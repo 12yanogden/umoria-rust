@@ -119,7 +119,7 @@ fn splash(data_dir: &Path) -> Result<()> {
         println!("Welcome to Umoria!");
         divider();
         match menu(&["Resume", "Load", "Reset", "Exit"])? {
-            0 => launch(data_dir, false)?,
+            0 => launch(data_dir)?,
             1 => load(data_dir)?,
             2 => {
                 match menu(&["Yes", "No"])? {
@@ -142,7 +142,7 @@ fn splash(data_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-fn launch(data_dir: &Path, update_last_loaded_on_archive: bool) -> Result<()> {
+fn launch(data_dir: &Path) -> Result<()> {
     let game_binary = data_dir.join("umoria");
     let status = Command::new(&game_binary)
         .current_dir(data_dir)
@@ -156,11 +156,11 @@ fn launch(data_dir: &Path, update_last_loaded_on_archive: bool) -> Result<()> {
         bail!("umoria exited with {status}");
     }
 
-    archive(data_dir, update_last_loaded_on_archive)?;
+    archive(data_dir)?;
     Ok(())
 }
 
-fn archive(data_dir: &Path, mark_as_last_loaded: bool) -> Result<()> {
+fn archive(data_dir: &Path) -> Result<()> {
     let save_file = data_dir.join(SAVE_FILE_NAME);
     if !save_file.is_file() {
         return Ok(());
@@ -178,9 +178,6 @@ fn archive(data_dir: &Path, mark_as_last_loaded: bool) -> Result<()> {
             archive_path.display()
         )
     })?;
-    if mark_as_last_loaded {
-        mark_last_loaded(&archive_dir, &archive_name)?;
-    }
     Ok(())
 }
 
@@ -213,7 +210,7 @@ fn load(data_dir: &Path) -> Result<()> {
     )
     .with_context(|| format!("restore archive {}", marked_archive))?;
 
-    launch(data_dir, true)
+    launch(data_dir)
 }
 
 fn reset_save_file(data_dir: &Path) -> Result<()> {
