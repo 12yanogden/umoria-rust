@@ -170,7 +170,7 @@ fn archive(data_dir: &Path) -> Result<()> {
     fs::create_dir_all(&archive_dir)?;
 
     let archive_name = chrono_like_timestamp();
-    let archive_path = archive_dir.join(archive_name);
+    let archive_path = archive_dir.join(&archive_name);
     fs::copy(&save_file, &archive_path).with_context(|| {
         format!(
             "archive {} to {}",
@@ -178,6 +178,7 @@ fn archive(data_dir: &Path) -> Result<()> {
             archive_path.display()
         )
     })?;
+    mark_last_loaded(&archive_dir, &archive_name)?;
     Ok(())
 }
 
@@ -191,11 +192,12 @@ fn load(data_dir: &Path) -> Result<()> {
 
     divider();
     skip_line();
-    let archive_refs: Vec<&str> = archives.iter().map(String::as_str).collect();
-    let Some(selected_index) = paginated_menu(&archive_refs, MENU_PAGE_SIZE)? else {
+    let menu_labels: Vec<String> = archives.iter().map(ArchiveEntry::menu_label).collect();
+    let menu_refs: Vec<&str> = menu_labels.iter().map(String::as_str).collect();
+    let Some(selected_index) = paginated_menu(&menu_refs, MENU_PAGE_SIZE)? else {
         return Ok(());
     };
-    let selected_archive = &archives[selected_index];
+    let selected_archive = &archives[selected_index].name;
 
     let marked_archive = mark_last_loaded(&archive_dir, selected_archive)?;
     let save_file = data_dir.join(SAVE_FILE_NAME);
@@ -268,6 +270,21 @@ fn archive_base_name(name: &str) -> &str {
     name.strip_suffix(LAST_LOADED_SUFFIX).unwrap_or(name)
 }
 
+struct ArchiveEntry {
+    name: String,
+    last_loaded: bool,
+}
+
+impl ArchiveEntry {
+    fn menu_label(&self) -> String {
+        if self.last_loaded {
+            format!("{} (last loaded)", self.name)
+        } else {
+            self.name.clone()
+        }
+    }
+}
+
 fn mark_last_loaded(archive_dir: &Path, archive_to_mark: &str) -> Result<String> {
     let archive_to_mark = archive_base_name(archive_to_mark);
 
@@ -288,7 +305,7 @@ fn mark_last_loaded(archive_dir: &Path, archive_to_mark: &str) -> Result<String>
     Ok(marked_name)
 }
 
-fn list_archives(archive_dir: &Path) -> Result<Vec<String>> {
+fn list_archives(archive_dir: &Path) -> Result<Vec<ArchiveEntry>> {
     if !archive_dir.is_dir() {
         return Ok(Vec::new());
     }
@@ -306,8 +323,11 @@ fn list_archives(archive_dir: &Path) -> Result<Vec<String>> {
     Ok(entries
         .into_iter()
         .map(|(path, _)| {
-            let name = path.file_name().unwrap().to_string_lossy().into_owned();
-            archive_base_name(&name).to_string()
+            let file_name = path.file_name().unwrap().to_string_lossy().into_owned();
+            ArchiveEntry {
+                last_loaded: file_name.ends_with(LAST_LOADED_SUFFIX),
+                name: archive_base_name(&file_name).to_string(),
+            }
         })
         .collect())
 }
