@@ -13,6 +13,8 @@ const BUNDLE: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/bundle.tar.gz"))
 const BUNDLE_VERSION: &str = env!("BUNDLE_VERSION");
 const SAVE_FILE_NAME: &str = "game.sav";
 const SCORES_FILE_NAME: &str = "scores.dat";
+const LAST_LOADED_SUFFIX: &str = "_last_loaded";
+const MENU_PAGE_SIZE: usize = 10;
 const SCORES_URL: &str =
     "https://raw.githubusercontent.com/dungeons-of-moria/umoria/master/data/scores.dat";
 
@@ -189,16 +191,13 @@ fn load(data_dir: &Path) -> Result<()> {
 
     divider();
     skip_line();
-    let mut menu_options: Vec<String> = archives.iter().map(|name| name.to_string()).collect();
-    menu_options.push("Back".to_string());
-    let menu_refs: Vec<&str> = menu_options.iter().map(String::as_str).collect();
-    let selected_index = menu(&menu_refs)?;
-    if selected_index == archives.len() {
+    let archive_refs: Vec<&str> = archives.iter().map(String::as_str).collect();
+    let Some(selected_index) = paginated_menu(&archive_refs, MENU_PAGE_SIZE)? else {
         return Ok(());
-    }
-    let selected_archive = archives[selected_index].clone();
+    };
+    let selected_archive = &archives[selected_index];
 
-    let marked_archive = mark_last_loaded(&archive_dir, &selected_archive)?;
+    let marked_archive = mark_last_loaded(&archive_dir, selected_archive)?;
     let save_file = data_dir.join(SAVE_FILE_NAME);
     if save_file.exists() {
         fs::remove_file(&save_file)?;
@@ -265,22 +264,27 @@ fn download_scores(destination: &Path) -> Result<()> {
     bail!("failed to download {SCORES_URL}");
 }
 
+fn archive_base_name(name: &str) -> &str {
+    name.strip_suffix(LAST_LOADED_SUFFIX).unwrap_or(name)
+}
+
 fn mark_last_loaded(archive_dir: &Path, archive_to_mark: &str) -> Result<String> {
+    let archive_to_mark = archive_base_name(archive_to_mark);
+
     for entry in fs::read_dir(archive_dir)? {
         let entry = entry?;
         let file_name = entry.file_name().to_string_lossy().into_owned();
-        if file_name.ends_with("_last_loaded") {
-            let unmarked = file_name.trim_end_matches("_last_loaded").to_string();
+        if file_name.ends_with(LAST_LOADED_SUFFIX) {
+            let unmarked = archive_base_name(&file_name).to_string();
             fs::rename(entry.path(), archive_dir.join(&unmarked))?;
         }
     }
 
-    let marked_name = format!("{archive_to_mark}_last_loaded");
+    let marked_name = format!("{archive_to_mark}{LAST_LOADED_SUFFIX}");
     fs::rename(
         archive_dir.join(archive_to_mark),
         archive_dir.join(&marked_name),
     )?;
-    println!("{marked_name}");
     Ok(marked_name)
 }
 
@@ -302,10 +306,8 @@ fn list_archives(archive_dir: &Path) -> Result<Vec<String>> {
     Ok(entries
         .into_iter()
         .map(|(path, _)| {
-            path.file_name()
-                .unwrap()
-                .to_string_lossy()
-                .into_owned()
+            let name = path.file_name().unwrap().to_string_lossy().into_owned();
+            archive_base_name(&name).to_string()
         })
         .collect())
 }
@@ -340,6 +342,92 @@ fn menu(options: &[&str]) -> Result<usize> {
         skip_line();
         return Ok(index);
     }
+}
+
+/// Paginated menu for long option lists. Returns `None` when the user chooses back.
+fn paginated_menu(options: &[&str], page_size: usize) -> Result<Option<usize>> {
+    let total_pages = options.len().div_ceil(page_size);
+    let mut page = 0usize;
+
+    loop {
+        skip_line();
+        let start = page * page_size;
+        let end = (start + page_size).min(options.len());
+        let page_count = end - start;
+
+        for (display_index, option_index) in (start..end).enumerate() {
+            println!("{display_index}: {}", options[option_index]);
+        }
+
+        skip_line();
+        print_pagination_help(page, total_pages);
+        skip_line();
+
+        print!("Select an option: ");
+        io::stdout().flush()?;
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input)?;
+        let selection = input.trim();
+
+        match selection {
+            "d" if page + 1 < total_pages => {
+                page += 1;
+                continue;
+            }
+            "u" if page > 0 => {
+                page -= 1;
+                continue;
+            }
+            "b" => {
+                skip_line();
+                return Ok(None);
+            }
+            "d" => {
+                println!("Already on the last page.");
+                continue;
+            }
+            "u" => {
+                println!("Already on the first page.");
+                continue;
+            }
+            _ => {
+                let Ok(index) = selection.parse::<usize>() else {
+                    println!(
+                        "Invalid selection: {selection}. Enter a number between 0 and {}, or a navigation key."
+                        , page_count - 1
+                    );
+                    continue;
+                };
+
+                if index >= page_count {
+                    println!(
+                        "Invalid selection: {index}. Please select a number between 0 and {}.",
+                        page_count - 1
+                    );
+                    continue;
+                }
+
+                skip_line();
+                return Ok(Some(start + index));
+            }
+        }
+    }
+}
+
+fn print_pagination_help(page: usize, total_pages: usize) {
+    if total_pages > 1 {
+        println!("Page {} of {total_pages}", page + 1);
+        skip_line();
+    }
+
+    if page > 0 {
+        println!("u: page up");
+    }
+    if page + 1 < total_pages {
+        println!("d: page down");
+    }
+    println!("b: back to main menu");
 }
 
 fn divider() {
