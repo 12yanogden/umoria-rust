@@ -118,10 +118,21 @@ fn splash(data_dir: &Path) -> Result<()> {
     loop {
         println!("Welcome to Umoria!");
         divider();
-        match menu(&["Resume", "Load", "Reset", "Exit"])? {
-            0 => launch(data_dir)?,
-            1 => load(data_dir)?,
-            2 => {
+
+        let archive_dir = data_dir.join("_archive");
+        let has_last_loaded = find_last_loaded_archive(&archive_dir)?.is_some();
+
+        let mut options: Vec<&str> = vec!["Resume"];
+        if has_last_loaded {
+            options.push("Load Last Loaded");
+        }
+        options.extend(["Load", "Reset", "Exit"]);
+
+        match options[menu(&options)?] {
+            "Resume" => launch(data_dir)?,
+            "Load Last Loaded" => load_last_loaded(data_dir)?,
+            "Load" => load(data_dir)?,
+            "Reset" => {
                 match menu(&["Yes", "No"])? {
                     0 => {
                         reset_save_file(data_dir)?;
@@ -131,7 +142,7 @@ fn splash(data_dir: &Path) -> Result<()> {
                 }
                 skip_line();
             }
-            3 => {
+            "Exit" => {
                 println!("Goodbye.");
                 break;
             }
@@ -199,18 +210,48 @@ fn load(data_dir: &Path) -> Result<()> {
     let selected_archive = &archives[selected_index].name;
 
     let marked_archive = mark_last_loaded(&archive_dir, selected_archive)?;
+    restore_and_launch(data_dir, &archive_dir, &marked_archive)
+}
+
+fn load_last_loaded(data_dir: &Path) -> Result<()> {
+    let archive_dir = data_dir.join("_archive");
+    let Some(last_loaded) = find_last_loaded_archive(&archive_dir)? else {
+        println!("No last loaded save found.");
+        return Ok(());
+    };
+
+    restore_and_launch(data_dir, &archive_dir, &last_loaded)
+}
+
+fn restore_and_launch(data_dir: &Path, archive_dir: &Path, archive_name: &str) -> Result<()> {
     let save_file = data_dir.join(SAVE_FILE_NAME);
     if save_file.exists() {
         fs::remove_file(&save_file)?;
     }
 
-    fs::copy(
-        archive_dir.join(&marked_archive),
-        &save_file,
-    )
-    .with_context(|| format!("restore archive {}", marked_archive))?;
+    fs::copy(archive_dir.join(archive_name), &save_file)
+        .with_context(|| format!("restore archive {archive_name}"))?;
 
     launch(data_dir)
+}
+
+fn find_last_loaded_archive(archive_dir: &Path) -> Result<Option<String>> {
+    if !archive_dir.is_dir() {
+        return Ok(None);
+    }
+
+    for entry in fs::read_dir(archive_dir)? {
+        let entry = entry?;
+        if !entry.file_type()?.is_file() {
+            continue;
+        }
+        let file_name = entry.file_name().to_string_lossy().into_owned();
+        if file_name.ends_with(LAST_LOADED_SUFFIX) {
+            return Ok(Some(file_name));
+        }
+    }
+
+    Ok(None)
 }
 
 fn reset_save_file(data_dir: &Path) -> Result<()> {
