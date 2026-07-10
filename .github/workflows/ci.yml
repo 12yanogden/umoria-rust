@@ -5,6 +5,11 @@ on:
     branches: [main, master]
   pull_request:
 
+# ncurses 6.x generates constants via a build-time initscr() probe, which
+# requires a valid TERM (jeaye/ncurses-rs#221). GitHub Actions has none.
+env:
+  TERM: xterm
+
 jobs:
   fmt:
     name: Format
