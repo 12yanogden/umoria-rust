@@ -1,7 +1,8 @@
 .idea
 
-# CMake
+# CMake generates Makefiles under build dirs; keep the repo-root Makefile tracked.
 Makefile
+!/Makefile
 CMakeCache.txt
 CMakeFiles
 CMakeScripts

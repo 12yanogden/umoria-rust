@@ -20,7 +20,7 @@ Windows is not a proven target for this Rust build. Some platform stubs exist in
 
 Requirements:
 
-- A recent stable Rust toolchain (MSRV **1.80**; see `rust-toolchain.toml`)
+- A recent stable Rust toolchain (MSRV **1.81**; see `rust-toolchain.toml`)
 - System **ncurses** development libraries and **pkg-config**
   - macOS (Homebrew): `brew install ncurses pkg-config`
   - Debian/Ubuntu: `sudo apt-get install libncurses-dev pkg-config`

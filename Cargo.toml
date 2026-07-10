@@ -2,7 +2,7 @@
 name = "umoria"
 version = "5.7.15"          # mirror CURRENT_VERSION_* in src/version.h
 edition = "2021"
-rust-version = "1.80"       # LazyLock statics (phase_1.3); conservative stable floor
+rust-version = "1.81"       # lint attribute reasons; LazyLock available since 1.80
 license = "GPL-3.0-or-later"
 publish = false
 # Exclude the C++ reference tree from any packaging (kept in-tree for CMake).
