@@ -142,7 +142,9 @@ pub fn coord_outside_panel(coord: Coord_t, force: bool) -> bool {
     });
 
     if let Some((row, col)) = changed {
-        with_state_mut(|state| {
+        // Snapshot find_bound and release the borrow before player_end_running
+        // (it re-enters game state).
+        let end_running = with_state_mut(|state| {
             state.dg.panel.row = row;
             state.dg.panel.col = col;
             let fields = panel_bounds_fields(row, col);
@@ -152,11 +154,11 @@ pub fn coord_outside_panel(coord: Coord_t, force: bool) -> bool {
             state.dg.panel.left = fields.left;
             state.dg.panel.right = fields.right;
             state.dg.panel.col_prt = fields.col_prt;
-
-            if state.options.find_bound {
-                player_end_running();
-            }
+            state.options.find_bound
         });
+        if end_running {
+            player_end_running();
+        }
         return true;
     }
     false

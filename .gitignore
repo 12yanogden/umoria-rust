@@ -71,6 +71,10 @@ dkms.conf
 # Cargo
 /target
 
+# Local play artifacts (keep data/scores.dat and tests/golden/** tracked)
+/game.sav
+/scores.dat
+
 # build directories
 umoria.xcodeproj
 nbproject

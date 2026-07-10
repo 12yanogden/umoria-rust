@@ -431,5 +431,5 @@ fn get_and_cast_escape_at_spell_prompt_consumes_no_rng() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): playthrough capture harness for mage spell casting"]
+#[ignore = "needs recorded-input/PTY playthrough harness for mage spell casting"]
 fn playthrough_mage_spell_cast_capture() {}

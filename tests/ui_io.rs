@@ -40,7 +40,7 @@ fn t1_put_string_truncation_boundaries() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for putString grid write"]
+#[ignore = "needs PTY/screen-capture harness for putString grid write"]
 fn t1_put_string_capture_hundred_as_at_x10() {
     let _ = (&"A".repeat(100), Coord { y: 5, x: 10 });
 }
@@ -49,7 +49,7 @@ fn t1_put_string_capture_hundred_as_at_x10() {
 // T2 — cursor/char/clear (capture → ignored; pure MSG_LINE guard via T4/T5)
 // ---------------------------------------------------------------------------
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for moveCursor/addChar/clear"]
+#[ignore = "needs PTY/screen-capture harness for moveCursor/addChar/clear"]
 fn t2_output_primitives_capture() {}
 
 // ---------------------------------------------------------------------------
@@ -64,7 +64,7 @@ fn t3_panel_screen_coord_subtracts_offsets() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for panelMoveCursor/panelPutTile"]
+#[ignore = "needs PTY/screen-capture harness for panelMoveCursor/panelPutTile"]
 fn t3_panel_primitives_capture() {}
 
 // ---------------------------------------------------------------------------
@@ -97,7 +97,7 @@ fn t4_message_ring_wrap_and_truncation() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for messageLinePrintMessage cursor save"]
+#[ignore = "needs PTY/screen-capture harness for messageLinePrintMessage cursor save"]
 fn t4_message_line_print_capture() {}
 
 // ---------------------------------------------------------------------------
@@ -133,7 +133,7 @@ fn t5_more_prompt_accepts_space_escape_cr_lf() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness + key injection for -more- loop"]
+#[ignore = "needs PTY/screen-capture + key-injection harness for -more- loop"]
 fn t5_more_prompt_input_and_capture() {}
 
 // ---------------------------------------------------------------------------
@@ -226,7 +226,7 @@ fn t8_trim_trailing_blanks_on_submit() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for getStringInput loop"]
+#[ignore = "needs PTY/screen-capture harness for getStringInput loop"]
 fn t8_get_string_input_editing_capture() {}
 
 // ---------------------------------------------------------------------------
@@ -243,7 +243,7 @@ fn t9_confirmation_key_codes() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for confirmation prompt layout"]
+#[ignore = "needs PTY/screen-capture harness for confirmation prompt layout"]
 fn t9_confirmation_prompt_capture() {}
 
 // ---------------------------------------------------------------------------

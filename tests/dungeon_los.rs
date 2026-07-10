@@ -499,19 +499,24 @@ fn look_image_returns_early() {
 }
 
 #[test]
-#[ignore = "TODO(phase_1.5): capture"]
+#[ignore = "needs recorded-input/transcript harness for look playthrough parity"]
 fn look_transcript_parity_newchar_seed42() {
-    // Recorded-input look sessions vs C++ transcript — phase_1 harness.
+    // Recorded-input look sessions vs C++ transcript — requires PTY capture.
 }
 
 #[test]
-#[ignore = "TODO(phase_5.5): get_all_directions"]
 fn look_directional_scan_order() {
     reset_for_new_game(None);
     setup_dungeon(30, 30);
     fill_feature(TILE_LIGHT_FLOOR);
     setup_player_panel(1, 0, Coord_t { y: 15, x: 15 });
+    los_look_reset_for_test();
+    los_look_set_hack_no_query(true);
+    los_look_set_rocks_and_objects(0);
     umoria::ui_io::test_set_ncurses_stub(true);
+    umoria::ui_io::test_clear_getch_keys();
+    // Direction 5 = look in all directions (get_all_directions).
+    umoria::ui_io::test_push_getch_keys(&[i32::from(b'5')]);
     look();
     umoria::ui_io::test_set_ncurses_stub(false);
 }

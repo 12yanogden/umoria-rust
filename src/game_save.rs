@@ -962,13 +962,12 @@ fn open_save_file(filename: &str) -> io::Result<(Option<i32>, bool)> {
     let path = Path::new(filename);
     let mut fd: Option<i32> = None;
 
-    match OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create_new(true)
-        .mode(0o600)
-        .open(path)
-    {
+    let mut create_opts = OpenOptions::new();
+    create_opts.read(true).write(true).create_new(true);
+    #[cfg(unix)]
+    create_opts.mode(0o600);
+
+    match create_opts.open(path) {
         Ok(file) => {
             drop(file);
             fd = Some(0);
@@ -980,14 +979,19 @@ fn open_save_file(filename: &str) -> io::Result<(Option<i32>, bool)> {
                         "Can't make new save file. Overwrite old?",
                     ));
             if overwrite {
-                let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
-                OpenOptions::new()
+                #[cfg(unix)]
+                {
+                    let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
+                }
+                let mut overwrite_opts = OpenOptions::new();
+                overwrite_opts
                     .read(true)
                     .write(true)
                     .truncate(true)
-                    .create(true)
-                    .mode(0o600)
-                    .open(path)?;
+                    .create(true);
+                #[cfg(unix)]
+                overwrite_opts.mode(0o600);
+                overwrite_opts.open(path)?;
                 fd = Some(0);
             }
         }
@@ -1681,12 +1685,20 @@ pub fn load_game(generate: &mut bool) -> bool {
         let path = Path::new(&save_path);
         let opened = OpenOptions::new().read(true).open(path);
         if opened.is_err() {
-            let chmod_ok = fs::set_permissions(path, fs::Permissions::from_mode(0o400)).is_ok();
-            let retry = if chmod_ok {
-                OpenOptions::new().read(true).open(path)
-            } else {
-                Err(io::Error::new(io::ErrorKind::PermissionDenied, "chmod"))
+            #[cfg(unix)]
+            let retry = {
+                let chmod_ok = fs::set_permissions(path, fs::Permissions::from_mode(0o400)).is_ok();
+                if chmod_ok {
+                    OpenOptions::new().read(true).open(path)
+                } else {
+                    Err(io::Error::new(io::ErrorKind::PermissionDenied, "chmod"))
+                }
             };
+            #[cfg(not(unix))]
+            let retry: io::Result<File> = Err(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "open failed",
+            ));
             if retry.is_err() {
                 terminal::print_message(Some("Can't open file for reading."));
                 return load_game_failure_tail();

@@ -1,126 +1,101 @@
-# Umoria
+# Umoria (Rust)
 
-_The Dungeons of Moria_ is a single player dungeon simulation originally
-written by Robert Alan Koeneke, with its first public release in 1983.
-The game was originally developed using VMS Pascal before being ported to the
-C language by James E. Wilson in 1988, and released as _Umoria_.
+A faithful Rust translation of [Umoria 5.7.15](https://github.com/dungeons-of-moria/umoria) — *The Dungeons of Moria*, a single-player dungeon simulation originally written by Robert Alan Koeneke (first public release 1983), ported to C by James E. Wilson in 1988 as Umoria.
 
-Moria/Umoria has had many variants over the years, with [_Angband_](http://rephial.org/)
-being the most well known. Umoria was also an inspiration for one the most
-commercially successful action roguelike games, _Diablo_!
+Moria/Umoria has had many variants over the years, with [*Angband*](http://rephial.org/) being the most well known. Umoria was also an inspiration for one of the most commercially successful action roguelike games, *Diablo*.
 
-Supported Platforms:
+This repository is a **line-faithful Rust port** of that classic. The goal is observable parity with the C++ 5.7.15 reference — not new gameplay. Upstream project sites: [umoria.org](https://umoria.org/) and [dungeons-of-moria/umoria](https://github.com/dungeons-of-moria/umoria).
 
-  - Windows
-  - macOS
-  - Linux (Ubuntu/Debian)
-
-Compiling and limited testing has been done for other Linux based system
-including NetBSD 8.1 and Fedora 32.
+**Distributed via git only** — the crate sets `publish = false` and is not on [crates.io](https://crates.io/).
 
 
-## Umoria 5.7.x releases
+## Platforms
 
-The main focus of the `5.7.0` release was to provide support for the three
-main operating systems: Windows, macOS, and Linux. Support for all other
-outdated computer systems such as MS DOS, "Classic" Mac OS (pre OSX), Amiga,
-and Atari ST was removed.
+**Primary:** Unix-like systems with ncurses — **macOS** and **Linux**.
 
-_Note: there have been no intentional gameplay changes in the 5.7.x releases._
-
-Since the initial 5.7 release, a great deal of _code restoration_ has been
-undertaken in the hope of aiding future development of the game. Some examples
-of the work done include reformatting the source code with the help of
-`clang-tidy` and `clang-format`, modernizing the code to use standard C types,
-breaking apart most large functions (many of which had hundreds of lines of code)
-into smaller, easier to read functions, and fixing all compiler warnings when
-compiling against recent versions of GCC and Clang.
-
-Full details of all changes can be found in the [CHANGELOG](CHANGELOG.md), and
-by browsing the commit history.
-
-Due to its lack of Windows and macOS support Moria was inaccessible to many
-people. Hopefully these changes will give many more people a chance to play
-this classic roguelike game.
+Windows is not a proven target for this Rust build. Some platform stubs exist in the port, but play and CI are oriented around macOS/Linux. Contributions that harden Windows support are welcome; do not assume it works out of the box.
 
 
-## Notes on Compiling Umoria
+## Building
 
-Umoria has been tested against GCC (`10` and `11`) and with `ncurses 6.x`,
-although recent earlier versions should also work fine.
+Requirements:
 
-You will need these as well as `CMake` and the C++ build tools for your system.
+- A recent stable Rust toolchain (MSRV **1.80**; see `rust-toolchain.toml`)
+- System **ncurses** development libraries and **pkg-config**
+  - macOS (Homebrew): `brew install ncurses pkg-config`
+  - Debian/Ubuntu: `sudo apt-get install libncurses-dev pkg-config`
 
+```bash
+cargo build --release
+```
 
-### macOS and Linux
-
-Change to the `umoria` game directory and enter the following commands at the
-terminal:
-
-    $ mkdir build && cd build
-    $ cmake ..
-    $ make
-
-NOTE: use `make -j $(nproc)` to speed up compilation on Linux.
-
-An `umoria` directory will be created in the current directory containing the
-game binary and data files, which can then be moved to any other location, such
-as the `home` directory.
+The binary is `target/release/umoria`.
 
 
-### Windows
+## Playing
 
-MinGW is used to provide GCC and GNU Binutils for compiling on the Windows platform.
-The easiest solution to get set up is to use the [MSYS2 Installer](http://msys2.github.io/).
-Once installed, `pacman` can be used to install `GCC`, `ncurses`, and the
-`make`/`cmake` build tools.
+Run from the repository root so relative paths resolve (`data/…`, `LICENSE`, default `game.sav` / `scores.dat`):
 
-At present an environment variable for the MinGW system being compiled on will
-need to be specified. This will be either `mingw64` or `mingw32`.
+```bash
+./target/release/umoria
+# or
+cargo run --release
+```
 
-At the command prompt type the following, being sure to add the correct label
-to `MINGW=`:
+Useful options (same CLI as upstream):
 
-    $ MINGW=mingw64 cmake .
-    $ make
+```text
+umoria [OPTIONS] SAVEGAME
 
-To perform an out-of-source build, type the following:
+SAVEGAME is an optional save game filename (default: game.sav)
 
-    $ mkdir build
-    $ cd build
-    $ MINGW=mingw64 cmake ..
-    $ make
+Options:
+    -n           Force start of a new game
+    -r           Enable classic roguelike keys on startup
+    -d           Display high scores and exit
+    -s NUMBER    Game seed (decimal, max 2147483647)
+    -v           Print version and exit
+    -h           Display help
+```
 
-As with the macOS/Linux builds, all files will be installed into an `umoria` directory.
-
-
-## Historical Documents
-
-Most of the original document files included in the Umoria 5.6 sources have
-been placed in the [historical](historical) directory. You will even find the
-old CHANGELOG, which tracks all code changes made between versions 4.81 and
-5.5.2 (1987-2008). If you'd like to learn more on the development history of
-Umoria, these can make for interesting reading.
-
-There is also the original Moria Manual and FAQ. Although these are a little
-outdated now they are certainly worth reading as they contain a lot of
-interesting and useful information.
+Example: `./target/release/umoria -n -s 42`
 
 
-## Code of Conduct and Contributions
+## Dual tree: Rust + C++ reference
 
-See here for details on our [Code of Conduct](CODE_OF_CONDUCT.md).
+| Tree | Role |
+|------|------|
+| **Rust** (`Cargo.toml`, `src/*.rs`) | Primary build for players and day-to-day development |
+| **C++** (`src/*.cpp` / `*.h`, CMake) | Differential reference — golden capture, tools under `tools/capture/`, and fidelity checks |
 
-For details on how to contribute to the Umoria project, please read our
-[contributing](CONTRIBUTING.md) guide.
+Players should use the Rust binary. The C++ sources remain in-tree so goldens and capture tooling can rebuild the reference and compare behavior. You do not need CMake to play.
 
 
-## License Information
+## Behavioral parity (honest scope)
 
-Umoria is released under the [GNU General Public License v3.0](LICENSE).
+This is a **faithful translation** with strong automated checks:
 
-In 2007 Ben Asselstine and Ben Shadwick started the
-[_free-moria_](http://free-moria.sourceforge.net/) project to re-license
-UMoria 5.5.2 under GPL-2 by obtaining permission from all the contributing
-authors. A year later they succeeded in their goal and in late 2008 official
-maintainer David Grabiner released Umoria 5.6 under a GPL-3.0-or-later license.
+- RNG sequence goldens (bit-exact PMMLCG / related helpers)
+- Save and score file round-trips against C++-captured fixtures
+- Scripted terminal screen replay for short recorded paths
+
+Coverage is **strongest for core RNG and the short new-character path**. It is **not** a proof of full-playthrough identity with every corner of a long dungeon run. If you see behavior that differs from Umoria 5.7.15, please [report it as a bug](CONTRIBUTING.md).
+
+
+## Historical documents
+
+Most of the original document files from the Umoria 5.6 sources live in [`historical/`](historical). That includes older changelogs, the original Moria Manual, and FAQ material — useful for history even where details are outdated.
+
+
+## Code of Conduct and contributions
+
+See the [Code of Conduct](CODE_OF_CONDUCT.md) and [contributing guide](CONTRIBUTING.md).
+
+
+## License and attribution
+
+Umoria is released under the [GNU General Public License v3.0 or later](LICENSE) (`GPL-3.0-or-later`).
+
+Original authors and maintainers include **Robert Alan Koeneke** (Moria), **James E. Wilson** (Umoria), and many later contributors — see [`AUTHORS`](AUTHORS). The 5.7.x restoration work was led in the [dungeons-of-moria](https://github.com/dungeons-of-moria) project.
+
+In 2007 Ben Asselstine and Ben Shadwick started the [*free-moria*](http://free-moria.sourceforge.net/) project to re-license UMoria 5.5.2 under GPL-2 by obtaining permission from all contributing authors. A year later they succeeded, and in late 2008 official maintainer David Grabiner released Umoria 5.6 under a GPL-3.0-or-later license.

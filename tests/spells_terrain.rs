@@ -514,7 +514,7 @@ fn spell_destroy_area_blind_accumulates_int16_seed42() {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[ignore = "TODO(phase_1.5): recorded-input capture for terrain spells"]
+#[ignore = "needs recorded-input/PTY playthrough harness for terrain spells"]
 fn playthrough_terrain_spells_capture_parity() {}
 
 #[test]

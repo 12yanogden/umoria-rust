@@ -10,9 +10,12 @@
 mod common;
 
 use common::{byte_diff, load_manifest, read_golden_bytes, GoldenKind};
+use umoria::game_save::{
+    read_high_score, save_high_score, set_c_getc_eof_mode, set_xor_byte, test_buffer_bytes,
+    test_buffer_inject, test_reset_buffer, HighScore, HIGH_SCORE_RECORD_SIZE,
+};
 
 #[test]
-#[ignore = "enable when score round-trip is wired"]
 fn scores_byte_exact_roundtrip_matches_cpp_golden() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let entry = manifest
@@ -24,10 +27,35 @@ fn scores_byte_exact_roundtrip_matches_cpp_golden() {
     assert_eq!(entry.kind, GoldenKind::Scores);
     let golden = read_golden_bytes(entry);
     assert!(
-        !golden.is_empty(),
-        "golden scores artifact must be non-empty; round-trip not yet wired"
+        golden.len() >= 3 + HIGH_SCORE_RECORD_SIZE,
+        "golden scores artifact must contain a version header and at least one record"
     );
 
-    // Phase 5: round-trip via umoria::scores, byte_diff vs golden.
-    let _ = byte_diff(&golden, &golden);
+    // Preserve the golden version header; decode each HighScore record and re-encode.
+    let mut rebuilt = golden[..3].to_vec();
+    let mut offset = 3usize;
+    while offset + HIGH_SCORE_RECORD_SIZE <= golden.len() {
+        test_buffer_inject(&golden[offset..]);
+        set_c_getc_eof_mode(true);
+        umoria::ui_io::test_set_eof_flag(0);
+
+        let mut score = HighScore::default();
+        read_high_score(&mut score).expect("decode high-score record");
+
+        test_reset_buffer();
+        set_xor_byte(0);
+        save_high_score(&score).expect("re-encode high-score record");
+        rebuilt.extend_from_slice(&test_buffer_bytes());
+
+        offset += HIGH_SCORE_RECORD_SIZE;
+    }
+
+    assert_eq!(
+        rebuilt.len(),
+        golden.len(),
+        "rebuilt scores file length must match golden"
+    );
+    if let Some(diff) = byte_diff(&golden, &rebuilt) {
+        panic!("{}", diff.render());
+    }
 }

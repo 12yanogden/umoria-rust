@@ -11,15 +11,19 @@ use umoria::config::player::PLAYER_MAX_EXP;
 use umoria::config::spells::{NAME_OFFSET_PRAYERS, NAME_OFFSET_SPELLS, SPELL_TYPE_MAGE};
 use umoria::data_player::{CLASSES, CLASS_LEVEL_ADJ, MAGIC_SPELLS, SPELL_NAMES};
 use umoria::game::{reset_for_new_game, with_state, with_state_mut};
-use umoria::player::{PlayerClassLevelAdj, BTH_PER_PLUS_TO_HIT_ADJUST, PLAYER_MAX_LEVEL};
+use umoria::player::{
+    PlayerAttr, PlayerClassLevelAdj, BTH_PER_PLUS_TO_HIT_ADJUST, PLAYER_MAX_LEVEL,
+};
+use umoria::spells::spell_chance_of_success;
 use umoria::types::Coord_t;
 use umoria::ui::{
     blank_string_tail, compute_ability_values, compute_panel_change, coord_inside_panel_bounds,
-    count_experience_level_ups, experience_exp_halving, format_character_current_depth,
-    format_exp_to_advance_line, format_header_long_number, format_header_long_number7_spaces,
-    format_header_number, format_long_number, format_number, format_spell_comment,
-    format_spell_row, movement_state_string, panel_bounds_fields, simulate_exp_clamp,
-    speed_display_string, stat_rating, stats_as_string, BLANK_LENGTH,
+    coord_outside_panel, count_experience_level_ups, display_character_experience,
+    experience_exp_halving, format_character_current_depth, format_exp_to_advance_line,
+    format_header_long_number, format_header_long_number7_spaces, format_header_number,
+    format_long_number, format_number, format_spell_comment, format_spell_row,
+    movement_state_string, panel_bounds_fields, simulate_exp_clamp, speed_display_string,
+    stat_rating, stats_as_string, BLANK_LENGTH,
 };
 
 // ---------------------------------------------------------------------------
@@ -236,8 +240,48 @@ fn a4_coord_inside_panel_boundary_equalities() {
 }
 
 #[test]
-#[ignore = "TODO(phase_4): playerEndRunning spy when find_bound set on panel change"]
-fn a4_coord_outside_panel_find_bound_calls_player_end_running() {}
+fn a4_coord_outside_panel_find_bound_calls_player_end_running() {
+    reset_for_new_game(None);
+    umoria::ui_io::test_set_ncurses_stub(true);
+    with_state_mut(|s| {
+        s.dg.height = 66;
+        s.dg.width = 198;
+        s.dg.panel.row = 0;
+        s.dg.panel.col = 0;
+        s.dg.panel.max_rows = 2;
+        s.dg.panel.max_cols = 2;
+        let fields = panel_bounds_fields(0, 0);
+        s.dg.panel.top = fields.top;
+        s.dg.panel.bottom = fields.bottom;
+        s.dg.panel.left = fields.left;
+        s.dg.panel.right = fields.right;
+        s.dg.panel.row_prt = fields.row_prt;
+        s.dg.panel.col_prt = fields.col_prt;
+        s.options.find_bound = true;
+        s.py.running_tracker = 5;
+        s.py.pos = Coord_t { y: 5, x: 5 };
+    });
+
+    assert!(coord_outside_panel(Coord_t { y: 30, x: 70 }, true));
+    with_state(|s| assert_eq!(s.py.running_tracker, 0));
+
+    with_state_mut(|s| {
+        s.dg.panel.row = 0;
+        s.dg.panel.col = 0;
+        let fields = panel_bounds_fields(0, 0);
+        s.dg.panel.top = fields.top;
+        s.dg.panel.bottom = fields.bottom;
+        s.dg.panel.left = fields.left;
+        s.dg.panel.right = fields.right;
+        s.dg.panel.row_prt = fields.row_prt;
+        s.dg.panel.col_prt = fields.col_prt;
+        s.options.find_bound = false;
+        s.py.running_tracker = 5;
+    });
+    assert!(coord_outside_panel(Coord_t { y: 30, x: 70 }, true));
+    with_state(|s| assert_eq!(s.py.running_tracker, 5));
+    umoria::ui_io::test_set_ncurses_stub(false);
+}
 
 // ---------------------------------------------------------------------------
 // A5 — printCharacterCurrentDepth formatting (ui.cpp 244–256)
@@ -351,8 +395,47 @@ fn a10_player_gain_level_exp_halving_math() {
 }
 
 #[test]
-#[ignore = "TODO(phase_4): playerCalculateHitPoints/AllowedSpellsCount/GainMana in playerGainLevel"]
-fn a10_player_gain_level_full_side_effects() {}
+fn a10_player_gain_level_full_side_effects() {
+    reset_for_new_game(None);
+    umoria::ui_io::test_set_ncurses_stub(true);
+    with_state_mut(|s| {
+        s.py.misc.class_id = 1; // Mage — triggers INT spell/mana recalculation
+        s.py.misc.level = 1;
+        s.py.misc.exp = 100;
+        s.py.misc.max_exp = 0;
+        s.py.misc.experience_factor = 100;
+        s.py.base_exp_levels.fill(10_000);
+        s.py.base_exp_levels[0] = 10;
+        s.py.misc.max_hp = 10;
+        s.py.misc.current_hp = 10;
+        s.py.misc.current_hp_fraction = 0;
+        s.py.base_hp_levels[0] = 8;
+        s.py.base_hp_levels[1] = 16;
+        s.py.stats.used[PlayerAttr::A_CON as usize] = 10;
+        s.py.stats.used[PlayerAttr::A_INT as usize] = 18;
+        s.py.flags.spells_learnt = 1;
+        s.py.misc.mana = 0;
+        s.py.misc.current_mana = 0;
+        s.py.misc.current_mana_fraction = 0;
+    });
+
+    let hp_before = with_state(|s| s.py.misc.max_hp);
+    display_character_experience();
+
+    with_state(|s| {
+        assert!(s.py.misc.level >= 2, "level should advance");
+        assert_ne!(
+            s.py.misc.max_hp, hp_before,
+            "player_calculate_hit_points should refresh max_hp"
+        );
+        assert!(
+            s.py.misc.mana > 0,
+            "mage level-up should call player_gain_mana"
+        );
+        assert!(s.py.misc.max_exp >= s.py.misc.exp);
+    });
+    umoria::ui_io::test_set_ncurses_stub(false);
+}
 
 // ---------------------------------------------------------------------------
 // A11 — displaySpellsList row formatting (ui.cpp 670–724)
@@ -402,8 +485,33 @@ fn a11_spell_list_column_and_offset_selection() {
 }
 
 #[test]
-#[ignore = "TODO(phase_4): spellChanceOfSuccess for full displaySpellsList row"]
-fn a11_display_spells_list_full_string_with_fail_chance() {}
+fn a11_display_spells_list_full_string_with_fail_chance() {
+    reset_for_new_game(None);
+    with_state_mut(|s| {
+        s.py.misc.class_id = 1;
+        s.py.misc.level = 10;
+        s.py.stats.used[PlayerAttr::A_INT as usize] = 18;
+        s.py.misc.current_mana = 100;
+    });
+    let chance = spell_chance_of_success(0);
+    assert_eq!(chance, 5);
+    let spell = MAGIC_SPELLS[0][0];
+    let row = format_spell_row(
+        'a',
+        SPELL_NAMES[0],
+        spell.level_required,
+        spell.mana_required,
+        chance,
+        "",
+    );
+    assert_eq!(
+        row,
+        format!(
+            "  a) {:<30}{:2} {:4} {:3}%{}",
+            SPELL_NAMES[0], spell.level_required, spell.mana_required, chance, ""
+        )
+    );
+}
 
 // ---------------------------------------------------------------------------
 // C26 — blank_string tail slices (ui.cpp 8–12, pointer-into-array padding)
@@ -434,30 +542,30 @@ fn c27_header_and_number_snprintf_widths() {
 }
 
 // ---------------------------------------------------------------------------
-// B12–B25 — screen-capture rendering (phase_1.5 harness)
+// B12–B25 — screen-capture rendering (needs PTY / UI capture harness)
 // ---------------------------------------------------------------------------
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for displayCharacterStats"]
+#[ignore = "needs PTY/screen-capture harness for displayCharacterStats grid output"]
 fn b12_display_character_stats_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_4): playerRankTitle; TODO(phase_1.5): capture for printCharacterStatsBlock"]
+#[ignore = "needs PTY/screen-capture harness for printCharacterStatsBlock"]
 fn b13_print_character_stats_block_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_4): playerGetGenderLabel; TODO(phase_1.5): capture for printCharacterInformation"]
+#[ignore = "needs PTY/screen-capture harness for printCharacterInformation"]
 fn b14_print_character_information_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for printCharacterStats sheet"]
+#[ignore = "needs PTY/screen-capture harness for printCharacterStats sheet"]
 fn b15_print_character_stats_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for printCharacterVitalStatistics"]
+#[ignore = "needs PTY/screen-capture harness for printCharacterVitalStatistics"]
 fn b16_print_character_vital_statistics_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for printCharacterLevelExperience"]
+#[ignore = "needs PTY/screen-capture harness for printCharacterLevelExperience"]
 fn b17_print_character_level_experience_capture() {}
 
 #[test]
@@ -485,33 +593,33 @@ fn print_character_level_experience_does_not_panic() {
     umoria::ui_io::test_set_ncurses_stub(false);
 }
 #[test]
-#[ignore = "TODO(phase_4): playerDisarmAdjustment/playerStatAdjustmentWisdomIntelligence; TODO(phase_1.5): capture"]
+#[ignore = "needs PTY/screen-capture harness for printCharacterAbilities"]
 fn b18_print_character_abilities_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_4): phase_4 callees; TODO(phase_1.5): capture for printCharacter composition"]
+#[ignore = "needs PTY/screen-capture harness for printCharacter composition"]
 fn b19_print_character_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_4): caveGetTileSymbol; TODO(phase_1.5): capture for drawDungeonPanel"]
+#[ignore = "needs PTY/screen-capture harness for drawDungeonPanel"]
 fn b20_draw_dungeon_panel_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_4): caveGetTileSymbol/playerRankTitle; TODO(phase_1.5): capture for drawCavePanel"]
+#[ignore = "needs PTY/screen-capture harness for drawCavePanel"]
 fn b21_draw_cave_panel_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_4): dungeonMoveCharacterLight/dungeonLightRoom; TODO(phase_1.5): capture for dungeonResetView"]
+#[ignore = "needs PTY/screen-capture harness for dungeonResetView"]
 fn b22_dungeon_reset_view_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for printCharacterCurrentDepth placement {23,65}"]
+#[ignore = "needs PTY/screen-capture harness for printCharacterCurrentDepth at {23,65}"]
 fn b23_print_character_current_depth_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): screen-capture harness for individual status printers at exact coords"]
+#[ignore = "needs PTY/screen-capture harness for individual status printers at exact coords"]
 fn b24_individual_status_printer_capture() {}
 
 #[test]
-#[ignore = "TODO(phase_4): getDefaultPlayerName/outputPlayerCharacterToFile; TODO(phase_1.5): key injection for name entry"]
+#[ignore = "needs PTY/key-injection harness for getAndChangeCharacterName"]
 fn b25_get_and_change_character_name_capture() {}

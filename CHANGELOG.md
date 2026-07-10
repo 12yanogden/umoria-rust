@@ -5,6 +5,9 @@ Tracking all changes since the 5.6.0 release.
 
 ## HEAD
 
+* Rust translation of Umoria 5.7.15: primary player build is now Cargo/`src/*.rs`
+  (ncurses). C++ sources remain in-tree as the differential reference for goldens
+  and capture tooling. See README for build/play notes and parity scope.
 * Fix out-of-bounds compile error in `/src/game_save.cpp` (Line 810).
 
 

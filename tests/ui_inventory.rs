@@ -748,55 +748,24 @@ fn inventory_wear_cursed_slot_message_does_not_panic() {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 4 callee tests — ignored
+// Screen capture — needs PTY / UI capture harness (not unit-testable via stub)
 // ---------------------------------------------------------------------------
 #[test]
-#[ignore = "TODO(phase_4): itemDescription"]
-fn verify_action_period_to_question() {}
-
-#[test]
-#[ignore = "TODO(phase_4): playerIsWieldingItem / playerWornItemIsCursed"]
-fn ui_command_inventory_unwield_item() {}
-
-#[test]
-#[ignore = "TODO(phase_4): executeRemoveItemCommand callees"]
-fn execute_remove_item_command() {}
-
-#[test]
-#[ignore = "TODO(phase_4): executeWearItemCommand callees"]
-fn execute_wear_item_command() {}
-
-#[test]
-#[ignore = "TODO(phase_4): executeDropItemCommand callees"]
-fn execute_drop_item_command() {}
-
-#[test]
-#[ignore = "TODO(phase_4): inventoryItemIsCursed / itemDescription"]
-fn inventory_item_is_cursed_message() {}
-
-#[test]
-#[ignore = "TODO(phase_4): selectItemCommands dispatch callees"]
-fn select_item_commands_loop() {}
-
-// ---------------------------------------------------------------------------
-// Screen capture — ignored until phase_1.5 / phase_4
-// ---------------------------------------------------------------------------
-#[test]
-#[ignore = "TODO(phase_1.5): golden capture Equipment screen"]
+#[ignore = "needs PTY/screen-capture harness for Equipment screen golden"]
 fn capture_display_equipment() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): golden capture Inventory screen"]
+#[ignore = "needs PTY/screen-capture harness for Inventory screen golden"]
 fn capture_display_inventory_items() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): golden capture Help menu"]
+#[ignore = "needs PTY/screen-capture harness for Help menu golden"]
 fn capture_show_equipment_help_menu() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): inventoryExecuteCommand flow capture"]
+#[ignore = "needs PTY/screen-capture harness for inventoryExecuteCommand flow"]
 fn capture_inventory_execute_command() {}
 
 #[test]
-#[ignore = "TODO(phase_1.5): inventoryGetInputForItemId flow capture"]
+#[ignore = "needs PTY/key-injection harness for inventoryGetInputForItemId flow"]
 fn capture_inventory_get_input_for_item_id() {}
