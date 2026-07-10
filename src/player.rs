@@ -249,8 +249,7 @@ use crate::config::player::status::{PY_ARMOR, PY_REST, PY_SEARCH, PY_SPEED, PY_S
 use crate::config::player::PLAYER_WEIGHT_CAP;
 use crate::config::treasure::chests::{CH_LOCKED, CH_TRAPPED};
 use crate::dungeon::{
-    coord_distance_between, dungeon_lite_spot, dungeon_move_creature_record,
-    trap_change_visibility,
+    coord_distance_between, dungeon_lite_spot, dungeon_move_creature_record, trap_change_visibility,
 };
 use crate::dungeon_tile::{MIN_CLOSED_SPACE, TILE_BLOCKED_FLOOR, TILE_CORR_FLOOR};
 use crate::helpers::string_to_number;
@@ -263,18 +262,16 @@ use crate::player_run::player_end_running;
 use crate::treasure::{
     TV_CHEST, TV_CLOSED_DOOR, TV_INVIS_TRAP, TV_NOTHING, TV_OPEN_DOOR, TV_SECRET_DOOR,
 };
-use crate::ui::{
-    dungeon_reset_view, print_character_movement_state, print_character_speed,
-};
-use crate::types::{CNIL, Obj_desc_t, Vtype_t, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE};
+use crate::types::{Vtype_t, CNIL, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE};
+use crate::ui::{dungeon_reset_view, print_character_movement_state, print_character_speed};
 
 const SHRT_MAX: i32 = 32_767;
-use crate::config::treasure::flags::{
-    TR_AGGRAVATE, TR_BLIND, TR_FFALL, TR_FREE_ACT, TR_REGEN, TR_RES_ACID, TR_RES_COLD,
-    TR_RES_FIRE, TR_RES_LIGHT, TR_SEARCH, TR_SEE_INVIS, TR_SLOW_DIGEST, TR_SPEED, TR_STATS,
-    TR_STEALTH, TR_SUST_STAT, TR_TELEPORT, TR_TIMID, TR_INFRA,
-};
 use crate::config::monsters::move_flags::CM_WIN;
+use crate::config::treasure::flags::{
+    TR_AGGRAVATE, TR_BLIND, TR_FFALL, TR_FREE_ACT, TR_INFRA, TR_REGEN, TR_RES_ACID, TR_RES_COLD,
+    TR_RES_FIRE, TR_RES_LIGHT, TR_SEARCH, TR_SEE_INVIS, TR_SLOW_DIGEST, TR_SPEED, TR_STATS,
+    TR_STEALTH, TR_SUST_STAT, TR_TELEPORT, TR_TIMID,
+};
 use crate::data_creatures::CREATURES_LIST;
 use crate::data_player::CLASS_LEVEL_ADJ;
 use crate::dice::{dice_roll, Dice};
@@ -288,8 +285,8 @@ use crate::inventory::{
 use crate::monster::{monster_take_hit, Creature, MON_MAX_LEVELS};
 use crate::player_magic::item_magic_ability_damage;
 use crate::treasure::{TV_BOW, TV_SLING_AMMO, TV_SPIKE};
-use crate::ui_io::get_direction_with_memory;
 use crate::ui::{display_character_experience, print_character_current_hit_points};
+use crate::ui_io::get_direction_with_memory;
 use crate::ui_io::terminal::print_message;
 
 /// C++ player.cpp lines 1076–1094.
@@ -356,11 +353,11 @@ pub fn player_get_gender_label() -> &'static str {
 #[allow(unused_imports)]
 pub use crate::player_stats::{
     player_armor_class_adjustment, player_attack_blows, player_calculate_hit_points,
-    player_damage_adjustment, player_disarm_adjustment,
-    player_initialize_base_experience_levels, player_modify_stat, player_set_and_use_stat,
-    player_stat_adjustment_charisma, player_stat_adjustment_constitution,
-    player_stat_adjustment_wisdom_intelligence, player_stat_boost, player_stat_random_decrease,
-    player_stat_random_increase, player_stat_restore, player_to_hit_adjustment,
+    player_damage_adjustment, player_disarm_adjustment, player_initialize_base_experience_levels,
+    player_modify_stat, player_set_and_use_stat, player_stat_adjustment_charisma,
+    player_stat_adjustment_constitution, player_stat_adjustment_wisdom_intelligence,
+    player_stat_boost, player_stat_random_decrease, player_stat_random_increase,
+    player_stat_restore, player_to_hit_adjustment,
 };
 
 use crate::config::player::status::{PY_MANA, PY_STUDY};
@@ -429,7 +426,7 @@ pub fn new_mana(stat: PlayerAttr) -> i32 {
             + 1;
 
         match player_stat_adjustment_wisdom_intelligence(stat) {
-            1 | 2 => 1 * levels,
+            1 | 2 => levels,
             3 => 3 * levels / 2,
             4 => 2 * levels,
             5 => 5 * levels / 2,
@@ -513,7 +510,7 @@ pub fn number_of_spells_allowed(stat: PlayerAttr) -> i32 {
             + 1;
 
         match player_stat_adjustment_wisdom_intelligence(stat) {
-            1 | 2 | 3 => 1 * levels,
+            1..=3 => levels,
             4 | 5 => 3 * levels / 2,
             6 => 2 * levels,
             7 => 5 * levels / 2,
@@ -560,11 +557,7 @@ fn remember_forgotten_spells(
             }
 
             let order_id = state.py.flags.spells_learned_order[n as usize];
-            let mask = if order_id == 99 {
-                0
-            } else {
-                1u32 << order_id
-            };
+            let mask = if order_id == 99 { 0 } else { 1u32 << order_id };
 
             if (mask & state.py.flags.spells_forgotten) != 0 {
                 if MAGIC_SPELLS[class_id][order_id as usize].level_required <= level as u8 {
@@ -629,11 +622,7 @@ fn forget_spells(mut new_spells: i32, magic_type_str: &str, offset: i32) {
             }
 
             let order_id = state.py.flags.spells_learned_order[i];
-            let mask = if order_id == 99 {
-                0
-            } else {
-                1u32 << order_id
-            };
+            let mask = if order_id == 99 { 0 } else { 1u32 << order_id };
 
             if (mask & state.py.flags.spells_learnt) != 0 {
                 state.py.flags.spells_learnt &= !mask;
@@ -785,10 +774,7 @@ pub fn player_gain_spells() {
                     }
                     spell_id -= 1;
 
-                    terminal::erase_line(Coord {
-                        y: c + 1,
-                        x: 31,
-                    });
+                    terminal::erase_line(Coord { y: c + 1, x: 31 });
                     display_spells_list(&spell_bank[..spell_id as usize], spell_id, false, -1);
                 } else {
                     terminal::terminal_bell_sound();
@@ -964,7 +950,10 @@ pub fn player_rest_on() {
                 -SHRT_MAX
             } else {
                 let mut parsed = 0i32;
-                let end = rest_str.iter().position(|&b| b == 0).unwrap_or(rest_str.len());
+                let end = rest_str
+                    .iter()
+                    .position(|&b| b == 0)
+                    .unwrap_or(rest_str.len());
                 let _ = string_to_number(
                     std::str::from_utf8(&rest_str[..end]).unwrap_or(""),
                     &mut parsed,
@@ -1045,9 +1034,8 @@ pub fn player_search(coord: Coord_t, chance: i32) {
                 continue;
             }
 
-            let treasure_id = with_state(|state| {
-                state.dg.floor[spot_y as usize][spot_x as usize].treasure_id
-            });
+            let treasure_id =
+                with_state(|state| state.dg.floor[spot_y as usize][spot_x as usize].treasure_id);
             if treasure_id == 0 {
                 continue;
             }
@@ -1057,15 +1045,17 @@ pub fn player_search(coord: Coord_t, chance: i32) {
                 x: spot_x,
             };
 
-            let category_id = with_state(|state| {
-                state.game.treasure.list[treasure_id as usize].category_id
-            });
+            let category_id =
+                with_state(|state| state.game.treasure.list[treasure_id as usize].category_id);
 
             if category_id == TV_INVIS_TRAP {
                 let mut description = [0u8; MORIA_OBJ_DESC_SIZE as usize];
                 let item = with_state(|state| state.game.treasure.list[treasure_id as usize]);
                 item_description(&mut description, item, true);
-                let end = description.iter().position(|&b| b == 0).unwrap_or(description.len());
+                let end = description
+                    .iter()
+                    .position(|&b| b == 0)
+                    .unwrap_or(description.len());
                 let desc = String::from_utf8_lossy(&description[..end]);
                 terminal::print_message(Some(&format!("You have found {desc}")));
                 trap_change_visibility(spot);
@@ -1080,15 +1070,15 @@ pub fn player_search(coord: Coord_t, chance: i32) {
                     (item.flags, spell_item_identified(*item))
                 });
                 if (flags & CH_TRAPPED) > 1 {
-                    if !identified {
+                    if identified {
+                        terminal::print_message(Some("The chest is trapped!"));
+                    } else {
                         with_state_mut(|state| {
                             spell_item_identify_and_remove_random_inscription(
                                 &mut state.game.treasure.list[treasure_id as usize],
                             );
                         });
                         terminal::print_message(Some("You have discovered a trap on the chest!"));
-                    } else {
-                        terminal::print_message(Some("The chest is trapped!"));
                     }
                 }
             }
@@ -1232,10 +1222,8 @@ pub fn player_saving_throw() -> bool {
             3
         } else if value > 14 {
             2
-        } else if value > 7 {
-            1
         } else {
-            0
+            i32::from(value > 7)
         }
     };
     let class_level_adjustment =
@@ -1324,7 +1312,8 @@ pub fn player_change_speed(speed: i32) {
         state.py.flags.speed += speed as i16;
         state.py.flags.status |= PY_SPEED;
 
-        for i in (i32::from(monsters::MON_MIN_INDEX_ID)..i32::from(state.next_free_monster_id)).rev()
+        for i in
+            (i32::from(monsters::MON_MIN_INDEX_ID)..i32::from(state.next_free_monster_id)).rev()
         {
             state.monsters[i as usize].speed += speed as i16;
         }
@@ -1405,8 +1394,7 @@ fn player_recalculate_bonuses_from_inventory() {
                     state.py.misc.display_to_damage =
                         state.py.misc.display_to_damage.wrapping_add(item.to_damage);
                 }
-                state.py.misc.display_to_ac =
-                    state.py.misc.display_to_ac.wrapping_add(item.to_ac);
+                state.py.misc.display_to_ac = state.py.misc.display_to_ac.wrapping_add(item.to_ac);
                 state.py.misc.display_ac = state.py.misc.display_ac.wrapping_add(item.ac);
             } else if !inventory_item_is_cursed(*item) {
                 state.py.misc.display_ac = state.py.misc.display_ac.wrapping_add(item.ac);
@@ -1475,14 +1463,10 @@ pub fn player_recalculate_bonuses() {
         state.py.misc.display_ac += state.py.misc.display_to_ac;
 
         if state.py.weapon_is_heavy {
-            state.py.misc.display_to_hit = state
-                .py
-                .misc
-                .display_to_hit
-                .wrapping_add(
-                    state.py.stats.used[PlayerAttr::A_STR as usize] as i16 * 15
-                        - state.py.inventory[PlayerEquipment::Wield as usize].weight as i16,
-                );
+            state.py.misc.display_to_hit = state.py.misc.display_to_hit.wrapping_add(
+                state.py.stats.used[PlayerAttr::A_STR as usize] as i16 * 15
+                    - state.py.inventory[PlayerEquipment::Wield as usize].weight as i16,
+            );
         }
 
         if state.py.flags.invulnerability > 0 {
@@ -1598,7 +1582,10 @@ pub fn player_take_off(item_id: i32, pack_position_id: i32) {
     }
 
     with_state_mut(|state| {
-        inventory_item_copy_to(OBJ_NOTHING as i16, &mut state.py.inventory[item_id as usize]);
+        inventory_item_copy_to(
+            OBJ_NOTHING as i16,
+            &mut state.py.inventory[item_id as usize],
+        );
     });
 }
 
@@ -1646,8 +1633,7 @@ pub fn player_weapon_critical_blow(
     let mut critical = damage;
     let threshold = weapon_weight
         + 5 * plus_to_hit
-        + i32::from(CLASS_LEVEL_ADJ[class_id as usize][attack_type_id as usize])
-            * i32::from(level);
+        + i32::from(CLASS_LEVEL_ADJ[class_id as usize][attack_type_id as usize]) * i32::from(level);
 
     if random_number(5000) <= threshold {
         let weight = weapon_weight + random_number(650);
@@ -1672,14 +1658,14 @@ pub fn player_weapon_critical_blow(
 /// C++ player.cpp lines 1096–1112.
 pub fn player_calculate_to_hit_blows(weapon_id: u8, weapon_weight: i32) -> (i32, i32) {
     let mut total_to_hit = 0;
-    let mut blows = if weapon_id != TV_NOTHING {
-        player_attack_blows(weapon_weight, &mut total_to_hit)
-    } else {
+    let mut blows = if weapon_id == TV_NOTHING {
         total_to_hit = -3;
         2
+    } else {
+        player_attack_blows(weapon_weight, &mut total_to_hit)
     };
 
-    if weapon_id >= TV_SLING_AMMO && weapon_id <= TV_SPIKE {
+    if (TV_SLING_AMMO..=TV_SPIKE).contains(&weapon_id) {
         blows = 1;
     }
 
@@ -1707,9 +1693,8 @@ pub fn player_calculate_base_to_hit(creature_lit: bool, tot_tohit: i32) -> i32 {
 
 /// C++ player.cpp lines 1130–1227.
 pub fn player_attack_monster(coord: Coord_t) {
-    let creature_id = with_state(|state| {
-        state.dg.floor[coord.y as usize][coord.x as usize].creature_id as i32
-    });
+    let creature_id =
+        with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].creature_id as i32);
 
     with_state_mut(|state| {
         state.monsters[creature_id as usize].sleep_count = 0;
@@ -1720,10 +1705,10 @@ pub fn player_attack_monster(coord: Coord_t) {
         (monster.lit, monster.creature_id)
     });
 
-    let name = if !lit {
-        "it".to_string()
-    } else {
+    let name = if lit {
         format!("the {}", CREATURES_LIST[monster_creature_id as usize].name)
+    } else {
+        "it".to_string()
     };
 
     let (weapon_id, weapon_weight, weapon_damage) = with_state(|state| {
@@ -1752,7 +1737,10 @@ pub fn player_attack_monster(coord: Coord_t) {
 
         print_message(Some(&format!("You hit {name}.")));
 
-        let mut damage = if weapon_id != TV_NOTHING {
+        let mut damage = if weapon_id == TV_NOTHING {
+            let damage = dice_roll(Dice { dice: 1, sides: 1 });
+            player_weapon_critical_blow(1, 0, damage, PlayerClassLevelAdj::BTH as u8)
+        } else {
             let item = with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize]);
             let mut damage = dice_roll(weapon_damage);
             damage = item_magic_ability_damage(item, damage, monster_creature_id as i32);
@@ -1762,9 +1750,6 @@ pub fn player_attack_monster(coord: Coord_t) {
                 damage,
                 PlayerClassLevelAdj::BTH as u8,
             )
-        } else {
-            let damage = dice_roll(Dice { dice: 1, sides: 1 });
-            player_weapon_critical_blow(1, 0, damage, PlayerClassLevelAdj::BTH as u8)
         };
 
         damage += with_state(|state| i32::from(state.py.misc.plusses_to_damage));
@@ -1778,7 +1763,7 @@ pub fn player_attack_monster(coord: Coord_t) {
             });
             print_message(Some("Your hands stop glowing."));
 
-            let (defenses, creature_level) = with_state(|state| {
+            let (defenses, creature_level) = with_state(|_state| {
                 let creature = &CREATURES_LIST[monster_creature_id as usize];
                 (creature.defenses, creature.level)
             });
@@ -1814,7 +1799,7 @@ pub fn player_attack_monster(coord: Coord_t) {
             return;
         }
 
-        if weapon_id >= TV_SLING_AMMO && weapon_id <= TV_SPIKE {
+        if (TV_SLING_AMMO..=TV_SPIKE).contains(&weapon_id) {
             with_state_mut(|state| {
                 let item = &mut state.py.inventory[PlayerEquipment::Wield as usize];
                 item.items_count -= 1;
@@ -1898,18 +1883,16 @@ fn player_lock_picking_skill_in(state: &crate::game::State) -> i16 {
         3
     } else if int_val > 14 {
         2
-    } else if int_val > 7 {
-        1
     } else {
-        0
+        i16::from(int_val > 7)
     };
 
     let mut skill = state.py.misc.disarm;
     skill += 2 * dex_adj;
     skill += int_adj;
-    skill += (i32::from(CLASS_LEVEL_ADJ[state.py.misc.class_id as usize]
-        [PlayerClassLevelAdj::DISARM as usize])
-        * i32::from(state.py.misc.level)
+    skill += (i32::from(
+        CLASS_LEVEL_ADJ[state.py.misc.class_id as usize][PlayerClassLevelAdj::DISARM as usize],
+    ) * i32::from(state.py.misc.level)
         / 3) as i16;
     skill
 }
@@ -1976,7 +1959,6 @@ pub fn open_closed_door(coord: Coord_t) {
     }
 }
 
-
 /// C++ player.cpp lines 1270–1318.
 pub fn open_closed_chest(coord: Coord_t) {
     let treasure_id =
@@ -2039,9 +2021,7 @@ pub fn open_closed_chest(coord: Coord_t) {
         });
     }
 
-    if with_state(|state| {
-        (state.game.treasure.list[treasure_id as usize].flags & CH_LOCKED) != 0
-    }) {
+    if with_state(|state| (state.game.treasure.list[treasure_id as usize].flags & CH_LOCKED) != 0) {
         return;
     }
 
@@ -2127,9 +2107,8 @@ pub fn player_close_door() {
     if treasure_id != 0 {
         if category_id == TV_OPEN_DOOR {
             if creature_id == 0 {
-                let misc_use = with_state(|state| {
-                    state.game.treasure.list[treasure_id as usize].misc_use
-                });
+                let misc_use =
+                    with_state(|state| state.game.treasure.list[treasure_id as usize].misc_use);
                 if misc_use == 0 {
                     with_state_mut(|state| {
                         inventory_item_copy_to(

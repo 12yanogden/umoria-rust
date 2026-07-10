@@ -1,4 +1,11 @@
 //! Phase 1.5 — score byte-exact round-trip skeleton (staged until phase_5).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 

@@ -1,4 +1,4 @@
-//! Port of src/player_bash.cpp — see phase_4.4.5.
+//! Port of `src/player_bash.cpp` — see `phase_4.4.5`.
 
 use crate::config::dungeon::objects::{OBJ_OPEN_DOOR, OBJ_RUINED_CHEST};
 use crate::config::monsters::defense::CD_MAX_HP;
@@ -21,7 +21,7 @@ use crate::types::Coord_t;
 use crate::ui::display_character_experience;
 use crate::ui_io::{get_direction_with_memory, terminal};
 
-/// C++ player_bash.cpp lines 35–78.
+/// C++ `player_bash.cpp` lines 35–78.
 pub fn player_bash() {
     let mut dir = 0i32;
     if !get_direction_with_memory(None, &mut dir) {
@@ -78,9 +78,8 @@ pub fn player_bash() {
 /// C++ player_bash.cpp lines 82–161.
 #[doc(hidden)]
 pub fn player_bash_attack(coord: Coord_t) {
-    let monster_id = with_state(|state| {
-        state.dg.floor[coord.y as usize][coord.x as usize].creature_id as i32
-    });
+    let monster_id =
+        with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].creature_id as i32);
 
     with_state_mut(|state| {
         state.monsters[monster_id as usize].sleep_count = 0;
@@ -91,10 +90,10 @@ pub fn player_bash_attack(coord: Coord_t) {
         (monster.lit, monster.creature_id)
     });
 
-    let name = if !lit {
-        "it".to_string()
-    } else {
+    let name = if lit {
         format!("the {}", CREATURES_LIST[monster_creature_id as usize].name)
+    } else {
+        "it".to_string()
     };
 
     let (str_stat, arm_weight, misc_weight, dex, level, class_id) = with_state(|state| {
@@ -129,9 +128,8 @@ pub fn player_bash_attack(coord: Coord_t) {
     ) {
         terminal::print_message(Some(&format!("You hit {name}.")));
 
-        let arm_damage = with_state(|state| {
-            state.py.inventory[PlayerEquipment::Arm as usize].damage
-        });
+        let arm_damage =
+            with_state(|state| state.py.inventory[PlayerEquipment::Arm as usize].damage);
         let mut damage = dice_roll(arm_damage);
         damage = player_weapon_critical_blow(
             arm_weight / 4 + str_stat,
@@ -273,9 +271,8 @@ pub fn player_bash_closed_chest(treasure_id: u8) {
         return;
     }
 
-    let locked = with_state(|state| {
-        (state.game.treasure.list[treasure_id as usize].flags & CH_LOCKED) != 0
-    });
+    let locked =
+        with_state(|state| (state.game.treasure.list[treasure_id as usize].flags & CH_LOCKED) != 0);
 
     if locked && random_number(10) == 1 {
         terminal::print_message(Some("The lock breaks open!"));

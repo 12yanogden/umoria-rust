@@ -1,5 +1,12 @@
 //! Phase 4.4.6 — player_throw.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::monsters::defense::CD_EVIL;
@@ -17,9 +24,7 @@ use umoria::inventory::{
 use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
 use umoria::player::{player_test_being_hit, PlayerAttr, PlayerClassLevelAdj};
 use umoria::player_move::player_move_position;
-use umoria::player_throw::{
-    inventory_drop_or_throw_item, player_throw_item, weapon_missile_facts,
-};
+use umoria::player_throw::{inventory_drop_or_throw_item, player_throw_item, weapon_missile_facts};
 use umoria::treasure::{TV_ARROW, TV_BOW, TV_SPIKE};
 use umoria::types::{Coord_t, MESSAGE_HISTORY_SIZE};
 use umoria::ui::panel_bounds_fields;
@@ -81,8 +86,7 @@ fn setup_player_panel(pos: Coord_t) {
         for i in 0..PLAYER_INVENTORY_SIZE as usize {
             inventory_item_copy_to(OBJ_NOTHING as i16, &mut s.py.inventory[i]);
         }
-        s.next_free_monster_id =
-            i16::from(umoria::config::monsters::MON_MIN_INDEX_ID) + 2;
+        s.next_free_monster_id = i16::from(umoria::config::monsters::MON_MIN_INDEX_ID) + 2;
         s.monsters = [Monster::default(); MON_TOTAL_ALLOCATIONS as usize];
     });
 }
@@ -236,10 +240,7 @@ fn player_throw_wall_hit_rng_order_seed42() {
             ..Tile::default()
         },
     );
-    pack_item(
-        0,
-        throwable_item(10, Dice { dice: 1, sides: 6 }, 2),
-    );
+    pack_item(0, throwable_item(10, Dice { dice: 1, sides: 6 }, 2));
     test_push_getch_keys(&[b'a' as i32]);
     test_set_direction(Some(6));
     player_throw_item();
@@ -256,10 +257,7 @@ fn player_throw_wall_hit_rng_order_seed42() {
             ..Tile::default()
         },
     );
-    pack_item(
-        0,
-        throwable_item(10, Dice { dice: 1, sides: 6 }, 2),
-    );
+    pack_item(0, throwable_item(10, Dice { dice: 1, sides: 6 }, 2));
     // weaponMissileFacts: diceRoll(1d6); landing: randomNumber(10) break gate only (tile valid).
     random_number(6);
     random_number(10);
@@ -406,7 +404,13 @@ fn player_throw_hit_applies_ego_slay_multiplier_seed42() {
     setup_dungeon(40, 40);
     setup_player_panel(POS);
     fill_corridor(POS, 6, 1);
-    place_monster(MON_SLOT, STREET_URCHIN_ID, 500, Coord_t { y: 10, x: 11 }, true);
+    place_monster(
+        MON_SLOT,
+        STREET_URCHIN_ID,
+        500,
+        Coord_t { y: 10, x: 11 },
+        true,
+    );
 
     with_state_mut(|s| {
         s.py.misc.bth_with_bows = 100;
@@ -448,7 +452,13 @@ fn player_throw_miss_drops_item_without_extra_hit_rng() {
     setup_dungeon(40, 40);
     setup_player_panel(POS);
     fill_corridor(POS, 6, 1);
-    place_monster(MON_SLOT, STREET_URCHIN_ID, 500, Coord_t { y: 10, x: 11 }, true);
+    place_monster(
+        MON_SLOT,
+        STREET_URCHIN_ID,
+        500,
+        Coord_t { y: 10, x: 11 },
+        true,
+    );
 
     with_state_mut(|s| {
         s.py.misc.bth_with_bows = 0;
@@ -639,11 +649,5 @@ fn player_throw_unlit_monster_applies_distance_and_bonus_penalties() {
     tbth -= tpth * (i32::from(umoria::player::BTH_PER_PLUS_TO_HIT_ADJUST) - 1);
 
     let ac = i32::from(CREATURES_LIST[STREET_URCHIN_ID as usize].ac);
-    let _hit = player_test_being_hit(
-        tbth,
-        10,
-        tpth,
-        ac,
-        PlayerClassLevelAdj::BTHB as u8,
-    );
+    let _hit = player_test_being_hit(tbth, 10, tpth, ac, PlayerClassLevelAdj::BTHB as u8);
 }

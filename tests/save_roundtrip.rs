@@ -1,4 +1,11 @@
 //! Phase 1.5 / 5.8 — save byte-exact round-trip vs C++ golden fixtures.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 

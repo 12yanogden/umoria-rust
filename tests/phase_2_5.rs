@@ -1,4 +1,11 @@
 //! Phase 2.5 — creatures_list + monster_attacks parity with data_creatures.cpp.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::monsters::defense as cd;
 use umoria::config::monsters::move_flags as cm;

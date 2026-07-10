@@ -1,5 +1,12 @@
 //! Phase 1.2 — ncurses integration strategy tests.
 //! See `.cursor/plans/rust-translation/phase_1.2.md`.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::ui_io::{self, terminal, Coord};
 

@@ -1,5 +1,12 @@
 //! Phase 2.1 — types, config, and version constant parity with C++.
 #![allow(clippy::assertions_on_constants)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config;
 use umoria::types;

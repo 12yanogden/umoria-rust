@@ -20,18 +20,17 @@ use crate::player::{
     player_recalculate_bonuses, player_teleport, player_worn_item_is_cursed,
 };
 use crate::spells::{
-    spell_aggravate_monsters, spell_create_food, spell_darken_area, spell_destroy_adjacent_doors_traps,
-    spell_destroy_area, spell_detect_invisible_creatures_within_vicinity,
-    spell_detect_objects_within_vicinity, spell_detect_secret_doors_within_vicinity,
-    spell_detect_traps_within_vicinity, spell_detect_treasure_within_vicinity, spell_dispel_creature,
-    spell_enchant_item, spell_genocide, spell_identify_item, spell_light_area, spell_map_current_area,
+    spell_aggravate_monsters, spell_create_food, spell_darken_area,
+    spell_destroy_adjacent_doors_traps, spell_destroy_area,
+    spell_detect_invisible_creatures_within_vicinity, spell_detect_objects_within_vicinity,
+    spell_detect_secret_doors_within_vicinity, spell_detect_traps_within_vicinity,
+    spell_detect_treasure_within_vicinity, spell_dispel_creature, spell_enchant_item,
+    spell_genocide, spell_identify_item, spell_light_area, spell_map_current_area,
     spell_mass_genocide, spell_recharge_item, spell_remove_curse_from_all_worn_items,
     spell_surround_player_with_doors, spell_surround_player_with_traps, spell_warding_glyph,
 };
-use crate::treasure::{
-    TV_DIGGING, TV_HAFTED, TV_NOTHING, TV_SCROLL1, TV_SCROLL2,
-};
-use crate::types::{Coord_t, MORIA_OBJ_DESC_SIZE_LEN};
+use crate::treasure::{TV_DIGGING, TV_HAFTED, TV_NOTHING, TV_SCROLL1, TV_SCROLL2};
+use crate::types::MORIA_OBJ_DESC_SIZE_LEN;
 use crate::ui::display_character_experience;
 use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_io::terminal;
@@ -118,8 +117,7 @@ pub fn inventory_item_id_of_cursed_equipment() -> i32 {
 }
 
 fn enchant_item_field(item_id: i32, field: fn(&mut Inventory) -> &mut i16, max_bonus: i16) -> bool {
-    let mut value =
-        with_state_mut(|state| *field(&mut state.py.inventory[item_id as usize]));
+    let mut value = with_state_mut(|state| *field(&mut state.py.inventory[item_id as usize]));
     let enchanted = spell_enchant_item(&mut value, max_bonus);
     if enchanted {
         with_state_mut(|state| *field(&mut state.py.inventory[item_id as usize]) = value);
@@ -182,8 +180,11 @@ pub fn scroll_enchant_weapon_to_damage() -> bool {
 
     let scroll_type = wielded_weapon_scroll_type();
 
-    let enchanted =
-        enchant_item_field(PlayerEquipment::Wield as i32, |item| &mut item.to_damage, scroll_type);
+    let enchanted = enchant_item_field(
+        PlayerEquipment::Wield as i32,
+        |item| &mut item.to_damage,
+        scroll_type,
+    );
 
     if enchanted {
         with_state_mut(|state| {
@@ -260,11 +261,10 @@ pub fn scroll_remove_curse() -> bool {
 #[must_use]
 pub fn scroll_summon_monster() -> bool {
     let mut identified = false;
-    let mut coord = Coord_t { y: 0, x: 0 };
 
     let count = random_number(3);
     for _ in 0..count {
-        coord = with_state(|state| state.py.pos);
+        let mut coord = with_state(|state| state.py.pos);
         identified |= monster_summon(&mut coord, false);
     }
 
@@ -319,8 +319,11 @@ pub fn scroll_enchant_weapon() -> bool {
 
     let to_dam_loops = random_number(2);
     for _ in 0..to_dam_loops {
-        if enchant_item_field(PlayerEquipment::Wield as i32, |item| &mut item.to_damage, scroll_type)
-        {
+        if enchant_item_field(
+            PlayerEquipment::Wield as i32,
+            |item| &mut item.to_damage,
+            scroll_type,
+        ) {
             enchanted = true;
         }
     }
@@ -457,11 +460,10 @@ pub fn scroll_curse_armor() -> bool {
 #[must_use]
 pub fn scroll_summon_undead() -> bool {
     let mut identified = false;
-    let mut coord = Coord_t { y: 0, x: 0 };
 
     let count = random_number(3);
     for _ in 0..count {
-        coord = with_state(|state| state.py.pos);
+        let mut coord = with_state(|state| state.py.pos);
         identified |= monster_summon_undead(&mut coord);
     }
 

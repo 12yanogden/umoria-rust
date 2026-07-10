@@ -1,4 +1,4 @@
-//! Port of src/game_files.cpp — see phase_5.3.
+//! Port of `src/game_files.cpp` — see `phase_5.3`.
 
 use std::cell::{Cell, RefCell};
 use std::fs::File;
@@ -17,13 +17,15 @@ use crate::identification::{
 use crate::inventory::{
     inventory_item_copy_to, inventory_item_is_cursed, PlayerEquipment, PLAYER_INVENTORY_SIZE,
 };
-use crate::player::{PlayerAttr, PlayerClassLevelAdj, BTH_PER_PLUS_TO_HIT_ADJUST, PLAYER_MAX_LEVEL};
+use crate::player::{
+    PlayerAttr, PlayerClassLevelAdj, BTH_PER_PLUS_TO_HIT_ADJUST, PLAYER_MAX_LEVEL,
+};
 use crate::scores;
 use crate::treasure::TV_NOTHING;
 use crate::types::{MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE_LEN};
 use crate::ui::{stat_rating, stats_as_string};
-use crate::ui_io::{self, terminal, ESCAPE};
 use crate::ui_io::terminal::Coord;
+use crate::ui_io::{self, terminal, ESCAPE};
 
 fn stat_adjustment_wisdom_intelligence(state: &State, stat: PlayerAttr) -> i32 {
     let value = i32::from(state.py.stats.used[stat as usize]);
@@ -39,10 +41,8 @@ fn stat_adjustment_wisdom_intelligence(state: &State, stat: PlayerAttr) -> i32 {
         3
     } else if value > 14 {
         2
-    } else if value > 7 {
-        1
     } else {
-        0
+        i32::from(value > 7)
     }
 }
 
@@ -117,7 +117,7 @@ pub fn test_set_output_player_character_results(results: &[bool]) {
 
 #[doc(hidden)]
 pub fn test_output_player_character_call_count() -> u32 {
-    TEST_OUTPUT_CALL_COUNT.with(|c| c.get())
+    TEST_OUTPUT_CALL_COUNT.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
@@ -203,12 +203,12 @@ fn copy_cstr(dest: &mut [u8], src: &str) {
     dest[n] = 0;
 }
 
-/// Port of `initializeScoreFile` in game_files.cpp.
+/// Port of `initializeScoreFile` in `game_files.cpp`.
 pub fn initialize_score_file() -> bool {
     scores::initialize_score_file()
 }
 
-/// Port of `displaySplashScreen` in game_files.cpp.
+/// Port of `displaySplashScreen` in `game_files.cpp`.
 pub fn display_splash_screen() {
     let Ok(mut screen_file) = File::open(files::splash_screen) else {
         return;
@@ -224,7 +224,7 @@ pub fn display_splash_screen() {
     terminal::wait_for_continue_key(23);
 }
 
-/// Port of `displayTextHelpFile` in game_files.cpp.
+/// Port of `displayTextHelpFile` in `game_files.cpp`.
 pub fn display_text_help_file(filename: &str) {
     let Ok(mut file) = File::open(filename) else {
         terminal::put_string_clear_to_eol(
@@ -249,10 +249,7 @@ pub fn display_text_help_file(filename: &str) {
             }
         }
 
-        terminal::put_string_clear_to_eol(
-            "[ press any key to continue ]",
-            Coord { y: 23, x: 23 },
-        );
+        terminal::put_string_clear_to_eol("[ press any key to continue ]", Coord { y: 23, x: 23 });
         if terminal::get_key_input() == ESCAPE {
             break;
         }
@@ -262,7 +259,7 @@ pub fn display_text_help_file(filename: &str) {
     terminal::terminal_restore_screen();
 }
 
-/// Port of `displayDeathFile` in game_files.cpp.
+/// Port of `displayDeathFile` in `game_files.cpp`.
 pub fn display_death_file(filename: &str) {
     let Ok(mut file) = File::open(filename) else {
         terminal::put_string_clear_to_eol(
@@ -289,7 +286,7 @@ pub fn display_death_file(filename: &str) {
     drop(file);
 }
 
-/// Port of `equipmentPlacementDescription` in game_files.cpp.
+/// Port of `equipmentPlacementDescription` in `game_files.cpp`.
 #[must_use]
 pub fn equipment_placement_description(item_id: i32) -> &'static str {
     match item_id {
@@ -385,18 +382,22 @@ fn write_character_sheet_to_file(char_file: &mut impl Write) -> io::Result<()> {
             colon,
             c_str_bytes(&state.py.misc.name)
         )?;
-        write!(char_file, " Age{:>11} {:>6}", colon, i32::from(state.py.misc.age))?;
         write!(
             char_file,
-            "   STR : {}\n",
+            " Age{:>11} {:>6}",
+            colon,
+            i32::from(state.py.misc.age)
+        )?;
+        writeln!(
+            char_file,
+            "   STR : {}",
             stats_as_string(state.py.stats.used[PlayerAttr::A_STR as usize])
         )?;
 
         write!(
             char_file,
             " Race{:>9} {:<23}",
-            colon,
-            CHARACTER_RACES[state.py.misc.race_id as usize].name
+            colon, CHARACTER_RACES[state.py.misc.race_id as usize].name
         )?;
         write!(
             char_file,
@@ -404,9 +405,9 @@ fn write_character_sheet_to_file(char_file: &mut impl Write) -> io::Result<()> {
             colon,
             i32::from(state.py.misc.height)
         )?;
-        write!(
+        writeln!(
             char_file,
-            "   INT : {}\n",
+            "   INT : {}",
             stats_as_string(state.py.stats.used[PlayerAttr::A_INT as usize])
         )?;
 
@@ -422,26 +423,25 @@ fn write_character_sheet_to_file(char_file: &mut impl Write) -> io::Result<()> {
             colon,
             i32::from(state.py.misc.weight)
         )?;
-        write!(
+        writeln!(
             char_file,
-            "   WIS : {}\n",
+            "   WIS : {}",
             stats_as_string(state.py.stats.used[PlayerAttr::A_WIS as usize])
         )?;
 
         write!(
             char_file,
             " Class{:>8} {:<23}",
-            colon,
-            CLASSES[state.py.misc.class_id as usize].title
+            colon, CLASSES[state.py.misc.class_id as usize].title
         )?;
         write!(
             char_file,
             " Social Class : {:>6}",
             state.py.misc.social_class
         )?;
-        write!(
+        writeln!(
             char_file,
-            "   DEX : {}\n",
+            "   DEX : {}",
             stats_as_string(state.py.stats.used[PlayerAttr::A_DEX as usize])
         )?;
 
@@ -452,9 +452,9 @@ fn write_character_sheet_to_file(char_file: &mut impl Write) -> io::Result<()> {
             rank_title_for_state(state)
         )?;
         write!(char_file, "{blank:>22}")?;
-        write!(
+        writeln!(
             char_file,
-            "   CON : {}\n",
+            "   CON : {}",
             stats_as_string(state.py.stats.used[PlayerAttr::A_CON as usize])
         )?;
 
@@ -474,47 +474,51 @@ fn write_character_sheet_to_file(char_file: &mut impl Write) -> io::Result<()> {
             blank,
             i32::from(misc.level)
         )?;
-        write!(char_file, "    Max Hit Points : {:>6}\n", misc.max_hp)?;
+        writeln!(char_file, "    Max Hit Points : {:>6}", misc.max_hp)?;
         write!(
             char_file,
             " + To Damage : {:>6}{:>7}Experience : {:>7}",
-            misc.display_to_damage,
-            blank,
-            misc.exp
+            misc.display_to_damage, blank, misc.exp
         )?;
-        write!(char_file, "    Cur Hit Points : {:>6}\n", misc.current_hp)?;
+        writeln!(char_file, "    Cur Hit Points : {:>6}", misc.current_hp)?;
         write!(
             char_file,
             " + To AC     : {:>6}{:>7}Max Exp    : {:>7}",
-            misc.display_to_ac,
-            blank,
-            misc.max_exp
+            misc.display_to_ac, blank, misc.max_exp
         )?;
-        write!(char_file, "    Max Mana{:>8} {:>6}\n", colon, misc.mana)?;
+        writeln!(char_file, "    Max Mana{:>8} {:>6}", colon, misc.mana)?;
         write!(char_file, "   Total AC  : {:>6}", misc.display_ac)?;
         if misc.level >= u16::from(PLAYER_MAX_LEVEL) {
-            write!(char_file, "{:>7}Exp to Adv : *******", blank)?;
+            write!(char_file, "{blank:>7}Exp to Adv : *******")?;
         } else {
             let exp_to_adv = (state.py.base_exp_levels[usize::from(misc.level.wrapping_sub(1))]
                 * u32::from(misc.experience_factor)
                 / 100) as i32;
-            write!(char_file, "{:>7}Exp to Adv : {:>7}", blank, exp_to_adv)?;
+            write!(char_file, "{blank:>7}Exp to Adv : {exp_to_adv:>7}")?;
         }
-        write!(char_file, "    Cur Mana{:>8} {:>6}\n", colon, misc.current_mana)?;
-        write!(char_file, "{:>28}Gold{:>8} {:>7}\n\n", blank, colon, misc.au)?;
+        writeln!(
+            char_file,
+            "    Cur Mana{:>8} {:>6}",
+            colon, misc.current_mana
+        )?;
+        write!(
+            char_file,
+            "{:>28}Gold{:>8} {:>7}\n\n",
+            blank, colon, misc.au
+        )?;
 
         let derived = compute_derived_abilities(state);
         write!(char_file, "(Miscellaneous Abilities)\n\n")?;
-        write!(
+        writeln!(
             char_file,
-            " Fighting    : {:<10}   Stealth     : {:<10}   Perception  : {}\n",
+            " Fighting    : {:<10}   Stealth     : {:<10}   Perception  : {}",
             stat_rating(derived.fighting),
             stat_rating(derived.stealth),
             stat_rating(derived.perception)
         )?;
-        write!(
+        writeln!(
             char_file,
-            " Bows/Throw  : {:<10}   Disarming   : {:<10}   Searching   : {}\n",
+            " Bows/Throw  : {:<10}   Disarming   : {:<10}   Searching   : {}",
             stat_rating(derived.bows),
             stat_rating(derived.disarming),
             stat_rating(derived.searching)
@@ -527,9 +531,9 @@ fn write_character_sheet_to_file(char_file: &mut impl Write) -> io::Result<()> {
             derived.infra
         )?;
 
-        write!(char_file, "Character Background\n")?;
+        writeln!(char_file, "Character Background")?;
         for entry in &state.py.misc.history {
-            write!(char_file, " {}\n", c_str_bytes(entry))?;
+            writeln!(char_file, " {}", c_str_bytes(entry))?;
         }
 
         Ok(())
@@ -555,9 +559,9 @@ fn write_equipment_list_to_file(equip_file: &mut impl Write) -> io::Result<()> {
             }
 
             item_description_for_state(&mut description, item, true, state);
-            write!(
+            writeln!(
                 equip_file,
-                "  {}) {:<19}: {}\n",
+                "  {}) {:<19}: {}",
                 (item_slot_id as u8 + b'a') as char,
                 equipment_placement_description(slot),
                 c_str_bytes(&description)
@@ -583,9 +587,9 @@ fn write_inventory_to_file(inv_file: &mut impl Write) -> io::Result<()> {
         for index in 0..state.py.pack.unique_items {
             let item = state.py.inventory[index as usize];
             item_description_for_state(&mut description, item, true, state);
-            write!(
+            writeln!(
                 inv_file,
-                "{}) {}\n",
+                "{}) {}",
                 (index as u8 + b'a') as char,
                 c_str_bytes(&description)
             )?;
@@ -596,7 +600,7 @@ fn write_inventory_to_file(inv_file: &mut impl Write) -> io::Result<()> {
     })
 }
 
-/// Port of `outputRandomLevelObjectsToFile` in game_files.cpp.
+/// Port of `outputRandomLevelObjectsToFile` in `game_files.cpp`.
 pub fn output_random_level_objects_to_file() {
     let mut input = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
 
@@ -620,7 +624,7 @@ pub fn output_random_level_objects_to_file() {
         return;
     }
 
-    if count < 1 || level < 0 || level > 1200 {
+    if count < 1 || !(0..=1200).contains(&level) {
         terminal::put_string_clear_to_eol("Parameters no good.", Coord { y: 0, x: 0 });
         return;
     }
@@ -695,7 +699,7 @@ pub fn output_random_level_objects_to_file() {
     terminal::put_string_clear_to_eol("Completed.", Coord { y: 0, x: 0 });
 }
 
-/// Port of `outputPlayerCharacterToFile` in game_files.cpp.
+/// Port of `outputPlayerCharacterToFile` in `game_files.cpp`.
 pub fn output_player_character_to_file(filename: &str) -> bool {
     TEST_OUTPUT_CALL_COUNT.with(|c| c.set(c.get().wrapping_add(1)));
     TEST_OUTPUT_LAST_PATH.with(|p| *p.borrow_mut() = filename.to_string());
@@ -744,15 +748,12 @@ fn output_player_character_to_file_impl(filename: &str) -> bool {
     }
 
     // C++ closes the fd then fopen("w") — recreate/truncate for the write path.
-    let mut file = match File::create(filename) {
-        Ok(f) => f,
-        Err(_) => {
-            if created_exclusive {
-                let _ = std::fs::remove_file(path);
-            }
-            terminal::print_message(Some(&format!("Can't open file {filename}:")));
-            return false;
+    let Ok(mut file) = File::create(filename) else {
+        if created_exclusive {
+            let _ = std::fs::remove_file(path);
         }
+        terminal::print_message(Some(&format!("Can't open file {filename}:")));
+        return false;
     };
 
     if write_character_sheet_to_file(&mut file).is_err()

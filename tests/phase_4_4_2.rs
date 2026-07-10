@@ -1,18 +1,23 @@
 //! Phase 4.4.2 — player_move.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
-use umoria::config::dungeon::objects::{OBJ_GOLD_LIST, OBJ_TRAP_LIST, OBJ_NOTHING};
-use umoria::config::player::status::PY_SEARCH;
+use umoria::config::dungeon::objects::{OBJ_GOLD_LIST, OBJ_NOTHING, OBJ_TRAP_LIST};
 use umoria::config::monsters::MON_ENDGAME_MONSTERS;
+use umoria::config::player::status::PY_SEARCH;
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::data_treasure::GAME_OBJECTS;
 use umoria::dungeon::{dungeon_set_trap, MAX_HEIGHT, MAX_WIDTH};
 use umoria::dungeon_tile::{Tile, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::game_objects::popt;
-use umoria::inventory::{
-    inventory_item_copy_to, PLAYER_INVENTORY_SIZE,
-};
+use umoria::inventory::{inventory_item_copy_to, PLAYER_INVENTORY_SIZE};
 use umoria::monster::{Monster, MON_MAX_CREATURES, MON_MAX_LEVELS, MON_TOTAL_ALLOCATIONS};
 use umoria::player::PlayerAttr;
 use umoria::player_move::player_move;

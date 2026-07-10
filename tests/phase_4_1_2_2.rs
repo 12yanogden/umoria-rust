@@ -1,5 +1,12 @@
 //! Phase 4.1.2.2 — room & vault builders in dungeon_generate.cpp.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -12,7 +19,7 @@ use umoria::dungeon_generate::{
     dungeon_place_random_secret_door, dungeon_place_treasure_vault, dungeon_place_vault,
 };
 use umoria::dungeon_tile::{
-    TILE_BLOCKED_FLOOR, TILE_DARK_FLOOR, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR, TMP1_WALL,
+    Tile, TILE_BLOCKED_FLOOR, TILE_DARK_FLOOR, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR, TMP1_WALL,
 };
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::treasure::TV_SECRET_DOOR;
@@ -22,7 +29,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
     });
 }
 
@@ -135,7 +142,10 @@ fn dungeon_build_room_cross_shaped_treasure_vault_seed42() {
 
     assert_eq!(count_feature(TMP1_WALL), 7);
     assert!(with_state(|s| s.game.treasure.current_id) > 1);
-    assert!(with_state(|s| s.next_free_monster_id) > i16::from(umoria::config::monsters::MON_MIN_INDEX_ID));
+    assert!(
+        with_state(|s| s.next_free_monster_id)
+            > i16::from(umoria::config::monsters::MON_MIN_INDEX_ID)
+    );
 }
 
 #[test]
@@ -161,7 +171,10 @@ fn dungeon_build_room_with_inner_rooms_plain_seed4() {
         tile_at(Coord_t { y: 30, x: 50 }).feature_id,
         TILE_LIGHT_FLOOR
     );
-    assert!(with_state(|s| s.next_free_monster_id) > i16::from(umoria::config::monsters::MON_MIN_INDEX_ID));
+    assert!(
+        with_state(|s| s.next_free_monster_id)
+            > i16::from(umoria::config::monsters::MON_MIN_INDEX_ID)
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -335,8 +348,10 @@ fn inner_room_type_branch_sweep_seeds() {
         match want {
             1 => {
                 assert_ne!(tile_at(coord).feature_id, TMP1_WALL);
-                assert!(with_state(|s| s.next_free_monster_id)
-                    > i16::from(umoria::config::monsters::MON_MIN_INDEX_ID));
+                assert!(
+                    with_state(|s| s.next_free_monster_id)
+                        > i16::from(umoria::config::monsters::MON_MIN_INDEX_ID)
+                );
             }
             2 => {
                 // Vault ring; one wall may become a locked door (TILE_BLOCKED_FLOOR).

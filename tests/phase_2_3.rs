@@ -1,6 +1,13 @@
 //! Phase 2.3 — helpers.{h,cpp} string/number helpers.
 //! See `.cursor/plans/rust-translation/phase_2.3.md`.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use std::ffi::CStr;
 use umoria::helpers::{
@@ -298,9 +305,9 @@ fn human_date_string_shape() {
     // Shape: "Mon Jul  5" — `%a %b %e` (space-padded day 1–9 on Unix).
     let bytes = s.as_bytes();
     assert!((8..=10).contains(&bytes.len()));
-    assert!(bytes[0..3].iter().all(|c| c.is_ascii_alphabetic()));
+    assert!(bytes[0..3].iter().all(u8::is_ascii_alphabetic));
     assert_eq!(bytes[3], b' ');
-    assert!(bytes[4..7].iter().all(|c| c.is_ascii_alphabetic()));
+    assert!(bytes[4..7].iter().all(u8::is_ascii_alphabetic));
     assert_eq!(bytes[7], b' ');
     assert!(bytes[8].is_ascii_whitespace() || bytes[8].is_ascii_digit());
     assert!(bytes[9].is_ascii_digit());

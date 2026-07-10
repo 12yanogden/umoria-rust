@@ -1,38 +1,40 @@
 //! Phase 4.3.1.1 — player bonus hub & combat resolution parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
 use umoria::config::identification::ID_KNOWN2;
 use umoria::config::monsters;
-use umoria::config::monsters::defense::CD_NO_SLEEP;
 use umoria::config::player::status::{PY_ARMOR, PY_SPEED, PY_STR_WGT};
 use umoria::config::treasure::flags::{
-    TR_AGGRAVATE, TR_BLIND, TR_CURSED, TR_FFALL, TR_FREE_ACT, TR_INFRA, TR_REGEN, TR_RES_ACID,
-    TR_RES_COLD, TR_RES_FIRE, TR_RES_LIGHT, TR_SEARCH, TR_SEE_INVIS, TR_SLOW_DIGEST, TR_SPEED,
-    TR_STATS, TR_STEALTH, TR_STR, TR_SUST_STAT, TR_TELEPORT, TR_TIMID,
+    TR_AGGRAVATE, TR_BLIND, TR_CURSED, TR_INFRA, TR_REGEN, TR_RES_FIRE, TR_SEARCH, TR_SPEED,
+    TR_STEALTH, TR_STR, TR_SUST_STAT, TR_TELEPORT, TR_TIMID,
 };
-use umoria::config::dungeon::objects::OBJ_NOTHING;
-use umoria::data_creatures::CREATURES_LIST;
 use umoria::data_player::CLASS_LEVEL_ADJ;
-use umoria::dice::{dice_roll, Dice};
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
+use umoria::dungeon_tile::{Tile, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::identification::spell_item_identified;
 use umoria::inventory::{
-    inventory_collect_all_item_flags, inventory_item_is_cursed,
-    inventory_item_remove_curse, Inventory, PlayerEquipment, PLAYER_INVENTORY_SIZE,
+    inventory_collect_all_item_flags, inventory_item_is_cursed, Inventory, PlayerEquipment,
+    PLAYER_INVENTORY_SIZE,
 };
-use umoria::monster::{Monster, MON_MAX_LEVELS, MON_TOTAL_ALLOCATIONS};
+use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
 use umoria::player::{
     player_adjust_bonuses_for_item, player_attack_monster, player_attack_position,
     player_calculate_base_to_hit, player_calculate_to_hit_blows, player_change_speed,
-    player_is_wielding_item, player_left_hand_ring_empty,
-    player_recalculate_bonuses, player_right_hand_ring_empty, player_saving_throw,
-    player_take_off, player_test_attack_hits, player_test_being_hit, player_weapon_critical_blow,
-    player_worn_item_is_cursed, player_worn_item_remove_curse, PlayerAttr, PlayerClassLevelAdj,
-    BTH_PER_PLUS_TO_HIT_ADJUST, CLASS_MISC_HIT,
+    player_is_wielding_item, player_left_hand_ring_empty, player_recalculate_bonuses,
+    player_right_hand_ring_empty, player_saving_throw, player_take_off, player_test_attack_hits,
+    player_test_being_hit, player_weapon_critical_blow, player_worn_item_is_cursed,
+    player_worn_item_remove_curse, PlayerAttr, PlayerClassLevelAdj, BTH_PER_PLUS_TO_HIT_ADJUST,
+    CLASS_MISC_HIT,
 };
 use umoria::player_stats::{
     player_armor_class_adjustment, player_damage_adjustment, player_to_hit_adjustment,
@@ -47,7 +49,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -81,10 +83,6 @@ fn place_monster(id: i32, creature_id: u16, hp: i16, coord: Coord_t, lit: bool) 
     });
 }
 
-fn next_random_pair(max: i32) -> (i32, i32) {
-    (max, random_number(max))
-}
-
 fn cpp_test_being_hit(
     base_to_hit: i32,
     level: i32,
@@ -112,11 +110,10 @@ fn cpp_weapon_critical_blow(
     let mut critical = damage;
     let threshold = weapon_weight
         + 5 * plus_to_hit
-        + i32::from(CLASS_LEVEL_ADJ[class_id as usize][attack_type_id as usize])
-            * i32::from(level);
+        + i32::from(CLASS_LEVEL_ADJ[class_id as usize][attack_type_id as usize]) * i32::from(level);
 
     if random_number(5000) <= threshold {
-        let mut weight = weapon_weight + random_number(650);
+        let weight = weapon_weight + random_number(650);
         critical = if weight < 400 {
             2 * damage + 5
         } else if weight < 700 {
@@ -126,7 +123,6 @@ fn cpp_weapon_critical_blow(
         } else {
             5 * damage + 20
         };
-        let _ = weight;
     }
     critical
 }
@@ -154,10 +150,8 @@ fn wis_int_adj(value: i32) -> i32 {
         3
     } else if value > 14 {
         2
-    } else if value > 7 {
-        1
     } else {
-        0
+        i32::from(value > 7)
     }
 }
 
@@ -181,32 +175,24 @@ fn make_test_item(
     category_id: u8,
     identified: bool,
 ) -> Inventory {
-    let mut item = Inventory::default();
-    item.category_id = category_id;
-    item.flags = flags;
-    item.misc_use = misc_use;
-    item.to_hit = to_hit;
-    item.to_damage = to_damage;
-    item.ac = ac;
-    item.to_ac = to_ac;
-    item.weight = weight;
-    item.items_count = 1;
-    if identified {
-        item.identification = ID_KNOWN2;
+    Inventory {
+        category_id,
+        flags,
+        misc_use,
+        to_hit,
+        to_damage,
+        ac,
+        to_ac,
+        weight,
+        items_count: 1,
+        identification: if identified { ID_KNOWN2 } else { 0 },
+        ..Default::default()
     }
-    item
 }
 
-fn cpp_recalculate_bonuses_from_inventory(items: &[Inventory; PLAYER_INVENTORY_SIZE as usize]) -> (
-    i16,
-    i16,
-    i16,
-    i16,
-    i16,
-    i16,
-    i16,
-    i16,
-) {
+fn cpp_recalculate_bonuses_from_inventory(
+    items: &[Inventory; PLAYER_INVENTORY_SIZE as usize],
+) -> (i16, i16, i16, i16, i16, i16, i16, i16) {
     let mut plusses_to_hit = 0i16;
     let mut plusses_to_damage = 0i16;
     let mut magical_ac = 0i16;
@@ -216,8 +202,11 @@ fn cpp_recalculate_bonuses_from_inventory(items: &[Inventory; PLAYER_INVENTORY_S
     let mut display_ac = 0i16;
     let mut display_to_ac = 0i16;
 
-    for i in PlayerEquipment::Wield as usize..PlayerEquipment::Light as usize {
-        let item = &items[i];
+    for item in items
+        .iter()
+        .take(PlayerEquipment::Light as usize)
+        .skip(PlayerEquipment::Wield as usize)
+    {
         if item.category_id == TV_NOTHING {
             continue;
         }
@@ -399,7 +388,10 @@ fn recalculate_bonuses_empty_inventory() {
     player_recalculate_bonuses();
     with_state(|s| {
         assert_eq!(s.py.misc.plusses_to_hit, player_to_hit_adjustment() as i16);
-        assert_eq!(s.py.misc.plusses_to_damage, player_damage_adjustment() as i16);
+        assert_eq!(
+            s.py.misc.plusses_to_damage,
+            player_damage_adjustment() as i16
+        );
         assert_eq!(s.py.misc.magical_ac, player_armor_class_adjustment() as i16);
         assert_eq!(s.py.misc.ac, 0);
         assert_eq!(s.py.misc.display_to_hit, s.py.misc.plusses_to_hit);
@@ -432,8 +424,7 @@ fn recalculate_bonuses_identified_weapon_and_resist_flags() {
     player_recalculate_bonuses();
     with_state(|s| {
         let inv = s.py.inventory;
-        let (pth, ptd, mac, ac, dth, dtd, dac, dtac) =
-            cpp_recalculate_bonuses_from_inventory(&inv);
+        let (pth, ptd, mac, ac, dth, dtd, dac, dtac) = cpp_recalculate_bonuses_from_inventory(&inv);
         let base_th = player_to_hit_adjustment() as i16;
         let base_td = player_damage_adjustment() as i16;
         let base_mac = player_armor_class_adjustment() as i16;
@@ -444,7 +435,10 @@ fn recalculate_bonuses_identified_weapon_and_resist_flags() {
         assert_eq!(s.py.misc.display_to_hit, base_th.wrapping_add(dth));
         assert_eq!(s.py.misc.display_to_damage, base_td.wrapping_add(dtd));
         assert_eq!(s.py.misc.display_to_ac, base_mac.wrapping_add(dtac));
-        assert_eq!(s.py.misc.display_ac, dac.wrapping_add(base_mac.wrapping_add(dtac)));
+        assert_eq!(
+            s.py.misc.display_ac,
+            dac.wrapping_add(base_mac.wrapping_add(dtac))
+        );
         assert!(s.py.flags.resistant_to_fire);
         assert!(s.py.flags.regenerate_hp);
         assert!(s.py.flags.sustain_str);
@@ -514,8 +508,14 @@ fn recalculate_bonuses_bow_excludes_damage_plusses() {
     equip_item(PlayerEquipment::Wield, bow);
     player_recalculate_bonuses();
     with_state(|s| {
-        assert_eq!(s.py.misc.plusses_to_damage, player_damage_adjustment() as i16);
-        assert_eq!(s.py.misc.display_to_damage, player_damage_adjustment() as i16);
+        assert_eq!(
+            s.py.misc.plusses_to_damage,
+            player_damage_adjustment() as i16
+        );
+        assert_eq!(
+            s.py.misc.display_to_damage,
+            player_damage_adjustment() as i16
+        );
     });
 }
 
@@ -526,7 +526,17 @@ fn recalculate_bonuses_bow_excludes_damage_plusses() {
 #[test]
 fn adjust_bonuses_for_item_wear_remove_symmetry() {
     reset_for_new_game(None);
-    let item = make_test_item(TR_SEARCH | TR_STEALTH | TR_INFRA | TR_STR, 2, 0, 0, 0, 0, 10, TV_RING, true);
+    let item = make_test_item(
+        TR_SEARCH | TR_STEALTH | TR_INFRA | TR_STR,
+        2,
+        0,
+        0,
+        0,
+        0,
+        10,
+        TV_RING,
+        true,
+    );
     let (base_search, base_fos, base_stealth, base_infra, base_speed) = with_state(|s| {
         (
             s.py.misc.chance_in_search,

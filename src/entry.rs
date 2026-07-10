@@ -19,8 +19,6 @@ use crate::version::{CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSI
 pub const USAGE_INSTRUCTIONS: &str = "\
 \nUsage:\n    umoria [OPTIONS] SAVEGAME\n\nSAVEGAME is an optional save game filename (default: game.sav)\n\nOptions:\n    -n           Force start of new game\n    -r           Enable classic roguelike keys on startup (default: disabled, or save game settings)\n    -d           Display high scores and exit\n    -s NUMBER    Game Seed, as a decimal number (max: 2147483647)\n\n    -v           Print version info and exit\n    -h           Display this message\n";
 
-const INT_MAX: i32 = i32::MAX;
-
 const SEED_ERROR: &str = "Game seed must be a decimal number between 1 and 2147483647\n";
 
 thread_local! {
@@ -34,30 +32,30 @@ thread_local! {
     static TEST_SKIP_START_MORIA: Cell<bool> = const { Cell::new(false) };
     static TEST_START_MORIA_ARGS: RefCell<Option<(u32, bool, bool)>> = const { RefCell::new(None) };
     static TEST_ENTRY_TRACE: Cell<bool> = const { Cell::new(false) };
-    static TEST_TRACE_EVENTS: RefCell<Vec<&'static str>> = RefCell::new(Vec::new());
+    static TEST_TRACE_EVENTS: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) };
 }
 
 fn trace(event: &'static str) {
-    if TEST_ENTRY_TRACE.with(|c| c.get()) {
+    if TEST_ENTRY_TRACE.with(std::cell::Cell::get) {
         TEST_TRACE_EVENTS.with(|events| events.borrow_mut().push(event));
     }
 }
 
 fn stdout_print(text: &str) {
-    if TEST_CAPTURE_STDOUT.with(|c| c.get()) {
+    if TEST_CAPTURE_STDOUT.with(std::cell::Cell::get) {
         TEST_STDOUT.with(|out| out.borrow_mut().push_str(text));
         return;
     }
-    print!("{text}");
+    let _ = write!(io::stdout(), "{text}");
     let _ = io::stdout().flush();
 }
 
 fn stderr_print(text: &str) {
-    if TEST_CAPTURE_STDERR.with(|c| c.get()) {
+    if TEST_CAPTURE_STDERR.with(std::cell::Cell::get) {
         TEST_STDERR.with(|out| out.borrow_mut().push_str(text));
         return;
     }
-    eprint!("{text}");
+    let _ = write!(io::stderr(), "{text}");
     let _ = io::stderr().flush();
 }
 
@@ -65,8 +63,7 @@ fn print_help_and_license() {
     terminal::terminal_restore();
     stdout_print("Robert A. Koeneke's classic dungeon crawler.\n");
     stdout_print(&format!(
-        "Umoria {}.{}.{} is released under a GPL-3.0-or-later license.\n",
-        CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH
+        "Umoria {CURRENT_VERSION_MAJOR}.{CURRENT_VERSION_MINOR}.{CURRENT_VERSION_PATCH} is released under a GPL-3.0-or-later license.\n"
     ));
     stdout_print(USAGE_INSTRUCTIONS);
 }
@@ -77,7 +74,7 @@ pub fn parse_game_seed(arg: &str, seed: &mut u32) -> bool {
     if !string_to_number(arg, &mut value) {
         return false;
     }
-    if value <= 0 || value > INT_MAX {
+    if value <= 0 {
         return false;
     }
     *seed = value as u32;
@@ -85,21 +82,23 @@ pub fn parse_game_seed(arg: &str, seed: &mut u32) -> bool {
 }
 
 /// C++ `main` body — returns the process exit status (0, 1, or 255).
-pub fn run_with_args(args: Vec<String>) -> u8 {
+pub fn run_with_args(args: &[String]) -> u8 {
     let mut seed = 0u32;
     let mut new_game = false;
     let mut roguelike_keys = false;
 
-    if TEST_FORCE_SCORE_INIT_FAIL.with(|c| c.get()) || !initialize_score_file() {
+    if TEST_FORCE_SCORE_INIT_FAIL.with(std::cell::Cell::get) || !initialize_score_file() {
         stderr_print(&format!("Can't open score file '{}'\n", files::scores));
         return 1;
     }
 
-    if TEST_FORCE_PERMISSIONS_FAIL.with(|c| c.get()) || !terminal::check_file_permissions() {
+    if TEST_FORCE_PERMISSIONS_FAIL.with(std::cell::Cell::get) || !terminal::check_file_permissions()
+    {
         return 1;
     }
 
-    if TEST_FORCE_TERMINAL_INIT_FAIL.with(|c| c.get()) || !terminal::terminal_initialize() {
+    if TEST_FORCE_TERMINAL_INIT_FAIL.with(std::cell::Cell::get) || !terminal::terminal_initialize()
+    {
         return 1;
     }
 
@@ -115,8 +114,7 @@ pub fn run_with_args(args: Vec<String>) -> u8 {
             'v' => {
                 terminal::terminal_restore();
                 stdout_print(&format!(
-                    "{}.{}.{}\n",
-                    CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH
+                    "{CURRENT_VERSION_MAJOR}.{CURRENT_VERSION_MINOR}.{CURRENT_VERSION_PATCH}\n"
                 ));
                 return 0;
             }
@@ -157,11 +155,12 @@ pub fn run_with_args(args: Vec<String>) -> u8 {
     }
 
     if index < args.len() {
-        with_state_mut(|state| state.config_save_game = args[index].clone());
+        with_state_mut(|state| state.config_save_game.clone_from(&args[index]));
     }
 
-    if TEST_SKIP_START_MORIA.with(|c| c.get()) {
-        TEST_START_MORIA_ARGS.with(|slot| *slot.borrow_mut() = Some((seed, new_game, roguelike_keys)));
+    if TEST_SKIP_START_MORIA.with(std::cell::Cell::get) {
+        TEST_START_MORIA_ARGS
+            .with(|slot| *slot.borrow_mut() = Some((seed, new_game, roguelike_keys)));
         return 0;
     }
 
@@ -171,8 +170,7 @@ pub fn run_with_args(args: Vec<String>) -> u8 {
 
 pub fn expected_help_output() -> String {
     format!(
-        "Robert A. Koeneke's classic dungeon crawler.\nUmoria {}.{}.{} is released under a GPL-3.0-or-later license.\n{}",
-        CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH, USAGE_INSTRUCTIONS
+        "Robert A. Koeneke's classic dungeon crawler.\nUmoria {CURRENT_VERSION_MAJOR}.{CURRENT_VERSION_MINOR}.{CURRENT_VERSION_PATCH} is released under a GPL-3.0-or-later license.\n{USAGE_INSTRUCTIONS}"
     )
 }
 
@@ -239,7 +237,7 @@ pub fn test_set_skip_start_moria(skip: bool) {
 
 #[doc(hidden)]
 pub fn test_start_moria_args() -> Option<(u32, bool, bool)> {
-    TEST_START_MORIA_ARGS.with(|slot| slot.borrow().clone())
+    TEST_START_MORIA_ARGS.with(|slot| *slot.borrow())
 }
 
 #[doc(hidden)]

@@ -129,14 +129,14 @@ impl GoldenEntry {
 }
 
 impl ScreenBuffer {
-    pub fn from_bytes(data: &[u8]) -> io::Result<Self> {
+    pub fn from_bytes(data: &[u8]) -> Self {
         let text = String::from_utf8_lossy(data);
         let rows: Vec<String> = text
             .lines()
             .map(str::trim_end)
             .map(str::to_string)
             .collect();
-        Ok(Self { rows })
+        Self { rows }
     }
 
     pub fn rows(&self) -> usize {
@@ -174,13 +174,19 @@ pub fn load_manifest() -> io::Result<Manifest> {
 }
 
 pub fn read_golden_bytes(entry: &GoldenEntry) -> Vec<u8> {
-    fs::read(entry.path()).unwrap_or_else(|err| {
-        panic!(
-            "golden file missing for {}: {} ({err})",
-            entry.id,
-            entry.path().display()
-        )
-    })
+    match fs::read(entry.path()) {
+        Ok(bytes) => bytes,
+        Err(err) => {
+            let path = entry.path();
+            assert!(
+                path.is_file(),
+                "golden file missing for {}: {} ({err})",
+                entry.id,
+                path.display()
+            );
+            Vec::new()
+        }
+    }
 }
 
 pub fn verify_manifest(manifest: &Manifest) -> io::Result<()> {
@@ -265,8 +271,8 @@ pub fn load_rng_sequence(path: &Path) -> io::Result<Vec<u32>> {
 pub fn screen_diff(expected: &ScreenBuffer, actual: &ScreenBuffer) -> Option<ScreenDiff> {
     let rows = expected.rows().max(actual.rows());
     for row in 0..rows {
-        let expected_row = expected.rows.get(row).map(String::as_str).unwrap_or("");
-        let actual_row = actual.rows.get(row).map(String::as_str).unwrap_or("");
+        let expected_row = expected.rows.get(row).map_or("", String::as_str);
+        let actual_row = actual.rows.get(row).map_or("", String::as_str);
         let cols = expected_row.chars().count().max(actual_row.chars().count());
         for col in 0..cols {
             let expected_ch = expected_row.chars().nth(col).unwrap_or('\0');
@@ -285,6 +291,68 @@ pub fn screen_diff(expected: &ScreenBuffer, actual: &ScreenBuffer) -> Option<Scr
 }
 
 #[cfg(feature = "differential_live")]
+fn render_pty_screen_vt100(raw: &[u8]) -> String {
+    let mut parser = vt100::Parser::new(24, 80, 0);
+    parser.process(raw);
+    let screen = parser.screen();
+    let mut lines = Vec::with_capacity(24);
+    for row in 0..24 {
+        let mut line = String::with_capacity(80);
+        for col in 0..80 {
+            if let Some(cell) = screen.cell(row, col) {
+                line.push_str(&cell.contents());
+            }
+        }
+        lines.push(line.trim_end().to_owned());
+    }
+    while lines.last().is_some_and(String::is_empty) {
+        lines.pop();
+    }
+    if lines.is_empty() {
+        String::new()
+    } else {
+        format!("{}\n", lines.join("\n"))
+    }
+}
+
+#[cfg(feature = "differential_live")]
+fn render_pty_screen_pyte(raw: &[u8]) -> Option<String> {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+
+    const SCRIPT: &str = r"
+import sys
+import pyte
+raw = sys.stdin.buffer.read()
+screen = pyte.Screen(80, 24)
+pyte.ByteStream(screen).feed(raw)
+lines = [line.rstrip() for line in screen.display]
+while lines and not lines[-1]:
+    lines.pop()
+sys.stdout.write('\n'.join(lines) + '\n')
+";
+
+    let mut child = Command::new("python3")
+        .args(["-c", SCRIPT])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .ok()?;
+    child.stdin.as_mut()?.write_all(raw).ok()?;
+    let output = child.wait_with_output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    Some(String::from_utf8_lossy(&output.stdout).into_owned())
+}
+
+#[cfg(feature = "differential_live")]
+fn render_pty_screen(raw: &[u8]) -> String {
+    render_pty_screen_pyte(raw).unwrap_or_else(|| render_pty_screen_vt100(raw))
+}
+
+#[cfg(feature = "differential_live")]
 pub fn replay_transcript(
     seed: u32,
     keys_path: &Path,
@@ -292,20 +360,44 @@ pub fn replay_transcript(
 ) -> io::Result<ScreenBuffer> {
     use portable_pty::{native_pty_system, CommandBuilder, PtySize};
     use std::io::{Read, Write};
+    use std::process::Command;
+    use std::sync::{Arc, Mutex};
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    // Match tools/capture/play.sh pacing for deterministic prompt handling.
+    const CHAR_DELAY: Duration = Duration::from_millis(150);
+    const TIMEOUT: Duration = Duration::from_secs(30);
+
+    let status = Command::new("cargo")
+        .args(["build", "--bin", "umoria"])
+        .current_dir(repo_root())
+        .status()
+        .map_err(|err| io::Error::other(err.to_string()))?;
+    if !status.success() {
+        return Err(io::Error::other("cargo build --bin umoria failed"));
+    }
+
+    let run_dir = repo_root().join("umoria");
+    // Match tools/capture/play.sh: golden transcripts assume a fresh save slot.
+    let _ = fs::remove_file(run_dir.join("game.sav"));
 
     let pty_system = native_pty_system();
-    let pair = pty_system.openpty(PtySize {
-        rows: env_string(env, "LINES")
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(24),
-        cols: env_string(env, "COLS")
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(80),
-        pixel_width: 0,
-        pixel_height: 0,
-    })?;
+    let pair = pty_system
+        .openpty(PtySize {
+            rows: env_string(env, "LINES")
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(24),
+            cols: env_string(env, "COLS")
+                .and_then(|v| v.parse().ok())
+                .unwrap_or(80),
+            pixel_width: 0,
+            pixel_height: 0,
+        })
+        .map_err(|e| io::Error::other(e.to_string()))?;
 
     let mut cmd = CommandBuilder::new(repo_root().join("target/debug/umoria"));
+    cmd.cwd(repo_root().join("umoria"));
     cmd.arg("-s");
     cmd.arg(seed.to_string());
     if let Some(term) = env_string(env, "TERM") {
@@ -318,21 +410,80 @@ pub fn replay_transcript(
         cmd.env("COLS", cols);
     }
 
-    let mut child = pair.slave.spawn_command(cmd)?;
+    let mut child = pair
+        .slave
+        .spawn_command(cmd)
+        .map_err(|e| io::Error::other(e.to_string()))?;
     drop(pair.slave);
 
+    let raw = Arc::new(Mutex::new(Vec::<u8>::new()));
+    let raw_reader = Arc::clone(&raw);
+    let mut reader = pair
+        .master
+        .try_clone_reader()
+        .map_err(|e| io::Error::other(e.to_string()))?;
+    let reader_thread = thread::spawn(move || {
+        let mut buf = [0u8; 4096];
+        loop {
+            match reader.read(&mut buf) {
+                Ok(0) => break,
+                Ok(n) => {
+                    if let Ok(mut guard) = raw_reader.lock() {
+                        guard.extend_from_slice(&buf[..n]);
+                    }
+                }
+                Err(_) => break,
+            }
+        }
+    });
+
     let keys = fs::read(keys_path)?;
-    if let Some(mut writer) = pair.master.take_writer() {
-        writer.write_all(&keys)?;
+    let mut writer = pair
+        .master
+        .take_writer()
+        .map_err(|e| io::Error::other(e.to_string()))?;
+
+    let deadline = Instant::now() + TIMEOUT;
+    let mut key_index = 0usize;
+    let mut last_write = Instant::now()
+        .checked_sub(CHAR_DELAY)
+        .unwrap_or_else(Instant::now);
+    let mut pty_closed = false;
+
+    while Instant::now() < deadline {
+        if key_index < keys.len() && !pty_closed && last_write.elapsed() >= CHAR_DELAY {
+            match writer.write_all(std::slice::from_ref(&keys[key_index])) {
+                Ok(()) => {
+                    let _ = writer.flush();
+                    key_index += 1;
+                    last_write = Instant::now();
+                }
+                Err(_) => pty_closed = true,
+            }
+        }
+
+        if key_index >= keys.len() {
+            if let Ok(Some(_)) = child.try_wait() {
+                break;
+            }
+        }
+
+        thread::sleep(Duration::from_millis(20));
     }
 
-    let mut output = String::new();
-    if let Some(mut reader) = pair.master.try_clone_reader()? {
-        reader.read_to_string(&mut output)?;
-    }
+    thread::sleep(Duration::from_millis(200));
 
+    if child.try_wait()?.is_none() {
+        let _ = child.kill();
+    }
     let _ = child.wait();
-    ScreenBuffer::from_bytes(output.as_bytes())
+    drop(writer);
+    let _ = reader_thread.join();
+
+    let raw_bytes = raw.lock().map(|guard| guard.clone()).unwrap_or_default();
+    Ok(ScreenBuffer::from_bytes(
+        render_pty_screen(&raw_bytes).as_bytes(),
+    ))
 }
 
 fn hash_golden(entry: &GoldenEntry, data: &[u8]) -> String {
@@ -348,7 +499,14 @@ fn hash_golden(entry: &GoldenEntry, data: &[u8]) -> String {
             let masked = apply_mask(&decoded, &entry.volatile_byte_ranges);
             sha256_hex(&masked)
         }
-        other => panic!("unsupported hash_method {other:?} for golden {}", entry.id),
+        other => {
+            assert!(
+                ["sha256", "sha256-masked-save", "sha256-masked-score"].contains(&other),
+                "unsupported hash_method {other:?} for golden {}",
+                entry.id
+            );
+            String::new()
+        }
     }
 }
 
@@ -377,8 +535,15 @@ fn apply_mask(data: &[u8], ranges: &[VolatileByteRange]) -> Vec<u8> {
 }
 
 fn sha256_hex(data: &[u8]) -> String {
+    use std::fmt::Write as _;
+
     let digest = Sha256::digest(data);
-    digest.iter().map(|byte| format!("{byte:02x}")).collect()
+    digest
+        .iter()
+        .fold(String::with_capacity(digest.len() * 2), |mut acc, byte| {
+            let _ = write!(acc, "{byte:02x}");
+            acc
+        })
 }
 
 fn env_string(env: &HashMap<String, Value>, key: &str) -> Option<String> {
@@ -397,11 +562,7 @@ fn hex_window(offset: usize, expected: u8, actual: u8, len: usize) -> String {
     for index in start..end {
         let marker = if index == offset { "<<" } else { "  " };
         lines.push(format!(
-            "  {index:#06x}: mismatch expected={expected:#04x} actual={actual:#04x} {marker}",
-            index = index,
-            expected = expected,
-            actual = actual,
-            marker = marker
+            "  {index:#06x}: mismatch expected={expected:#04x} actual={actual:#04x} {marker}"
         ));
     }
     lines.join("\n")

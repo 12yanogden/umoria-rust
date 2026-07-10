@@ -1,5 +1,12 @@
 //! Meta-tests verifying the Rust crate scaffold mirrors the C++ source layout.
 //! See `.cursor/plans/rust-translation/phase_1.1.md`.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use std::collections::{BTreeSet, HashSet};
 use std::fs;

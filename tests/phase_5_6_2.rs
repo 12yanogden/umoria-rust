@@ -1,32 +1,36 @@
 //! Phase 5.6.2 — per-turn player status/upkeep (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::identification::ID_MAGIK;
-use umoria::config::player::{
-    PLAYER_FOOD_ALERT, PLAYER_FOOD_FAINT, PLAYER_FOOD_WEAK, PLAYER_REGEN_FAINT,
-    PLAYER_REGEN_NORMAL, PLAYER_REGEN_WEAK,
-};
 use umoria::config::player::status::{
-    PY_ARMOR, PY_BLESSED, PY_BLIND, PY_CONFUSED, PY_DET_INV, PY_FEAR, PY_FAST, PY_HERO, PY_HP,
-    PY_HUNGRY, PY_INVULN, PY_MANA, PY_PARALYSED, PY_POISONED, PY_REST, PY_SEARCH, PY_SHERO,
-    PY_SLOW, PY_SPEED, PY_STATS, PY_STR, PY_TIM_INFRA, PY_WEAK,
+    PY_ARMOR, PY_BLIND, PY_DET_INV, PY_FAST, PY_FEAR, PY_HERO, PY_HP, PY_HUNGRY, PY_INVULN,
+    PY_MANA, PY_REST, PY_SEARCH, PY_SLOW, PY_SPEED, PY_STATS, PY_STR, PY_TIM_INFRA, PY_WEAK,
 };
-use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
+use umoria::config::player::{
+    PLAYER_FOOD_ALERT, PLAYER_FOOD_WEAK, PLAYER_REGEN_FAINT, PLAYER_REGEN_NORMAL, PLAYER_REGEN_WEAK,
+};
+use umoria::game::{reset_for_new_game, with_state, with_state_mut};
 use umoria::game_run::{
-    item_enchanted, player_detect_enchantment, player_food_consumption,
-    player_update_blindness, player_update_blessedness, player_update_confusion,
-    player_update_detect_invisible, player_update_evil_protection, player_update_fear_state,
-    player_update_fastness, player_update_heat_resistance, player_update_hero_status,
-    player_update_hallucination, player_update_infra_vision, player_update_invulnerability,
-    player_update_light_status, player_update_max_dungeon_depth, player_update_paralysis,
+    item_enchanted, player_detect_enchantment, player_food_consumption, player_update_blessedness,
+    player_update_blindness, player_update_confusion, player_update_detect_invisible,
+    player_update_evil_protection, player_update_fear_state, player_update_hallucination,
+    player_update_heat_resistance, player_update_hero_status, player_update_infra_vision,
+    player_update_invulnerability, player_update_light_status, player_update_max_dungeon_depth,
     player_update_poisoned_state, player_update_regeneration, player_update_resting_state,
-    player_update_slowness, player_update_speed, player_update_status_flags,
-    player_update_word_of_recall, test_end_running_count, test_regenerate_hp_amounts,
-    test_regenerate_mana_amounts, test_reset_game_run_hooks,
+    player_update_speed, player_update_status_flags, player_update_word_of_recall,
+    test_end_running_count, test_regenerate_hp_amounts, test_regenerate_mana_amounts,
+    test_reset_game_run_hooks,
 };
-use umoria::inventory::{Inventory, PlayerEquipment, PLAYER_INVENTORY_SIZE};
+use umoria::inventory::{Inventory, PlayerEquipment};
 use umoria::monster::{test_reset_update_monsters_hooks, test_update_monsters_calls};
 use umoria::player::PlayerAttr;
-use umoria::treasure::{TV_MIN_ENCHANT, TV_NOTHING, TV_SWORD};
+use umoria::treasure::{TV_NOTHING, TV_SWORD};
 use umoria::ui_io::{
     register_game_ui_hooks, test_set_ncurses_stub, test_set_ui_capture, test_ui_messages,
 };
@@ -97,7 +101,10 @@ fn light_growing_faint_only_on_guarded_rng_path() {
             break;
         }
     }
-    assert!(faint_seed.is_some(), "expected some seed to trigger faint RNG path");
+    assert!(
+        faint_seed.is_some(),
+        "expected some seed to trigger faint RNG path"
+    );
 }
 
 #[test]
@@ -216,7 +223,9 @@ fn food_starvation_zero_regen() {
     with_state_mut(|s| s.py.flags.food = -32);
     let regen = player_food_consumption();
     assert_eq!(regen, 0);
-    assert!(with_state(|s| s.py.misc.current_hp < 0 || s.py.flags.food < 0));
+    assert!(with_state(
+        |s| s.py.misc.current_hp < 0 || s.py.flags.food < 0
+    ));
 }
 
 #[test]
@@ -480,15 +489,25 @@ fn status_flags_stats_loop() {
 
 #[test]
 fn item_enchanted_truth_table() {
-    let mut item = Inventory::default();
-    item.category_id = TV_NOTHING;
+    let item = Inventory {
+        category_id: TV_NOTHING,
+        ..Default::default()
+    };
     assert!(!item_enchanted(item));
 
-    item.category_id = TV_SWORD;
-    item.to_hit = 1;
+    let item = Inventory {
+        category_id: TV_SWORD,
+        to_hit: 1,
+        ..Default::default()
+    };
     assert!(item_enchanted(item));
 
-    item.identification |= ID_MAGIK;
+    let item = Inventory {
+        category_id: TV_SWORD,
+        to_hit: 1,
+        identification: ID_MAGIK,
+        ..Default::default()
+    };
     assert!(!item_enchanted(item));
 }
 
@@ -501,9 +520,11 @@ fn detect_enchantment_skips_unique_items_slot() {
         s.py.inventory[PlayerEquipment::Wield as usize].to_hit = 5;
     });
     player_detect_enchantment();
-    assert!(!with_state(|s| {
-        (s.py.inventory[PlayerEquipment::Wield as usize].identification & ID_MAGIK) != 0
-    }) || messages_contain("There's something about"));
+    assert!(
+        !with_state(|s| {
+            (s.py.inventory[PlayerEquipment::Wield as usize].identification & ID_MAGIK) != 0
+        }) || messages_contain("There's something about")
+    );
 }
 
 // ---------------------------------------------------------------------------

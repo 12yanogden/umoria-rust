@@ -5,9 +5,7 @@ use std::os::raw::c_char;
 use crate::config::dungeon::objects::OBJ_NOTHING;
 use crate::config::identification::ID_EMPTY;
 use crate::config::player::status::PY_STR_WGT;
-use crate::config::treasure::flags::{
-    TR_CURSED, TR_RES_ACID, TR_RES_FIRE,
-};
+use crate::config::treasure::flags::{TR_CURSED, TR_RES_ACID, TR_RES_FIRE};
 use crate::data_treasure::GAME_OBJECTS;
 use crate::dice::Dice;
 use crate::dungeon::dungeon_delete_object;
@@ -17,14 +15,14 @@ use crate::identification::{
     item_append_to_inscription, item_description, item_set_colorless_as_identified_for_state,
     object_position_offset, spell_item_identified, SpecialNameIds,
 };
+use crate::player::{player_recalculate_bonuses, player_take_off, player_takes_hit, PlayerAttr};
 use crate::treasure::{
-    TV_ARROW, TV_BOLT, TV_BOOTS, TV_BOW, TV_CHEST, TV_CLOSED_DOOR, TV_CLOAK, TV_FLASK, TV_FOOD,
+    TV_ARROW, TV_BOLT, TV_BOOTS, TV_BOW, TV_CHEST, TV_CLOAK, TV_CLOSED_DOOR, TV_FLASK, TV_FOOD,
     TV_GLOVES, TV_HAFTED, TV_HARD_ARMOR, TV_HELM, TV_MISC, TV_NOTHING, TV_OPEN_DOOR, TV_POLEARM,
     TV_POTION1, TV_POTION2, TV_RING, TV_SCROLL1, TV_SCROLL2, TV_SHIELD, TV_SOFT_ARMOR, TV_SPIKE,
     TV_STAFF, TV_SWORD, TV_WAND,
 };
-use crate::player::{player_recalculate_bonuses, player_take_off, player_takes_hit, PlayerAttr};
-use crate::types::{Vtype_t, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE};
+use crate::types::{Vtype_t, MORIA_OBJ_DESC_SIZE};
 use crate::ui_io::terminal::print_message;
 
 pub const PLAYER_INVENTORY_SIZE: u8 = 34;
@@ -377,10 +375,8 @@ pub fn inventory_can_carry_item_count(item: Inventory) -> bool {
             let inv = &state.py.inventory[i as usize];
             let same_character = inv.category_id == item.category_id;
             let same_category = inv.sub_category_id == item.sub_category_id;
-            let same_number =
-                u16::from(inv.items_count) + u16::from(item.items_count) < 256;
-            let same_group = item.sub_category_id < ITEM_GROUP_MIN
-                || inv.misc_use == item.misc_use;
+            let same_number = u16::from(inv.items_count) + u16::from(item.items_count) < 256;
+            let same_group = item.sub_category_id < ITEM_GROUP_MIN || inv.misc_use == item.misc_use;
             let inventory_item_is_colorless = item_set_colorless_as_identified_for_state(
                 state,
                 inv.category_id,
@@ -461,12 +457,9 @@ pub fn inventory_carry_item(new_item: Inventory) -> i32 {
                 let item = &state.py.inventory[slot as usize];
                 i32::from(new_item.items_count) + i32::from(item.items_count) < 256
             };
-            let same_known_status = item_set_colorless_as_identified_for_state(
-                state,
-                item_cat,
-                item_sub,
-                item_ident,
-            ) == is_known;
+            let same_known_status =
+                item_set_colorless_as_identified_for_state(state, item_cat, item_sub, item_ident)
+                    == is_known;
             let is_stackable = inventory_item_stackable(new_item);
             let is_same_group =
                 new_item.sub_category_id < ITEM_GROUP_MIN || item_misc == new_item.misc_use;
@@ -482,9 +475,7 @@ pub fn inventory_carry_item(new_item: Inventory) -> i32 {
                 break;
             }
 
-            if (is_same_category
-                && new_item.sub_category_id < item_sub
-                && is_always_known)
+            if (is_same_category && new_item.sub_category_id < item_sub && is_always_known)
                 || new_item.category_id > item_cat
             {
                 for i in (slot..state.py.pack.unique_items as i32).rev() {
@@ -497,7 +488,8 @@ pub fn inventory_carry_item(new_item: Inventory) -> i32 {
         }
 
         state.py.pack.weight = (i32::from(state.py.pack.weight)
-            + i32::from(new_item.items_count) * i32::from(new_item.weight)) as i16;
+            + i32::from(new_item.items_count) * i32::from(new_item.weight))
+            as i16;
         state.py.flags.status |= PY_STR_WGT;
 
         slot_id

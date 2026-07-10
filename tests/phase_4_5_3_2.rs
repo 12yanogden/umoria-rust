@@ -1,4 +1,11 @@
 //! Phase 4.5.3.2 — rings/amulets/wands/staffs/chests magical ability parity.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::identification::{ID_NO_SHOW_P1, ID_SHOW_HIT_DAM};
 use umoria::config::treasure::chests::{CH_EXPLODE, CH_LOCKED, CH_PARALYSED, CH_SUMMON};
@@ -32,7 +39,13 @@ fn item_snapshot() -> Inventory {
     with_state(|state| state.game.treasure.list[ITEM_ID as usize])
 }
 
-fn run_magical(seed: u32, category_id: u8, sub_category_id: u8, level: i32, cost: i32) -> Inventory {
+fn run_magical(
+    seed: u32,
+    category_id: u8,
+    sub_category_id: u8,
+    level: i32,
+    cost: i32,
+) -> Inventory {
     reset_for_new_game(Some(seed));
     setup_item(category_id, sub_category_id, cost);
     magic_treasure_magical_ability(ITEM_ID, level);

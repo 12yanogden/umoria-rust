@@ -1,4 +1,4 @@
-//! Port of src/game_save.cpp — XOR save stream primitives and score record I/O.
+//! Port of `src/game_save.cpp` — XOR save stream primitives and score record I/O.
 
 use std::cell::{Cell, RefCell};
 use std::fs::{self, File, OpenOptions};
@@ -87,7 +87,7 @@ impl Default for HighScore {
 pub const HIGH_SCORE_RECORD_SIZE: usize = 73;
 
 pub fn xor_byte() -> u8 {
-    XOR_BYTE.with(|c| c.get())
+    XOR_BYTE.with(std::cell::Cell::get)
 }
 
 pub fn set_xor_byte(value: u8) {
@@ -95,11 +95,11 @@ pub fn set_xor_byte(value: u8) {
 }
 
 pub fn from_save_file() -> i32 {
-    FROM_SAVE_FILE.with(|c| c.get())
+    FROM_SAVE_FILE.with(std::cell::Cell::get)
 }
 
 pub fn start_time() -> u32 {
-    START_TIME.with(|c| c.get())
+    START_TIME.with(std::cell::Cell::get)
 }
 
 pub fn set_from_save_file(value: i32) {
@@ -133,7 +133,7 @@ pub fn test_set_force_save_char_fail(fail: bool) {
 
 #[doc(hidden)]
 pub fn test_store_maintenance_count() -> u32 {
-    TEST_STORE_MAINTENANCE_COUNT.with(|c| c.get())
+    TEST_STORE_MAINTENANCE_COUNT.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
@@ -147,15 +147,15 @@ fn test_buffer_active() -> bool {
 
 fn save_unix_time() -> u32 {
     TEST_UNIX_TIME
-        .with(|c| c.get())
+        .with(std::cell::Cell::get)
         .unwrap_or_else(get_current_unix_time)
 }
 
 fn flush_ok() -> bool {
-    !TEST_SAVE_FAIL_FLUSH.with(|c| c.get())
+    !TEST_SAVE_FAIL_FLUSH.with(std::cell::Cell::get)
 }
 
-/// Port of `setFileptr` in game_save.cpp.
+/// Port of `setFileptr` in `game_save.cpp`.
 pub fn set_fileptr(file: File) {
     FILEPTR.with(|fp| *fp.borrow_mut() = Some(file));
     TEST_BUFFER.with(|buf| *buf.borrow_mut() = None);
@@ -233,20 +233,13 @@ pub fn test_write_raw(bytes: &[u8]) -> io::Result<()> {
 }
 
 pub fn test_buffer_len() -> usize {
-    TEST_BUFFER.with(|buf| {
-        buf.borrow()
-            .as_ref()
-            .map(|c| c.get_ref().len())
-            .unwrap_or(0)
-    })
+    TEST_BUFFER.with(|buf| buf.borrow().as_ref().map_or(0, |c| c.get_ref().len()))
 }
 
 pub fn test_buffer_remaining() -> usize {
     TEST_BUFFER.with(|buf| {
         buf.borrow().as_ref().map_or(0, |c| {
-            c.get_ref()
-                .len()
-                .saturating_sub(c.position() as usize)
+            c.get_ref().len().saturating_sub(c.position() as usize)
         })
     })
 }
@@ -291,7 +284,7 @@ fn unget_byte_raw(byte: u8) {
 }
 
 fn get_byte_raw() -> io::Result<u8> {
-    if let Some(byte) = UNGET_BYTE.with(|c| c.take()) {
+    if let Some(byte) = UNGET_BYTE.with(std::cell::Cell::take) {
         return Ok(byte);
     }
     if let Some(file) = FILEPTR.with(|fp| fp.borrow_mut().take()) {
@@ -300,7 +293,7 @@ fn get_byte_raw() -> io::Result<u8> {
         let n = file.read(&mut byte)?;
         FILEPTR.with(|fp| *fp.borrow_mut() = Some(file));
         if n == 0 {
-            if C_GETC_EOF_MODE.with(|c| c.get()) {
+            if C_GETC_EOF_MODE.with(std::cell::Cell::get) {
                 ui_io::test_set_eof_flag(1);
                 return Ok(0xFF);
             }
@@ -313,7 +306,7 @@ fn get_byte_raw() -> io::Result<u8> {
             let mut byte = [0u8; 1];
             let n = cursor.read(&mut byte)?;
             if n == 0 {
-                if C_GETC_EOF_MODE.with(|c| c.get()) {
+                if C_GETC_EOF_MODE.with(std::cell::Cell::get) {
                     ui_io::test_set_eof_flag(1);
                     return Ok(0xFF);
                 }
@@ -597,7 +590,7 @@ pub fn test_build_options_l() -> u32 {
 #[doc(hidden)]
 pub fn test_compute_save_timestamp() -> u32 {
     let mut l = save_unix_time();
-    let start = START_TIME.with(|c| c.get());
+    let start = START_TIME.with(std::cell::Cell::get);
     if l < start {
         l = start.wrapping_add(86_400);
     }
@@ -951,14 +944,14 @@ fn write_save_header() -> io::Result<u8> {
     wr_byte(CURRENT_VERSION_PATCH)?;
     set_xor_byte(0);
     let char_tmp = FORCED_SEED_BYTE
-        .with(|c| c.get())
+        .with(std::cell::Cell::get)
         .unwrap_or_else(|| (random_number(256) - 1) as u8);
     wr_byte(char_tmp)?;
     Ok(char_tmp)
 }
 
 fn open_save_file(filename: &str) -> io::Result<(Option<i32>, bool)> {
-    if TEST_FORCE_SAVE_CHAR_FAIL.with(|c| c.get()) {
+    if TEST_FORCE_SAVE_CHAR_FAIL.with(std::cell::Cell::get) {
         return Ok((None, false));
     }
 
@@ -1036,13 +1029,12 @@ pub fn save_char(filename: &str) -> bool {
 
     let buffer_mode = test_buffer_active();
     let mut ok = false;
-    let mut fd_opened = false;
 
-    if buffer_mode {
-        fd_opened = true;
+    let fd_opened = if buffer_mode {
+        true
     } else {
         match open_save_file(filename) {
-            Ok((Some(_), true)) | Ok((None, true)) => fd_opened = true,
+            Ok((Some(_) | None, true)) => true,
             Ok((_, false)) => {
                 terminal::print_message(Some(&format!("Can't create new file '{filename}'")));
                 return false;
@@ -1052,12 +1044,12 @@ pub fn save_char(filename: &str) -> bool {
                 return false;
             }
         }
-    }
+    };
 
     if fd_opened && (buffer_mode || FILEPTR.with(|fp| fp.borrow().is_some())) {
         if write_save_header().is_ok() {
             ok = sv_write();
-            if TEST_SAVE_FAIL_FLUSH.with(|c| c.get()) {
+            if TEST_SAVE_FAIL_FLUSH.with(std::cell::Cell::get) {
                 ok = false;
             }
         }
@@ -1104,11 +1096,7 @@ pub fn save_game() -> bool {
                 terminal::Coord { y: 0, x: 0 },
             );
             let mut input = [0u8; 80];
-            if !terminal::get_string_input(
-                &mut input,
-                terminal::Coord { y: 0, x: 31 },
-                45,
-            ) {
+            if !terminal::get_string_input(&mut input, terminal::Coord { y: 0, x: 31 }, 45) {
                 return false;
             }
             if input[0] != 0 {
@@ -1350,7 +1338,10 @@ fn read_creature_sparse_list(state: &mut State) -> io::Result<()> {
         let xchar = rd_byte()?;
         char_tmp = rd_byte()?;
         if xchar > MAX_WIDTH || ychar > MAX_HEIGHT {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "creature coords"));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "creature coords",
+            ));
         }
         state.dg.floor[ychar as usize][xchar as usize].creature_id = char_tmp;
         char_tmp = rd_byte()?;
@@ -1365,7 +1356,10 @@ fn read_treasure_sparse_list(state: &mut State) -> io::Result<()> {
         let xchar = rd_byte()?;
         char_tmp = rd_byte()?;
         if xchar > MAX_WIDTH || ychar > MAX_HEIGHT {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, "treasure coords"));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "treasure coords",
+            ));
         }
         state.dg.floor[ychar as usize][xchar as usize].treasure_id = char_tmp;
         char_tmp = rd_byte()?;
@@ -1449,12 +1443,9 @@ fn load_game_restore(generate: &mut bool) -> RestoreOutcome {
     terminal::put_string_clear_to_eol("Restoring Memory...", terminal::Coord { y: 0, x: 0 });
     terminal::put_qio();
 
-    let header = match read_save_header() {
-        Ok(v) => v,
-        Err(_) => {
-            outcome.ok = false;
-            return outcome;
-        }
+    let Ok(header) = read_save_header() else {
+        outcome.ok = false;
+        return outcome;
     };
     outcome.version_maj = header.0;
     outcome.version_min = header.1;
@@ -1469,12 +1460,10 @@ fn load_game_restore(generate: &mut bool) -> RestoreOutcome {
         return outcome;
     }
 
-    let mut l = match with_state_mut(|state| read_monster_memory(state).and_then(|_| rd_long())) {
-        Ok(v) => v,
-        Err(_) => {
-            outcome.ok = false;
-            return outcome;
-        }
+    let Ok(mut l) = with_state_mut(|state| read_monster_memory(state).and_then(|()| rd_long()))
+    else {
+        outcome.ok = false;
+        return outcome;
     };
 
     with_state_mut(|state| decode_options_from_l(state, l));
@@ -1489,11 +1478,11 @@ fn load_game_restore(generate: &mut bool) -> RestoreOutcome {
         l &= !0x8000_0000;
     }
 
-    if (l & 0x8000_0000) == 0 {
-        if let Err(_) = with_state_mut(|state| read_player_body(state, &mut outcome.time_saved)) {
-            outcome.ok = false;
-            return outcome;
-        }
+    if (l & 0x8000_0000) == 0
+        && with_state_mut(|state| read_player_body(state, &mut outcome.time_saved)).is_err()
+    {
+        outcome.ok = false;
+        return outcome;
     }
 
     let peek = match get_byte_raw() {
@@ -1540,7 +1529,7 @@ fn load_game_restore(generate: &mut bool) -> RestoreOutcome {
         }
     };
 
-    if peek as i32 == -1 || (l & 0x8000_0000) != 0 {
+    if (l & 0x8000_0000) != 0 {
         if (l & 0x8000_0000) == 0 {
             if !with_state(|state| state.game.to_be_wizard)
                 || with_state(|state| state.dg.game_turn < 0)
@@ -1582,7 +1571,7 @@ fn load_game_restore(generate: &mut bool) -> RestoreOutcome {
     terminal::put_string_clear_to_eol("Restoring Character...", terminal::Coord { y: 0, x: 0 });
     terminal::put_qio();
 
-    if with_state_mut(|state| read_level_block(state)).is_err() {
+    if with_state_mut(read_level_block).is_err() {
         outcome.ok = false;
         return outcome;
     }
@@ -1641,11 +1630,7 @@ fn finish_load_success(
         let start = save_unix_time();
         set_start_time(start);
         let time_saved = outcome.time_saved;
-        let mut age = if start < time_saved {
-            0
-        } else {
-            start - time_saved
-        };
+        let mut age = start.saturating_sub(time_saved);
         age = (age + 43_200) / 86_400;
         if age > 10 {
             age = 10;
@@ -1665,8 +1650,7 @@ fn finish_load_success(
         && !is_current_game_version(version_maj, version_min, patch_level)
     {
         terminal::print_message(Some(&format!(
-            "Save file version {}.{} accepted on game version {}.{}.",
-            version_maj, version_min, CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR
+            "Save file version {version_maj}.{version_min} accepted on game version {CURRENT_VERSION_MAJOR}.{CURRENT_VERSION_MINOR}."
         )));
     }
 
@@ -1754,7 +1738,10 @@ pub fn test_load_save_from_bytes(bytes: &[u8]) -> io::Result<()> {
     let outcome = load_game_restore(&mut generate);
     close_load_streams();
     if !outcome.ok {
-        return Err(io::Error::new(io::ErrorKind::InvalidData, "load decode failed"));
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "load decode failed",
+        ));
     }
     Ok(())
 }
@@ -1771,12 +1758,7 @@ pub fn test_player_body_end_offset(bytes: &[u8]) -> io::Result<usize> {
         let mut time_saved = 0u32;
         with_state_mut(|state| read_player_body(state, &mut time_saved))?;
     }
-    let offset = TEST_BUFFER.with(|buf| {
-        buf.borrow()
-            .as_ref()
-            .map(|c| c.position() as usize)
-            .unwrap_or(0)
-    });
+    let offset = TEST_BUFFER.with(|buf| buf.borrow().as_ref().map_or(0, |c| c.position() as usize));
     close_load_streams();
     Ok(offset)
 }
@@ -1791,5 +1773,5 @@ pub fn test_resave_to_buffer() -> io::Result<()> {
     test_reset_buffer();
     save_char("game.sav")
         .then_some(())
-        .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "save_char failed"))
+        .ok_or_else(|| io::Error::other("save_char failed"))
 }

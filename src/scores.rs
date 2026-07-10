@@ -12,7 +12,7 @@ use crate::game_save::{
     fileptr_seek, fileptr_tell, putc_raw, read_high_score, save_high_score, score_getc,
     set_c_getc_eof_mode, set_fileptr, take_fileptr, HighScore, HIGH_SCORE_RECORD_SIZE,
 };
-use crate::player::player_is_male;
+use crate::player::{player_is_male, PLAYER_NAME_SIZE};
 use crate::store_inventory::store_item_value_for_state;
 use crate::types::CNIL;
 use crate::ui_io::{self, terminal, ESCAPE};
@@ -43,15 +43,15 @@ pub fn test_reset_score_test_hooks() {
 
 #[doc(hidden)]
 pub fn test_character_saved_at_record() -> Option<bool> {
-    TEST_CHARACTER_SAVED_AT_RECORD.with(|c| c.get())
+    TEST_CHARACTER_SAVED_AT_RECORD.with(std::cell::Cell::get)
 }
 
 fn scores_path() -> String {
     TEST_SCORES_PATH.with(|path| {
-        path.borrow()
-            .as_ref()
-            .map(|p| p.to_string_lossy().into_owned())
-            .unwrap_or_else(|| files::scores.to_string())
+        path.borrow().as_ref().map_or_else(
+            || files::scores.to_string(),
+            |p| p.to_string_lossy().into_owned(),
+        )
     })
 }
 
@@ -97,10 +97,7 @@ pub fn player_calculate_total_points_for_state(state: &crate::game::State) -> i3
         total = total.wrapping_add(store_item_value_for_state(state, item));
     }
 
-    total = total.wrapping_add(
-        i32::from(state.dg.current_level)
-            .wrapping_mul(50),
-    );
+    total = total.wrapping_add(i32::from(state.dg.current_level).wrapping_mul(50));
 
     if state.py.max_score > total {
         state.py.max_score
@@ -151,21 +148,23 @@ pub fn strip_died_from_for_high_score(src: &[u8]) -> [u8; 25] {
 
 fn build_new_high_score_entry() -> HighScore {
     with_state(|state| {
-        let mut new_entry = HighScore::default();
-        new_entry.points = player_calculate_total_points_for_state(state);
-        new_entry.birth_date = state.py.misc.date_of_birth;
-        new_entry.uid = 0;
-        new_entry.mhp = state.py.misc.max_hp;
-        new_entry.chp = state.py.misc.current_hp;
-        new_entry.dungeon_depth = state.dg.current_level as u8;
-        new_entry.level = state.py.misc.level as u8;
-        new_entry.deepest_dungeon_depth = state.py.misc.max_dungeon_depth as u8;
-        new_entry.gender = high_score_gender_label();
-        new_entry.race = state.py.misc.race_id;
-        new_entry.character_class = state.py.misc.class_id;
-        copy_cstr(&mut new_entry.name, c_string(&state.py.misc.name));
-        new_entry.died_from = strip_died_from_for_high_score(&state.game.character_died_from);
-        new_entry
+        let mut name = [0u8; PLAYER_NAME_SIZE as usize];
+        copy_cstr(&mut name, c_string(&state.py.misc.name));
+        HighScore {
+            points: player_calculate_total_points_for_state(state),
+            birth_date: state.py.misc.date_of_birth,
+            uid: 0,
+            mhp: state.py.misc.max_hp,
+            chp: state.py.misc.current_hp,
+            dungeon_depth: state.dg.current_level as u8,
+            level: state.py.misc.level as u8,
+            deepest_dungeon_depth: state.py.misc.max_dungeon_depth as u8,
+            gender: high_score_gender_label(),
+            race: state.py.misc.race_id,
+            character_class: state.py.misc.class_id,
+            name,
+            died_from: strip_died_from_for_high_score(&state.game.character_died_from),
+        }
     })
 }
 
@@ -186,17 +185,14 @@ fn open_score_file_read_write() -> io::Result<File> {
         .open(scores_path())
 }
 
-/// Port of `initializeScoreFile` in game_files.cpp — opens `"rb+"` while setuid.
+/// Port of `initializeScoreFile` in `game_files.cpp` — opens `"rb+"` while setuid.
 pub fn initialize_score_file() -> bool {
-    match open_score_file_read_write() {
-        Ok(file) => {
-            HIGHSCORE_FP.with(|fp| *fp.borrow_mut() = Some(file));
-            true
-        }
-        Err(_) => {
-            HIGHSCORE_FP.with(|fp| *fp.borrow_mut() = None);
-            false
-        }
+    if let Ok(file) = open_score_file_read_write() {
+        HIGHSCORE_FP.with(|fp| *fp.borrow_mut() = Some(file));
+        true
+    } else {
+        HIGHSCORE_FP.with(|fp| *fp.borrow_mut() = None);
+        false
     }
 }
 
@@ -237,14 +233,11 @@ pub fn record_new_high_score() {
 
     let new_entry = build_new_high_score_entry();
 
-    let file = match open_score_file_read_write() {
-        Ok(file) => file,
-        Err(_) => {
-            let path = scores_path();
-            terminal::print_message(Some(&format!("Error opening score file '{path}'.")));
-            terminal::print_message(CNIL);
-            return;
-        }
+    let Ok(file) = open_score_file_read_write() else {
+        let path = scores_path();
+        terminal::print_message(Some(&format!("Error opening score file '{path}'.")));
+        terminal::print_message(CNIL);
+        return;
     };
 
     install_score_file(file);
@@ -267,7 +260,6 @@ pub fn record_new_high_score() {
     }
 
     let mut old_entry = HighScore::default();
-    let mut entry = HighScore::default();
 
     let mut i = 0i32;
     let mut curpos = fileptr_tell().unwrap_or(3);
@@ -297,7 +289,7 @@ pub fn record_new_high_score() {
         let _ = fileptr_seek(SeekFrom::Start(curpos));
         let _ = save_high_score(&new_entry);
     } else {
-        entry = new_entry;
+        let mut entry = new_entry;
 
         while !scores_feof() {
             let _ = fileptr_seek(SeekFrom::Current(-(HIGH_SCORE_RECORD_STRIDE as i64)));
@@ -351,12 +343,10 @@ fn format_left_str(value: &str, width: usize, precision: usize) -> String {
 pub fn format_show_scores_line(rank: i32, score: &HighScore) -> String {
     let race_name = CHARACTER_RACES
         .get(score.race as usize)
-        .map(|race| race.name)
-        .unwrap_or("");
+        .map_or("", |race| race.name);
     let class_title = CLASSES
         .get(score.character_class as usize)
-        .map(|class| class.title)
-        .unwrap_or("");
+        .map_or("", |class| class.title);
 
     let mut msg = format!(
         "{}{} {} {} {} {}{} {}",
@@ -378,14 +368,11 @@ pub fn format_show_scores_line(rank: i32, score: &HighScore) -> String {
 
 /// Port of `showScoresScreen`.
 pub fn show_scores_screen() {
-    let file = match open_score_file_read() {
-        Ok(file) => file,
-        Err(_) => {
-            let path = scores_path();
-            terminal::print_message(Some(&format!("Error opening score file '{path}'.")));
-            terminal::print_message(CNIL);
-            return;
-        }
+    let Ok(file) = open_score_file_read() else {
+        let path = scores_path();
+        terminal::print_message(Some(&format!("Error opening score file '{path}'.")));
+        terminal::print_message(CNIL);
+        return;
     };
 
     install_score_file(file);
@@ -416,18 +403,12 @@ pub fn show_scores_screen() {
         while !scores_feof() && i < 21 {
             let msg = format_show_scores_line(rank, &score);
             i += 1;
-            terminal::put_string_clear_to_eol(
-                &msg,
-                terminal::Coord { y: i, x: 0 },
-            );
+            terminal::put_string_clear_to_eol(&msg, terminal::Coord { y: i, x: 0 });
             rank += 1;
             let _ = read_high_score(&mut score);
         }
 
-        terminal::put_string_clear_to_eol(
-            SHOW_SCORES_HEADER,
-            terminal::Coord { y: 0, x: 0 },
-        );
+        terminal::put_string_clear_to_eol(SHOW_SCORES_HEADER, terminal::Coord { y: 0, x: 0 });
         terminal::erase_line(terminal::Coord { y: 1, x: 0 });
         terminal::put_string_clear_to_eol(
             "[ press any key to continue ]",

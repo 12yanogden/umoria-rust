@@ -13,7 +13,9 @@ use crate::identification::{
 };
 use crate::inventory::inventory_find_range;
 use crate::monster_manager::monster_summon;
-use crate::player::{player_stat_adjustment_wisdom_intelligence, player_teleport, PlayerAttr, PlayerClassLevelAdj};
+use crate::player::{
+    player_stat_adjustment_wisdom_intelligence, player_teleport, PlayerAttr, PlayerClassLevelAdj,
+};
 use crate::player_magic::{player_cure_blindness, player_cure_confusion, player_cure_poison};
 use crate::spells::{
     spell_build_wall, spell_change_monster_hit_points, spell_change_player_hit_points,
@@ -21,7 +23,7 @@ use crate::spells::{
     spell_destroy_doors_traps_in_direction, spell_detect_evil,
     spell_detect_invisible_creatures_within_vicinity, spell_detect_objects_within_vicinity,
     spell_detect_secret_doors_within_vicinity, spell_detect_traps_within_vicinity,
-    spell_detect_treasure_within_vicinity, spell_dispel_creature, spell_disarm_all_in_direction,
+    spell_detect_treasure_within_vicinity, spell_disarm_all_in_direction, spell_dispel_creature,
     spell_drain_life_from_monster, spell_earthquake, spell_fire_ball, spell_fire_bolt,
     spell_light_area, spell_light_line, spell_mass_polymorph, spell_polymorph_monster,
     spell_remove_curse_from_all_worn_items, spell_sleep_all_monsters, spell_sleep_monster,
@@ -220,10 +222,10 @@ pub fn staff_use() {
     if identified {
         if !item_set_colorless_as_identified(category_id, sub_category_id, identification) {
             with_state_mut(|state| {
-                state.py.misc.exp += (i32::from(
-                    state.py.inventory[item_id as usize].depth_first_found,
-                ) + (i32::from(state.py.misc.level) >> 1))
-                    / i32::from(state.py.misc.level);
+                state.py.misc.exp +=
+                    (i32::from(state.py.inventory[item_id as usize].depth_first_found)
+                        + (i32::from(state.py.misc.level) >> 1))
+                        / i32::from(state.py.misc.level);
             });
             display_character_experience();
             item_identify(&mut item_id);
@@ -326,13 +328,7 @@ fn wand_discharge(item_id: i32, direction: i32) -> bool {
                 identified = true;
             }
             21 => {
-                spell_fire_ball(
-                    coord,
-                    direction,
-                    72,
-                    MagicSpellFlags::Fire,
-                    SPELL_NAMES[28],
-                );
+                spell_fire_ball(coord, direction, 72, MagicSpellFlags::Fire, SPELL_NAMES[28]);
                 identified = true;
             }
             22 => {
@@ -403,9 +399,9 @@ pub fn wand_aim() {
     }
 
     let player_class_lev_adj = with_state(|state| {
-        i32::from(CLASS_LEVEL_ADJ[state.py.misc.class_id as usize]
-            [PlayerClassLevelAdj::DEVICE as usize])
-            * i32::from(state.py.misc.level)
+        i32::from(
+            CLASS_LEVEL_ADJ[state.py.misc.class_id as usize][PlayerClassLevelAdj::DEVICE as usize],
+        ) * i32::from(state.py.misc.level)
             / 3
     });
 
@@ -454,10 +450,10 @@ pub fn wand_aim() {
     if identified {
         if !item_set_colorless_as_identified(category_id, sub_category_id, identification) {
             with_state_mut(|state| {
-                state.py.misc.exp += (i32::from(
-                    state.py.inventory[item_id as usize].depth_first_found,
-                ) + (i32::from(state.py.misc.level) >> 1))
-                    / i32::from(state.py.misc.level);
+                state.py.misc.exp +=
+                    (i32::from(state.py.inventory[item_id as usize].depth_first_found)
+                        + (i32::from(state.py.misc.level) >> 1))
+                        / i32::from(state.py.misc.level);
             });
             display_character_experience();
             item_identify(&mut item_id);

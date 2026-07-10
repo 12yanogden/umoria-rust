@@ -1,0 +1,20 @@
+
+                    Robert A. Koeneke's classic roguelike
+
+                            D U N G E O N S   O F
+
+             ##     ##    #######    ########    ####      ###
+             ###   ###   ##     ##   ##     ##    ##      ## ##
+             #### ####   ##     ##   ##     ##    ##     ##   ##
+             ## ### ##   ##     ##   ########     ##    ##     ##
+             ##     ##   ##     ##   ##   ##      ##    #########
+             ##     ##   ##     ##   ##    ##     ##    ##     ##
+             ##     ##    #######    ##     ##   ####   ##     ##
+
+                                Umoria 5.7.15
+
+
+                Umoria is free software released under GPL-3.0
+                    and comes with ABSOLUTELY NO WARRANTY
+
+      For more information: https://github.com/dungeons-of-moria/umoria

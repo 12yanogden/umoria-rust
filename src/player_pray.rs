@@ -1,4 +1,4 @@
-//! Port of src/player_pray.cpp — priest prayer driver.
+//! Port of `src/player_pray.cpp` — priest prayer driver.
 
 use crate::config::monsters::defense::{CD_EVIL, CD_UNDEAD};
 use crate::config::spells::SPELL_TYPE_PRIEST;
@@ -14,11 +14,11 @@ use crate::player_magic::{
 };
 use crate::player_stats::{player_stat_random_decrease, player_stat_restore};
 use crate::spells::{
-    cast_spell_get_id, spell_change_player_hit_points, spell_confuse_monster,
-    spell_create_food, spell_detect_evil, spell_detect_secret_doors_within_vicinity,
-    spell_detect_traps_within_vicinity, spell_dispel_creature, spell_earthquake,
-    spell_fire_ball, spell_light_area, spell_map_current_area, spell_slow_poison,
-    spell_turn_undead, spell_warding_glyph, MagicSpellFlags,
+    cast_spell_get_id, spell_change_player_hit_points, spell_confuse_monster, spell_create_food,
+    spell_detect_evil, spell_detect_secret_doors_within_vicinity,
+    spell_detect_traps_within_vicinity, spell_dispel_creature, spell_earthquake, spell_fire_ball,
+    spell_light_area, spell_map_current_area, spell_slow_poison, spell_turn_undead,
+    spell_warding_glyph, MagicSpellFlags,
 };
 use crate::treasure::{TV_MAX_WEAR, TV_MIN_WEAR, TV_NEVER, TV_PRAYER_BOOK};
 use crate::ui::{display_character_experience, print_character_current_mana};
@@ -26,7 +26,7 @@ use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_io::get_direction_with_memory;
 use crate::ui_io::terminal;
 
-/// C++ player_pray.cpp lines 45–77.
+/// C++ `player_pray.cpp` lines 45–77.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i32)]
 enum PriestSpellId {
@@ -63,7 +63,7 @@ enum PriestSpellId {
     HolyWord,
 }
 
-/// C++ player_pray.cpp lines 10–42.
+/// C++ `player_pray.cpp` lines 10–42.
 #[must_use]
 pub fn player_can_pray(item_pos_begin: &mut i32, item_pos_end: &mut i32) -> bool {
     let block_reason = with_state(|state| {
@@ -99,7 +99,7 @@ pub fn player_can_pray(item_pos_begin: &mut i32, item_pos_end: &mut i32) -> bool
     }
 }
 
-/// C++ player_pray.cpp lines 80–206.
+/// C++ `player_pray.cpp` lines 80–206.
 pub fn player_recite_prayer(prayer_type: i32) {
     let (pos, level) = with_state(|state| (state.py.pos, state.py.misc.level));
     let mut dir = 0;
@@ -129,10 +129,10 @@ pub fn player_recite_prayer(prayer_type: i32) {
         id if id == PriestSpellId::SlowPoison as i32 => {
             let _ = spell_slow_poison();
         }
-        id if id == PriestSpellId::BlindCreature as i32 => {
-            if get_direction_with_memory(None, &mut dir) {
-                let _ = spell_confuse_monster(pos, dir);
-            }
+        id if id == PriestSpellId::BlindCreature as i32
+            && get_direction_with_memory(None, &mut dir) =>
+        {
+            let _ = spell_confuse_monster(pos, dir);
         }
         id if id == PriestSpellId::Portal as i32 => {
             player_teleport(i32::from(level) * 3);
@@ -169,16 +169,16 @@ pub fn player_recite_prayer(prayer_type: i32) {
         id if id == PriestSpellId::NeutralizePoison as i32 => {
             let _ = player_cure_poison();
         }
-        id if id == PriestSpellId::OrbOfDraining as i32 => {
-            if get_direction_with_memory(None, &mut dir) {
-                spell_fire_ball(
-                    pos,
-                    dir,
-                    dice_roll(Dice { dice: 3, sides: 6 }) + i32::from(level),
-                    MagicSpellFlags::HolyOrb,
-                    "Black Sphere",
-                );
-            }
+        id if id == PriestSpellId::OrbOfDraining as i32
+            && get_direction_with_memory(None, &mut dir) =>
+        {
+            spell_fire_ball(
+                pos,
+                dir,
+                dice_roll(Dice { dice: 3, sides: 6 }) + i32::from(level),
+                MagicSpellFlags::HolyOrb,
+                "Black Sphere",
+            );
         }
         id if id == PriestSpellId::CureSeriousWounds as i32 => {
             let _ = spell_change_player_hit_points(dice_roll(Dice { dice: 8, sides: 4 }));
@@ -247,7 +247,7 @@ pub fn player_recite_prayer(prayer_type: i32) {
     }
 }
 
-/// C++ player_pray.cpp lines 209–272.
+/// C++ `player_pray.cpp` lines 209–272.
 pub fn pray() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -297,16 +297,11 @@ pub fn pray() {
         player_recite_prayer(choice);
 
         let should_award_exp = with_state(|state| {
-            !state.game.player_free_turn
-                && (state.py.flags.spells_worked & (1u32 << choice)) == 0
+            !state.game.player_free_turn && (state.py.flags.spells_worked & (1u32 << choice)) == 0
         });
         if should_award_exp {
             with_state_mut(|state| {
-                state.py.misc.exp = state
-                    .py
-                    .misc
-                    .exp
-                    .wrapping_add(exp_gain_for_learning << 2);
+                state.py.misc.exp = state.py.misc.exp.wrapping_add(exp_gain_for_learning << 2);
                 state.py.flags.spells_worked |= 1u32 << choice;
             });
             display_character_experience();

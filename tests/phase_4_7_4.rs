@@ -1,5 +1,12 @@
 //! Phase 4.7.4 — monster-affecting spells (spells.cpp) parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -8,16 +15,15 @@ use umoria::config::monsters::{self, MON_MAX_SIGHT};
 use umoria::config::treasure::OBJECT_BOLTS_MAX_RANGE;
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::{MIN_CLOSED_SPACE, TILE_LIGHT_FLOOR};
+use umoria::dungeon_tile::{Tile, MIN_CLOSED_SPACE, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::monster::{Monster, MON_MAX_CREATURES, MON_MAX_LEVELS, MON_TOTAL_ALLOCATIONS};
 use umoria::spells::{
     spell_change_monster_hit_points, spell_clone_monster, spell_confuse_monster,
-    spell_dispel_creature, spell_drain_life_from_monster, spell_genocide,
-    spell_mass_genocide, spell_mass_polymorph, spell_polymorph_monster,
-    spell_sleep_all_monsters, spell_sleep_monster, spell_speed_all_monsters,
-    spell_speed_monster, spell_teleport_away_monster, spell_teleport_away_monster_in_direction,
-    spell_turn_undead,
+    spell_dispel_creature, spell_drain_life_from_monster, spell_genocide, spell_mass_genocide,
+    spell_mass_polymorph, spell_polymorph_monster, spell_sleep_all_monsters, spell_sleep_monster,
+    spell_speed_all_monsters, spell_speed_monster, spell_teleport_away_monster,
+    spell_teleport_away_monster_in_direction, spell_turn_undead,
 };
 use umoria::types::Coord_t;
 use umoria::ui::panel_bounds_fields;
@@ -47,7 +53,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -164,7 +170,11 @@ fn change_monster_hp_damages_and_returns_true_seed42() {
     setup_player(Coord_t { y: 10, x: 10 }, 10);
     place_monster(2, URCHIN_ID, 20, Coord_t { y: 10, x: 11 }, true, 1, 11);
 
-    assert!(spell_change_monster_hit_points(Coord_t { y: 10, x: 10 }, 6, 5));
+    assert!(spell_change_monster_hit_points(
+        Coord_t { y: 10, x: 10 },
+        6,
+        5
+    ));
     with_state(|s| {
         assert_eq!(s.monsters[2].hp, 15);
         assert_eq!(s.monsters[2].sleep_count, 0);
@@ -177,12 +187,23 @@ fn drain_life_skips_undead_sets_recall_seed42() {
     setup_dungeon(20, 20);
     reset_monster_slots();
     setup_player(Coord_t { y: 10, x: 10 }, 10);
-    place_monster(2, ZOMBIE_KOBOLD_ID, 100, Coord_t { y: 10, x: 11 }, true, 1, 11);
+    place_monster(
+        2,
+        ZOMBIE_KOBOLD_ID,
+        100,
+        Coord_t { y: 10, x: 11 },
+        true,
+        1,
+        11,
+    );
 
     assert!(!spell_drain_life_from_monster(Coord_t { y: 10, x: 10 }, 6));
     with_state(|s| {
         assert_eq!(s.monsters[2].hp, 100);
-        assert_ne!(s.creature_recall[ZOMBIE_KOBOLD_ID as usize].defenses & CD_UNDEAD, 0);
+        assert_ne!(
+            s.creature_recall[ZOMBIE_KOBOLD_ID as usize].defenses & CD_UNDEAD,
+            0
+        );
     });
 }
 
@@ -250,7 +271,15 @@ fn confuse_monster_cd_no_sleep_short_circuit_seed42() {
     setup_dungeon(20, 20);
     reset_monster_slots();
     setup_player(Coord_t { y: 10, x: 10 }, 10);
-    place_monster(2, COPPER_COINS_ID, 50, Coord_t { y: 10, x: 11 }, true, 1, 10);
+    place_monster(
+        2,
+        COPPER_COINS_ID,
+        50,
+        Coord_t { y: 10, x: 11 },
+        true,
+        1,
+        10,
+    );
 
     let before = with_state(|s| s.rng.old_seed);
     assert!(!spell_confuse_monster(Coord_t { y: 10, x: 10 }, 6));
@@ -305,8 +334,7 @@ fn clone_monster_attempts_multiply_seed42() {
     setup_player(Coord_t { y: 10, x: 10 }, 10);
     place_monster(2, URCHIN_ID, 10, Coord_t { y: 10, x: 11 }, true, 1, 11);
 
-    let cloned = spell_clone_monster(Coord_t { y: 10, x: 10 }, 6);
-    assert!(cloned || !cloned);
+    let _ = spell_clone_monster(Coord_t { y: 10, x: 10 }, 6);
     with_state(|s| assert_eq!(s.monsters[2].sleep_count, 0));
 }
 
@@ -455,7 +483,15 @@ fn dispel_creature_rolls_damage_seed42() {
     setup_dungeon(20, 20);
     reset_monster_slots();
     setup_player(Coord_t { y: 10, x: 10 }, 10);
-    place_monster(2, ZOMBIE_KOBOLD_ID, 200, Coord_t { y: 10, x: 11 }, true, 1, 11);
+    place_monster(
+        2,
+        ZOMBIE_KOBOLD_ID,
+        200,
+        Coord_t { y: 10, x: 11 },
+        true,
+        1,
+        11,
+    );
 
     assert!(spell_dispel_creature(i32::from(CD_UNDEAD), 100));
     assert_eq!(next_random_pair(100), (100, 73));
@@ -467,7 +503,15 @@ fn turn_undead_confusion_amount_truncates_seed42() {
     setup_dungeon(20, 20);
     reset_monster_slots();
     setup_player(Coord_t { y: 10, x: 10 }, 10);
-    place_monster(2, ZOMBIE_KOBOLD_ID, 200, Coord_t { y: 10, x: 11 }, true, 1, 11);
+    place_monster(
+        2,
+        ZOMBIE_KOBOLD_ID,
+        200,
+        Coord_t { y: 10, x: 11 },
+        true,
+        1,
+        11,
+    );
 
     assert!(spell_turn_undead());
     with_state(|s| assert_eq!(s.monsters[2].confused_amount, 10));

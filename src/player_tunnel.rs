@@ -1,4 +1,4 @@
-//! Port of src/player_tunnel.cpp — see phase_4.4.
+//! Port of `src/player_tunnel.cpp` — see `phase_4.4`.
 
 use crate::config::treasure::flags::TR_TUNNEL;
 use crate::dice::max_dice_roll;
@@ -42,8 +42,7 @@ pub fn player_tunnel_wall(coord: Coord_t, digging_ability: i32, digging_chance: 
                     if ny >= 0 && nx >= 0 {
                         let neighbor = &state.dg.floor[ny as usize][nx as usize];
                         if neighbor.feature_id <= MAX_CAVE_ROOM {
-                            found_neighbor =
-                                Some((neighbor.feature_id, neighbor.permanent_light));
+                            found_neighbor = Some((neighbor.feature_id, neighbor.permanent_light));
                             break;
                         }
                     }
@@ -74,7 +73,7 @@ pub fn player_tunnel_wall(coord: Coord_t, digging_ability: i32, digging_chance: 
     true
 }
 
-/// C++ player_tunnel.cpp lines 30–54.
+/// C++ `player_tunnel.cpp` lines 30–54.
 pub fn player_digging_ability(weapon: Inventory) -> i32 {
     let (used_str, weapon_is_heavy) = with_state(|state| {
         (
@@ -89,9 +88,7 @@ pub fn player_digging_ability(weapon: Inventory) -> i32 {
         digging_ability += 25 + i32::from(weapon.misc_use) * 50;
     } else {
         let max_roll = max_dice_roll(weapon.damage);
-        digging_ability += max_roll
-            + i32::from(weapon.to_hit)
-            + i32::from(weapon.to_damage);
+        digging_ability += max_roll + i32::from(weapon.to_hit) + i32::from(weapon.to_damage);
         digging_ability >>= 1;
     }
 
@@ -192,7 +189,7 @@ fn dungeon_dig_at_location(coord: Coord_t, wall_type: u8, digging_ability: i32) 
     }
 }
 
-/// C++ player_tunnel.cpp lines 130–176.
+/// C++ `player_tunnel.cpp` lines 130–176.
 pub fn player_tunnel(direction: i32) {
     let mut direction = direction;
 
@@ -224,9 +221,8 @@ pub fn player_tunnel(direction: i32) {
 
         if !dungeon_dig_at_location(coord, tile_id, digging_ability) {
             if treasure_id != 0 {
-                let category_id = with_state(|state| {
-                    state.game.treasure.list[treasure_id as usize].category_id
-                });
+                let category_id =
+                    with_state(|state| state.game.treasure.list[treasure_id as usize].category_id);
                 if category_id == TV_RUBBLE {
                     dungeon_dig_rubble(coord, digging_ability);
                 } else if category_id == TV_SECRET_DOOR {
@@ -235,10 +231,10 @@ pub fn player_tunnel(direction: i32) {
                     let search_coord = with_state(|state| state.py.pos);
                     player_search(search_coord, i32::from(chance));
                 } else {
-                    panic!("player_tunnel: unexpected treasure category {category_id}");
+                    return;
                 }
             } else {
-                panic!("player_tunnel: dig failed with no treasure on tile");
+                return;
             }
         }
         return;

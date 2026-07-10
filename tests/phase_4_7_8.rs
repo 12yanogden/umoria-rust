@@ -1,12 +1,19 @@
 //! Phase 4.7.8 — staff & wand use parity (staves.cpp).
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
+use umoria::config::identification::{ID_EMPTY, ID_KNOWN2};
 use umoria::config::monsters::MON_ENDGAME_MONSTERS;
 use umoria::data_creatures::CREATURES_LIST;
-use umoria::config::identification::{ID_EMPTY, ID_KNOWN2};
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
+use umoria::dungeon_tile::{Tile, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::identification::spell_item_identified;
 use umoria::inventory::{inventory_item_copy_to, Inventory, PLAYER_INVENTORY_SIZE};
@@ -54,7 +61,7 @@ fn setup_dungeon(height: i16, width: i16, pos: Coord_t) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;

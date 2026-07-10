@@ -1,5 +1,12 @@
 //! Phase 4.3.2 — player_stats.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -51,10 +58,8 @@ fn cpp_wis_int_adj(value: i32) -> i32 {
         3
     } else if value > 14 {
         2
-    } else if value > 7 {
-        1
     } else {
-        0
+        i32::from(value > 7)
     }
 }
 
@@ -265,10 +270,7 @@ fn cpp_attack_blows(strength: i32, dexterity: i32, weight: i32) -> (i32, i32) {
     }
     let dex = cpp_attack_blows_dexterity(dexterity);
     let str_idx = cpp_attack_blows_strength(strength, weight);
-    (
-        i32::from(BLOWS_TABLE[str_idx as usize][dex as usize]),
-        0,
-    )
+    (i32::from(BLOWS_TABLE[str_idx as usize][dex as usize]), 0)
 }
 
 fn cpp_modify_stat(current: u8, amount: i16) -> u8 {
@@ -426,11 +428,7 @@ fn disarm_adjustment_exhaustive() {
     for dex in 3..=118u8 {
         set_used_stat(PlayerAttr::A_DEX, dex);
         let expected = cpp_disarm_adj(i32::from(dex));
-        assert_eq!(
-            player_disarm_adjustment(),
-            i32::from(expected),
-            "dex={dex}"
-        );
+        assert_eq!(player_disarm_adjustment(), i32::from(expected), "dex={dex}");
     }
 }
 
@@ -440,11 +438,7 @@ fn damage_adjustment_exhaustive() {
     for str in 3..=118u8 {
         set_used_stat(PlayerAttr::A_STR, str);
         let expected = cpp_damage_adj(i32::from(str));
-        assert_eq!(
-            player_damage_adjustment(),
-            i32::from(expected),
-            "str={str}"
-        );
+        assert_eq!(player_damage_adjustment(), i32::from(expected), "str={str}");
     }
 }
 
@@ -485,7 +479,7 @@ fn calculate_hit_points_basic_levels() {
     reset_for_new_game(None);
     for level in 1..=10u16 {
         for con in [6u8, 10, 17, 18, 50, 100, 118] {
-            let base_hp = (level as u16) * 8;
+            let base_hp = level * 8;
             with_state_mut(|s| {
                 s.py.misc.level = level;
                 s.py.misc.max_hp = 100;
@@ -496,15 +490,8 @@ fn calculate_hit_points_basic_levels() {
                 s.py.base_hp_levels[(level - 1) as usize] = base_hp;
             });
             player_calculate_hit_points();
-            let (expected_cur, expected_frac, expected_max, expected_status) = cpp_calculate_hit_points(
-                level,
-                base_hp,
-                con,
-                0,
-                50,
-                0,
-                100,
-            );
+            let (expected_cur, expected_frac, expected_max, expected_status) =
+                cpp_calculate_hit_points(level, base_hp, con, 0, 50, 0, 100);
             with_state(|s| {
                 assert_eq!(s.py.misc.max_hp, expected_max, "level={level} con={con}");
                 assert_eq!(s.py.misc.current_hp, expected_cur);
@@ -742,12 +729,12 @@ fn initialize_base_experience_levels_table() {
     reset_for_new_game(None);
     player_initialize_base_experience_levels();
     with_state(|s| {
-        for i in 0..PLAYER_MAX_LEVEL as usize {
-            assert_eq!(
-                s.py.base_exp_levels[i],
-                EXPECTED_BASE_EXP_LEVELS[i],
-                "level index {i}"
-            );
+        for (i, &exp) in EXPECTED_BASE_EXP_LEVELS
+            .iter()
+            .enumerate()
+            .take(PLAYER_MAX_LEVEL as usize)
+        {
+            assert_eq!(s.py.base_exp_levels[i], exp, "level index {i}");
         }
     });
 }
@@ -804,10 +791,7 @@ fn set_and_use_stat_mage_int_triggers_spell_side_effects() {
     reset_for_new_game(None);
     with_state_mut(|s| {
         s.py.misc.class_id = 1;
-        assert_eq!(
-            CLASSES[1].class_to_use_mage_spells,
-            SPELL_TYPE_MAGE
-        );
+        assert_eq!(CLASSES[1].class_to_use_mage_spells, SPELL_TYPE_MAGE);
         s.py.stats.current[PlayerAttr::A_INT as usize] = 10;
         s.py.stats.modified[PlayerAttr::A_INT as usize] = 0;
     });
@@ -820,10 +804,7 @@ fn set_and_use_stat_priest_wis_triggers_spell_side_effects() {
     reset_for_new_game(None);
     with_state_mut(|s| {
         s.py.misc.class_id = 2;
-        assert_eq!(
-            CLASSES[2].class_to_use_mage_spells,
-            SPELL_TYPE_PRIEST
-        );
+        assert_eq!(CLASSES[2].class_to_use_mage_spells, SPELL_TYPE_PRIEST);
         s.py.stats.current[PlayerAttr::A_WIS as usize] = 12;
         s.py.stats.modified[PlayerAttr::A_WIS as usize] = 0;
     });

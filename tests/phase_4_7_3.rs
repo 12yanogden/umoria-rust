@@ -1,21 +1,28 @@
 //! Phase 4.7.3 — bolt / ball / breath damage parity (spells.cpp).
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::monsters::defense::{CD_EVIL, CD_FIRE, CD_FROST, CD_LIGHT};
 use umoria::config::monsters::spells::{CS_BR_FIRE, CS_BR_FROST, CS_BR_LIGHT};
 use umoria::config::treasure::OBJECT_BOLTS_MAX_RANGE;
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::dungeon::{coord_distance_between, MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::{MIN_CAVE_WALL, MIN_CLOSED_SPACE, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
+use umoria::dungeon_tile::{Tile, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::game_objects::popt;
-use umoria::inventory::{inventory_item_copy_to, set_frost_destroyable_items, set_null};
+use umoria::inventory::{set_frost_destroyable_items, set_null};
 use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
-use umoria::spells::{
-    spell_apply_area_distance_falloff, spell_apply_monster_damage_scaling,
-    spell_fire_ball, spell_fire_bolt, spell_breath, spell_get_area_affect_flags, MagicSpellFlags,
-};
 use umoria::player::PLAYER_MAX_LEVEL;
+use umoria::spells::{
+    spell_apply_area_distance_falloff, spell_apply_monster_damage_scaling, spell_breath,
+    spell_fire_ball, spell_fire_bolt, spell_get_area_affect_flags, MagicSpellFlags,
+};
 use umoria::treasure::TV_POTION1;
 use umoria::types::{Coord_t, Vtype_t, MORIA_MESSAGE_SIZE};
 use umoria::ui::panel_bounds_fields;
@@ -30,7 +37,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -133,7 +140,7 @@ fn spell_get_area_affect_flags_maps_all_spell_types() {
     let mm = spell_get_area_affect_flags(MagicSpellFlags::MagicMissile);
     assert_eq!(mm.weapon_type, 0);
     assert_eq!(mm.harm_type, 0);
-    assert_eq!(mm.destroy as usize, set_null as usize);
+    assert_eq!(mm.destroy as usize, set_null as *const () as usize);
 
     let lightning = spell_get_area_affect_flags(MagicSpellFlags::Lightning);
     assert_eq!(lightning.weapon_type, CS_BR_LIGHT);
@@ -160,7 +167,13 @@ fn spell_get_area_affect_flags_maps_all_spell_types() {
 fn damage_scaling_neutral_creature_no_modifiers() {
     let creature = &CREATURES_LIST[GIANT_YELLOW_CENTIPEDE_ID as usize];
     assert_eq!(
-        spell_apply_monster_damage_scaling(40, CD_LIGHT, CS_BR_LIGHT, creature.defenses, creature.spells),
+        spell_apply_monster_damage_scaling(
+            40,
+            CD_LIGHT,
+            CS_BR_LIGHT,
+            creature.defenses,
+            creature.spells
+        ),
         40
     );
 }
@@ -171,15 +184,33 @@ fn damage_scaling_susceptible_doubles_before_immune_check() {
     assert!((creature.defenses & CD_LIGHT) != 0);
     assert!((creature.spells & CS_BR_FROST) != 0);
     assert_eq!(
-        spell_apply_monster_damage_scaling(50, CD_LIGHT, CS_BR_LIGHT, creature.defenses, creature.spells),
+        spell_apply_monster_damage_scaling(
+            50,
+            CD_LIGHT,
+            CS_BR_LIGHT,
+            creature.defenses,
+            creature.spells
+        ),
         100
     );
     assert_eq!(
-        spell_apply_monster_damage_scaling(50, CD_FROST, CS_BR_FROST, creature.defenses, creature.spells),
+        spell_apply_monster_damage_scaling(
+            50,
+            CD_FROST,
+            CS_BR_FROST,
+            creature.defenses,
+            creature.spells
+        ),
         12
     );
     assert_eq!(
-        spell_apply_monster_damage_scaling(50, CD_FIRE, CS_BR_FIRE, creature.defenses, creature.spells),
+        spell_apply_monster_damage_scaling(
+            50,
+            CD_FIRE,
+            CS_BR_FIRE,
+            creature.defenses,
+            creature.spells
+        ),
         100
     );
 }
@@ -188,7 +219,13 @@ fn damage_scaling_susceptible_doubles_before_immune_check() {
 fn damage_scaling_immune_quarters_when_not_susceptible() {
     let creature = &CREATURES_LIST[FIRE_ELEMENTAL_ID as usize];
     assert_eq!(
-        spell_apply_monster_damage_scaling(100, CD_FIRE, CS_BR_FIRE, creature.defenses, creature.spells),
+        spell_apply_monster_damage_scaling(
+            100,
+            CD_FIRE,
+            CS_BR_FIRE,
+            creature.defenses,
+            creature.spells
+        ),
         25
     );
 }
@@ -236,7 +273,13 @@ fn ball_applies_distance_scaled_damage_seed100() {
     setup_dungeon(20, 20);
     setup_player(Coord_t { y: 10, x: 10 });
     reset_monster_slots();
-    place_monster(2, GIANT_YELLOW_CENTIPEDE_ID, 500, Coord_t { y: 10, x: 11 }, true);
+    place_monster(
+        2,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        500,
+        Coord_t { y: 10, x: 11 },
+        true,
+    );
     place_wall(Coord_t { y: 10, x: 12 });
     spell_fire_ball(
         Coord_t { y: 10, x: 10 },
@@ -260,8 +303,20 @@ fn bolt_stops_at_first_monster_without_hitting_later_target() {
     setup_dungeon(20, 20);
     setup_player(Coord_t { y: 10, x: 10 });
     reset_monster_slots();
-    place_monster(2, GIANT_YELLOW_CENTIPEDE_ID, 500, Coord_t { y: 10, x: 11 }, true);
-    place_monster(3, GIANT_YELLOW_CENTIPEDE_ID, 500, Coord_t { y: 10, x: 13 }, true);
+    place_monster(
+        2,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        500,
+        Coord_t { y: 10, x: 11 },
+        true,
+    );
+    place_monster(
+        3,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        500,
+        Coord_t { y: 10, x: 13 },
+        true,
+    );
     spell_fire_bolt(
         Coord_t { y: 10, x: 10 },
         6,
@@ -281,7 +336,13 @@ fn bolt_stops_at_closed_space_without_damage() {
     setup_dungeon(20, 20);
     setup_player(Coord_t { y: 10, x: 10 });
     reset_monster_slots();
-    place_monster(2, GIANT_YELLOW_CENTIPEDE_ID, 500, Coord_t { y: 10, x: 13 }, true);
+    place_monster(
+        2,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        500,
+        Coord_t { y: 10, x: 13 },
+        true,
+    );
     place_wall(Coord_t { y: 10, x: 12 });
     spell_fire_bolt(
         Coord_t { y: 10, x: 10 },
@@ -301,7 +362,13 @@ fn ball_backs_up_to_old_coord_on_wall_hit() {
     setup_dungeon(20, 20);
     setup_player(Coord_t { y: 10, x: 10 });
     reset_monster_slots();
-    place_monster(2, GIANT_YELLOW_CENTIPEDE_ID, 500, Coord_t { y: 10, x: 11 }, true);
+    place_monster(
+        2,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        500,
+        Coord_t { y: 10, x: 11 },
+        true,
+    );
     place_wall(Coord_t { y: 10, x: 12 });
     spell_fire_ball(
         Coord_t { y: 10, x: 10 },
@@ -354,13 +421,7 @@ fn frost_ball_destroys_potion_in_row_major_scan_order() {
         category_id: TV_POTION1,
         ..Default::default()
     }));
-    spell_fire_ball(
-        center,
-        6,
-        10,
-        MagicSpellFlags::Frost,
-        "Frost Ball",
-    );
+    spell_fire_ball(center, 6, 10, MagicSpellFlags::Frost, "Frost Ball");
     with_state(|s| {
         assert_eq!(s.dg.floor[8][10].treasure_id, 0);
         assert_eq!(s.dg.floor[8][11].treasure_id, 0);
@@ -400,8 +461,8 @@ fn breath_applies_minimum_one_player_damage_when_scaled_to_zero() {
 
 #[test]
 fn integer_subtraction_uses_i16_truncation_like_cpp() {
-    assert_eq!(((i32::from(5i16) - 10)) as i16, -5i16);
-    assert_eq!(((i32::from(1i16) - 2)) as i16, -1i16);
+    assert_eq!((i32::from(5i16) - 10) as i16, -5i16);
+    assert_eq!((i32::from(1i16) - 2) as i16, -1i16);
 }
 
 #[test]
@@ -410,7 +471,13 @@ fn breath_kills_monster_when_hp_drops_below_zero() {
     setup_dungeon(20, 20);
     setup_player(Coord_t { y: 10, x: 10 });
     reset_monster_slots();
-    place_monster(2, GIANT_YELLOW_CENTIPEDE_ID, 5, Coord_t { y: 10, x: 10 }, true);
+    place_monster(
+        2,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        5,
+        Coord_t { y: 10, x: 10 },
+        true,
+    );
     let name = vtype_from_str("fire");
     spell_breath(
         Coord_t { y: 10, x: 10 },
@@ -434,7 +501,13 @@ fn bolt_kill_rng_order_seed500() {
     setup_dungeon(20, 20);
     setup_player(Coord_t { y: 10, x: 10 });
     reset_monster_slots();
-    place_monster(2, GIANT_YELLOW_CENTIPEDE_ID, 10, Coord_t { y: 10, x: 11 }, true);
+    place_monster(
+        2,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        10,
+        Coord_t { y: 10, x: 11 },
+        true,
+    );
     spell_fire_bolt(
         Coord_t { y: 10, x: 10 },
         6,
@@ -458,16 +531,22 @@ fn ball_hits_monsters_in_row_major_explosion_order() {
     setup_player(Coord_t { y: 10, x: 10 });
     reset_monster_slots();
     let center = Coord_t { y: 10, x: 11 };
-    place_monster(2, GIANT_YELLOW_CENTIPEDE_ID, 500, Coord_t { y: 9, x: 10 }, true);
-    place_monster(3, GIANT_YELLOW_CENTIPEDE_ID, 500, Coord_t { y: 9, x: 11 }, true);
-    place_wall(Coord_t { y: 10, x: 12 });
-    spell_fire_ball(
-        center,
-        6,
-        30,
-        MagicSpellFlags::MagicMissile,
-        "Magic Ball",
+    place_monster(
+        2,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        500,
+        Coord_t { y: 9, x: 10 },
+        true,
     );
+    place_monster(
+        3,
+        GIANT_YELLOW_CENTIPEDE_ID,
+        500,
+        Coord_t { y: 9, x: 11 },
+        true,
+    );
+    place_wall(Coord_t { y: 10, x: 12 });
+    spell_fire_ball(center, 6, 30, MagicSpellFlags::MagicMissile, "Magic Ball");
     with_state(|s| {
         assert_eq!(s.monsters[2].hp, 485);
         assert_eq!(s.monsters[3].hp, 485);

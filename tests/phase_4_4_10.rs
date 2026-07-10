@@ -1,5 +1,12 @@
 //! Phase 4.4.10 — player_traps.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::identification::ID_KNOWN2;
 use umoria::config::monsters::MON_ENDGAME_MONSTERS;
@@ -161,7 +168,12 @@ fn floor_trap_disarm_success_rng_order_seed42() {
 
     // After success, player_move always consumes randomNumber(4) (C++ playerRandomMovement).
     assert_eq!(next_random_pair(100), (100, 2));
-    with_state(|s| assert_eq!(s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id, 0));
+    with_state(|s| {
+        assert_eq!(
+            s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id,
+            0
+        );
+    });
 }
 
 #[test]
@@ -176,7 +188,10 @@ fn floor_trap_disarm_failure_rng_order_seed3() {
     assert_eq!(last_message_text(), "You failed to disarm the trap.");
     assert_eq!(next_random_pair(100), (100, 52));
     with_state(|s| {
-        assert_eq!(s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id, treasure_id);
+        assert_eq!(
+            s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id,
+            treasure_id
+        );
     });
 }
 
@@ -193,7 +208,10 @@ fn floor_trap_disarm_trigger_rng_order_seed6() {
     // Trigger path also calls player_move, which always draws randomNumber(4).
     assert_eq!(next_random_pair(100), (100, 9));
     with_state(|s| {
-        assert_eq!(s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id, treasure_id);
+        assert_eq!(
+            s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id,
+            treasure_id
+        );
     });
 }
 
@@ -340,7 +358,10 @@ fn chest_trap_explode_rng_order_seed8() {
 
     assert_eq!(next_random_pair(8), (8, 2));
     with_state(|s| {
-        assert_eq!(s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id, 0);
+        assert_eq!(
+            s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id,
+            0
+        );
         assert!(s.py.misc.current_hp < 500);
     });
     let _ = treasure_id;
@@ -416,7 +437,10 @@ fn player_disarm_trap_no_target_sets_free_turn() {
     test_set_direction(Some(NORTH));
     player_disarm_trap();
     with_state(|s| assert!(s.game.player_free_turn));
-    assert_eq!(last_message_text(), "I do not see anything to disarm there.");
+    assert_eq!(
+        last_message_text(),
+        "I do not see anything to disarm there."
+    );
 }
 
 #[test]

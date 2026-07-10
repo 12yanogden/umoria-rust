@@ -1,32 +1,35 @@
 //! Phase 4.3.1.2 — player movement/state/search/experience/doors/tunnel parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
-use umoria::config::identification::ID_KNOWN2;
-use umoria::config::player::status::{PY_REST, PY_SEARCH, PY_SPEED, PY_STR_WGT};
+use umoria::config::player::status::{PY_REST, PY_SEARCH, PY_STR_WGT};
 use umoria::config::player::PLAYER_WEIGHT_CAP;
-use umoria::config::treasure::chests::{CH_LOCKED, CH_TRAPPED};
-use umoria::config::treasure::flags::TR_CURSED;
-use umoria::data_creatures::CREATURES_LIST;
+use umoria::config::treasure::chests::CH_LOCKED;
 use umoria::data_player::CLASS_RANK_TITLES;
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::{MIN_CLOSED_SPACE, TILE_CORR_FLOOR, TILE_LIGHT_FLOOR};
+use umoria::dungeon_tile::{Tile, MIN_CLOSED_SPACE, TILE_CORR_FLOOR, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::inventory::PlayerEquipment;
 use umoria::monster::Creature;
 use umoria::player::{
     open_closed_chest, open_closed_door, player_carrying_load_limit, player_disturb,
-    player_gain_kill_experience, player_get_gender_label, player_is_male, player_lock_picking_skill,
-    player_move_position, player_no_light, player_rank_title, player_rest_off, player_rest_on,
-    player_search, player_search_off, player_search_on, player_set_gender, player_strength,
-    player_teleport, PlayerAttr, PLAYER_MAX_CLASSES, PLAYER_MAX_LEVEL,
+    player_gain_kill_experience, player_get_gender_label, player_is_male,
+    player_lock_picking_skill, player_move_position, player_no_light, player_rank_title,
+    player_rest_off, player_rest_on, player_search, player_search_off, player_search_on,
+    player_set_gender, player_strength, player_teleport, PlayerAttr, PLAYER_MAX_CLASSES,
+    PLAYER_MAX_LEVEL,
 };
 use umoria::player_stats::player_initialize_base_experience_levels;
 use umoria::player_tunnel::player_tunnel_wall;
-use umoria::treasure::{
-    TV_CHEST, TV_CLOSED_DOOR, TV_INVIS_TRAP, TV_NOTHING, TV_SECRET_DOOR,
-};
+use umoria::treasure::{TV_CHEST, TV_CLOSED_DOOR, TV_NOTHING};
 use umoria::types::Coord_t;
 use umoria::ui_io::test_set_ncurses_stub;
 
@@ -35,7 +38,7 @@ fn setup_open_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 0..height {
             for x in 0..width {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -195,15 +198,15 @@ fn player_gain_kill_experience_parity_matrix() {
             level: creature_level,
             ..Default::default()
         };
-        let (expected_quotient, expected_fraction) = cpp_gain_kill_exp(
-            kill_exp,
-            creature_level,
-            player_level,
-            12345,
-        );
+        let (expected_quotient, expected_fraction) =
+            cpp_gain_kill_exp(kill_exp, creature_level, player_level, 12345);
         player_gain_kill_experience(&creature);
         with_state(|s| {
-            assert_eq!(s.py.misc.exp, 100 + expected_quotient, "level={player_level}");
+            assert_eq!(
+                s.py.misc.exp,
+                100 + expected_quotient,
+                "level={player_level}"
+            );
             assert_eq!(s.py.misc.exp_fraction, expected_fraction);
         });
     }
@@ -326,8 +329,8 @@ fn player_teleport_rng_and_destination_seed42() {
     });
     player_teleport(5);
     let (final_y, final_x) = with_state(|s| (s.py.pos.y, s.py.pos.x));
-    assert!(final_y >= 0 && final_y < 20);
-    assert!(final_x >= 0 && final_x < 20);
+    assert!((0..20).contains(&final_y));
+    assert!((0..20).contains(&final_x));
     with_state(|s| {
         let tile = &s.dg.floor[final_y as usize][final_x as usize];
         assert!(tile.feature_id < MIN_CLOSED_SPACE);
@@ -368,7 +371,10 @@ fn open_closed_door_lock_pick_rng_seed777() {
     open_closed_door(Coord_t { y: 5, x: 6 });
     with_state(|s| {
         assert_eq!(s.game.treasure.list[1].misc_use, 0);
-        assert_eq!(s.game.treasure.list[1].category_id, umoria::treasure::TV_OPEN_DOOR);
+        assert_eq!(
+            s.game.treasure.list[1].category_id,
+            umoria::treasure::TV_OPEN_DOOR
+        );
     });
     assert_eq!(next_random_pair(100), (100, 29));
 }

@@ -17,11 +17,15 @@ use crate::config::dungeon::objects::{MAX_TRAPS, OBJ_CLOSED_DOOR, OBJ_MUSH, OBJ_
 use crate::config::monsters::defense::{
     CD_ACID, CD_EVIL, CD_FIRE, CD_FROST, CD_LIGHT, CD_NO_SLEEP, CD_POISON, CD_STONE, CD_UNDEAD,
 };
-use crate::config::monsters::move_flags::{CM_ATTACK_ONLY, CM_PHASE, CM_TREASURE, CM_TR_SHIFT, CM_WIN};
+use crate::config::monsters::move_flags::{
+    CM_ATTACK_ONLY, CM_PHASE, CM_TREASURE, CM_TR_SHIFT, CM_WIN,
+};
 use crate::config::monsters::spells as monster_spells;
-use crate::config::monsters::{self, MON_MIN_INDEX_ID, MON_MAX_SIGHT};
+use crate::config::monsters::{self, MON_MAX_SIGHT, MON_MIN_INDEX_ID};
 use crate::config::player::status::PY_BLIND;
-use crate::config::spells::{NAME_OFFSET_PRAYERS, NAME_OFFSET_SPELLS, SPELL_TYPE_MAGE, SPELL_TYPE_PRIEST};
+use crate::config::spells::{
+    NAME_OFFSET_PRAYERS, NAME_OFFSET_SPELLS, SPELL_TYPE_MAGE, SPELL_TYPE_PRIEST,
+};
 use crate::config::treasure::chests::{CH_LOCKED, CH_TRAPPED};
 use crate::config::treasure::OBJECT_BOLTS_MAX_RANGE;
 use crate::data_creatures::CREATURES_LIST;
@@ -43,8 +47,8 @@ use crate::game::{random_number, random_number_state, with_state, with_state_mut
 use crate::game_objects::popt;
 use crate::helpers::get_and_clear_first_bit;
 use crate::identification::{
-    item_description, item_identification_clear_empty, item_identify,
-    spell_item_identified, spell_item_identify_and_remove_random_inscription,
+    item_description, item_identification_clear_empty, item_identify, spell_item_identified,
+    spell_item_identify_and_remove_random_inscription,
     spell_item_identify_and_remove_random_inscription_for_state, spell_item_remove_identification,
     SpecialNameIds,
 };
@@ -62,19 +66,19 @@ use crate::player::{
     player_calculate_allowed_spells_count, player_gain_mana, player_recalculate_bonuses,
     player_worn_item_is_cursed, player_worn_item_remove_curse, PlayerAttr,
 };
-use crate::player_stats::player_calculate_hit_points;
 use crate::player_move::player_move_position;
+use crate::player_stats::player_calculate_hit_points;
 use crate::player_tunnel::player_tunnel_wall;
 use crate::treasure::{
-    TV_CHEST, TV_CLOSED_DOOR, TV_DOWN_STAIR, TV_GOLD, TV_INVIS_TRAP, TV_MAX_OBJECT,
-    TV_MAX_VISIBLE, TV_MIN_VISIBLE, TV_OPEN_DOOR, TV_RUBBLE, TV_SECRET_DOOR, TV_STAFF,
-    TV_UP_STAIR, TV_VIS_TRAP, TV_WAND,
+    TV_CHEST, TV_CLOSED_DOOR, TV_DOWN_STAIR, TV_GOLD, TV_INVIS_TRAP, TV_MAX_OBJECT, TV_MAX_VISIBLE,
+    TV_MIN_VISIBLE, TV_OPEN_DOOR, TV_RUBBLE, TV_SECRET_DOOR, TV_STAFF, TV_UP_STAIR, TV_VIS_TRAP,
+    TV_WAND,
 };
-use crate::types::{Coord_t, MORIA_OBJ_DESC_SIZE_LEN, Vtype_t};
+use crate::types::{Coord_t, Vtype_t, MORIA_OBJ_DESC_SIZE_LEN};
 use crate::ui::{
     coord_inside_panel, coord_inside_panel_bounds, display_character_experience,
-    display_spells_list, draw_dungeon_panel, dungeon_reset_view, print_character_current_hit_points,
-    print_character_level, print_character_title,
+    display_spells_list, draw_dungeon_panel, dungeon_reset_view,
+    print_character_current_hit_points, print_character_level, print_character_title,
 };
 use crate::ui_inventory::{inventory_get_input_for_item_id, player_item_wearing_description};
 use crate::ui_io::terminal::{self, panel_put_tile, put_qio, Coord};
@@ -96,14 +100,12 @@ fn wis_int_adj_from_used(value: u8) -> i32 {
         3
     } else if value > 14 {
         2
-    } else if value > 7 {
-        1
     } else {
-        0
+        i32::from(value > 7)
     }
 }
 
-/// C++ mage_spells.cpp lines 270–295.
+/// C++ `mage_spells.cpp` lines 270–295.
 pub(crate) fn spell_chance_of_success_for_state(state: &State, spell_id: i32) -> i32 {
     let class_id = state.py.misc.class_id as usize;
     let spell = &MAGIC_SPELLS[class_id - 1][spell_id as usize];
@@ -123,16 +125,10 @@ pub(crate) fn spell_chance_of_success_for_state(state: &State, spell_id: i32) ->
         chance += 5 * (i32::from(spell.mana_required) - i32::from(state.py.misc.current_mana));
     }
 
-    if chance > 95 {
-        95
-    } else if chance < 5 {
-        5
-    } else {
-        chance
-    }
+    chance.clamp(5, 95)
 }
 
-/// C++ mage_spells.cpp lines 270–295 (needed by display_spells_list during learning).
+/// C++ `mage_spells.cpp` lines 270–295 (needed by `display_spells_list` during learning).
 pub fn spell_chance_of_success(spell_id: i32) -> i32 {
     with_state(|state| spell_chance_of_success_for_state(state, spell_id))
 }
@@ -212,8 +208,8 @@ fn spell_get_id(
             if test_spell_id == number_of_choices {
                 *spell_id = -2;
             } else {
-                let spell = &MAGIC_SPELLS
-                    [with_state(|s| s.py.misc.class_id as usize) - 1][*spell_id as usize];
+                let spell = &MAGIC_SPELLS[with_state(|s| s.py.misc.class_id as usize) - 1]
+                    [*spell_id as usize];
                 let name = crate::data_player::SPELL_NAMES[(*spell_id + offset) as usize];
                 let fail = spell_chance_of_success(*spell_id);
                 let confirm_msg = format!(
@@ -439,16 +435,14 @@ pub fn spell_detect_traps_within_vicinity() -> bool {
                 x: coord_x,
             };
 
-            let treasure_id = with_state(|state| {
-                state.dg.floor[coord.y as usize][coord.x as usize].treasure_id
-            });
+            let treasure_id =
+                with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id);
             if treasure_id == 0 {
                 continue;
             }
 
-            let category_id = with_state(|state| {
-                state.game.treasure.list[treasure_id as usize].category_id
-            });
+            let category_id =
+                with_state(|state| state.game.treasure.list[treasure_id as usize].category_id);
 
             if category_id == TV_INVIS_TRAP {
                 with_state_mut(|state| {
@@ -489,9 +483,8 @@ pub fn spell_detect_secret_doors_within_vicinity() -> bool {
                 x: coord_x,
             };
 
-            let treasure_id = with_state(|state| {
-                state.dg.floor[coord.y as usize][coord.x as usize].treasure_id
-            });
+            let treasure_id =
+                with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id);
             if treasure_id == 0 {
                 continue;
             }
@@ -510,8 +503,7 @@ pub fn spell_detect_secret_doors_within_vicinity() -> bool {
                 });
                 trap_change_visibility(coord);
                 detected = true;
-            } else if (category_id == TV_UP_STAIR || category_id == TV_DOWN_STAIR) && !field_mark
-            {
+            } else if (category_id == TV_UP_STAIR || category_id == TV_DOWN_STAIR) && !field_mark {
                 with_state_mut(|state| {
                     state.dg.floor[coord.y as usize][coord.x as usize].field_mark = true;
                 });
@@ -556,13 +548,7 @@ pub fn spell_detect_invisible_creatures_within_vicinity() -> bool {
                     monster.pos,
                 )
             });
-            terminal::panel_put_tile(
-                sprite,
-                Coord {
-                    y: pos.y,
-                    x: pos.x,
-                },
-            );
+            terminal::panel_put_tile(sprite, Coord { y: pos.y, x: pos.x });
             detected = true;
         }
     }
@@ -590,7 +576,7 @@ fn dungeon_light_area_around_floor_tile(coord: Coord_t) {
                 } else if tile.treasure_id != 0 {
                     let category_id =
                         state.game.treasure.list[tile.treasure_id as usize].category_id;
-                    if category_id >= TV_MIN_VISIBLE && category_id <= TV_MAX_VISIBLE {
+                    if (TV_MIN_VISIBLE..=TV_MAX_VISIBLE).contains(&category_id) {
                         tile.field_mark = true;
                     }
                 }
@@ -747,8 +733,7 @@ pub fn spell_surround_player_with_traps() -> bool {
             dungeon_set_trap(coord, random_number(i32::from(MAX_TRAPS)) - 1);
 
             with_state_mut(|state| {
-                let treasure_id =
-                    state.dg.floor[coord.y as usize][coord.x as usize].treasure_id;
+                let treasure_id = state.dg.floor[coord.y as usize][coord.x as usize].treasure_id;
                 state.game.treasure.list[treasure_id as usize].misc_use = 0;
             });
 
@@ -821,21 +806,17 @@ pub fn spell_destroy_adjacent_doors_traps() -> bool {
                 x: coord_x,
             };
 
-            let treasure_id = with_state(|state| {
-                state.dg.floor[coord.y as usize][coord.x as usize].treasure_id
-            });
+            let treasure_id =
+                with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id);
             if treasure_id == 0 {
                 continue;
             }
 
-            let category_id = with_state(|state| {
-                state.game.treasure.list[treasure_id as usize].category_id
-            });
+            let category_id =
+                with_state(|state| state.game.treasure.list[treasure_id as usize].category_id);
             let flags = with_state(|state| state.game.treasure.list[treasure_id as usize].flags);
 
-            if (category_id >= TV_INVIS_TRAP
-                && category_id <= TV_CLOSED_DOOR
-                && category_id != TV_RUBBLE)
+            if ((TV_INVIS_TRAP..=TV_CLOSED_DOOR).contains(&category_id) && category_id != TV_RUBBLE)
                 || category_id == TV_SECRET_DOOR
             {
                 if dungeon_delete_object(coord) {
@@ -892,13 +873,7 @@ pub fn spell_detect_monsters() -> bool {
                     monster.pos,
                 )
             });
-            terminal::panel_put_tile(
-                sprite,
-                Coord {
-                    y: pos.y,
-                    x: pos.x,
-                },
-            );
+            terminal::panel_put_tile(sprite, Coord { y: pos.y, x: pos.x });
             detected = true;
         }
     }
@@ -944,13 +919,7 @@ pub fn spell_detect_evil() -> bool {
                     monster.pos,
                 )
             });
-            terminal::panel_put_tile(
-                sprite,
-                Coord {
-                    y: pos.y,
-                    x: pos.x,
-                },
-            );
+            terminal::panel_put_tile(sprite, Coord { y: pos.y, x: pos.x });
             detected = true;
         }
     }
@@ -1038,8 +1007,8 @@ pub fn spell_darken_area(coord: Coord_t) -> bool {
         state.dg.floor[coord.y as usize][coord.x as usize].perma_lit_room
             && state.dg.current_level > 0
     }) {
-        let half_height = i32::from(SCREEN_HEIGHT / 2);
-        let half_width = i32::from(SCREEN_WIDTH / 2);
+        let half_height = SCREEN_HEIGHT / 2;
+        let half_width = SCREEN_WIDTH / 2;
         let start_row = (coord.y / half_height) * half_height + 1;
         let start_col = (coord.x / half_width) * half_width + 1;
         let end_row = start_row + half_height - 1;
@@ -1181,10 +1150,8 @@ pub fn spell_disarm_all_in_direction(coord: Coord_t, direction: i32) -> bool {
 
         if let Some((category_id, flags)) = category_and_flags {
             match category_id {
-                TV_INVIS_TRAP | TV_VIS_TRAP => {
-                    if dungeon_delete_object(coord) {
-                        disarmed = true;
-                    }
+                TV_INVIS_TRAP | TV_VIS_TRAP if dungeon_delete_object(coord) => {
+                    disarmed = true;
                 }
                 TV_CLOSED_DOOR => {
                     with_state_mut(|state| {
@@ -1220,9 +1187,8 @@ pub fn spell_disarm_all_in_direction(coord: Coord_t, direction: i32) -> bool {
         let _ = player_move_position(direction, &mut coord);
         distance += 1;
 
-        let feature_id = with_state(|state| {
-            state.dg.floor[coord.y as usize][coord.x as usize].feature_id
-        });
+        let feature_id =
+            with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].feature_id);
         if distance > i32::from(OBJECT_BOLTS_MAX_RANGE) || feature_id > MAX_OPEN_SPACE {
             break;
         }
@@ -1311,12 +1277,10 @@ pub fn spell_teleport_away_monster(monster_id: i32, mut distance_from_player: i3
     loop {
         loop {
             let pos = with_state(|state| state.monsters[monster_id as usize].pos);
-            coord.y = pos.y
-                + (random_number(2 * distance_from_player + 1)
-                    - (distance_from_player + 1));
-            coord.x = pos.x
-                + (random_number(2 * distance_from_player + 1)
-                    - (distance_from_player + 1));
+            coord.y =
+                pos.y + (random_number(2 * distance_from_player + 1) - (distance_from_player + 1));
+            coord.x =
+                pos.x + (random_number(2 * distance_from_player + 1) - (distance_from_player + 1));
             if coord_in_bounds(coord) {
                 break;
             }
@@ -1359,10 +1323,8 @@ pub fn spell_teleport_player_to(coord: Coord_t) {
 
     loop {
         loop {
-            rnd_coord.y =
-                coord.y + (random_number(2 * distance + 1) - (distance + 1));
-            rnd_coord.x =
-                coord.x + (random_number(2 * distance + 1) - (distance + 1));
+            rnd_coord.y = coord.y + (random_number(2 * distance + 1) - (distance + 1));
+            rnd_coord.x = coord.x + (random_number(2 * distance + 1) - (distance + 1));
             if coord_in_bounds(rnd_coord) {
                 break;
             }
@@ -1456,20 +1418,14 @@ pub fn spell_wall_to_mud(coord: Coord_t, direction: i32) -> bool {
 
         let (feature_id, treasure_id, creature_id) = with_state(|state| {
             let tile = &state.dg.floor[coord.y as usize][coord.x as usize];
-            (
-                tile.feature_id,
-                tile.treasure_id,
-                tile.creature_id,
-            )
+            (tile.feature_id, tile.treasure_id, tile.creature_id)
         });
 
         if distance == i32::from(OBJECT_BOLTS_MAX_RANGE) {
             finished = true;
         }
 
-        if i32::from(feature_id) >= i32::from(MIN_CAVE_WALL)
-            && feature_id != TILE_BOUNDARY_WALL
-        {
+        if i32::from(feature_id) >= i32::from(MIN_CAVE_WALL) && feature_id != TILE_BOUNDARY_WALL {
             finished = true;
             let _ = player_tunnel_wall(coord, 1, 0);
             if cave_tile_visible(coord) {
@@ -1498,9 +1454,8 @@ pub fn spell_wall_to_mud(coord: Coord_t, direction: i32) -> bool {
                 terminal::print_message(Some(&format!("The {desc} turns into mud.")));
             }
 
-            let category_id = with_state(|state| {
-                state.game.treasure.list[treasure_id as usize].category_id
-            });
+            let category_id =
+                with_state(|state| state.game.treasure.list[treasure_id as usize].category_id);
             if category_id == TV_RUBBLE {
                 let _ = dungeon_delete_object(coord);
                 if random_number(10) == 1 {
@@ -1516,7 +1471,7 @@ pub fn spell_wall_to_mud(coord: Coord_t, direction: i32) -> bool {
         }
 
         if creature_id > 1 {
-            let (defenses, lit, name, recall_creature_id) = with_state(|state| {
+            let (defenses, _lit, name, recall_creature_id) = with_state(|state| {
                 let monster = &state.monsters[creature_id as usize];
                 let creature = &CREATURES_LIST[monster.creature_id as usize];
                 (
@@ -1560,9 +1515,8 @@ pub fn spell_destroy_doors_traps_in_direction(coord: Coord_t, direction: i32) ->
         let _ = player_move_position(direction, &mut coord);
         distance += 1;
 
-        let treasure_id = with_state(|state| {
-            state.dg.floor[coord.y as usize][coord.x as usize].treasure_id
-        });
+        let treasure_id =
+            with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id);
 
         if treasure_id != 0 {
             let (category_id, flags) = with_state(|state| {
@@ -1595,9 +1549,8 @@ pub fn spell_destroy_doors_traps_in_direction(coord: Coord_t, direction: i32) ->
             }
         }
 
-        let feature_id = with_state(|state| {
-            state.dg.floor[coord.y as usize][coord.x as usize].feature_id
-        });
+        let feature_id =
+            with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].feature_id);
 
         if distance > i32::from(OBJECT_BOLTS_MAX_RANGE)
             && i32::from(feature_id) > i32::from(MAX_OPEN_SPACE)
@@ -1801,8 +1754,7 @@ pub fn spell_create_food() {
     dungeon_place_random_object_at(player_pos, false);
 
     with_state_mut(|state| {
-        let treasure_id =
-            state.dg.floor[player_pos.y as usize][player_pos.x as usize].treasure_id;
+        let treasure_id = state.dg.floor[player_pos.y as usize][player_pos.x as usize].treasure_id;
         inventory_item_copy_to(
             OBJ_MUSH as i16,
             &mut state.game.treasure.list[treasure_id as usize],
@@ -2086,9 +2038,7 @@ fn print_bolt_strikes_monster_message(creature_name: &str, bolt_name: &str, is_l
     } else {
         "it".to_string()
     };
-    terminal::print_message(Some(&format!(
-        "The {bolt_name} strikes {monster_name}."
-    )));
+    terminal::print_message(Some(&format!("The {bolt_name} strikes {monster_name}.")));
 }
 
 /// C++ spells.cpp lines 770–806.
@@ -2106,9 +2056,8 @@ fn spell_fire_bolt_touches_monster(
         (monster_id, creature.name, monster.lit)
     });
 
-    let saved_lit_status = with_state(|state| {
-        state.dg.floor[coord.y as usize][coord.x as usize].permanent_light
-    });
+    let saved_lit_status =
+        with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].permanent_light);
     with_state_mut(|state| {
         state.dg.floor[coord.y as usize][coord.x as usize].permanent_light = true;
     });
@@ -2134,10 +2083,8 @@ fn spell_fire_bolt_touches_monster(
             if monster.lit {
                 state.creature_recall[monster.creature_id as usize].defenses |= harm_type;
             }
-        } else if (weapon_type & creature.spells) != 0 {
-            if monster.lit {
-                state.creature_recall[monster.creature_id as usize].spells |= weapon_type;
-            }
+        } else if (weapon_type & creature.spells) != 0 && monster.lit {
+            state.creature_recall[monster.creature_id as usize].spells |= weapon_type;
         }
         (damage, monster.lit)
     });
@@ -2195,7 +2142,13 @@ pub fn spell_fire_bolt(
                 spell_name,
             );
         } else if show_bolt {
-            panel_put_tile(b'*', Coord { y: coord.y, x: coord.x });
+            panel_put_tile(
+                b'*',
+                Coord {
+                    y: coord.y,
+                    x: coord.x,
+                },
+            );
             put_qio();
         }
     }
@@ -2278,11 +2231,9 @@ fn spell_explosion_at(
                             state.creature_recall[monster.creature_id as usize].defenses |=
                                 affect.harm_type;
                         }
-                    } else if (affect.weapon_type & creature.spells) != 0 {
-                        if monster.lit {
-                            state.creature_recall[monster.creature_id as usize].spells |=
-                                affect.weapon_type;
-                        }
+                    } else if (affect.weapon_type & creature.spells) != 0 && monster.lit {
+                        state.creature_recall[monster.creature_id as usize].spells |=
+                            affect.weapon_type;
                     }
                     damage = spell_apply_area_distance_falloff(
                         damage,
@@ -2295,7 +2246,13 @@ fn spell_explosion_at(
                     total_kills += 1;
                 }
             } else if show_blast {
-                panel_put_tile(b'*', Coord { y: spot.y, x: spot.x });
+                panel_put_tile(
+                    b'*',
+                    Coord {
+                        y: spot.y,
+                        x: spot.x,
+                    },
+                );
             }
         }
     }
@@ -2316,9 +2273,7 @@ fn spell_explosion_at(
 
     if count_hits {
         if total_hits == 1 {
-            terminal::print_message(Some(&format!(
-                "The {spell_name} envelops a creature!"
-            )));
+            terminal::print_message(Some(&format!("The {spell_name} envelops a creature!")));
         } else if total_hits > 1 {
             terminal::print_message(Some(&format!(
                 "The {spell_name} envelops several creatures!"
@@ -2380,7 +2335,13 @@ pub fn spell_fire_ball(
 
             let _ = spell_explosion_at(coord, damage_hp, spell_type, spell_name, true);
         } else if show_bolt {
-            panel_put_tile(b'*', Coord { y: coord.y, x: coord.x });
+            panel_put_tile(
+                b'*',
+                Coord {
+                    y: coord.y,
+                    x: coord.x,
+                },
+            );
             put_qio();
         }
     }
@@ -2431,7 +2392,13 @@ pub fn spell_breath(
             }
 
             if show_blast {
-                panel_put_tile(b'*', Coord { y: location.y, x: location.x });
+                panel_put_tile(
+                    b'*',
+                    Coord {
+                        y: location.y,
+                        x: location.x,
+                    },
+                );
             }
 
             if creature_id > 1 {
@@ -2606,7 +2573,12 @@ pub fn spell_drain_life_from_monster(coord: Coord_t, direction: i32) -> bool {
                 (CREATURES_LIST[monster.creature_id as usize].defenses & CD_UNDEAD) != 0
             });
 
-            if !undead {
+            if undead {
+                with_state_mut(|state| {
+                    let cid = state.monsters[creature_id as usize].creature_id;
+                    state.creature_recall[cid as usize].defenses |= CD_UNDEAD;
+                });
+            } else {
                 let name = with_state(|state| {
                     let monster = &state.monsters[creature_id as usize];
                     let creature = &CREATURES_LIST[monster.creature_id as usize];
@@ -2622,11 +2594,6 @@ pub fn spell_drain_life_from_monster(coord: Coord_t, direction: i32) -> bool {
                 }
 
                 drained = true;
-            } else {
-                with_state_mut(|state| {
-                    let cid = state.monsters[creature_id as usize].creature_id;
-                    state.creature_recall[cid as usize].defenses |= CD_UNDEAD;
-                });
             }
         }
     }
@@ -2743,8 +2710,7 @@ pub fn spell_confuse_monster(coord: Coord_t, direction: i32) -> bool {
             {
                 if lit && (creature_defenses & CD_NO_SLEEP) != 0 {
                     with_state_mut(|state| {
-                        state.creature_recall[recall_creature_id as usize].defenses |=
-                            CD_NO_SLEEP;
+                        state.creature_recall[recall_creature_id as usize].defenses |= CD_NO_SLEEP;
                     });
                 }
 
@@ -2820,8 +2786,7 @@ pub fn spell_sleep_monster(coord: Coord_t, direction: i32) -> bool {
             {
                 if lit && (creature_defenses & CD_NO_SLEEP) != 0 {
                     with_state_mut(|state| {
-                        state.creature_recall[recall_creature_id as usize].defenses |=
-                            CD_NO_SLEEP;
+                        state.creature_recall[recall_creature_id as usize].defenses |= CD_NO_SLEEP;
                     });
                 }
 
@@ -2851,16 +2816,15 @@ pub fn spell_polymorph_monster(coord: Coord_t, direction: i32) -> bool {
         let _ = player_move_position(direction, &mut coord);
         distance += 1;
 
-        let (feature_id, creature_id, temporary_light, permanent_light) =
-            with_state(|state| {
-                let tile = &state.dg.floor[coord.y as usize][coord.x as usize];
-                (
-                    tile.feature_id,
-                    tile.creature_id,
-                    tile.temporary_light,
-                    tile.permanent_light,
-                )
-            });
+        let (feature_id, creature_id, temporary_light, permanent_light) = with_state(|state| {
+            let tile = &state.dg.floor[coord.y as usize][coord.x as usize];
+            (
+                tile.feature_id,
+                tile.creature_id,
+                tile.temporary_light,
+                tile.permanent_light,
+            )
+        });
 
         if distance > i32::from(OBJECT_BOLTS_MAX_RANGE)
             || i32::from(feature_id) >= i32::from(MIN_CLOSED_SPACE)
@@ -2884,18 +2848,14 @@ pub fn spell_polymorph_monster(coord: Coord_t, direction: i32) -> bool {
                     random_number_state(
                         state,
                         i32::from(
-                            state.monster_levels[MON_MAX_LEVELS as usize]
-                                - state.monster_levels[0],
+                            state.monster_levels[MON_MAX_LEVELS as usize] - state.monster_levels[0],
                         ),
                     ) - 1
                         + i32::from(state.monster_levels[0])
                 });
                 morphed = monster_place_new(coord, level_arg, false);
 
-                if morphed
-                    && coord_inside_panel(coord)
-                    && (temporary_light || permanent_light)
-                {
+                if morphed && coord_inside_panel(coord) && (temporary_light || permanent_light) {
                     morphed = true;
                 }
             } else {
@@ -3041,11 +3001,11 @@ pub fn spell_genocide() -> bool {
         });
 
         if sprite == creature_char {
-            if !is_win {
+            if is_win {
+                terminal::print_message(Some(&format!("The {creature_name} is unaffected.")));
+            } else {
                 killed = true;
                 dungeon_delete_monster(id);
-            } else {
-                terminal::print_message(Some(&format!("The {creature_name} is unaffected.")));
             }
         }
     }
@@ -3153,8 +3113,7 @@ pub fn spell_sleep_all_monsters() -> bool {
             if lit {
                 if (creature_defenses & CD_NO_SLEEP) != 0 {
                     with_state_mut(|state| {
-                        state.creature_recall[recall_creature_id as usize].defenses |=
-                            CD_NO_SLEEP;
+                        state.creature_recall[recall_creature_id as usize].defenses |= CD_NO_SLEEP;
                     });
                 }
                 print_monster_action_text(&name, "is unaffected.");
@@ -3202,8 +3161,7 @@ pub fn spell_mass_polymorph() -> bool {
                 random_number_state(
                     state,
                     i32::from(
-                        state.monster_levels[MON_MAX_LEVELS as usize]
-                            - state.monster_levels[0],
+                        state.monster_levels[MON_MAX_LEVELS as usize] - state.monster_levels[0],
                     ),
                 ) - 1
                     + i32::from(state.monster_levels[0])
@@ -3301,15 +3259,10 @@ pub fn spell_turn_undead() -> bool {
                 )
             });
 
-        if distance <= MON_MAX_SIGHT
-            && (defenses & CD_UNDEAD) != 0
-            && los(player_pos, pos)
-        {
+        if distance <= MON_MAX_SIGHT && (defenses & CD_UNDEAD) != 0 && los(player_pos, pos) {
             let player_level = with_state(|state| state.py.misc.level);
 
-            if i32::from(player_level) + 1 > i32::from(creature_level)
-                || random_number(5) == 1
-            {
+            if i32::from(player_level) + 1 > i32::from(creature_level) || random_number(5) == 1 {
                 if lit {
                     with_state_mut(|state| {
                         state.creature_recall[recall_creature_id as usize].defenses |= CD_UNDEAD;
@@ -3355,7 +3308,7 @@ fn replace_spot(coord: Coord_t, typ: i32) {
         let tile = &mut state.dg.floor[coord.y as usize][coord.x as usize];
 
         match typ {
-            1 | 2 | 3 => tile.feature_id = TILE_CORR_FLOOR,
+            1..=3 => tile.feature_id = TILE_CORR_FLOOR,
             4 | 7 | 10 => tile.feature_id = TILE_GRANITE_WALL,
             5 | 8 | 11 => tile.feature_id = TILE_MAGMA_WALL,
             6 | 9 | 12 => tile.feature_id = TILE_QUARTZ_WALL,

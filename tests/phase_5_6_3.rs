@@ -1,21 +1,26 @@
 //! Phase 5.6.3 — command input parsing & dispatch (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
-use umoria::config::player::status::PY_REPEAT;
 use umoria::game::{reset_for_new_game, test_set_direction, with_state, with_state_mut};
 use umoria::game_run::{
-    calculate_max_message_count, command_flip_wizard_mode, command_previous_message,
-    command_quit, command_save_and_exit, command_toggle_search, do_command,
-    execute_input_commands, get_command_repeat_count, move_without_pickup,
-    original_commands, parse_alternate_ctrl_input, test_clear_dispatch_log,
-    test_dispatch_log, test_free_turn_after_command, test_last_command_after,
-    test_set_message, valid_count_command, VALID_COUNT_FALSE, VALID_COUNT_TRUE,
+    calculate_max_message_count, command_flip_wizard_mode, command_previous_message, command_quit,
+    command_save_and_exit, command_toggle_search, do_command, execute_input_commands,
+    get_command_repeat_count, move_without_pickup, original_commands, parse_alternate_ctrl_input,
+    test_clear_dispatch_log, test_dispatch_log, test_free_turn_after_command,
+    test_last_command_after, test_set_message, valid_count_command, VALID_COUNT_FALSE,
+    VALID_COUNT_TRUE,
 };
 use umoria::types::MESSAGE_HISTORY_SIZE;
 use umoria::ui_io::{
-    self, register_game_ui_hooks, test_bell_count, test_clear_getch_keys,
-    test_flush_input_buffer_count, test_push_getch_keys, test_put_strings,
-    test_set_ncurses_stub, test_set_ui_capture, test_set_ui_detail_capture, test_ui_messages, ctrl_key, DELETE,
-    ESCAPE,
+    self, ctrl_key, register_game_ui_hooks, test_bell_count, test_clear_getch_keys,
+    test_flush_input_buffer_count, test_push_getch_keys, test_put_strings, test_set_ncurses_stub,
+    test_set_ui_capture, test_set_ui_detail_capture, test_ui_messages, DELETE, ESCAPE,
 };
 
 fn setup_harness() {
@@ -39,11 +44,7 @@ fn step1_repeat_count_digits_and_default() {
     setup_harness();
     test_set_ui_capture(true);
     test_clear_getch_keys();
-    test_push_getch_keys(&[
-        i32::from(b'h'),
-        i32::from(b' '),
-        i32::from(b'2'),
-    ]);
+    test_push_getch_keys(&[i32::from(b'h'), i32::from(b' '), i32::from(b'2')]);
 
     let mut cmd = b'1';
     let count = get_command_repeat_count(&mut cmd);
@@ -511,16 +512,24 @@ fn step9_command_previous_message_single() {
     command_previous_message();
     let strings = test_put_strings();
     assert!(strings.iter().any(|(_, x, s)| *x == 0 && s == ">"));
-    assert!(strings.iter().any(|(_, x, s)| *x == 1 && s == "hello world"));
+    assert!(strings
+        .iter()
+        .any(|(_, x, s)| *x == 1 && s == "hello world"));
 }
 
 #[test]
 fn step9_command_toggle_search() {
     setup_harness();
     command_toggle_search();
-    assert_ne!(with_state(|state| state.py.flags.status & umoria::config::player::status::PY_SEARCH), 0);
+    assert_ne!(
+        with_state(|state| state.py.flags.status & umoria::config::player::status::PY_SEARCH),
+        0
+    );
     command_toggle_search();
-    assert_eq!(with_state(|state| state.py.flags.status & umoria::config::player::status::PY_SEARCH), 0);
+    assert_eq!(
+        with_state(|state| state.py.flags.status & umoria::config::player::status::PY_SEARCH),
+        0
+    );
 }
 
 #[test]

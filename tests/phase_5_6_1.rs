@@ -1,4 +1,11 @@
 //! Phase 5.6.1 — startMoria & game initialization (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -19,14 +26,14 @@ use umoria::game_run::{
     initialize_character_inventory, initialize_monster_levels, initialize_treasure_levels,
     player_initialize_player_light, price_adjust, price_adjust_cost, reset_dungeon_flags,
     start_moria, test_boot_events, test_play_dungeon_call_count, test_reset_boot_hooks,
-    test_set_load_game_hook, test_set_play_dungeon_script, test_set_skip_change_character_name,
-    test_set_skip_character_create, test_set_skip_end_game, test_set_skip_generate_cave,
-    test_set_boot_stop_after, BootEvent, PlayDungeonScript,
+    test_set_boot_stop_after, test_set_load_game_hook, test_set_play_dungeon_script,
+    test_set_skip_change_character_name, test_set_skip_character_create, test_set_skip_end_game,
+    test_set_skip_generate_cave, BootEvent, PlayDungeonScript,
 };
 use umoria::game_save::{test_set_force_save_char_fail, test_set_unix_time};
-use umoria::scores::test_set_scores_path;
 use umoria::inventory::{PlayerEquipment, PLAYER_INVENTORY_SIZE};
 use umoria::scores::test_reset_score_test_hooks;
+use umoria::scores::test_set_scores_path;
 use umoria::store::COST_ADJUSTMENT;
 use umoria::treasure::TV_SWORD;
 use umoria::types::{MAX_DUNGEON_OBJECTS, MON_MAX_CREATURES, MON_MAX_LEVELS, TREASURE_MAX_LEVELS};
@@ -73,7 +80,10 @@ fn reference_monster_levels() -> [i16; MON_MAX_LEVELS as usize + 1] {
     levels
 }
 
-fn reference_treasure_tables() -> ([i16; TREASURE_MAX_LEVELS as usize + 1], [i16; MAX_DUNGEON_OBJECTS as usize]) {
+fn reference_treasure_tables() -> (
+    [i16; TREASURE_MAX_LEVELS as usize + 1],
+    [i16; MAX_DUNGEON_OBJECTS as usize],
+) {
     let mut treasure_levels = [0i16; TREASURE_MAX_LEVELS as usize + 1];
     for i in 0..MAX_DUNGEON_OBJECTS as usize {
         let level = GAME_OBJECTS[i].depth_first_found as usize;
@@ -274,7 +284,8 @@ fn start_moria_new_game_call_order() {
 fn start_moria_new_game_rng_after_seeds_initialize() {
     setup_harness();
     seeds_initialize(42);
-    let expected = with_state(|state| (state.game.magic_seed, state.game.town_seed, state.rng.seed));
+    let expected =
+        with_state(|state| (state.game.magic_seed, state.game.town_seed, state.rng.seed));
 
     reset_for_new_game(None);
     test_reset_boot_hooks();
@@ -295,12 +306,16 @@ fn start_moria_new_game_begin_display_puts_help_string() {
     test_set_skip_character_create(true);
     start_moria(42, true, false);
 
-    let help = test_ui_trace_events().into_iter().find_map(|event| match event {
-        UiTraceEvent::PutString { text, y, x } if text == "Press ? for help" && y == 0 && x == 63 => {
-            Some(())
-        }
-        _ => None,
-    });
+    let help = test_ui_trace_events()
+        .into_iter()
+        .find_map(|event| match event {
+            UiTraceEvent::PutString { text, y, x }
+                if text == "Press ? for help" && y == 0 && x == 63 =>
+            {
+                Some(())
+            }
+            _ => None,
+        });
     assert!(help.is_some());
 }
 
@@ -382,7 +397,10 @@ fn start_moria_eof_save_sets_died_from_and_exits() {
     assert_eq!(test_play_dungeon_call_count(), 1);
     with_state(|state| {
         assert!(state.game.character_is_dead);
-        assert_eq!(c_str(&state.game.character_died_from), "(end of input: saved)");
+        assert_eq!(
+            c_str(&state.game.character_died_from),
+            "(end of input: saved)"
+        );
     });
     assert!(save_path.is_file());
     let _ = fs::remove_dir_all(dir);

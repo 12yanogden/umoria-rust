@@ -1,41 +1,42 @@
 //! Phase 4.7.1 — spells.cpp selection & detection parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
-use umoria::config::dungeon::objects::{MAX_TRAPS, OBJ_CLOSED_DOOR, OBJ_NOTHING};
+use umoria::config::dungeon::objects::{MAX_TRAPS, OBJ_CLOSED_DOOR};
 use umoria::config::monsters::defense::CD_EVIL;
 use umoria::config::monsters::move_flags::CM_INVISIBLE;
-use umoria::config::monsters::{self};
 use umoria::config::spells::{NAME_OFFSET_SPELLS, SPELL_TYPE_MAGE};
 use umoria::config::treasure::chests::{CH_LOCKED, CH_TRAPPED};
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::data_player::{CLASSES, MAGIC_SPELLS};
-use umoria::dungeon::{cave_tile_visible, MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::{MAX_CAVE_FLOOR, TILE_BLOCKED_FLOOR, TILE_LIGHT_FLOOR};
+use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
+use umoria::dungeon_tile::{Tile, TILE_BLOCKED_FLOOR, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::game_objects::popt;
 use umoria::helpers::get_and_clear_first_bit;
 use umoria::identification::SpecialNameIds;
-use umoria::inventory::{inventory_item_copy_to, PlayerEquipment, PLAYER_INVENTORY_SIZE};
-use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
+use umoria::monster::Monster;
 use umoria::player::PlayerAttr;
 use umoria::spells::{
     build_castable_spell_list, cast_spell_get_id, spell_aggravate_monsters,
-    spell_chance_of_success, spell_destroy_adjacent_doors_traps,
-    spell_detect_evil, spell_detect_invisible_creatures_within_vicinity,
-    spell_detect_monsters, spell_detect_objects_within_vicinity,
-    spell_detect_secret_doors_within_vicinity, spell_detect_traps_within_vicinity,
-    spell_detect_treasure_within_vicinity, spell_map_current_area,
-    spell_surround_player_with_doors, spell_surround_player_with_traps,
+    spell_chance_of_success, spell_destroy_adjacent_doors_traps, spell_detect_evil,
+    spell_detect_invisible_creatures_within_vicinity, spell_detect_monsters,
+    spell_detect_objects_within_vicinity, spell_detect_secret_doors_within_vicinity,
+    spell_detect_traps_within_vicinity, spell_detect_treasure_within_vicinity,
+    spell_map_current_area, spell_surround_player_with_doors, spell_surround_player_with_traps,
 };
 use umoria::treasure::{
-    TV_CHEST, TV_DOWN_STAIR, TV_GOLD, TV_INVIS_TRAP, TV_SECRET_DOOR, TV_SWORD, TV_UP_STAIR,
-    TV_VIS_TRAP,
+    TV_CHEST, TV_GOLD, TV_INVIS_TRAP, TV_SECRET_DOOR, TV_SWORD, TV_UP_STAIR, TV_VIS_TRAP,
 };
-use umoria::types::{Coord_t, MESSAGE_HISTORY_SIZE};
+use umoria::types::Coord_t;
 use umoria::ui::panel_bounds_fields;
-use umoria::ui_io::{
-    test_clear_getch_keys, test_push_getch_keys, test_set_ncurses_stub, ESCAPE,
-};
+use umoria::ui_io::{test_clear_getch_keys, test_push_getch_keys, test_set_ncurses_stub, ESCAPE};
 
 const MAGE_CLASS_ID: u8 = 2;
 const FLOATING_EYE_ID: u16 = 18;
@@ -60,7 +61,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -121,15 +122,6 @@ fn place_monster(id: i32, creature_id: u16, coord: Coord_t) {
 
 fn tile_at(coord: Coord_t) -> umoria::dungeon_tile::Tile {
     with_state(|s| s.dg.floor[coord.y as usize][coord.x as usize])
-}
-
-fn message_text(id: i16) -> String {
-    with_state(|s| {
-        let idx = id.rem_euclid(MESSAGE_HISTORY_SIZE as i16) as usize;
-        let msg = &s.messages[idx];
-        let end = msg.iter().position(|&b| b == 0).unwrap_or(msg.len());
-        String::from_utf8_lossy(&msg[..end]).into_owned()
-    })
 }
 
 // ---------------------------------------------------------------------------
@@ -414,9 +406,7 @@ fn spell_detect_monsters_lights_visible_on_panel() {
     reset_for_new_game(Some(7));
     setup_dungeon(66, 66);
     setup_player_panel(Coord_t { y: 15, x: 20 });
-    assert!(
-        CREATURES_LIST[FLOATING_EYE_ID as usize].movement & CM_INVISIBLE == 0
-    );
+    assert!(CREATURES_LIST[FLOATING_EYE_ID as usize].movement & CM_INVISIBLE == 0);
     place_monster(2, FLOATING_EYE_ID, Coord_t { y: 15, x: 22 });
     assert!(spell_detect_monsters());
 }
@@ -480,7 +470,8 @@ fn spell_destroy_adjacent_doors_traps_disarms_chest() {
     let chest_coord = Coord_t { y: 15, x: 16 };
     let treasure_id = place_treasure(chest_coord, TV_CHEST, CH_TRAPPED | CH_LOCKED);
     with_state_mut(|s| {
-        s.game.treasure.list[treasure_id as usize].special_name_id = SpecialNameIds::SN_LOCKED as u8;
+        s.game.treasure.list[treasure_id as usize].special_name_id =
+            SpecialNameIds::SN_LOCKED as u8;
     });
 
     assert!(spell_destroy_adjacent_doors_traps());

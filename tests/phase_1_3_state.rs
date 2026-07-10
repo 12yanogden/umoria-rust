@@ -1,5 +1,12 @@
 //! Phase 1.3 global-state ownership model tests.
 //! See `.cursor/plans/rust-translation/phase_1.3.md`.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config;
 use umoria::data_creatures;

@@ -1,28 +1,36 @@
 //! Phase 5.6.4 — misc actions, level transitions & playDungeon loop (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::identification::ID_MAGIK;
-use umoria::config::player::{PLAYER_REGEN_HPBASE, PLAYER_REGEN_MNBASE};
-use umoria::config::spells::SPELL_TYPE_MAGE;
-use umoria::config::treasure::OBJECT_LAMP_MAX_CAPACITY;
 use umoria::config::player::status::{PY_SEARCH, PY_STR_WGT, PY_STUDY};
+use umoria::config::player::PLAYER_REGEN_HPBASE;
+use umoria::config::treasure::OBJECT_LAMP_MAX_CAPACITY;
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::data_player::MAGIC_SPELLS;
-use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
 use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
-use umoria::game::{random_number, reset_for_new_game, test_set_direction, with_state, with_state_mut};
+use umoria::game::{
+    random_number, reset_for_new_game, test_set_direction, with_state, with_state_mut,
+};
 use umoria::game_objects::popt;
 use umoria::game_run::{
     dungeon_go_down_level, dungeon_go_up_level, dungeon_jam_door, examine_book,
     inventory_refill_lamp, item_enchanted, play_dungeon, player_regenerate_hit_points,
-    player_regenerate_mana, PlayDungeonTrace, test_play_dungeon_trace, test_reset_game_run_hooks,
-    test_reset_play_dungeon_trace, test_set_play_dungeon_max_turns, test_set_skip_input_command_loop,
+    player_regenerate_mana, test_play_dungeon_trace, test_reset_game_run_hooks,
+    test_reset_play_dungeon_trace, test_set_play_dungeon_max_turns,
+    test_set_skip_input_command_loop, PlayDungeonTrace,
 };
 use umoria::helpers::get_and_clear_first_bit;
-use umoria::inventory::{inventory_item_copy_to, Inventory, PlayerEquipment};
+use umoria::inventory::{Inventory, PlayerEquipment};
 use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
 use umoria::treasure::{
     TV_CLOSED_DOOR, TV_DOWN_STAIR, TV_FLASK, TV_MAGIC_BOOK, TV_MAX_ENCHANT, TV_MIN_ENCHANT,
-    TV_NOTHING, TV_OPEN_DOOR, TV_PRAYER_BOOK, TV_SPIKE, TV_SWORD, TV_UP_STAIR,
+    TV_OPEN_DOOR, TV_PRAYER_BOOK, TV_SPIKE, TV_SWORD, TV_UP_STAIR,
 };
 use umoria::types::Coord_t;
 use umoria::ui_io::{
@@ -414,7 +422,10 @@ fn dungeon_jam_door_messages_and_spike_series() {
     place_treasure(door, TV_CLOSED_DOOR);
     place_monster(1, ORC_ID, door);
     dungeon_jam_door();
-    let expected = format!("The {} is in your way!", CREATURES_LIST[ORC_ID as usize].name);
+    let expected = format!(
+        "The {} is in your way!",
+        CREATURES_LIST[ORC_ID as usize].name
+    );
     assert!(messages_contain(&expected));
 }
 
@@ -638,8 +649,7 @@ fn play_dungeon_loop_exits_on_generate_new_level() {
 fn play_dungeon_compact_monsters_when_nearly_full() {
     setup();
     with_state_mut(|s| {
-        s.next_free_monster_id =
-            i16::from(MON_TOTAL_ALLOCATIONS) - 5;
+        s.next_free_monster_id = i16::from(MON_TOTAL_ALLOCATIONS) - 5;
     });
     play_one_dungeon_turn();
     assert!(test_play_dungeon_trace().contains(&PlayDungeonTrace::CompactMonsters));

@@ -1,4 +1,11 @@
 //! Phase 2.11 — data_stores.cpp static store data tables parity.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::data_stores::{RACE_GOLD_ADJUSTMENTS, STORE_CHOICES};
 use umoria::player::PLAYER_MAX_RACES;

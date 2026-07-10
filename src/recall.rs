@@ -7,22 +7,22 @@ use crate::config::monsters::defense::{
 };
 use crate::config::monsters::move_flags::{
     CM_1D2_OBJ, CM_2D2_OBJ, CM_4D2_OBJ, CM_60_RANDOM, CM_90_RANDOM, CM_ALL_MV_FLAGS,
-    CM_ATTACK_ONLY, CM_CARRY_GOLD, CM_CARRY_OBJ, CM_ONLY_MAGIC, CM_RANDOM_MOVE, CM_SMALL_OBJ,
-    CM_SPECIAL, CM_TREASURE, CM_TR_SHIFT, CM_WIN, CM_INVISIBLE,
+    CM_ATTACK_ONLY, CM_CARRY_GOLD, CM_CARRY_OBJ, CM_INVISIBLE, CM_ONLY_MAGIC, CM_RANDOM_MOVE,
+    CM_SMALL_OBJ, CM_SPECIAL, CM_TREASURE, CM_TR_SHIFT, CM_WIN,
 };
 use crate::config::monsters::spells::{CS_BREATHE, CS_BR_LIGHT, CS_FREQ, CS_SPELLS, CS_TEL_SHORT};
 use crate::config::monsters::MON_ENDGAME_LEVEL;
 use crate::data_creatures::{CREATURES_LIST, MONSTER_ATTACKS};
 use crate::data_recall::{
-    RECALL_DESCRIPTION_ATTACK_METHOD, RECALL_DESCRIPTION_ATTACK_TYPE,
-    RECALL_DESCRIPTION_BREATH, RECALL_DESCRIPTION_HOW_MUCH, RECALL_DESCRIPTION_MOVE,
-    RECALL_DESCRIPTION_SPELL, RECALL_DESCRIPTION_WEAKNESS,
+    RECALL_DESCRIPTION_ATTACK_METHOD, RECALL_DESCRIPTION_ATTACK_TYPE, RECALL_DESCRIPTION_BREATH,
+    RECALL_DESCRIPTION_HOW_MUCH, RECALL_DESCRIPTION_MOVE, RECALL_DESCRIPTION_SPELL,
+    RECALL_DESCRIPTION_WEAKNESS,
 };
 use crate::game::{with_state, with_state_mut};
 use crate::monster::{Creature, MON_MAX_ATTACKS};
-use crate::types::{MORIA_MESSAGE_SIZE, Vtype_t};
-use crate::ui_io::{self, ESCAPE};
+use crate::types::{Vtype_t, MORIA_MESSAGE_SIZE};
 use crate::ui_io::terminal;
+use crate::ui_io::{self, ESCAPE};
 
 /// Port of `Recall_t` in recall.h.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -41,7 +41,7 @@ const SHRT_MAX: u16 = i16::MAX as u16;
 const UCHAR_MAX: u8 = u8::MAX;
 
 thread_local! {
-    static ROFF_BUFFER: RefCell<Vtype_t> = RefCell::new([0; MORIA_MESSAGE_SIZE]);
+    static ROFF_BUFFER: RefCell<Vtype_t> = const { RefCell::new([0; MORIA_MESSAGE_SIZE]) };
     static ROFF_BUFFER_POINTER: Cell<usize> = const { Cell::new(0) };
     static ROFF_PRINT_LINE: Cell<i32> = const { Cell::new(0) };
     static TEST_CAPTURE_LINES: RefCell<Vec<(i32, String)>> = const { RefCell::new(Vec::new()) };
@@ -80,7 +80,7 @@ fn vtype_cstr(buf: &Vtype_t) -> String {
 }
 
 fn emit_recall_line(line: i32, text: &str) {
-    if TEST_CAPTURE_ENABLED.with(|c| c.get()) {
+    if TEST_CAPTURE_ENABLED.with(std::cell::Cell::get) {
         TEST_CAPTURE_LINES.with(|lines| lines.borrow_mut().push((line, text.to_owned())));
     } else {
         terminal::put_string_clear_to_eol(text, terminal::Coord { y: line, x: 0 });
@@ -244,7 +244,10 @@ fn memory_depth_found_at(level: u8, kills: u16) -> bool {
         let mut desc = [0u8; MORIA_MESSAGE_SIZE];
         vtype_set_cstr(
             &mut desc,
-            &format!(" It is normally found at depths of {} feet", u32::from(lvl) * 50),
+            &format!(
+                " It is normally found at depths of {} feet",
+                u32::from(lvl) * 50
+            ),
         );
         memory_print(&vtype_cstr(&desc));
     }
@@ -320,7 +323,7 @@ fn memory_movement(rc_move: u32, monster_speed: u8, mut is_known: bool) -> bool 
     is_known
 }
 
-/// C++ recall.cpp lines 222–279 — returns (quotient, remainder, plural_char).
+/// C++ recall.cpp lines 222–279 — returns (quotient, remainder, `plural_char`).
 #[must_use]
 pub fn memory_kill_points_math(
     monster_exp: u16,
@@ -329,11 +332,10 @@ pub fn memory_kill_points_math(
 ) -> (i32, i32, char) {
     let player_level_i = i32::from(player_level);
     let quotient = i32::from(monster_exp) * i32::from(creature_level) / player_level_i;
-    let remainder = (((i32::from(monster_exp) * i32::from(creature_level) % player_level_i)
-        * 1000
+    let remainder = ((i32::from(monster_exp) * i32::from(creature_level) % player_level_i) * 1000
         / player_level_i
         + 5)
-        / 10) as i32;
+        / 10;
     let plural_ch = if quotient == 1 && remainder == 0 {
         '\0'
     } else {
@@ -363,12 +365,7 @@ fn memory_kill_points(creature_defense: u16, monster_exp: u16, level: u8) {
     let mut desc = [0u8; MORIA_MESSAGE_SIZE];
     vtype_set_cstr(
         &mut desc,
-        &format!(
-            " creature is worth {}.{:02} point{}",
-            quotient,
-            remainder,
-            plural_ch
-        ),
+        &format!(" creature is worth {quotient}.{remainder:02} point{plural_ch}"),
     );
     memory_print(&vtype_cstr(&desc));
 
@@ -391,10 +388,7 @@ fn memory_kill_points(creature_defense: u16, monster_exp: u16, level: u8) {
 
     vtype_set_cstr(
         &mut desc,
-        &format!(
-            " for a{} {}{} level character.",
-            article_n, player_level, ord_suffix
-        ),
+        &format!(" for a{article_n} {player_level}{ord_suffix} level character."),
     );
     memory_print(&vtype_cstr(&desc));
 }
@@ -485,9 +479,7 @@ fn memory_kill_difficulty(creature: &Creature, monster_kills: u32) {
         &mut description,
         &format!(
             " and a{} life rating of {}d{}.",
-            maximized,
-            creature.hit_die.dice,
-            creature.hit_die.sides
+            maximized, creature.hit_die.dice, creature.hit_die.sides
         ),
     );
     memory_print(&vtype_cstr(&description));
@@ -597,8 +589,7 @@ fn memory_loot_carried(creature_move: u32, memory_move: u32) {
         } else {
             memory_print(" often");
         }
-    } else if carrying_chance == 2
-        && (creature_move & CM_TREASURE) == (CM_60_RANDOM | CM_90_RANDOM)
+    } else if carrying_chance == 2 && (creature_move & CM_TREASURE) == (CM_60_RANDOM | CM_90_RANDOM)
     {
         memory_print(" often");
     }
@@ -620,7 +611,7 @@ fn memory_loot_carried(creature_move: u32, memory_move: u32) {
     } else if carrying_chance == 2 {
         memory_print(" one or two");
     } else {
-        let msg = format!(" up to {}", carrying_chance);
+        let msg = format!(" up to {carrying_chance}");
         memory_print(&msg);
     }
 
@@ -685,16 +676,17 @@ fn memory_attack_number_and_damage(memory: &Recall, creature: &Creature) {
 
             memory_print(RECALL_DESCRIPTION_ATTACK_TYPE[attack_type as usize]);
 
-            if dice.dice != 0 && dice.sides != 0 {
-                if knowdamage(creature.level, memory.attacks[i], dice.dice * dice.sides) {
-                    if attack_type == 19 {
-                        memory_print(" by");
-                    } else {
-                        memory_print(" with damage");
-                    }
-                    let msg = format!(" {}d{}", dice.dice, dice.sides);
-                    memory_print(&msg);
+            if dice.dice != 0
+                && dice.sides != 0
+                && knowdamage(creature.level, memory.attacks[i], dice.dice * dice.sides)
+            {
+                if attack_type == 19 {
+                    memory_print(" by");
+                } else {
+                    memory_print(" with damage");
                 }
+                let msg = format!(" {}d{}", dice.dice, dice.sides);
+                memory_print(&msg);
             }
         }
     }
@@ -726,7 +718,7 @@ pub fn memory_recall(monster_id: i32) -> u8 {
         (saved, wizard)
     });
 
-    let output = with_state(|state| {
+    with_state(|state| {
         let memory = &state.creature_recall[monster_id as usize];
         let creature = &CREATURES_LIST[monster_id as usize];
 
@@ -783,7 +775,7 @@ pub fn memory_recall(monster_id: i32) -> u8 {
         memory_print("\n");
     });
 
-    let _ = output;
+    let () = ();
 
     let pause_line = ROFF_PRINT_LINE.get();
     emit_recall_line(pause_line, "--pause--");
@@ -814,8 +806,10 @@ pub fn recall_monster_attributes(command: u8) {
 
         if sprite == command && known {
             if n == 0 {
-                let confirmed =
-                    ui_io::terminal::get_input_confirmation_with_abort(40, "You recall those details?");
+                let confirmed = ui_io::terminal::get_input_confirmation_with_abort(
+                    40,
+                    "You recall those details?",
+                );
                 if confirmed != 1 {
                     break;
                 }

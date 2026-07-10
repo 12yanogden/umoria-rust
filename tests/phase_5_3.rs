@@ -1,4 +1,11 @@
-//! Phase 5.3 — game_files.cpp (strict TDD).
+//! Phase 5.3 — `game_files.cpp` (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -8,20 +15,18 @@ use umoria::data_treasure::GAME_OBJECTS;
 use umoria::game::{reset_for_new_game, with_state, with_state_mut};
 use umoria::game_files::{
     compute_derived_abilities_for_test, display_death_file, display_splash_screen,
-    display_text_help_file, equipment_placement_description, fgets,
-    initialize_score_file, output_player_character_to_file, output_random_level_objects_to_file,
+    display_text_help_file, equipment_placement_description, fgets, initialize_score_file,
+    output_player_character_to_file, output_random_level_objects_to_file,
 };
 use umoria::inventory::{Inventory, PlayerEquipment};
-use umoria::player::{
-    player_initialize_base_experience_levels, PlayerAttr, PLAYER_MAX_LEVEL,
-};
+use umoria::player::{player_initialize_base_experience_levels, PlayerAttr, PLAYER_MAX_LEVEL};
 use umoria::scores::{highscore_fp_is_none, test_reset_highscore_fp, test_set_scores_path};
+use umoria::types::{MAX_DUNGEON_OBJECTS, TREASURE_MAX_LEVELS};
 use umoria::ui_io::{
     ctrl_key, test_clear_getch_keys, test_push_getch_keys, test_set_eof_flag,
     test_set_ncurses_stub, test_set_select_ready, test_set_ui_capture, test_set_ui_trace,
     test_ui_messages, test_ui_trace_events, UiTraceEvent, ESCAPE,
 };
-use umoria::types::{MAX_DUNGEON_OBJECTS, TREASURE_MAX_LEVELS};
 
 /// Splash tests `chdir`; serialize against any CWD-relative file I/O in this suite.
 static CWD_LOCK: Mutex<()> = Mutex::new(());
@@ -58,7 +63,7 @@ fn push_keys_in_consume_order(keys: &[i32]) {
 }
 
 fn push_string_input(s: &str) {
-    let mut keys: Vec<i32> = s.bytes().map(|b| i32::from(b)).collect();
+    let mut keys: Vec<i32> = s.bytes().map(i32::from).collect();
     keys.push(i32::from(ctrl_key(b'J')));
     push_keys_in_consume_order(&keys);
 }
@@ -158,7 +163,11 @@ fn display_splash_screen_golden_trace() {
     let _cwd = CWD_LOCK.lock().unwrap();
     let temp = tempfile_dir("splash");
     fs::create_dir_all(temp.join("data")).expect("data dir");
-    fs::copy(fixture_root().join("splash.txt"), temp.join("data/splash.txt")).expect("copy splash");
+    fs::copy(
+        fixture_root().join("splash.txt"),
+        temp.join("data/splash.txt"),
+    )
+    .expect("copy splash");
     let prev = std::env::current_dir().expect("cwd");
     std::env::set_current_dir(&temp).expect("chdir");
 
@@ -167,7 +176,10 @@ fn display_splash_screen_golden_trace() {
     display_splash_screen();
 
     let trace = test_ui_trace_events();
-    assert_eq!(count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)), 1);
+    assert_eq!(
+        count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)),
+        1
+    );
     assert_eq!(
         put_strings(&trace)
             .into_iter()
@@ -179,7 +191,10 @@ fn display_splash_screen_golden_trace() {
         ]
     );
     assert_eq!(
-        count_events(&trace, |e| matches!(e, UiTraceEvent::WaitForContinueKey { line: 23 })),
+        count_events(&trace, |e| matches!(
+            e,
+            UiTraceEvent::WaitForContinueKey { line: 23 }
+        )),
         1
     );
 
@@ -198,7 +213,10 @@ fn display_splash_screen_missing_file_is_noop() {
     setup_ui_harness();
     display_splash_screen();
     let trace = test_ui_trace_events();
-    assert_eq!(count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)), 0);
+    assert_eq!(
+        count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)),
+        0
+    );
 
     std::env::set_current_dir(prev).expect("restore cwd");
     let _ = fs::remove_dir_all(temp);
@@ -210,11 +228,7 @@ fn display_text_help_file_pagination_and_escape() {
     let path = write_temp_text("help-60.txt", &lines.join(""));
 
     setup_ui_harness();
-    push_keys_in_consume_order(&[
-        i32::from(b' '),
-        i32::from(b' '),
-        i32::from(ESCAPE),
-    ]);
+    push_keys_in_consume_order(&[i32::from(b' '), i32::from(b' '), i32::from(ESCAPE)]);
 
     display_text_help_file(path.to_str().unwrap());
     let trace = test_ui_trace_events();
@@ -227,12 +241,15 @@ fn display_text_help_file_pagination_and_escape() {
         count_events(&trace, |e| matches!(e, UiTraceEvent::TerminalRestoreScreen)),
         1
     );
-    assert_eq!(count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)), 3);
     assert_eq!(
-        count_events(
-            &trace,
-            |e| matches!(e, UiTraceEvent::PutStringClearToEol { y: 23, x: 23, .. })
-        ),
+        count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)),
+        3
+    );
+    assert_eq!(
+        count_events(&trace, |e| matches!(
+            e,
+            UiTraceEvent::PutStringClearToEol { y: 23, x: 23, .. }
+        )),
         3
     );
 
@@ -250,7 +267,9 @@ fn display_text_help_file_missing_file_message() {
         "Can not find help file 'no-such-help-file-xyz'."
     );
     let trace = test_ui_trace_events();
-    assert!(!trace.iter().any(|e| matches!(e, UiTraceEvent::TerminalSaveScreen)));
+    assert!(!trace
+        .iter()
+        .any(|e| matches!(e, UiTraceEvent::TerminalSaveScreen)));
 }
 
 #[test]
@@ -262,9 +281,14 @@ fn display_death_file_caps_at_23_lines() {
     display_death_file(path.to_str().unwrap());
     let trace = test_ui_trace_events();
 
-    assert_eq!(count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)), 1);
+    assert_eq!(
+        count_events(&trace, |e| matches!(e, UiTraceEvent::ClearScreen)),
+        1
+    );
     assert_eq!(put_strings(&trace).len(), 23);
-    assert!(!trace.iter().any(|e| matches!(e, UiTraceEvent::TerminalSaveScreen)));
+    assert!(!trace
+        .iter()
+        .any(|e| matches!(e, UiTraceEvent::TerminalSaveScreen)));
 
     let _ = fs::remove_file(path);
 }
@@ -294,7 +318,9 @@ fn output_random_level_objects_prompt_flow_and_bounds() {
     setup_ui_harness();
     push_keys_in_consume_order(&[i32::from(ESCAPE)]);
     output_random_level_objects_to_file();
-    assert!(test_ui_messages().iter().any(|m| m.contains("Produce objects on what level")));
+    assert!(test_ui_messages()
+        .iter()
+        .any(|m| m.contains("Produce objects on what level")));
 
     setup_ui_harness();
     push_string_input("abc");
@@ -314,7 +340,9 @@ fn output_random_level_objects_prompt_flow_and_bounds() {
     push_string_input("0");
     push_string_input("5");
     output_random_level_objects_to_file();
-    assert!(test_ui_messages().iter().any(|m| m == "Parameters no good."));
+    assert!(test_ui_messages()
+        .iter()
+        .any(|m| m == "Parameters no good."));
 }
 
 #[test]
@@ -338,7 +366,10 @@ fn output_random_level_objects_writes_header_and_completed() {
 
     let messages = test_ui_messages();
     let body = fs::read_to_string(&out).unwrap_or_else(|e| {
-        panic!("output file missing ({e}); ui messages={messages:?}; path={}", out.display());
+        panic!(
+            "output file missing ({e}); ui messages={messages:?}; path={}",
+            out.display()
+        );
     });
     assert!(body.starts_with("*** Random Object Sampling:\n"));
     assert!(body.contains("*** 2 objects\n"));
@@ -380,7 +411,7 @@ fn character_sheet_header_form_feed_and_exp_to_adv() {
     assert_eq!(&bytes[1..3], b"\n\n");
     let text = String::from_utf8_lossy(&bytes);
     assert!(text.contains("Exp to Adv :"));
-    assert!(text.contains("Writing character sheet...") == false); // UI message, not file
+    assert!(!text.contains("Writing character sheet...")); // UI message, not file
     assert!(text.contains("Born brave"));
 
     with_state_mut(|s| s.py.misc.level = u16::from(PLAYER_MAX_LEVEL));
@@ -414,7 +445,7 @@ fn derived_ability_arithmetic_matches_cpp_truncation() {
         s.py.flags.see_infra = 2;
     });
 
-    let derived = with_state(|s| compute_derived_abilities_for_test(s));
+    let derived = with_state(compute_derived_abilities_for_test);
     assert_eq!(derived.perception.x, 0); // 40 - 45 clamped
     assert_eq!(derived.stealth.x, 4); // stealth_factor + 1
     assert_eq!(derived.infra, "20 feet");
@@ -448,7 +479,9 @@ fn equipment_and_inventory_sections_in_output_file() {
 
     let empty_path = tempfile_dir("empty-chr").join("empty.chr");
     let _ = fs::remove_file(&empty_path);
-    assert!(output_player_character_to_file(empty_path.to_str().unwrap()));
+    assert!(output_player_character_to_file(
+        empty_path.to_str().unwrap()
+    ));
     let empty = fs::read_to_string(&empty_path).expect("empty chr");
     assert!(empty.contains("\n  [Character's Equipment List]\n\n"));
     assert!(empty.contains("  Character has no equipment in use.\n"));
@@ -499,7 +532,9 @@ fn output_player_character_new_and_replace_paths() {
     setup_player_for_character_output();
     push_confirm_no();
     assert!(!output_player_character_to_file(path.to_str().unwrap()));
-    assert!(test_ui_messages().iter().any(|m| m.starts_with("Can't open file")));
+    assert!(test_ui_messages()
+        .iter()
+        .any(|m| m.starts_with("Can't open file")));
 
     setup_ui_harness();
     setup_player_for_character_output();

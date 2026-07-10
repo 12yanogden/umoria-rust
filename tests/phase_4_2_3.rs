@@ -1,12 +1,20 @@
 //! Phase 4.2.3 — monster melee attacks on player parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
+use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::monsters::defense::{CD_EVIL, CD_NO_SLEEP};
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
+use umoria::dungeon_tile::{Tile, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::inventory::{
     inventory_item_copy_to, Inventory, PlayerEquipment, ITEM_GROUP_MIN, ITEM_SINGLE_STACK_MIN,
@@ -19,7 +27,6 @@ use umoria::player::PlayerAttr;
 use umoria::treasure::{TV_FOOD, TV_WAND};
 use umoria::types::{Coord_t, Vtype_t, MORIA_MESSAGE_SIZE};
 use umoria::ui_io::test_set_ncurses_stub;
-use umoria::config::dungeon::objects::OBJ_NOTHING;
 
 const URCHIN_ID: u16 = 0;
 const GREY_MUSHROOM_ID: u16 = 8;
@@ -30,7 +37,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -502,12 +509,13 @@ fn execute_attack_disenchant_seed42() {
             PlayerEquipment::Head,
             PlayerEquipment::Feet,
         ] {
-            let mut item = Inventory::default();
-            item.category_id = 30; // TV_SWORD-ish placeholder
-            item.to_hit = 3;
-            item.to_damage = 2;
-            item.to_ac = 4;
-            s.py.inventory[slot as usize] = item;
+            s.py.inventory[slot as usize] = Inventory {
+                category_id: 30, // TV_SWORD-ish placeholder
+                to_hit: 3,
+                to_damage: 2,
+                to_ac: 4,
+                ..Default::default()
+            };
         }
     });
     let mut hp = 0i16;
@@ -546,12 +554,13 @@ fn execute_attack_eat_food_seed42() {
         for i in 0..umoria::inventory::PLAYER_INVENTORY_SIZE as usize {
             inventory_item_copy_to(OBJ_NOTHING as i16, &mut s.py.inventory[i]);
         }
-        let mut food = Inventory::default();
-        food.category_id = TV_FOOD;
-        food.sub_category_id = ITEM_GROUP_MIN;
-        food.items_count = 1;
-        food.weight = 1;
-        s.py.inventory[0] = food;
+        s.py.inventory[0] = Inventory {
+            category_id: TV_FOOD,
+            sub_category_id: ITEM_GROUP_MIN,
+            items_count: 1,
+            weight: 1,
+            ..Default::default()
+        };
         s.py.pack.unique_items = 1;
     });
     let mut hp = 0i16;
@@ -579,7 +588,10 @@ fn execute_attack_eat_light_seed42() {
     assert!(noticed);
     with_state(|s| {
         // C++: misc_use -= 250 + randomNumber(250); seed42 → 548 (same as phase_4_5_1).
-        assert_eq!(s.py.inventory[PlayerEquipment::Light as usize].misc_use, 548);
+        assert_eq!(
+            s.py.inventory[PlayerEquipment::Light as usize].misc_use,
+            548
+        );
         assert_eq!(message_text(s.last_message_id), "Your light dims.");
     });
 }
@@ -593,12 +605,13 @@ fn execute_attack_drain_charges_seed42() {
         for i in 0..umoria::inventory::PLAYER_INVENTORY_SIZE as usize {
             inventory_item_copy_to(OBJ_NOTHING as i16, &mut s.py.inventory[i]);
         }
-        let mut wand = Inventory::default();
-        wand.category_id = TV_WAND;
-        wand.sub_category_id = ITEM_SINGLE_STACK_MIN;
-        wand.items_count = 1;
-        wand.misc_use = 5;
-        s.py.inventory[0] = wand;
+        s.py.inventory[0] = Inventory {
+            category_id: TV_WAND,
+            sub_category_id: ITEM_SINGLE_STACK_MIN,
+            items_count: 1,
+            misc_use: 5,
+            ..Default::default()
+        };
         s.py.pack.unique_items = 1;
     });
     let mut hp = 10i16;

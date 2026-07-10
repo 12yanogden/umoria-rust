@@ -1,4 +1,4 @@
-//! Port of src/ui_inventory.cpp — see phase_3.3.
+//! Port of `src/ui_inventory.cpp` — see `phase_3.3`.
 
 use std::os::raw::c_char;
 
@@ -7,8 +7,7 @@ use crate::game::{with_state, with_state_mut};
 use crate::identification::{item_append_to_inscription, item_description};
 use crate::inventory::{
     inventory_can_carry_item_count, inventory_carry_item, inventory_destroy_item,
-    inventory_drop_item, inventory_item_is_cursed, Inventory, PlayerEquipment,
-    PLAYER_INVENTORY_SIZE,
+    inventory_drop_item, inventory_item_is_cursed, PlayerEquipment, PLAYER_INVENTORY_SIZE,
 };
 use crate::player::{
     player_adjust_bonuses_for_item, player_carrying_load_limit, player_is_wielding_item,
@@ -515,9 +514,7 @@ pub fn request_and_show_inventory_screen(recover_screen: bool) {
     match action {
         ResumeAction::Done | ResumeAction::Abort => {}
         ResumeAction::Confirm => {
-            if !terminal::get_input_confirmation("Continuing with inventory command?") {
-                with_state_mut(|state| state.game.doing_inventory_command = 0);
-            } else {
+            if terminal::get_input_confirmation("Continuing with inventory command?") {
                 with_state_mut(|state| {
                     state.game.screen.screen_left_pos = 50;
                     state.game.screen.screen_bottom_pos = 0;
@@ -528,6 +525,8 @@ pub fn request_and_show_inventory_screen(recover_screen: bool) {
                     current
                 });
                 ui_command_switch_screen(screen);
+            } else {
+                with_state_mut(|state| state.game.doing_inventory_command = 0);
             }
         }
         ResumeAction::Switch(screen) => ui_command_switch_screen(screen),
@@ -554,10 +553,10 @@ pub fn ui_command_inventory_take_off_item(selecting: bool) -> bool {
             return Outcome::Message("You will have to drop something first.");
         }
 
-        if state.game.screen.current_screen_id != Screen::Blank {
-            Outcome::Switch(Screen::Equipment)
-        } else {
+        if state.game.screen.current_screen_id == Screen::Blank {
             Outcome::Done
+        } else {
+            Outcome::Switch(Screen::Equipment)
         }
     });
 
@@ -605,10 +604,10 @@ pub fn ui_command_inventory_drop_item(command: &mut u8, selecting: bool) -> bool
             && state.py.equipment_count > 0)
             || state.py.pack.unique_items == 0
         {
-            let switch = if state.game.screen.current_screen_id != Screen::Blank {
-                SwitchScreen::Equipment
-            } else {
+            let switch = if state.game.screen.current_screen_id == Screen::Blank {
                 SwitchScreen::None
+            } else {
+                SwitchScreen::Equipment
             };
             Outcome::RemapRemove(switch)
         } else if state.game.screen.current_screen_id != Screen::Blank {
@@ -741,7 +740,9 @@ fn ui_command_inventory_unwield_item() {
     });
 
     with_state_mut(|state| {
-        if state.py.inventory[PlayerEquipment::Wield as usize].category_id != TV_NOTHING {
+        if state.py.inventory[PlayerEquipment::Wield as usize].category_id == TV_NOTHING {
+            terminal::print_message(Some("No primary weapon."));
+        } else {
             let label = *b"Primary weapon   : \0";
             let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
             item_description(
@@ -752,8 +753,6 @@ fn ui_command_inventory_unwield_item() {
             let label_str = c_string_to_str(&label);
             let msg = format!("{}{}", label_str, c_string_to_str(&description));
             terminal::print_message(Some(&msg));
-        } else {
-            terminal::print_message(Some("No primary weapon."));
         }
     });
 
@@ -1076,8 +1075,7 @@ fn execute_wear_item_command(item_id: i32, which: &[u8], prompt: &str) {
             state.game.screen.wear_high_id += 1;
         }
 
-        state.py.pack.weight +=
-            (i32::from(saved.weight) * i32::from(saved.items_count)) as i16;
+        state.py.pack.weight += (i32::from(saved.weight) * i32::from(saved.items_count)) as i16;
         saved
     });
     inventory_destroy_item(resolved);

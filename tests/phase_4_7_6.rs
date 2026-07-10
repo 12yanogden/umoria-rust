@@ -1,10 +1,17 @@
 //! Phase 4.7.6 — player-effect & item-utility spells (spells.cpp).
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::treasure::flags::TR_CURSED;
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::{MIN_CLOSED_SPACE, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
+use umoria::dungeon_tile::{Tile, MIN_CLOSED_SPACE, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::inventory::{
     inventory_item_copy_to, inventory_item_is_cursed, Inventory, PlayerEquipment,
@@ -14,9 +21,8 @@ use umoria::player::PlayerAttr;
 use umoria::player_stats::player_initialize_base_experience_levels;
 use umoria::spells::{
     spell_change_player_hit_points, spell_create_food, spell_enchant_item, spell_lose_chr,
-    spell_lose_con, spell_lose_dex, spell_lose_exp, spell_lose_int, spell_lose_str,
-    spell_lose_wis, spell_recharge_item, spell_recharge_item_at,
-    spell_remove_curse_from_all_worn_items,
+    spell_lose_con, spell_lose_dex, spell_lose_exp, spell_lose_int, spell_lose_str, spell_lose_wis,
+    spell_recharge_item, spell_recharge_item_at, spell_remove_curse_from_all_worn_items,
     spell_restore_player_levels, spell_slow_poison, spell_teleport_player_to,
 };
 use umoria::treasure::TV_WAND;
@@ -75,7 +81,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -148,14 +154,11 @@ fn spell_enchant_item_max_bonus_zero_skips_rng() {
 
 #[test]
 fn spell_enchant_item_negative_limit_skips_rng() {
-    assert_rng_unchanged_after(
-        setup_player_base,
-        || {
-            let mut plusses = 3;
-            assert!(!spell_enchant_item(&mut plusses, -1));
-            assert_eq!(plusses, 3);
-        },
-    );
+    assert_rng_unchanged_after(setup_player_base, || {
+        let mut plusses = 3;
+        assert!(!spell_enchant_item(&mut plusses, -1));
+        assert_eq!(plusses, 3);
+    });
 }
 
 #[test]
@@ -240,8 +243,9 @@ fn spell_teleport_player_to_seed42_lands_and_rng_order() {
     assert_eq!(random_number(100), tail1);
     assert_ne!(pos1, Coord_t { y: 10, x: 10 });
     assert!(
-        i32::from(with_state(|s| s.dg.floor[pos1.y as usize][pos1.x as usize].feature_id))
-            < i32::from(MIN_CLOSED_SPACE)
+        i32::from(with_state(
+            |s| s.dg.floor[pos1.y as usize][pos1.x as usize].feature_id
+        )) < i32::from(MIN_CLOSED_SPACE)
     );
 }
 
@@ -264,8 +268,11 @@ fn spell_teleport_player_to_retries_on_wall_seed7() {
     });
     spell_teleport_player_to(Coord_t { y: 10, x: 10 });
     let pos = with_state(|s| s.py.pos);
-    assert!(i32::from(with_state(|s| s.dg.floor[pos.y as usize][pos.x as usize].feature_id))
-        < i32::from(MIN_CLOSED_SPACE));
+    assert!(
+        i32::from(with_state(
+            |s| s.dg.floor[pos.y as usize][pos.x as usize].feature_id
+        )) < i32::from(MIN_CLOSED_SPACE)
+    );
     assert_eq!(pairs.len(), 4);
 }
 
@@ -303,9 +310,7 @@ fn spell_lose_int_decreases_stat() {
     setup_player_base();
     let before = with_state(|s| s.py.stats.current[PlayerAttr::A_INT as usize]);
     spell_lose_int();
-    assert!(
-        with_state(|s| s.py.stats.current[PlayerAttr::A_INT as usize]) < before
-    );
+    assert!(with_state(|s| s.py.stats.current[PlayerAttr::A_INT as usize]) < before);
 }
 
 #[test]
@@ -315,9 +320,7 @@ fn spell_lose_wis_decreases_stat() {
     with_state_mut(|s| s.py.stats.current[PlayerAttr::A_WIS as usize] = 18);
     let before = with_state(|s| s.py.stats.current[PlayerAttr::A_WIS as usize]);
     spell_lose_wis();
-    assert!(
-        with_state(|s| s.py.stats.current[PlayerAttr::A_WIS as usize]) < before
-    );
+    assert!(with_state(|s| s.py.stats.current[PlayerAttr::A_WIS as usize]) < before);
 }
 
 #[test]
@@ -327,9 +330,7 @@ fn spell_lose_dex_decreases_stat() {
     with_state_mut(|s| s.py.stats.current[PlayerAttr::A_DEX as usize] = 18);
     let before = with_state(|s| s.py.stats.current[PlayerAttr::A_DEX as usize]);
     spell_lose_dex();
-    assert!(
-        with_state(|s| s.py.stats.current[PlayerAttr::A_DEX as usize]) < before
-    );
+    assert!(with_state(|s| s.py.stats.current[PlayerAttr::A_DEX as usize]) < before);
 }
 
 #[test]
@@ -339,9 +340,7 @@ fn spell_lose_con_decreases_stat() {
     with_state_mut(|s| s.py.stats.current[PlayerAttr::A_CON as usize] = 18);
     let before = with_state(|s| s.py.stats.current[PlayerAttr::A_CON as usize]);
     spell_lose_con();
-    assert!(
-        with_state(|s| s.py.stats.current[PlayerAttr::A_CON as usize]) < before
-    );
+    assert!(with_state(|s| s.py.stats.current[PlayerAttr::A_CON as usize]) < before);
 }
 
 #[test]
@@ -351,9 +350,7 @@ fn spell_lose_chr_decreases_stat() {
     with_state_mut(|s| s.py.stats.current[PlayerAttr::A_CHR as usize] = 18);
     let before = with_state(|s| s.py.stats.current[PlayerAttr::A_CHR as usize]);
     spell_lose_chr();
-    assert!(
-        with_state(|s| s.py.stats.current[PlayerAttr::A_CHR as usize]) < before
-    );
+    assert!(with_state(|s| s.py.stats.current[PlayerAttr::A_CHR as usize]) < before);
 }
 
 #[test]
@@ -462,7 +459,7 @@ fn spell_create_food_blocked_when_object_present_no_rng() {
             setup_dungeon(20, 20);
             with_state_mut(|s| s.dg.floor[10][10].treasure_id = 1);
         },
-        || spell_create_food(),
+        spell_create_food,
     );
     assert!(with_state(|s| s.game.player_free_turn));
     assert!(last_message_text().contains("already an object"));

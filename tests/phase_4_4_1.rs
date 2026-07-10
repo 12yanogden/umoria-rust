@@ -1,5 +1,12 @@
 //! Phase 4.4.1 — player_magic.cpp temporary-effect helpers.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::monsters::defense::{
     CD_ANIMAL, CD_DRAGON, CD_EVIL, CD_FIRE, CD_FROST, CD_UNDEAD,
@@ -227,10 +234,7 @@ fn item_magic_ability_damage_slay_animal() {
     reset_for_new_game(None);
     clear_recall_defenses(GIANT_CLEAR_ANT_ID);
     let item = ego_weapon(TV_ARROW, TR_SLAY_ANIMAL);
-    assert_eq!(
-        item_magic_ability_damage(item, 10, GIANT_CLEAR_ANT_ID),
-        20
-    );
+    assert_eq!(item_magic_ability_damage(item, 10, GIANT_CLEAR_ANT_ID), 20);
     assert_eq!(recall_defenses(GIANT_CLEAR_ANT_ID), CD_ANIMAL);
 }
 
@@ -239,10 +243,7 @@ fn item_magic_ability_damage_slay_evil() {
     reset_for_new_game(None);
     clear_recall_defenses(STREET_URCHIN_ID);
     let item = ego_weapon(TV_SWORD, TR_SLAY_EVIL);
-    assert_eq!(
-        item_magic_ability_damage(item, 10, STREET_URCHIN_ID),
-        20
-    );
+    assert_eq!(item_magic_ability_damage(item, 10, STREET_URCHIN_ID), 20);
     assert_eq!(recall_defenses(STREET_URCHIN_ID), CD_EVIL);
 }
 
@@ -251,10 +252,7 @@ fn item_magic_ability_damage_frost_brand() {
     reset_for_new_game(None);
     clear_recall_defenses(STREET_URCHIN_ID);
     let item = ego_weapon(TV_FLASK, TR_FROST_BRAND);
-    assert_eq!(
-        item_magic_ability_damage(item, 10, STREET_URCHIN_ID),
-        15
-    );
+    assert_eq!(item_magic_ability_damage(item, 10, STREET_URCHIN_ID), 15);
     assert_eq!(recall_defenses(STREET_URCHIN_ID), CD_FROST);
 }
 
@@ -263,10 +261,7 @@ fn item_magic_ability_damage_flame_tongue() {
     reset_for_new_game(None);
     clear_recall_defenses(YELLOW_JELLY_ID);
     let item = ego_weapon(TV_SWORD, TR_FLAME_TONGUE);
-    assert_eq!(
-        item_magic_ability_damage(item, 10, YELLOW_JELLY_ID),
-        15
-    );
+    assert_eq!(item_magic_ability_damage(item, 10, YELLOW_JELLY_ID), 15);
     assert_eq!(recall_defenses(YELLOW_JELLY_ID), CD_FIRE);
 }
 
@@ -323,10 +318,7 @@ fn item_magic_ability_damage_no_matching_branch_unchanged() {
     reset_for_new_game(None);
     clear_recall_defenses(GIANT_CLEAR_ANT_ID);
     let item = ego_weapon(TV_SWORD, TR_SLAY_DRAGON);
-    assert_eq!(
-        item_magic_ability_damage(item, 10, GIANT_CLEAR_ANT_ID),
-        10
-    );
+    assert_eq!(item_magic_ability_damage(item, 10, GIANT_CLEAR_ANT_ID), 10);
     assert_eq!(recall_defenses(GIANT_CLEAR_ANT_ID), 0);
 }
 

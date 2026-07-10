@@ -1,1 +1,1 @@
-//! Port of src/data_tables.cpp — see phase_2.
+//! Port of `src/data_tables.cpp` — see `phase_2`.

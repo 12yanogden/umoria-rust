@@ -194,7 +194,7 @@ pub fn monster_take_hit(monster_id: i32, damage: i32) -> i32 {
 
 /// C++ monster.cpp lines 1399–1417.
 pub fn monster_death_item_drop_type(flags: u32) -> i32 {
-    let mut object = if (flags & CM_CARRY_OBJ) != 0 { 1 } else { 0 };
+    let mut object = i32::from((flags & CM_CARRY_OBJ) != 0);
 
     if (flags & CM_CARRY_GOLD) != 0 {
         object += 2;
@@ -405,13 +405,7 @@ pub fn monster_movement_rate(speed: i16) -> i32 {
         return i32::from(speed);
     }
 
-    with_state(|state| {
-        if (state.dg.game_turn % (2 - i32::from(speed))) == 0 {
-            1
-        } else {
-            0
-        }
-    })
+    with_state(|state| i32::from((state.dg.game_turn % (2 - i32::from(speed))) == 0))
 }
 
 /// C++ monster.cpp lines 1235–1253.
@@ -1041,10 +1035,10 @@ pub fn monster_attack_player(monster_id: i32) {
     let lit = with_state(|state| state.monsters[monster_id as usize].lit);
 
     let mut name = [0u8; MORIA_MESSAGE_SIZE];
-    if !lit {
-        vtype_set_cstr(&mut name, "It ");
-    } else {
+    if lit {
         vtype_snprintf(&mut name, &format!("The {} ", creature.name));
+    } else {
+        vtype_set_cstr(&mut name, "It ");
     }
 
     let mut death_description = [0u8; MORIA_MESSAGE_SIZE];
@@ -1657,22 +1651,26 @@ pub fn monster_open_door(
             if category_id == TV_CLOSED_DOOR {
                 *do_turn = true;
 
-                if misc_use == 0 {
-                    *do_move = true;
-                } else if misc_use > 0 {
-                    let lhs = (i32::from(monster_hp) + 1) * (50 + i32::from(misc_use));
-                    let rhs = 40 * (i32::from(monster_hp) - 10 - i32::from(misc_use));
-                    if random_number_state(state, lhs) < rhs {
-                        state.game.treasure.list[treasure_id as usize].misc_use = 0;
-                    }
-                } else if misc_use < 0 {
-                    let lhs = (i32::from(monster_hp) + 1) * (50 - i32::from(misc_use));
-                    let rhs = 40 * (i32::from(monster_hp) - 10 + i32::from(misc_use));
-                    if random_number_state(state, lhs) < rhs {
-                        stuck_message = true;
-                        disturb = true;
-                        door_is_stuck = true;
+                match misc_use.cmp(&0) {
+                    std::cmp::Ordering::Equal => {
                         *do_move = true;
+                    }
+                    std::cmp::Ordering::Greater => {
+                        let lhs = (i32::from(monster_hp) + 1) * (50 + i32::from(misc_use));
+                        let rhs = 40 * (i32::from(monster_hp) - 10 - i32::from(misc_use));
+                        if random_number_state(state, lhs) < rhs {
+                            state.game.treasure.list[treasure_id as usize].misc_use = 0;
+                        }
+                    }
+                    std::cmp::Ordering::Less => {
+                        let lhs = (i32::from(monster_hp) + 1) * (50 - i32::from(misc_use));
+                        let rhs = 40 * (i32::from(monster_hp) - 10 + i32::from(misc_use));
+                        if random_number_state(state, lhs) < rhs {
+                            stuck_message = true;
+                            disturb = true;
+                            door_is_stuck = true;
+                            *do_move = true;
+                        }
                     }
                 }
             } else if category_id == TV_SECRET_DOOR {

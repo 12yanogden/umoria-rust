@@ -1,19 +1,19 @@
 //! Phase 4.6.1 — store.cpp interaction & haggling parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::identification::ID_DAMD;
 use umoria::data_store_owners::STORE_OWNERS;
 use umoria::data_stores::{
-    SPEECH_BUYING_HAGGLE as SPEECH_BUYING_HAGGLE_TABLE,
-    SPEECH_BUYING_HAGGLE_FINAL as SPEECH_BUYING_HAGGLE_FINAL_TABLE,
-    SPEECH_GET_OUT_OF_MY_STORE as SPEECH_GET_OUT_OF_MY_STORE_TABLE,
-    SPEECH_HAGGLING_TRY_AGAIN as SPEECH_HAGGLING_TRY_AGAIN_TABLE,
     SPEECH_INSULTED_HAGGLING_DONE as SPEECH_INSULTED_HAGGLING_DONE_TABLE,
     SPEECH_SALE_ACCEPTED as SPEECH_SALE_ACCEPTED_TABLE,
-    SPEECH_SELLING_HAGGLE as SPEECH_SELLING_HAGGLE_TABLE,
-    SPEECH_SELLING_HAGGLE_FINAL as SPEECH_SELLING_HAGGLE_FINAL_TABLE,
-    SPEECH_SORRY as SPEECH_SORRY_TABLE,
 };
 use umoria::data_treasure::GAME_OBJECTS;
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
@@ -28,12 +28,12 @@ use umoria::store::{
     store_purchase_customer_adjustment, store_purchase_haggle, store_receive_offer,
     store_sell_customer_adjustment, store_sell_haggle, test_reset_store_last_increment,
     test_store_decrease_insults, test_store_increase_insults, test_store_last_increment,
-    test_store_no_need_to_bargain, test_store_update_bargaining_skills, BidState, Owner, Store,
+    test_store_no_need_to_bargain, test_store_update_bargaining_skills, BidState, Store,
     MAX_OWNERS, MAX_STORES, STORE_BUY,
 };
 use umoria::treasure::{
-    TV_AMULET, TV_ARROW, TV_BOOTS, TV_CHEST, TV_CLOAK, TV_DIGGING, TV_FOOD, TV_GLOVES, TV_HAFTED,
-    TV_MAGIC_BOOK, TV_POTION1, TV_SCROLL1, TV_SOFT_ARMOR, TV_SWORD, TV_WAND,
+    TV_AMULET, TV_ARROW, TV_BOOTS, TV_CLOAK, TV_DIGGING, TV_FOOD, TV_HAFTED, TV_MAGIC_BOOK,
+    TV_POTION1, TV_SCROLL1, TV_SOFT_ARMOR, TV_SWORD, TV_WAND,
 };
 use umoria::ui_io::{
     ctrl_key, test_clear_getch_keys, test_push_getch_keys, test_set_ncurses_stub, ESCAPE,
@@ -76,7 +76,7 @@ fn speech_roll(max: i32) -> i32 {
 }
 
 #[test]
-#[ignore]
+#[ignore = "manual RNG probe for seed42 calibration"]
 fn probe_seed42_values() {
     reset_for_new_game(Some(42));
     eprintln!("14: {}", random_number(14));
@@ -149,7 +149,7 @@ fn store_initialize_owners_rng_golden_seed42() {
             assert_eq!(store.good_purchases, 0);
             assert_eq!(store.bad_purchases, 0);
             assert_eq!(store.inventory[0].cost, 0);
-            assert_eq!(store.inventory[0].item.id, OBJ_NOTHING as u16);
+            assert_eq!(store.inventory[0].item.id, OBJ_NOTHING);
         }
     });
 
@@ -181,8 +181,11 @@ fn print_speech_finished_haggling_rng_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_finished_haggling();
-    assert_eq!(SPEECH_SALE_ACCEPTED_TABLE[(roll - 1) as usize], SPEECH_SALE_ACCEPTED_TABLE[(roll - 1) as usize]);
-    assert!(roll >= 1 && roll <= 14);
+    assert_eq!(
+        SPEECH_SALE_ACCEPTED_TABLE[(roll - 1) as usize],
+        SPEECH_SALE_ACCEPTED_TABLE[(roll - 1) as usize]
+    );
+    assert!((1..=14).contains(&roll));
 }
 
 #[test]
@@ -191,7 +194,7 @@ fn print_speech_selling_haggle_non_final_rng_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_selling_haggle(100, 200, 0);
-    assert!(roll >= 1 && roll <= 16);
+    assert!((1..=16).contains(&roll));
 }
 
 #[test]
@@ -200,7 +203,7 @@ fn print_speech_selling_haggle_final_rng_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_selling_haggle(100, 200, 1);
-    assert!(roll >= 1 && roll <= 3);
+    assert!((1..=3).contains(&roll));
 }
 
 #[test]
@@ -209,7 +212,7 @@ fn print_speech_buying_haggle_non_final_rng_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_buying_haggle(200, 100, 0);
-    assert!(roll >= 1 && roll <= 15);
+    assert!((1..=15).contains(&roll));
 }
 
 #[test]
@@ -218,7 +221,7 @@ fn print_speech_buying_haggle_final_rng_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_buying_haggle(200, 100, 1);
-    assert!(roll >= 1 && roll <= 3);
+    assert!((1..=3).contains(&roll));
 }
 
 #[test]
@@ -227,7 +230,7 @@ fn print_speech_get_out_of_my_store_one_draw_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_get_out_of_my_store();
-    assert!(roll >= 1 && roll <= 5);
+    assert!((1..=5).contains(&roll));
     assert_eq!(
         SPEECH_INSULTED_HAGGLING_DONE_TABLE[(roll - 1) as usize],
         SPEECH_INSULTED_HAGGLING_DONE_TABLE[(roll - 1) as usize]
@@ -240,7 +243,7 @@ fn print_speech_try_again_rng_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_try_again();
-    assert!(roll >= 1 && roll <= 10);
+    assert!((1..=10).contains(&roll));
 }
 
 #[test]
@@ -249,7 +252,7 @@ fn print_speech_sorry_rng_seed42() {
     reset_for_new_game(Some(42));
     setup_stub_io();
     print_speech_sorry();
-    assert!(roll >= 1 && roll <= 5);
+    assert!((1..=5).contains(&roll));
 }
 
 // ---------------------------------------------------------------------------
@@ -472,8 +475,12 @@ fn store_purchase_haggle_over_ask_sorry_path_rng_seed200() {
         let store = &s.stores[0];
         let mut min_sell = 0;
         let mut max_sell = 0;
-        let cost =
-            umoria::store_inventory::store_item_sell_price(store, &mut min_sell, &mut max_sell, &item);
+        let cost = umoria::store_inventory::store_item_sell_price(
+            store,
+            &mut min_sell,
+            &mut max_sell,
+            &item,
+        );
         store_purchase_customer_adjustment(&mut min_sell, &mut max_sell);
         let owner = &STORE_OWNERS[store.owner_id as usize];
         let max_buy = (cost * (200 - i32::from(owner.max_inflate)) / 100).max(1);

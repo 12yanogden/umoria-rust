@@ -1,21 +1,26 @@
 //! Phase 4.5.4.2 — itemDescription, inscriptions & description helpers parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use std::fs;
 use std::os::raw::c_char;
 use std::path::{Path, PathBuf};
 
-use umoria::config::identification::{
-    ID_EMPTY, ID_KNOWN2, ID_MAGIK, ID_STORE_BOUGHT, OD_TRIED,
-};
-use umoria::config::treasure::flags::{TR_STR};
+use umoria::config::identification::{ID_EMPTY, ID_KNOWN2, ID_MAGIK, ID_STORE_BOUGHT, OD_TRIED};
+use umoria::config::treasure::flags::TR_STR;
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::game::{reset_for_new_game, with_state, with_state_mut};
 use umoria::identification::{
     bow_damage_value, item_append_to_inscription, item_charges_remaining_description,
     item_description, item_inscribe, item_replace_inscription, item_set_as_identified,
-    item_type_remaining_count_description, magic_initialize_item_names,
-    object_blocked_by_monster, spell_item_identified, FlavorTables, SpecialNameIds,
+    item_type_remaining_count_description, magic_initialize_item_names, object_blocked_by_monster,
+    spell_item_identified, FlavorTables, SpecialNameIds,
 };
 use umoria::inventory::{inventory_item_copy_to, Inventory, INSCRIP_SIZE};
 use umoria::monster::Monster;
@@ -180,7 +185,11 @@ fn case_item(name: &str) -> Inventory {
             let mut item = make_item(293, 64);
             item.misc_use = 3;
             item.identification = ID_KNOWN2 | ID_MAGIK | ID_EMPTY;
-            item.inscription[..3].copy_from_slice(&[b'a' as c_char, b'b' as c_char, b'c' as c_char]);
+            item.inscription[..3].copy_from_slice(&[
+                b'a' as c_char,
+                b'b' as c_char,
+                b'c' as c_char,
+            ]);
             item.inscription[3] = 0;
             item
         }
@@ -286,7 +295,10 @@ fn item_charges_remaining_description_message() {
         s.py.pack.unique_items = 1;
     });
     item_charges_remaining_description(0);
-    assert_eq!(message_text(with_state(|s| s.last_message_id)), "You have 7 charges remaining.");
+    assert_eq!(
+        message_text(with_state(|s| s.last_message_id)),
+        "You have 7 charges remaining."
+    );
     test_set_ncurses_stub(false);
 }
 
@@ -343,7 +355,9 @@ fn item_replace_inscription_truncates_to_inscrip_size() {
         .position(|&ch| ch == 0)
         .unwrap_or(INSCRIP_SIZE as usize);
     assert_eq!(end, INSCRIP_SIZE as usize - 1);
-    assert!(item.inscription[..end].iter().all(|&ch| ch == b'x' as c_char));
+    assert!(item.inscription[..end]
+        .iter()
+        .all(|&ch| ch == b'x' as c_char));
 }
 
 #[test]
@@ -378,10 +392,7 @@ fn object_blocked_by_monster_lit() {
     object_blocked_by_monster(3);
     assert_eq!(
         message_text(with_state(|s| s.last_message_id)),
-        format!(
-            "The {} is in your way!",
-            CREATURES_LIST[1].name
-        )
+        format!("The {} is in your way!", CREATURES_LIST[1].name)
     );
     test_set_ncurses_stub(false);
 }

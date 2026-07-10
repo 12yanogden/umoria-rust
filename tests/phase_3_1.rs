@@ -1,5 +1,12 @@
 //! Phase 3.1 — ui_io (curses wrapper & terminal I/O).
 //! See `.cursor/plans/rust-translation/phase_3.1.md`.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::game::{reset_for_new_game, with_state, with_state_mut};
 use umoria::types::{Vtype_t, MORIA_MESSAGE_SIZE};
@@ -7,11 +14,11 @@ use umoria::ui_io::{
     self, advance_message_ring_index, append_message_slot, clamp_more_column,
     clamp_string_input_end_col, confirmation_key_result, copy_message_to_ring_slot, ctrl_key,
     is_printable_key, message_old_len, more_prompt_accepts_key, panel_screen_coord,
-    should_combine_messages, should_show_more, test_bell_count, test_clear_getch_keys,
-    test_flush_input_buffer_count, test_push_getch_keys, test_set_eof_flag, test_set_ncurses_stub,
-    test_set_select_ready, test_set_ui_detail_capture, test_set_ui_trace, test_ui_trace_events,
+    should_combine_messages, should_show_more,
     terminal::{self, Coord},
-    trim_trailing_spaces, UiTraceEvent, ESCAPE,
+    test_bell_count, test_clear_getch_keys, test_flush_input_buffer_count, test_push_getch_keys,
+    test_set_eof_flag, test_set_ncurses_stub, test_set_select_ready, test_set_ui_detail_capture,
+    test_set_ui_trace, test_ui_trace_events, trim_trailing_spaces, UiTraceEvent, ESCAPE,
 };
 
 // ---------------------------------------------------------------------------

@@ -1,14 +1,19 @@
 //! Phase 4.7.2 — area/line light & darken spells parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::{OBJ_CLOSED_DOOR, OBJ_SECRET_DOOR, OBJ_TRAP_LIST};
 use umoria::config::monsters::defense::CD_LIGHT;
 use umoria::config::treasure::chests::{CH_LOCKED, CH_TRAPPED};
 use umoria::config::treasure::OBJECT_BOLTS_MAX_RANGE;
 use umoria::data_creatures::CREATURES_LIST;
-use umoria::dungeon::{
-    cave_tile_visible, dungeon_lite_spot, MAX_HEIGHT, MAX_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH,
-};
+use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH};
 use umoria::dungeon_tile::{
     Tile, MAX_CAVE_FLOOR, MAX_OPEN_SPACE, MIN_CLOSED_SPACE, TILE_CORR_FLOOR, TILE_DARK_FLOOR,
     TILE_GRANITE_WALL, TILE_LIGHT_FLOOR,
@@ -17,15 +22,13 @@ use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut
 use umoria::game_objects::popt;
 use umoria::identification::SpecialNameIds;
 use umoria::inventory::{inventory_item_copy_to, Inventory};
-use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
+use umoria::monster::Monster;
 use umoria::player_move::player_move_position;
 use umoria::spells::{
     spell_darken_area, spell_disarm_all_in_direction, spell_light_area, spell_light_line,
     spell_starlite,
 };
-use umoria::treasure::{
-    TV_CHEST, TV_CLOSED_DOOR, TV_INVIS_TRAP, TV_SECRET_DOOR, TV_VIS_TRAP,
-};
+use umoria::treasure::{TV_CHEST, TV_CLOSED_DOOR};
 use umoria::types::Coord_t;
 use umoria::ui::panel_bounds_fields;
 use umoria::ui_io::test_set_ncurses_stub;
@@ -487,12 +490,15 @@ fn spell_disarm_all_in_direction_closed_door_clears_misc_use() {
         s.game.treasure.list[tid as usize].misc_use = 7;
     });
 
-    spell_disarm_all_in_direction(Coord_t { y: 10, x: 10 }, 2);
+    let _ = spell_disarm_all_in_direction(Coord_t { y: 10, x: 10 }, 2);
 
     with_state(|s| {
         let tid = s.dg.floor[door.y as usize][door.x as usize].treasure_id;
         assert_eq!(s.game.treasure.list[tid as usize].misc_use, 0);
-        assert_eq!(s.game.treasure.list[tid as usize].category_id, TV_CLOSED_DOOR);
+        assert_eq!(
+            s.game.treasure.list[tid as usize].category_id,
+            TV_CLOSED_DOOR
+        );
     });
 }
 
@@ -516,7 +522,10 @@ fn spell_disarm_all_in_direction_secret_door_marks_field() {
     assert!(tile_at(door).field_mark);
     with_state(|s| {
         let tid = s.dg.floor[door.y as usize][door.x as usize].treasure_id;
-        assert_eq!(s.game.treasure.list[tid as usize].category_id, TV_CLOSED_DOOR);
+        assert_eq!(
+            s.game.treasure.list[tid as usize].category_id,
+            TV_CLOSED_DOOR
+        );
     });
 }
 

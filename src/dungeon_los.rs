@@ -1,6 +1,7 @@
-//! Port of src/dungeon_los.cpp — line-of-sight and look commands.
+//! Port of `src/dungeon_los.cpp` — line-of-sight and look commands.
 
 use std::cell::RefCell;
+use std::cmp::Ordering;
 
 use crate::config::monsters::MON_MAX_SIGHT;
 use crate::data_creatures::CREATURES_LIST;
@@ -100,7 +101,7 @@ fn snprintf_obj_desc(buf: &mut Obj_desc_t, formatted: &str) {
     buf[n] = 0;
 }
 
-/// C++ dungeon_los.cpp lines 25–176 — Joseph Hall integer LOS.
+/// C++ `dungeon_los.cpp` lines 25–176 — Joseph Hall integer LOS.
 pub fn los(from: Coord_t, to: Coord_t) -> bool {
     let mut from = from;
     let mut to = to;
@@ -163,20 +164,24 @@ pub fn los(from: Coord_t, to: Coord_t) -> bool {
                 return false;
             }
             dy += slope;
-            if dy < scale_half {
-                xx += x_sign;
-            } else if dy > scale_half {
-                yy += y_sign;
-                if feature_blocks_los(yy, xx) {
-                    return false;
+            match dy.cmp(&scale_half) {
+                Ordering::Less => {
+                    xx += x_sign;
                 }
-                xx += x_sign;
-                dy -= scale;
-            } else {
-                // dy == scale_half — corner tile (lines 128–132)
-                xx += x_sign;
-                yy += y_sign;
-                dy -= scale;
+                Ordering::Greater => {
+                    yy += y_sign;
+                    if feature_blocks_los(yy, xx) {
+                        return false;
+                    }
+                    xx += x_sign;
+                    dy -= scale;
+                }
+                Ordering::Equal => {
+                    // dy == scale_half — corner tile (lines 128–132)
+                    xx += x_sign;
+                    yy += y_sign;
+                    dy -= scale;
+                }
             }
         }
         return true;
@@ -199,25 +204,29 @@ pub fn los(from: Coord_t, to: Coord_t) -> bool {
             return false;
         }
         dx += slope;
-        if dx < scale_half {
-            yy += y_sign;
-        } else if dx > scale_half {
-            xx += x_sign;
-            if feature_blocks_los(yy, xx) {
-                return false;
+        match dx.cmp(&scale_half) {
+            Ordering::Less => {
+                yy += y_sign;
             }
-            yy += y_sign;
-            dx -= scale;
-        } else {
-            xx += x_sign;
-            yy += y_sign;
-            dx -= scale;
+            Ordering::Greater => {
+                xx += x_sign;
+                if feature_blocks_los(yy, xx) {
+                    return false;
+                }
+                yy += y_sign;
+                dx -= scale;
+            }
+            Ordering::Equal => {
+                xx += x_sign;
+                yy += y_sign;
+                dx -= scale;
+            }
         }
     }
     true
 }
 
-/// C++ dungeon_los.cpp lines 258–357.
+/// C++ `dungeon_los.cpp` lines 258–357.
 pub fn look() {
     if with_state(|s| s.py.flags.blind > 0) {
         terminal::print_message(Some("You can't see a damn thing!"));
@@ -338,7 +347,7 @@ pub fn look() {
     }
 }
 
-/// C++ dungeon_los.cpp lines 375–463.
+/// C++ `dungeon_los.cpp` lines 375–463.
 pub fn look_ray(y: i32, mut from: i32, to: i32) -> bool {
     if from <= to || y > i32::from(MON_MAX_SIGHT) {
         return false;
@@ -425,7 +434,7 @@ pub fn look_ray(y: i32, mut from: i32, to: i32) -> bool {
     }
 }
 
-/// C++ dungeon_los.cpp lines 465–575.
+/// C++ `dungeon_los.cpp` lines 465–575.
 pub fn look_see(mut coord: Coord_t, transparent: &mut bool) -> bool {
     if coord.x < 0 || coord.y < 0 || coord.y > coord.x {
         let msg = format!("Illegal call to lookSee({}, {})", coord.y, coord.x);

@@ -1,7 +1,7 @@
-//! Port of src/player_eat.cpp — see phase_2.
+//! Port of `src/player_eat.cpp` — see `phase_2`.
 
-use crate::config::player::{PLAYER_FOOD_FULL, PLAYER_FOOD_MAX};
 use crate::config::player::status::{PY_HUNGRY, PY_WEAK};
+use crate::config::player::{PLAYER_FOOD_FULL, PLAYER_FOOD_MAX};
 use crate::dice::{dice_roll, Dice};
 use crate::game::{random_number, with_state, with_state_mut};
 use crate::helpers::get_and_clear_first_bit;
@@ -11,16 +11,12 @@ use crate::identification::{
 };
 use crate::inventory::{inventory_destroy_item, inventory_find_range, Inventory};
 use crate::player::{player_takes_hit, PlayerAttr};
-use crate::player_magic::{
-    player_cure_blindness, player_cure_confusion, player_cure_poison,
-};
+use crate::player_magic::{player_cure_blindness, player_cure_confusion, player_cure_poison};
 use crate::player_stats::player_stat_restore;
-use crate::spells::{
-    spell_change_player_hit_points, spell_lose_con, spell_lose_str,
-};
+use crate::spells::{spell_change_player_hit_points, spell_lose_con, spell_lose_str};
 use crate::treasure::{TV_FOOD, TV_NEVER};
-use crate::types::{MORIA_MESSAGE_SIZE, Vtype_t};
-use crate::ui::{draw_cave_panel, display_character_experience, print_character_hunger_status};
+use crate::types::{Vtype_t, MORIA_MESSAGE_SIZE};
+use crate::ui::{display_character_experience, draw_cave_panel, print_character_hunger_status};
 use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_io::terminal;
 
@@ -158,7 +154,7 @@ fn apply_food_effect(item: &Inventory, item_flags: &mut u32) -> bool {
     }
 }
 
-/// C++ player_eat.cpp lines 38–233.
+/// C++ `player_eat.cpp` lines 38–233.
 pub fn player_eat() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -216,10 +212,10 @@ pub fn player_eat() {
     if identified {
         if !item_set_colorless_as_identified(category_id, sub_category_id, identification) {
             with_state_mut(|state| {
-                state.py.misc.exp += (i32::from(
-                    state.py.inventory[item_id as usize].depth_first_found,
-                ) + (i32::from(state.py.misc.level) >> 1))
-                    / i32::from(state.py.misc.level);
+                state.py.misc.exp +=
+                    (i32::from(state.py.inventory[item_id as usize].depth_first_found)
+                        + (i32::from(state.py.misc.level) >> 1))
+                        / i32::from(state.py.misc.level);
             });
             display_character_experience();
             item_identify(&mut item_id);
@@ -240,7 +236,7 @@ pub fn player_eat() {
     inventory_destroy_item(item_id);
 }
 
-/// C++ player_eat.cpp lines 236–264.
+/// C++ `player_eat.cpp` lines 236–264.
 pub fn player_ingest_food(amount: i32) {
     let message = with_state_mut(|state| {
         if state.py.flags.food < 0 {
@@ -259,8 +255,7 @@ pub fn player_ingest_food(amount: i32) {
             state.py.flags.slow += penalty as i16;
 
             if extra == amount {
-                state.py.flags.food =
-                    (i32::from(state.py.flags.food) - amount + penalty) as i16;
+                state.py.flags.food = (i32::from(state.py.flags.food) - amount + penalty) as i16;
             } else {
                 state.py.flags.food = (i32::from(PLAYER_FOOD_MAX) + penalty) as i16;
             }

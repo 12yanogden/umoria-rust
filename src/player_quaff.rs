@@ -1,4 +1,4 @@
-//! Port of src/player_quaff.cpp — potion quaffing.
+//! Port of `src/player_quaff.cpp` — potion quaffing.
 
 use crate::config::player::PLAYER_MAX_EXP;
 use crate::dice::{dice_roll, Dice};
@@ -9,16 +9,16 @@ use crate::identification::{
     item_type_remaining_count_description,
 };
 use crate::inventory::{inventory_destroy_item, inventory_find_range};
+use crate::player::PlayerAttr;
 use crate::player_eat::player_ingest_food;
 use crate::player_magic::{
     player_cure_blindness, player_cure_confusion, player_cure_poison, player_detect_invisible,
     player_remove_fear,
 };
-use crate::player::PlayerAttr;
 use crate::player_stats::{player_stat_random_increase, player_stat_restore};
 use crate::spells::{
-    spell_lose_chr, spell_lose_exp, spell_lose_int, spell_lose_str, spell_lose_wis,
-    spell_change_player_hit_points, spell_restore_player_levels, spell_slow_poison,
+    spell_change_player_hit_points, spell_lose_chr, spell_lose_exp, spell_lose_int, spell_lose_str,
+    spell_lose_wis, spell_restore_player_levels, spell_slow_poison,
 };
 use crate::treasure::{TV_POTION1, TV_POTION2};
 use crate::ui::{display_character_experience, print_character_current_mana};
@@ -27,7 +27,7 @@ use crate::ui_io::terminal;
 
 const SHRT_MAX: i32 = 32_767;
 
-/// C++ player_quaff.cpp lines 60–334.
+/// C++ `player_quaff.cpp` lines 60–334.
 pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
     let mut identified = false;
     let mut flags = flags;
@@ -150,9 +150,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                 if with_state(|state| !state.py.flags.free_action) {
                     terminal::print_message(Some("You fall asleep."));
                     with_state_mut(|state| {
-                        state.py.flags.paralysis = state.py.flags.paralysis.wrapping_add(
-                            (random_number_state(state, 4) + 4) as i16,
-                        );
+                        state.py.flags.paralysis = state
+                            .py
+                            .flags
+                            .paralysis
+                            .wrapping_add((random_number_state(state, 4) + 4) as i16);
                     });
                     true
                 } else {
@@ -165,9 +167,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.blind = state.py.flags.blind.wrapping_add(
-                        (random_number_state(state, 100) + 100) as i16,
-                    );
+                    state.py.flags.blind = state
+                        .py
+                        .flags
+                        .blind
+                        .wrapping_add((random_number_state(state, 100) + 100) as i16);
                 });
                 identified
             }
@@ -177,9 +181,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.confused = state.py.flags.confused.wrapping_add(
-                        (random_number_state(state, 20) + 12) as i16,
-                    );
+                    state.py.flags.confused = state
+                        .py
+                        .flags
+                        .confused
+                        .wrapping_add((random_number_state(state, 20) + 12) as i16);
                 });
                 identified
             }
@@ -189,9 +195,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.poisoned = state.py.flags.poisoned.wrapping_add(
-                        (random_number_state(state, 15) + 10) as i16,
-                    );
+                    state.py.flags.poisoned = state
+                        .py
+                        .flags
+                        .poisoned
+                        .wrapping_add((random_number_state(state, 15) + 10) as i16);
                 });
                 identified
             }
@@ -200,9 +208,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.fast = state.py.flags.fast.wrapping_add(
-                        (random_number_state(state, 25) + 15) as i16,
-                    );
+                    state.py.flags.fast = state
+                        .py
+                        .flags
+                        .fast
+                        .wrapping_add((random_number_state(state, 25) + 15) as i16);
                 });
                 identified
             }
@@ -211,9 +221,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.slow = state.py.flags.slow.wrapping_add(
-                        (random_number_state(state, 25) + 15) as i16,
-                    );
+                    state.py.flags.slow = state
+                        .py
+                        .flags
+                        .slow
+                        .wrapping_add((random_number_state(state, 25) + 15) as i16);
                 });
                 identified
             }
@@ -281,10 +293,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.invulnerability =
-                        state.py.flags.invulnerability.wrapping_add(
-                            (random_number_state(state, 10) + 10) as i16,
-                        );
+                    state.py.flags.invulnerability = state
+                        .py
+                        .flags
+                        .invulnerability
+                        .wrapping_add((random_number_state(state, 10) + 10) as i16);
                 });
                 identified
             }
@@ -293,9 +306,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.heroism = state.py.flags.heroism.wrapping_add(
-                        (random_number_state(state, 25) + 25) as i16,
-                    );
+                    state.py.flags.heroism = state
+                        .py
+                        .flags
+                        .heroism
+                        .wrapping_add((random_number_state(state, 25) + 25) as i16);
                 });
                 identified
             }
@@ -304,10 +319,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.super_heroism =
-                        state.py.flags.super_heroism.wrapping_add(
-                            (random_number_state(state, 25) + 25) as i16,
-                        );
+                    state.py.flags.super_heroism = state
+                        .py
+                        .flags
+                        .super_heroism
+                        .wrapping_add((random_number_state(state, 25) + 25) as i16);
                 });
                 identified
             }
@@ -318,10 +334,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.heat_resistance =
-                        state.py.flags.heat_resistance.wrapping_add(
-                            (random_number_state(state, 10) + 10) as i16,
-                        );
+                    state.py.flags.heat_resistance = state
+                        .py
+                        .flags
+                        .heat_resistance
+                        .wrapping_add((random_number_state(state, 10) + 10) as i16);
                 });
                 identified
             }
@@ -330,10 +347,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.cold_resistance =
-                        state.py.flags.cold_resistance.wrapping_add(
-                            (random_number_state(state, 10) + 10) as i16,
-                        );
+                    state.py.flags.cold_resistance = state
+                        .py
+                        .flags
+                        .cold_resistance
+                        .wrapping_add((random_number_state(state, 10) + 10) as i16);
                 });
                 identified
             }
@@ -348,9 +366,8 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
             44 => spell_slow_poison(),
             45 => player_cure_poison(),
             46 => {
-                let needs_restore = with_state(|state| {
-                    state.py.misc.current_mana < state.py.misc.mana
-                });
+                let needs_restore =
+                    with_state(|state| state.py.misc.current_mana < state.py.misc.mana);
                 if needs_restore {
                     with_state_mut(|state| state.py.misc.current_mana = state.py.misc.mana);
                     terminal::print_message(Some("Your feel your head clear."));
@@ -366,9 +383,11 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.timed_infra = state.py.flags.timed_infra.wrapping_add(
-                        (100 + random_number_state(state, 100)) as i16,
-                    );
+                    state.py.flags.timed_infra = state
+                        .py
+                        .flags
+                        .timed_infra
+                        .wrapping_add((100 + random_number_state(state, 100)) as i16);
                 });
                 identified
             }
@@ -382,7 +401,7 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
     identified
 }
 
-/// C++ player_quaff.cpp lines 337–384.
+/// C++ `player_quaff.cpp` lines 337–384.
 pub fn quaff() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -417,17 +436,16 @@ pub fn quaff() {
 
     with_state_mut(|state| state.game.player_free_turn = false);
 
-    let (flags, category_id, sub_category_id, identification, misc_use) =
-        with_state(|state| {
-            let item = state.py.inventory[item_id as usize];
-            (
-                item.flags,
-                item.category_id,
-                item.sub_category_id,
-                item.identification,
-                item.misc_use,
-            )
-        });
+    let (flags, category_id, sub_category_id, identification, misc_use) = with_state(|state| {
+        let item = state.py.inventory[item_id as usize];
+        (
+            item.flags,
+            item.category_id,
+            item.sub_category_id,
+            item.identification,
+            item.misc_use,
+        )
+    });
 
     let identified = if flags == 0 {
         terminal::print_message(Some("You feel less thirsty."));
@@ -439,10 +457,10 @@ pub fn quaff() {
     if identified {
         if !item_set_colorless_as_identified(category_id, sub_category_id, identification) {
             with_state_mut(|state| {
-                state.py.misc.exp += (i32::from(
-                    state.py.inventory[item_id as usize].depth_first_found,
-                ) + (i32::from(state.py.misc.level) >> 1))
-                    / i32::from(state.py.misc.level);
+                state.py.misc.exp +=
+                    (i32::from(state.py.inventory[item_id as usize].depth_first_found)
+                        + (i32::from(state.py.misc.level) >> 1))
+                        / i32::from(state.py.misc.level);
             });
             display_character_experience();
             item_identify(&mut item_id);

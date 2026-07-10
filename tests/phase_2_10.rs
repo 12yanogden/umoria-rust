@@ -1,4 +1,11 @@
 //! Phase 2.10 — data_store_owners.cpp store owner table parity.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::data_store_owners::STORE_OWNERS;
 use umoria::data_stores::{

@@ -19,7 +19,7 @@ pub(crate) fn set_seed_state(state: &mut State, seed: u32) {
     state.rng.seed = (seed % (RNG_M as u32 - 1)) + 1;
 }
 
-/// Returns a pseudo-random number from set 1, 2, ..., RNG_M - 1.
+/// Returns a pseudo-random number from set 1, 2, ..., `RNG_M` - 1.
 pub fn rnd() -> i32 {
     with_state_mut(rnd_state)
 }

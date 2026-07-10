@@ -1,4 +1,4 @@
-//! Port of src/game_objects.cpp — object heap and random object selection.
+//! Port of `src/game_objects.cpp` — object heap and random object selection.
 
 use crate::config::dungeon::objects::OBJ_NOTHING;
 use crate::config::treasure::TREASURE_CHANCE_OF_GREAT_ITEM;
@@ -15,7 +15,7 @@ use crate::types::{Coord_t, LEVEL_MAX_OBJECTS, TREASURE_MAX_LEVELS};
 use crate::ui::draw_dungeon_panel;
 use crate::ui_io::terminal;
 
-/// C++ game_objects.cpp lines 14–67.
+/// C++ `game_objects.cpp` lines 14–67.
 fn compact_objects() {
     terminal::print_message(Some("Compacting objects..."));
 
@@ -34,9 +34,8 @@ fn compact_objects() {
         for y in 0..height {
             for x in 0..width {
                 let coord = Coord_t { y, x };
-                let treasure_id = with_state(|state| {
-                    state.dg.floor[y as usize][x as usize].treasure_id
-                });
+                let treasure_id =
+                    with_state(|state| state.dg.floor[y as usize][x as usize].treasure_id);
                 if treasure_id == 0 {
                     continue;
                 }
@@ -81,11 +80,10 @@ pub fn item_bigger_than_chest(obj: &DungeonObject) -> bool {
     }
 }
 
-/// C++ game_objects.cpp lines 70–76.
+/// C++ `game_objects.cpp` lines 70–76.
 pub fn popt() -> i32 {
-    let needs_compact = with_state(|state| {
-        state.game.treasure.current_id == i16::from(LEVEL_MAX_OBJECTS)
-    });
+    let needs_compact =
+        with_state(|state| state.game.treasure.current_id == i16::from(LEVEL_MAX_OBJECTS));
     if needs_compact {
         compact_objects();
     }
@@ -96,7 +94,7 @@ pub fn popt() -> i32 {
     })
 }
 
-/// C++ game_objects.cpp lines 81–97.
+/// C++ `game_objects.cpp` lines 81–97.
 pub fn pusht_state(state: &mut State, treasure_id: u8) {
     let current = state.game.treasure.current_id;
     if i32::from(treasure_id) != i32::from(current) - 1 {
@@ -117,12 +115,12 @@ pub fn pusht_state(state: &mut State, treasure_id: u8) {
     );
 }
 
-/// C++ game_objects.cpp lines 81–97.
+/// C++ `game_objects.cpp` lines 81–97.
 pub fn pusht(treasure_id: u8) {
     with_state_mut(|state| pusht_state(state, treasure_id));
 }
 
-/// C++ game_objects.cpp lines 120–171.
+/// C++ `game_objects.cpp` lines 120–171.
 pub fn item_get_random_object_id(level: i32, must_be_small: bool) -> i32 {
     with_state_mut(|state| {
         let mut level = level;

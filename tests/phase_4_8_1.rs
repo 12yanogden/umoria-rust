@@ -1,4 +1,11 @@
 //! Phase 4.8.1 — recall.cpp monster memory text parity (no RNG).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::monsters::move_flags::{
     CM_20_RANDOM, CM_40_RANDOM, CM_ATTACK_ONLY, CM_CARRY_GOLD, CM_CARRY_OBJ, CM_MOVE_NORMAL,
@@ -193,7 +200,13 @@ fn recall_attack_only_and_only_magic_punctuation() {
 fn recall_kill_points_balrog_level1_overflow() {
     reset_for_new_game(None);
     with_state_mut(|s| s.py.misc.level = 1);
-    set_memory(BALROG_ID, Recall { kills: 1, ..Default::default() });
+    set_memory(
+        BALROG_ID,
+        Recall {
+            kills: 1,
+            ..Default::default()
+        },
+    );
     let lines = test_memory_recall_lines(BALROG_ID);
     let body = recall_body(&lines);
     assert!(body.contains("5500000.00 points"));
@@ -246,7 +259,13 @@ fn recall_magic_breath_and_spell_frequency() {
 #[test]
 fn recall_kill_difficulty_armor_and_max_hp() {
     reset_for_new_game(None);
-    set_memory(BALROG_ID, Recall { kills: 100, ..Default::default() });
+    set_memory(
+        BALROG_ID,
+        Recall {
+            kills: 100,
+            ..Default::default()
+        },
+    );
     let lines = test_memory_recall_lines(BALROG_ID);
     let body = recall_body(&lines);
     assert!(body.contains("armor rating of 125"));
@@ -320,7 +339,13 @@ fn recall_attacks_known_damage() {
 #[test]
 fn recall_win_monster_tail_line() {
     reset_for_new_game(None);
-    set_memory(BALROG_ID, Recall { movement: 1, ..Default::default() });
+    set_memory(
+        BALROG_ID,
+        Recall {
+            movement: 1,
+            ..Default::default()
+        },
+    );
     let lines = test_memory_recall_lines(BALROG_ID);
     let body = recall_body(&lines);
     assert!(body.contains("Killing one of these wins the game!"));

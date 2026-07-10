@@ -1,4 +1,11 @@
 //! Phase 2.4 — shared data-bearing struct definitions & container declarations.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use core::mem::{align_of, size_of};
 use std::os::raw::c_char;

@@ -1,4 +1,11 @@
 //! Phase 5.7 — main.cpp entry point (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use std::fs;
 use std::path::PathBuf;
@@ -7,26 +14,21 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use umoria::config::files;
 use umoria::entry::{
     expected_help_output, parse_game_seed, run_with_args, test_entry_trace_events,
-    test_reset_entry_hooks, test_set_capture_stderr, test_set_capture_stdout,
-    test_set_entry_trace, test_set_force_permissions_fail, test_set_force_score_init_fail,
+    test_reset_entry_hooks, test_set_capture_stderr, test_set_capture_stdout, test_set_entry_trace,
+    test_set_force_permissions_fail, test_set_force_score_init_fail,
     test_set_force_terminal_init_fail, test_set_skip_start_moria, test_setup_entry_harness,
     test_start_moria_args, test_take_stderr, test_take_stdout, USAGE_INSTRUCTIONS,
 };
 use umoria::game::{test_exit_program_called, with_state};
 use umoria::scores::{test_reset_highscore_fp, test_set_scores_path};
-use umoria::version::{
-    CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH,
-};
+use umoria::version::{CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH};
 
 static TEMP_SCORES_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 fn write_temp_scores_file() -> PathBuf {
     let id = TEMP_SCORES_COUNTER.fetch_add(1, Ordering::Relaxed);
-    let path = std::env::temp_dir().join(format!(
-        "umoria-phase57-{}-{}.dat",
-        std::process::id(),
-        id
-    ));
+    let path =
+        std::env::temp_dir().join(format!("umoria-phase57-{}-{}.dat", std::process::id(), id));
     fs::write(&path, [1u8, 2, 3]).expect("temp scores file");
     path
 }
@@ -55,7 +57,8 @@ fn teardown_scores(path: &PathBuf) {
 }
 
 fn run(args: &[&str]) -> u8 {
-    run_with_args(args.iter().map(|s| (*s).to_string()).collect())
+    let owned: Vec<String> = args.iter().map(|s| (*s).to_string()).collect();
+    run_with_args(&owned)
 }
 
 // ---------------------------------------------------------------------------
@@ -107,10 +110,7 @@ fn step2_version_flag_prints_exact_version() {
     assert_eq!(code, 0);
     assert_eq!(
         test_take_stdout(),
-        format!(
-            "{}.{}.{}\n",
-            CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH
-        )
+        format!("{CURRENT_VERSION_MAJOR}.{CURRENT_VERSION_MINOR}.{CURRENT_VERSION_PATCH}\n")
     );
     assert!(test_take_stderr().is_empty());
     teardown_scores(&path);
@@ -202,10 +202,7 @@ fn step3_flags_set_new_game_roguelike_and_wizard() {
     let path = setup_harness();
     let code = run(&["umoria", "-n", "-r", "-w", "SAVE"]);
     assert_eq!(code, 0);
-    assert_eq!(
-        test_start_moria_args(),
-        Some((0, true, true))
-    );
+    assert_eq!(test_start_moria_args(), Some((0, true, true)));
     assert!(with_state(|state| state.game.to_be_wizard));
     assert_eq!(with_state(|state| state.config_save_game.clone()), "SAVE");
     teardown_scores(&path);

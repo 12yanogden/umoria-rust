@@ -1,10 +1,17 @@
 //! Phase 4.3.1.3 — player spell & mana learning parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
 use umoria::config::player::status::PY_STUDY;
-use umoria::config::spells::{NAME_OFFSET_PRAYERS, NAME_OFFSET_SPELLS, SPELL_TYPE_MAGE};
+use umoria::config::spells::{NAME_OFFSET_PRAYERS, SPELL_TYPE_MAGE};
 use umoria::data_player::{CLASSES, MAGIC_SPELLS, SPELL_NAMES};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::player::{
@@ -24,12 +31,6 @@ const MAGE_CLASS_ID: u8 = 1;
 fn init_spell_order() {
     with_state_mut(|s| {
         s.py.flags.spells_learned_order = [99; 32];
-    });
-}
-
-fn set_player_pos(coord: Coord_t) {
-    with_state_mut(|s| {
-        s.py.pos = coord;
     });
 }
 
@@ -63,20 +64,17 @@ fn cpp_wis_int_adj(value: i32) -> i32 {
         3
     } else if value > 14 {
         2
-    } else if value > 7 {
-        1
     } else {
-        0
+        i32::from(value > 7)
     }
 }
 
-fn cpp_new_mana(stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i32 {
+fn cpp_new_mana(_stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i32 {
     let adj = cpp_wis_int_adj(i32::from(used_stat));
-    let levels = i32::from(level)
-        - i32::from(CLASSES[class_id as usize].min_level_for_spell_casting)
-        + 1;
+    let levels =
+        i32::from(level) - i32::from(CLASSES[class_id as usize].min_level_for_spell_casting) + 1;
     match adj {
-        1 | 2 => 1 * levels,
+        1 | 2 => levels,
         3 => 3 * levels / 2,
         4 => 2 * levels,
         5 => 5 * levels / 2,
@@ -86,13 +84,12 @@ fn cpp_new_mana(stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i3
     }
 }
 
-fn cpp_number_of_spells_allowed(stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i32 {
+fn cpp_number_of_spells_allowed(_stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i32 {
     let adj = cpp_wis_int_adj(i32::from(used_stat));
-    let levels = i32::from(level)
-        - i32::from(CLASSES[class_id as usize].min_level_for_spell_casting)
-        + 1;
+    let levels =
+        i32::from(level) - i32::from(CLASSES[class_id as usize].min_level_for_spell_casting) + 1;
     match adj {
-        1 | 2 | 3 => 1 * levels,
+        1..=3 => levels,
         4 | 5 => 3 * levels / 2,
         6 => 2 * levels,
         7 => 5 * levels / 2,
@@ -112,7 +109,12 @@ fn cpp_number_of_spells_known(spells_learnt: u32) -> i32 {
     known
 }
 
-fn cpp_learnable_spells(spells: &[Spell; 31], level: u16, spells_learnt: u32, new_spells: i32) -> i32 {
+fn cpp_learnable_spells(
+    spells: &[Spell; 31],
+    level: u16,
+    spells_learnt: u32,
+    new_spells: i32,
+) -> i32 {
     let mut spell_flag = 0x7FFF_FFFFu32 & !spells_learnt;
     let mut id = 0;
     let mut mask = 1u32;
@@ -502,7 +504,10 @@ fn bitmask_shift_matches_cpp_u32() {
     let order_id = 5u8;
     let mask = 1u32 << order_id;
     assert_eq!(mask, 32);
-    assert_eq!(player_stat_adjustment_wisdom_intelligence(PlayerAttr::A_INT), 0);
+    assert_eq!(
+        player_stat_adjustment_wisdom_intelligence(PlayerAttr::A_INT),
+        0
+    );
 }
 
 #[test]

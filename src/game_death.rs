@@ -1,4 +1,4 @@
-//! Port of src/game_death.cpp — see phase_5.4.
+//! Port of `src/game_death.cpp` — see `phase_5.4`.
 
 use std::cell::{Cell, RefCell};
 
@@ -8,7 +8,7 @@ use crate::game::{exit_program, with_state, with_state_mut};
 use crate::game_files::{display_death_file, output_player_character_to_file};
 use crate::game_save::save_game;
 use crate::helpers::human_date_string;
-use crate::identification::{item_set_as_identified, spell_item_identify_and_remove_random_inscription};
+use crate::identification::identify_player_inventory_slot;
 use crate::player::{
     player_is_male, player_rank_title, player_recalculate_bonuses, PLAYER_MAX_LEVEL,
 };
@@ -17,8 +17,8 @@ use crate::spells::spell_restore_player_levels;
 use crate::types::CNIL;
 use crate::ui::print_character;
 use crate::ui_inventory::{display_equipment, display_inventory_items};
-use crate::ui_io::ESCAPE;
 use crate::ui_io::terminal::{self, Coord};
+use crate::ui_io::ESCAPE;
 
 thread_local! {
     static TEST_IDENTIFY_COUNT: Cell<u32> = const { Cell::new(0) };
@@ -43,17 +43,17 @@ pub fn test_reset_death_hooks() {
 
 #[doc(hidden)]
 pub fn test_identify_side_effect_count() -> u32 {
-    TEST_IDENTIFY_COUNT.with(|c| c.get())
+    TEST_IDENTIFY_COUNT.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
 pub fn test_recalculate_bonuses_count() -> u32 {
-    TEST_RECALC_COUNT.with(|c| c.get())
+    TEST_RECALC_COUNT.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
 pub fn test_display_equipment_called() -> bool {
-    TEST_DISPLAY_EQUIPMENT.with(|c| c.get())
+    TEST_DISPLAY_EQUIPMENT.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
@@ -63,17 +63,17 @@ pub fn test_display_inventory_range() -> Option<(i32, i32)> {
 
 #[doc(hidden)]
 pub fn test_kingly_called() -> bool {
-    TEST_KINGLY_CALLED.with(|c| c.get())
+    TEST_KINGLY_CALLED.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
 pub fn test_print_tomb_called() -> bool {
-    TEST_PRINT_TOMB_CALLED.with(|c| c.get())
+    TEST_PRINT_TOMB_CALLED.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
 pub fn test_print_crown_called() -> bool {
-    TEST_PRINT_CROWN_CALLED.with(|c| c.get())
+    TEST_PRINT_CROWN_CALLED.with(std::cell::Cell::get)
 }
 
 /// C++ `(int)(26 - text.length() / 2)` with unsigned `length()` arithmetic.
@@ -128,9 +128,9 @@ fn kingly() {
 
 fn identify_inventory_and_recalculate() {
     with_state_mut(|state| {
-        for item in &mut state.py.inventory {
-            item_set_as_identified(item.category_id, item.sub_category_id);
-            spell_item_identify_and_remove_random_inscription(item);
+        let slots = state.py.inventory.len();
+        for index in 0..slots {
+            identify_player_inventory_slot(state, index);
             TEST_IDENTIFY_COUNT.with(|c| c.set(c.get().wrapping_add(1)));
         }
     });
@@ -157,7 +157,13 @@ fn print_tomb() {
 
     let (name, total_winner, class_id, level, exp, au, current_level, died_from) = snapshot;
 
-    terminal::put_string(&name, Coord { y: 6, x: tomb_center_col(name.len()) });
+    terminal::put_string(
+        &name,
+        Coord {
+            y: 6,
+            x: tomb_center_col(name.len()),
+        },
+    );
 
     let rank_text = if total_winner {
         "Magnificent".to_string()
@@ -256,10 +262,7 @@ fn print_tomb() {
             } else {
                 terminal::clear_screen();
                 print_character();
-                terminal::put_string(
-                    "Type ESC to skip the inventory:",
-                    Coord { y: 23, x: 0 },
-                );
+                terminal::put_string("Type ESC to skip the inventory:", Coord { y: 23, x: 0 });
                 if terminal::get_key_input() != ESCAPE {
                     terminal::clear_screen();
                     terminal::print_message(Some("You are using:"));
@@ -284,7 +287,7 @@ fn c_string(bytes: &[u8]) -> String {
     String::from_utf8_lossy(&bytes[..end]).into_owned()
 }
 
-/// Port of `endGame` in game_death.cpp lines 122–154.
+/// Port of `endGame` in `game_death.cpp` lines 122–154.
 pub fn end_game() {
     terminal::print_message(CNIL);
     terminal::flush_input_buffer();

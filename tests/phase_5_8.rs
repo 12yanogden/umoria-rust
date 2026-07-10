@@ -1,4 +1,11 @@
 //! Phase 5.8 — final assembly & end-to-end integration gates.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -9,23 +16,16 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use common::{golden_root, load_manifest, repo_root, verify_manifest};
 use umoria::config::files;
-use umoria::entry::{
-    run_with_args, test_setup_entry_harness, test_take_stderr, test_take_stdout,
-};
+use umoria::entry::{run_with_args, test_setup_entry_harness, test_take_stderr, test_take_stdout};
 use umoria::scores::{test_reset_highscore_fp, test_set_scores_path};
-use umoria::version::{
-    CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH,
-};
+use umoria::version::{CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH};
 
 static HARNESS_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 fn write_temp_scores_file() -> PathBuf {
     let id = HARNESS_COUNTER.fetch_add(1, Ordering::Relaxed);
-    let path = std::env::temp_dir().join(format!(
-        "umoria-phase58-{}-{}.dat",
-        std::process::id(),
-        id
-    ));
+    let path =
+        std::env::temp_dir().join(format!("umoria-phase58-{}-{}.dat", std::process::id(), id));
     fs::write(&path, [1u8, 2, 3]).expect("temp scores file");
     path
 }
@@ -63,7 +63,8 @@ fn test_crate_builds_and_binary_exists() {
 #[test]
 fn test_main_rs_dispatch_reaches_start_moria() {
     let path = setup_lib_harness();
-    let code = run_with_args(vec!["umoria".into(), "-n".into(), "-s".into(), "42".into()]);
+    let args = vec!["umoria".into(), "-n".into(), "-s".into(), "42".into()];
+    let code = run_with_args(&args);
     assert_eq!(code, 0);
     assert_eq!(
         umoria::entry::test_start_moria_args(),
@@ -83,7 +84,11 @@ fn test_data_dir_resolved() {
         "versions.txt.in",
     ] {
         let path = data_dir.join(name);
-        assert!(path.is_file(), "runtime data file must exist at {}", path.display());
+        assert!(
+            path.is_file(),
+            "runtime data file must exist at {}",
+            path.display()
+        );
     }
     assert_eq!(files::scores, "scores.dat");
     assert_eq!(files::save_game, "game.sav");
@@ -101,14 +106,12 @@ fn test_golden_manifest_integrity() {
 #[test]
 fn test_cli_version_via_entry_harness() {
     let path = setup_lib_harness();
-    let code = run_with_args(vec!["umoria".into(), "-v".into()]);
+    let args = vec!["umoria".into(), "-v".into()];
+    let code = run_with_args(&args);
     assert_eq!(code, 0);
     assert_eq!(
         test_take_stdout(),
-        format!(
-            "{}.{}.{}\n",
-            CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH
-        )
+        format!("{CURRENT_VERSION_MAJOR}.{CURRENT_VERSION_MINOR}.{CURRENT_VERSION_PATCH}\n")
     );
     assert!(test_take_stderr().is_empty());
     let _ = fs::remove_file(&path);
@@ -117,7 +120,8 @@ fn test_cli_version_via_entry_harness() {
 #[test]
 fn test_cli_bad_seed_via_entry_harness() {
     let path = setup_lib_harness();
-    let code = run_with_args(vec!["umoria".into(), "-s".into(), "0".into()]);
+    let args = vec!["umoria".into(), "-s".into(), "0".into()];
+    let code = run_with_args(&args);
     assert_eq!(code, 255);
     assert_eq!(
         test_take_stdout(),
@@ -129,7 +133,8 @@ fn test_cli_bad_seed_via_entry_harness() {
 #[test]
 fn test_cli_help_via_entry_harness() {
     let path = setup_lib_harness();
-    let code = run_with_args(vec!["umoria".into(), "-h".into()]);
+    let args = vec!["umoria".into(), "-h".into()];
+    let code = run_with_args(&args);
     assert_eq!(code, 0);
     let stdout = test_take_stdout();
     assert!(stdout.contains("Robert A. Koeneke's classic dungeon crawler."));
@@ -141,7 +146,8 @@ fn test_cli_help_via_entry_harness() {
 fn test_cli_score_file_failure_via_entry_harness() {
     test_setup_entry_harness();
     umoria::entry::test_set_force_score_init_fail(true);
-    let code = run_with_args(vec!["umoria".into(), "-v".into()]);
+    let args = vec!["umoria".into(), "-v".into()];
+    let code = run_with_args(&args);
     assert_eq!(code, 1);
     assert_eq!(
         test_take_stderr(),

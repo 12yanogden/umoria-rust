@@ -1,5 +1,12 @@
 //! Phase 3.2 — ui (viewport, status line & character screens).
 //! See `.cursor/plans/rust-translation/phase_3.2.md`.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::player::PLAYER_MAX_EXP;
 use umoria::config::spells::{NAME_OFFSET_PRAYERS, NAME_OFFSET_SPELLS, SPELL_TYPE_MAGE};

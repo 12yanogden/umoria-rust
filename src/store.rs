@@ -32,10 +32,10 @@ use crate::store_inventory::{
     store_item_value,
 };
 use crate::treasure::{
-    TV_AMULET, TV_ARROW, TV_BOLT, TV_BOOTS, TV_BOW, TV_CLOAK, TV_DIGGING, TV_FLASK,
-    TV_FOOD, TV_GLOVES, TV_HAFTED, TV_HARD_ARMOR, TV_HELM, TV_LIGHT, TV_MAGIC_BOOK, TV_POLEARM,
-    TV_POTION1, TV_POTION2, TV_PRAYER_BOOK, TV_RING, TV_SCROLL1, TV_SCROLL2, TV_SHIELD,
-    TV_SLING_AMMO, TV_SOFT_ARMOR, TV_SPIKE, TV_STAFF, TV_SWORD, TV_WAND,
+    TV_AMULET, TV_ARROW, TV_BOLT, TV_BOOTS, TV_BOW, TV_CLOAK, TV_DIGGING, TV_FLASK, TV_FOOD,
+    TV_GLOVES, TV_HAFTED, TV_HARD_ARMOR, TV_HELM, TV_LIGHT, TV_MAGIC_BOOK, TV_POLEARM, TV_POTION1,
+    TV_POTION2, TV_PRAYER_BOOK, TV_RING, TV_SCROLL1, TV_SCROLL2, TV_SHIELD, TV_SLING_AMMO,
+    TV_SOFT_ARMOR, TV_SPIKE, TV_STAFF, TV_SWORD, TV_WAND,
 };
 use crate::types::{Vtype_t, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE};
 use crate::ui::draw_cave_panel;
@@ -120,7 +120,7 @@ impl Default for Store {
 }
 
 fn store_last_increment_get() -> i16 {
-    STORE_LAST_INCREMENT.with(|c| c.get())
+    STORE_LAST_INCREMENT.with(std::cell::Cell::get)
 }
 
 fn store_last_increment_set(value: i16) {
@@ -162,7 +162,7 @@ pub fn store_initialize_owners() {
         for store_id in 0..MAX_STORES as i32 {
             let rn = random_number_state(state, count);
             let store = &mut state.stores[store_id as usize];
-            store.owner_id = (MAX_STORES * (rn as u8 - 1) + store_id as u8) as u8;
+            store.owner_id = MAX_STORES * (rn as u8 - 1) + store_id as u8;
             store.insults_counter = 0;
             store.turns_left_before_closing = 0;
             store.unique_items_counter = 0;
@@ -296,12 +296,15 @@ fn display_store_inventory_for_state(state: &mut State, store_id: usize, item_po
             .map(|c| c.to_string_lossy().into_owned())
             .unwrap_or_default();
         let msg = format!("{}) {}", (b'a' + item_line_num as u8) as char, desc);
-        terminal::put_string_clear_to_eol(&msg, Coord {
-            y: item_line_num + 5,
-            x: 0,
-        });
+        terminal::put_string_clear_to_eol(
+            &msg,
+            Coord {
+                y: item_line_num + 5,
+                x: 0,
+            },
+        );
 
-        let mut current_item_count = store.inventory[item_pos_start as usize].cost;
+        let current_item_count = store.inventory[item_pos_start as usize].cost;
         let price_msg = if current_item_count <= 0 {
             let mut value = -current_item_count;
             value = value * player_stat_adjustment_charisma() / 100;
@@ -313,10 +316,13 @@ fn display_store_inventory_for_state(state: &mut State, store_id: usize, item_po
             format!("{current_item_count:>9} [Fixed]")
         };
 
-        terminal::put_string_clear_to_eol(&price_msg, Coord {
-            y: item_line_num + 5,
-            x: 59,
-        });
+        terminal::put_string_clear_to_eol(
+            &price_msg,
+            Coord {
+                y: item_line_num + 5,
+                x: 59,
+            },
+        );
 
         item_pos_start += 1;
         item_line_num += 1;
@@ -348,10 +354,13 @@ fn display_single_cost(store_id: i32, item_id: i32) {
     } else {
         format!("{cost:>9} [Fixed]")
     };
-    terminal::put_string_clear_to_eol(&msg, Coord {
-        y: (item_id % 12) + 5,
-        x: 59,
-    });
+    terminal::put_string_clear_to_eol(
+        &msg,
+        Coord {
+            y: (item_id % 12) + 5,
+            x: 59,
+        },
+    );
 }
 
 fn display_player_remaining_gold() {
@@ -361,9 +370,8 @@ fn display_player_remaining_gold() {
 }
 
 fn display_store(store_id: i32, current_top_item_id: i32) {
-    let owner_name = with_state(|state| {
-        STORE_OWNERS[state.stores[store_id as usize].owner_id as usize].name
-    });
+    let owner_name =
+        with_state(|state| STORE_OWNERS[state.stores[store_id as usize].owner_id as usize].name);
 
     terminal::clear_screen();
     terminal::put_string(owner_name, Coord { y: 3, x: 9 });
@@ -477,13 +485,24 @@ pub fn store_get_haggle(prompt: &str, new_offer: &mut i32, offer_count: i32) -> 
         let mut prompt_len = prompt_len;
         if offer_count != 0 && store_last_increment_get() != 0 {
             let abs_store_last_increment = i32::from(store_last_increment_get().unsigned_abs());
-            let sign = if store_last_increment_get() < 0 { '-' } else { '+' };
+            let sign = if store_last_increment_get() < 0 {
+                '-'
+            } else {
+                '+'
+            };
             let last_offer_str = format!("[{sign}{abs_store_last_increment}] ");
             terminal::put_string_clear_to_eol(&last_offer_str, Coord { y: 0, x: start_len });
             prompt_len = start_len + last_offer_str.len() as i32;
         }
 
-        if !terminal::get_string_input(&mut msg, Coord { y: 0, x: prompt_len }, 40) {
+        if !terminal::get_string_input(
+            &mut msg,
+            Coord {
+                y: 0,
+                x: prompt_len,
+            },
+            40,
+        ) {
             valid_offer = false;
         }
 
@@ -609,7 +628,11 @@ fn store_update_bargaining_skills(store: &mut Store, price: i32, min_price: i32)
 
 /// C++ store.cpp lines 399–559.
 #[doc(hidden)]
-pub fn store_purchase_haggle(store_id: i32, price: &mut i32, item: &crate::inventory::Inventory) -> BidState {
+pub fn store_purchase_haggle(
+    store_id: i32,
+    price: &mut i32,
+    item: &crate::inventory::Inventory,
+) -> BidState {
     let mut status = BidState::Received;
     let mut new_price = 0;
 
@@ -641,8 +664,9 @@ pub fn store_purchase_haggle(store_id: i32, price: &mut i32, item: &crate::inven
     let mut accepted_without_haggle = false;
     let mut offers_count = 0;
 
-    if with_state(|state| store_no_need_to_bargain(&state.stores[store_id as usize], final_asking_price))
-    {
+    if with_state(|state| {
+        store_no_need_to_bargain(&state.stores[store_id as usize], final_asking_price)
+    }) {
         terminal::print_message(Some(
             "After a long bargaining session, you agree upon the price.",
         ));
@@ -684,18 +708,22 @@ pub fn store_purchase_haggle(store_id: i32, price: &mut i32, item: &crate::inven
                 break;
             }
 
-            if new_offer > current_asking_price {
-                print_speech_sorry();
-                new_offer = last_offer;
-                if last_offer + i32::from(store_last_increment_get()) > current_asking_price {
-                    store_last_increment_set(0);
+            match new_offer.cmp(&current_asking_price) {
+                std::cmp::Ordering::Greater => {
+                    print_speech_sorry();
+                    new_offer = last_offer;
+                    if last_offer + i32::from(store_last_increment_get()) > current_asking_price {
+                        store_last_increment_set(0);
+                    }
                 }
-            } else if new_offer == current_asking_price {
-                rejected = true;
-                new_price = new_offer;
-                break;
-            } else {
-                bidding_open = false;
+                std::cmp::Ordering::Equal => {
+                    rejected = true;
+                    new_price = new_offer;
+                    break;
+                }
+                std::cmp::Ordering::Less => {
+                    bidding_open = false;
+                }
             }
 
             if rejected || !bidding_open {
@@ -707,8 +735,7 @@ pub fn store_purchase_haggle(store_id: i32, price: &mut i32, item: &crate::inven
             break;
         }
 
-        let mut adjustment =
-            (new_offer - last_offer) * 100 / (current_asking_price - last_offer);
+        let mut adjustment = (new_offer - last_offer) * 100 / (current_asking_price - last_offer);
 
         if adjustment < min_per {
             rejected = store_haggle_insults(store_id);
@@ -791,7 +818,10 @@ pub fn store_sell_customer_adjustment(
 
     *cost = *cost * (200 - player_stat_adjustment_charisma()) / 100;
     *cost = *cost
-        * (200 - i32::from(crate::data_stores::RACE_GOLD_ADJUSTMENTS[owner.race as usize][race_id as usize]))
+        * (200
+            - i32::from(
+                crate::data_stores::RACE_GOLD_ADJUSTMENTS[owner.race as usize][race_id as usize],
+            ))
         / 100;
     if *cost < 1 {
         *cost = 1;
@@ -814,7 +844,11 @@ pub fn store_sell_customer_adjustment(
 
 /// C++ store.cpp lines 585–781.
 #[doc(hidden)]
-pub fn store_sell_haggle(store_id: i32, price: &mut i32, item: &crate::inventory::Inventory) -> BidState {
+pub fn store_sell_haggle(
+    store_id: i32,
+    price: &mut i32,
+    item: &crate::inventory::Inventory,
+) -> BidState {
     let mut status = BidState::Received;
     let mut new_price = 0;
 
@@ -850,12 +884,12 @@ pub fn store_sell_haggle(store_id: i32, price: &mut i32, item: &crate::inventory
     };
 
     let mut final_asking_price = 0;
-    let mut current_asking_price = 0;
     let mut final_flag = 0;
     let mut comment = "Offer";
     let mut accepted_without_haggle = false;
 
     if !rejected {
+        let mut current_asking_price;
         display_store_haggle_commands(-1);
 
         let mut offer_count = 0;
@@ -921,18 +955,23 @@ pub fn store_sell_haggle(store_id: i32, price: &mut i32, item: &crate::inventory
                     break;
                 }
 
-                if new_offer < current_asking_price {
-                    print_speech_sorry();
-                    new_offer = last_offer;
-                    if last_offer + i32::from(store_last_increment_get()) < current_asking_price {
-                        store_last_increment_set(0);
+                match new_offer.cmp(&current_asking_price) {
+                    std::cmp::Ordering::Less => {
+                        print_speech_sorry();
+                        new_offer = last_offer;
+                        if last_offer + i32::from(store_last_increment_get()) < current_asking_price
+                        {
+                            store_last_increment_set(0);
+                        }
                     }
-                } else if new_offer == current_asking_price {
-                    rejected = true;
-                    new_price = new_offer;
-                    break;
-                } else {
-                    bidding_open = false;
+                    std::cmp::Ordering::Equal => {
+                        rejected = true;
+                        new_price = new_offer;
+                        break;
+                    }
+                    std::cmp::Ordering::Greater => {
+                        bidding_open = false;
+                    }
                 }
 
                 if rejected || !bidding_open {
@@ -959,8 +998,9 @@ pub fn store_sell_haggle(store_id: i32, price: &mut i32, item: &crate::inventory
                 }
             }
 
-            adjustment =
-                ((new_offer - current_asking_price) * (adjustment + random_number(5) - 3) / 100) + 1;
+            adjustment = ((new_offer - current_asking_price) * (adjustment + random_number(5) - 3)
+                / 100)
+                + 1;
 
             if adjustment > 0 {
                 current_asking_price += adjustment;
@@ -1051,7 +1091,8 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
     item_id += *current_top_item_id;
 
     let mut sell_item = crate::inventory::Inventory::default();
-    let store_item = with_state(|state| state.stores[store_id as usize].inventory[item_id as usize].item);
+    let store_item =
+        with_state(|state| state.stores[store_id as usize].inventory[item_id as usize].item);
     inventory_take_one_item(&mut sell_item, &store_item);
 
     if !inventory_can_carry_item_count(sell_item) {
@@ -1062,7 +1103,8 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
         return false;
     }
 
-    let fixed_cost = with_state(|state| state.stores[store_id as usize].inventory[item_id as usize].cost);
+    let fixed_cost =
+        with_state(|state| state.stores[store_id as usize].inventory[item_id as usize].cost);
     let mut status = BidState::Received;
     let mut price = 0;
 
@@ -1091,16 +1133,16 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
 
             let mut description = [0u8; MORIA_OBJ_DESC_SIZE as usize];
             with_state(|state| {
-                item_description(&mut description, state.py.inventory[new_item_id as usize], true);
+                item_description(
+                    &mut description,
+                    state.py.inventory[new_item_id as usize],
+                    true,
+                );
             });
             let desc = CStr::from_bytes_until_nul(&description)
                 .map(|c| c.to_string_lossy().into_owned())
                 .unwrap_or_default();
-            let msg = format!(
-                "You have {} ({})",
-                desc,
-                (b'a' + new_item_id as u8) as char
-            );
+            let msg = format!("You have {} ({})", desc, (b'a' + new_item_id as u8) as char);
             terminal::put_string_clear_to_eol(&msg, Coord { y: 0, x: 0 });
 
             player_strength();
@@ -1110,7 +1152,11 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
             if *current_top_item_id >= unique_after as i32 {
                 *current_top_item_id = 0;
                 with_state_mut(|state| {
-                    display_store_inventory_for_state(state, store_id as usize, *current_top_item_id);
+                    display_store_inventory_for_state(
+                        state,
+                        store_id as usize,
+                        *current_top_item_id,
+                    );
                 });
             } else {
                 let (same_count, store_item_cost) = with_state(|state| {
@@ -1122,7 +1168,8 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
                 if same_count {
                     if store_item_cost < 0 {
                         with_state_mut(|state| {
-                            state.stores[store_id as usize].inventory[item_id as usize].cost = price;
+                            state.stores[store_id as usize].inventory[item_id as usize].cost =
+                                price;
                         });
                         display_single_cost(store_id, item_id);
                     }
@@ -1150,58 +1197,33 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
 pub fn set_general_store_items(item_type: u8) -> bool {
     matches!(
         item_type,
-        TV_DIGGING
-            | TV_BOOTS
-            | TV_CLOAK
-            | TV_FOOD
-            | TV_FLASK
-            | TV_LIGHT
-            | TV_SPIKE
+        TV_DIGGING | TV_BOOTS | TV_CLOAK | TV_FOOD | TV_FLASK | TV_LIGHT | TV_SPIKE
     )
 }
 
 pub fn set_armory_items(item_type: u8) -> bool {
     matches!(
         item_type,
-        TV_BOOTS
-            | TV_GLOVES
-            | TV_HELM
-            | TV_SHIELD
-            | TV_HARD_ARMOR
-            | TV_SOFT_ARMOR
+        TV_BOOTS | TV_GLOVES | TV_HELM | TV_SHIELD | TV_HARD_ARMOR | TV_SOFT_ARMOR
     )
 }
 
 pub fn set_weaponsmith_items(item_type: u8) -> bool {
     matches!(
         item_type,
-        TV_SLING_AMMO
-            | TV_BOLT
-            | TV_ARROW
-            | TV_BOW
-            | TV_HAFTED
-            | TV_POLEARM
-            | TV_SWORD
+        TV_SLING_AMMO | TV_BOLT | TV_ARROW | TV_BOW | TV_HAFTED | TV_POLEARM | TV_SWORD
     )
 }
 
 pub fn set_temple_items(item_type: u8) -> bool {
     matches!(
         item_type,
-        TV_HAFTED
-            | TV_SCROLL1
-            | TV_SCROLL2
-            | TV_POTION1
-            | TV_POTION2
-            | TV_PRAYER_BOOK
+        TV_HAFTED | TV_SCROLL1 | TV_SCROLL2 | TV_POTION1 | TV_POTION2 | TV_PRAYER_BOOK
     )
 }
 
 pub fn set_alchemist_items(item_type: u8) -> bool {
-    matches!(
-        item_type,
-        TV_SCROLL1 | TV_SCROLL2 | TV_POTION1 | TV_POTION2
-    )
+    matches!(item_type, TV_SCROLL1 | TV_SCROLL2 | TV_POTION1 | TV_POTION2)
 }
 
 pub fn set_magic_shop_items(item_type: u8) -> bool {
@@ -1236,7 +1258,8 @@ fn store_sell_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool {
         let mut mask = [0u8; PlayerEquipment::Wield as usize];
 
         for counter in 0..unique as i32 {
-            let flag = STORE_BUY[store_id as usize](state.py.inventory[counter as usize].category_id);
+            let flag =
+                STORE_BUY[store_id as usize](state.py.inventory[counter as usize].category_id);
             if flag {
                 mask[counter as usize] = 1;
                 if counter < first {
@@ -1306,7 +1329,10 @@ fn store_sell_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool {
 
         item_identify(&mut item_id);
 
-        inventory_take_one_item(&mut sold_item, &with_state(|state| state.py.inventory[item_id as usize]));
+        inventory_take_one_item(
+            &mut sold_item,
+            &with_state(|state| state.py.inventory[item_id as usize]),
+        );
         spell_item_identify_and_remove_random_inscription(&mut sold_item);
         inventory_destroy_item(item_id);
 
@@ -1330,7 +1356,11 @@ fn store_sell_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool {
                 } else {
                     *current_top_item_id = 0;
                     with_state_mut(|state| {
-                        display_store_inventory_for_state(state, store_id as usize, *current_top_item_id);
+                        display_store_inventory_for_state(
+                            state,
+                            store_id as usize,
+                            *current_top_item_id,
+                        );
                     });
                 }
             } else if *current_top_item_id > 11 {
@@ -1340,7 +1370,11 @@ fn store_sell_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool {
             } else {
                 *current_top_item_id = 12;
                 with_state_mut(|state| {
-                    display_store_inventory_for_state(state, store_id as usize, *current_top_item_id);
+                    display_store_inventory_for_state(
+                        state,
+                        store_id as usize,
+                        *current_top_item_id,
+                    );
                 });
             }
         }
@@ -1374,14 +1408,12 @@ pub fn store_enter(store_id: i32) {
 
         let mut command = 0u8;
         if terminal::get_command("", &mut command) {
-            let saved_chr =
-                with_state(|state| state.py.stats.used[PlayerAttr::A_CHR as usize]);
+            let saved_chr = with_state(|state| state.py.stats.used[PlayerAttr::A_CHR as usize]);
 
             match command {
                 b'b' => {
-                    let unique = with_state(|state| {
-                        state.stores[store_id as usize].unique_items_counter
-                    });
+                    let unique =
+                        with_state(|state| state.stores[store_id as usize].unique_items_counter);
                     if current_top_item_id == 0 {
                         if unique > 12 {
                             current_top_item_id = 12;
@@ -1448,7 +1480,7 @@ pub fn store_enter(store_id: i32) {
     draw_cave_panel();
 }
 
-/// C++ store_inventory.cpp lines 24+.
+/// C++ `store_inventory.cpp` lines 24+.
 pub fn store_maintenance() {
     crate::store_inventory::store_maintenance();
 }
@@ -1470,5 +1502,5 @@ pub fn test_store_increase_insults(store_id: i32) -> bool {
 
 #[doc(hidden)]
 pub fn test_store_decrease_insults(store_id: i32) {
-    store_decrease_insults(store_id)
+    store_decrease_insults(store_id);
 }

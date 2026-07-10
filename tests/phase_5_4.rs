@@ -1,32 +1,42 @@
 //! Phase 5.4 — death handling (`game_death.cpp`, strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use std::path::Path;
 
 use umoria::game::{
-    reset_for_new_game, test_exit_program_called, test_reset_exit_program_called, with_state,
-    with_state_mut,
+    reset_for_new_game, test_exit_program_called, test_reset_exit_program_called,
+    test_set_skip_process_exit, with_state, with_state_mut,
 };
 use umoria::game_death::{
     end_game, test_display_equipment_called, test_display_inventory_range,
     test_identify_side_effect_count, test_kingly, test_kingly_called, test_print_crown,
-    test_print_crown_called, test_print_tomb, test_print_tomb_called, test_recalculate_bonuses_count,
-    test_reset_death_hooks, tomb_center_col,
+    test_print_crown_called, test_print_tomb, test_print_tomb_called,
+    test_recalculate_bonuses_count, test_reset_death_hooks, tomb_center_col,
 };
 use umoria::game_files::{
     test_output_player_character_call_count, test_output_player_character_last_path,
     test_reset_output_player_character_hooks, test_set_output_player_character_results,
 };
-use umoria::game_save::{test_reset_buffer, test_set_forced_seed_byte};
+use umoria::game_save::test_set_forced_seed_byte;
 use umoria::inventory::PLAYER_INVENTORY_SIZE;
 use umoria::player::{player_set_gender, PLAYER_MAX_LEVEL};
-use umoria::scores::{test_character_saved_at_record, test_reset_score_test_hooks, test_set_scores_path};
+use umoria::scores::{
+    test_character_saved_at_record, test_reset_score_test_hooks, test_set_scores_path,
+};
 use umoria::ui_io::{
     ctrl_key, test_clear_getch_keys, test_erase_lines, test_flush_input_buffer_count,
-    test_push_getch_keys, test_put_strings, test_set_eof_flag, test_set_ncurses_stub,
+    test_push_getch_keys, test_put_strings_peek, test_set_eof_flag, test_set_ncurses_stub,
     test_set_ui_detail_capture, test_wait_continue_lines, ESCAPE,
 };
 
 fn setup_death_harness() {
+    test_set_skip_process_exit(true);
     test_set_ncurses_stub(true);
     test_set_ui_detail_capture(true);
     test_set_eof_flag(0);
@@ -42,11 +52,7 @@ fn set_name(name: &str) {
     with_state_mut(|state| {
         let bytes = name.as_bytes();
         for (slot, byte) in state.py.misc.name.iter_mut().enumerate() {
-            *byte = if slot < bytes.len() {
-                bytes[slot]
-            } else {
-                0
-            };
+            *byte = if slot < bytes.len() { bytes[slot] } else { 0 };
         }
     });
 }
@@ -55,11 +61,7 @@ fn set_died_from(text: &str) {
     with_state_mut(|state| {
         let bytes = text.as_bytes();
         for (slot, byte) in state.game.character_died_from.iter_mut().enumerate() {
-            *byte = if slot < bytes.len() {
-                bytes[slot]
-            } else {
-                0
-            };
+            *byte = if slot < bytes.len() { bytes[slot] } else { 0 };
         }
     });
 }
@@ -75,13 +77,19 @@ fn setup_nonwinner_tomb() {
         state.py.misc.au = 567;
         state.dg.current_level = 12;
         state.py.misc.gender = true;
+        // Generated characters always have non-zero ability bases (ui.cpp statRating divisors).
+        state.py.misc.bth = 10;
+        state.py.misc.bth_with_bows = 10;
+        state.py.misc.saving_throw = 10;
+        state.py.misc.disarm = 10;
+        state.py.misc.chance_in_search = 10;
     });
     set_name("Bob");
     set_died_from("Poison");
 }
 
 fn find_put(row: i32, col: i32) -> Option<String> {
-    test_put_strings()
+    test_put_strings_peek()
         .into_iter()
         .find(|(y, x, _)| *y == row && *x == col)
         .map(|(_, _, text)| text)
@@ -100,8 +108,8 @@ fn test_tomb_layout_nonwinner() {
 
     assert_eq!(find_put(6, tomb_center_col(3)), Some("Bob".to_string()));
     assert_eq!(
-        find_put(8, tomb_center_col("Rookie".len())),
-        Some("Rookie".to_string())
+        find_put(8, tomb_center_col("Veteran(1st)".len())),
+        Some("Veteran(1st)".to_string())
     );
     assert_eq!(
         find_put(10, tomb_center_col("Warrior".len())),
@@ -121,7 +129,9 @@ fn test_tomb_layout_nonwinner() {
         find_put(16, tomb_center_col("Poison".len())),
         Some("Poison".to_string())
     );
-    assert!(test_put_strings().iter().any(|(y, _, text)| *y == 17 && !text.is_empty()));
+    assert!(test_put_strings_peek()
+        .iter()
+        .any(|(y, _, text)| *y == 17 && !text.is_empty()));
     assert_eq!(
         find_put(23, 0),
         Some("(ESC to abort, return to print on screen, or file name)".to_string())
@@ -162,7 +172,7 @@ fn test_tomb_winner_titles() {
     with_state_mut(|state| {
         state.dg.game_turn = 1;
         state.game.total_winner = true;
-        player_set_gender(false);
+        state.py.misc.gender = false;
     });
     set_name("Win");
     test_push_getch_keys(&[i32::from(ESCAPE)]);
@@ -287,7 +297,7 @@ fn test_kingly_mutations() {
         state.py.misc.au = 100;
         state.py.misc.max_exp = 10;
         state.py.misc.exp = 10;
-        player_set_gender(true);
+        state.py.misc.gender = true;
     });
     test_push_getch_keys(&[b' ' as i32]);
 
@@ -362,7 +372,6 @@ fn test_endgame_save_on_death() {
         state.config_save_game = save_path.to_string_lossy().into_owned();
     });
 
-    test_reset_buffer();
     test_set_forced_seed_byte(Some(0x2A));
     test_set_scores_path(Some(dir.join("scores.dat").as_path()));
 

@@ -1,27 +1,36 @@
 //! Phase 4.5.1 — inventory.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::player::status::PY_STR_WGT;
 use umoria::config::treasure::flags::{TR_CURSED, TR_RES_ACID};
 use umoria::data_treasure::GAME_OBJECTS;
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
+use umoria::dungeon_tile::{Tile, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::inventory::{
-    damage_acid, damage_cold, damage_corroding_gas, damage_fire, damage_lightning_bolt,
-    damage_minus_ac, damage_poisoned_gas, execute_disenchant_attack,
-    inventory_can_carry_item, inventory_can_carry_item_count, inventory_carry_item,
-    inventory_collect_all_item_flags, inventory_damage_item, inventory_destroy_item,
-    inventory_diminish_charges_attack, inventory_diminish_light_attack, inventory_drop_item,
-    inventory_find_range, inventory_item_copy_to, inventory_item_is_cursed,
-    inventory_item_remove_curse, inventory_item_single_stackable, inventory_item_stackable,
-    inventory_take_one_item, set_fire_destroyable_items, set_frost_destroyable_items, set_null,
-    Inventory, PlayerEquipment, ITEM_GROUP_MIN, ITEM_NEVER_STACK_MAX, ITEM_SINGLE_STACK_MAX,
-    ITEM_SINGLE_STACK_MIN, PLAYER_INVENTORY_SIZE,
+    damage_acid, damage_cold, damage_corroding_gas, damage_fire, damage_minus_ac,
+    damage_poisoned_gas, execute_disenchant_attack, inventory_can_carry_item,
+    inventory_can_carry_item_count, inventory_carry_item, inventory_collect_all_item_flags,
+    inventory_damage_item, inventory_destroy_item, inventory_diminish_charges_attack,
+    inventory_diminish_light_attack, inventory_drop_item, inventory_find_range,
+    inventory_item_copy_to, inventory_item_is_cursed, inventory_item_remove_curse,
+    inventory_item_single_stackable, inventory_item_stackable, inventory_take_one_item,
+    set_fire_destroyable_items, set_frost_destroyable_items, set_null, Inventory, PlayerEquipment,
+    ITEM_GROUP_MIN, ITEM_NEVER_STACK_MAX, ITEM_SINGLE_STACK_MAX, ITEM_SINGLE_STACK_MIN,
+    PLAYER_INVENTORY_SIZE,
 };
 use umoria::player::PlayerAttr;
-use umoria::treasure::{TV_ARROW, TV_FOOD, TV_HARD_ARMOR, TV_POTION1, TV_SCROLL1, TV_SWORD, TV_WAND};
+use umoria::treasure::{
+    TV_ARROW, TV_FOOD, TV_HARD_ARMOR, TV_POTION1, TV_SCROLL1, TV_SWORD, TV_WAND,
+};
 use umoria::types::{Coord_t, MESSAGE_HISTORY_SIZE};
 use umoria::ui_io::test_set_ncurses_stub;
 
@@ -68,7 +77,7 @@ fn setup_dungeon() {
     with_state_mut(|s| {
         s.dg.height = 20;
         s.dg.width = 20;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..19 {
             for x in 1..19 {
                 s.dg.floor[y][x].feature_id = TILE_LIGHT_FLOOR;
@@ -79,12 +88,13 @@ fn setup_dungeon() {
 }
 
 fn make_item(category_id: u8, sub_category_id: u8, items_count: u8, weight: u16) -> Inventory {
-    let mut item = Inventory::default();
-    item.category_id = category_id;
-    item.sub_category_id = sub_category_id;
-    item.items_count = items_count;
-    item.weight = weight;
-    item
+    Inventory {
+        category_id,
+        sub_category_id,
+        items_count,
+        weight,
+        ..Default::default()
+    }
 }
 
 fn pack_item(slot: i32, item: Inventory) {
@@ -106,15 +116,50 @@ fn next_random_pair(max: i32) -> (i32, i32) {
 
 #[test]
 fn inventory_item_stackable_boundaries() {
-    assert!(!inventory_item_stackable(make_item(TV_SWORD, ITEM_NEVER_STACK_MAX, 1, 10)));
-    assert!(inventory_item_stackable(make_item(TV_SWORD, ITEM_SINGLE_STACK_MIN, 1, 10)));
-    assert!(inventory_item_stackable(make_item(TV_FOOD, ITEM_GROUP_MIN, 1, 10)));
+    assert!(!inventory_item_stackable(make_item(
+        TV_SWORD,
+        ITEM_NEVER_STACK_MAX,
+        1,
+        10
+    )));
+    assert!(inventory_item_stackable(make_item(
+        TV_SWORD,
+        ITEM_SINGLE_STACK_MIN,
+        1,
+        10
+    )));
+    assert!(inventory_item_stackable(make_item(
+        TV_FOOD,
+        ITEM_GROUP_MIN,
+        1,
+        10
+    )));
 
-    assert!(!inventory_item_single_stackable(make_item(TV_SWORD, ITEM_NEVER_STACK_MAX, 1, 10)));
-    assert!(inventory_item_single_stackable(make_item(TV_SWORD, ITEM_SINGLE_STACK_MIN, 1, 10)));
-    assert!(inventory_item_single_stackable(make_item(TV_FOOD, ITEM_SINGLE_STACK_MAX, 1, 10)));
+    assert!(!inventory_item_single_stackable(make_item(
+        TV_SWORD,
+        ITEM_NEVER_STACK_MAX,
+        1,
+        10
+    )));
+    assert!(inventory_item_single_stackable(make_item(
+        TV_SWORD,
+        ITEM_SINGLE_STACK_MIN,
+        1,
+        10
+    )));
+    assert!(inventory_item_single_stackable(make_item(
+        TV_FOOD,
+        ITEM_SINGLE_STACK_MAX,
+        1,
+        10
+    )));
     // sub_category_id 192 is both ITEM_SINGLE_STACK_MAX and ITEM_GROUP_MIN (torch case).
-    assert!(inventory_item_single_stackable(make_item(TV_FOOD, ITEM_GROUP_MIN, 1, 10)));
+    assert!(inventory_item_single_stackable(make_item(
+        TV_FOOD,
+        ITEM_GROUP_MIN,
+        1,
+        10
+    )));
 }
 
 #[test]
@@ -499,7 +544,10 @@ fn inventory_diminish_light_attack_seed_42() {
 
     assert!(inventory_diminish_light_attack(true));
     with_state(|s| {
-        assert_eq!(s.py.inventory[PlayerEquipment::Light as usize].misc_use, 548);
+        assert_eq!(
+            s.py.inventory[PlayerEquipment::Light as usize].misc_use,
+            548
+        );
     });
     assert_eq!(
         message_text(with_state(|s| s.last_message_id)),
@@ -537,10 +585,7 @@ fn damage_minus_ac_damages_armor_seed_42() {
 
     assert!(damage_minus_ac(TR_RES_ACID));
     with_state(|s| {
-        assert_eq!(
-            s.py.inventory[PlayerEquipment::Body as usize].to_ac,
-            1
-        );
+        assert_eq!(s.py.inventory[PlayerEquipment::Body as usize].to_ac, 1);
     });
 }
 

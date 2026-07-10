@@ -1,4 +1,4 @@
-//! Port of src/player_traps.cpp — see phase_4.4.10.
+//! Port of `src/player_traps.cpp` — see `phase_4.4.10`.
 
 use crate::config::treasure::chests::{
     CH_EXPLODE, CH_LOCKED, CH_LOSE_STR, CH_PARALYSED, CH_POISON, CH_SUMMON, CH_TRAPPED,
@@ -6,20 +6,18 @@ use crate::config::treasure::chests::{
 use crate::data_player::CLASS_LEVEL_ADJ;
 use crate::dice::{dice_roll, Dice};
 use crate::dungeon::dungeon_delete_object;
+use crate::game::{random_number, with_state, with_state_mut};
 use crate::identification::{
     object_blocked_by_monster, spell_item_identified,
     spell_item_identify_and_remove_random_inscription_for_state, SpecialNameIds,
 };
 use crate::monster_manager::monster_summon;
-use crate::player::{
-    player_no_light, player_takes_hit, PlayerAttr, PlayerClassLevelAdj,
-};
+use crate::player::{player_no_light, player_takes_hit, PlayerAttr, PlayerClassLevelAdj};
 use crate::player_move::{player_move, player_move_position};
 use crate::player_stats::{
     player_disarm_adjustment, player_stat_adjustment_wisdom_intelligence,
     player_stat_random_decrease,
 };
-use crate::game::{random_number, with_state, with_state_mut};
 use crate::treasure::{TV_CHEST, TV_VIS_TRAP};
 use crate::types::{Coord_t, Vtype_t, MORIA_MESSAGE_SIZE};
 use crate::ui::display_character_experience;
@@ -33,7 +31,7 @@ fn trap_hit_label(text: &str) -> Vtype_t {
     buf
 }
 
-/// C++ player_traps.cpp lines 10–30.
+/// C++ `player_traps.cpp` lines 10–30.
 fn player_trap_disarm_ability() -> i32 {
     let (mut ability, blind, confused, image, class_id, level, int_stat) = with_state(|state| {
         (
@@ -113,9 +111,8 @@ pub fn player_disarm_floor_trap(coord: Coord_t, total: i32, level: i32, dir: i32
 /// C++ player_traps.cpp lines 63–101.
 #[doc(hidden)]
 pub fn player_disarm_chest_trap(coord: Coord_t, total: i32, treasure_id: u8) {
-    let identified = with_state(|state| {
-        spell_item_identified(state.game.treasure.list[treasure_id as usize])
-    });
+    let identified =
+        with_state(|state| spell_item_identified(state.game.treasure.list[treasure_id as usize]));
     if !identified {
         with_state_mut(|state| {
             state.game.player_free_turn = true;
@@ -175,7 +172,7 @@ pub fn player_disarm_chest_trap(coord: Coord_t, total: i32, treasure_id: u8) {
     });
 }
 
-/// C++ player_traps.cpp lines 104–140.
+/// C++ `player_traps.cpp` lines 104–140.
 pub fn player_disarm_trap() {
     let mut dir = 0i32;
     if !get_direction_with_memory(None, &mut dir) {
@@ -208,10 +205,7 @@ pub fn player_disarm_trap() {
         if category_id == TV_VIS_TRAP {
             let (level, misc_use) = with_state(|state| {
                 let item = &state.game.treasure.list[treasure_id as usize];
-                (
-                    i32::from(item.depth_first_found),
-                    item.misc_use,
-                )
+                (i32::from(item.depth_first_found), item.misc_use)
             });
             player_disarm_floor_trap(coord, disarm_ability, level, dir, misc_use);
         } else if category_id == TV_CHEST {
@@ -231,7 +225,7 @@ pub fn player_disarm_trap() {
     }
 }
 
-/// C++ player_traps.cpp lines 142–155.
+/// C++ `player_traps.cpp` lines 142–155.
 fn chest_loose_strength() {
     terminal::print_message(Some("A small needle has pricked you!"));
 
@@ -243,16 +237,22 @@ fn chest_loose_strength() {
 
     let _ = player_stat_random_decrease(PlayerAttr::A_STR);
 
-    player_takes_hit(dice_roll(Dice { dice: 1, sides: 4 }), &trap_hit_label("a poison needle"));
+    player_takes_hit(
+        dice_roll(Dice { dice: 1, sides: 4 }),
+        &trap_hit_label("a poison needle"),
+    );
 
     terminal::print_message(Some("You feel weakened!"));
 }
 
-/// C++ player_traps.cpp lines 157–163.
+/// C++ `player_traps.cpp` lines 157–163.
 fn chest_poison() {
     terminal::print_message(Some("A small needle has pricked you!"));
 
-    player_takes_hit(dice_roll(Dice { dice: 1, sides: 6 }), &trap_hit_label("a poison needle"));
+    player_takes_hit(
+        dice_roll(Dice { dice: 1, sides: 6 }),
+        &trap_hit_label("a poison needle"),
+    );
 
     let poison = 10 + random_number(20);
     with_state_mut(|state| {
@@ -260,7 +260,7 @@ fn chest_poison() {
     });
 }
 
-/// C++ player_traps.cpp lines 165–175.
+/// C++ `player_traps.cpp` lines 165–175.
 fn chest_paralysed() {
     terminal::print_message(Some("A puff of yellow gas surrounds you!"));
 
@@ -277,7 +277,7 @@ fn chest_paralysed() {
     });
 }
 
-/// C++ player_traps.cpp lines 177–185.
+/// C++ `player_traps.cpp` lines 177–185.
 fn chest_summon_monster(coord: Coord_t) {
     let mut position = Coord_t { y: 0, x: 0 };
 
@@ -288,16 +288,19 @@ fn chest_summon_monster(coord: Coord_t) {
     }
 }
 
-/// C++ player_traps.cpp lines 187–193.
+/// C++ `player_traps.cpp` lines 187–193.
 fn chest_explode(coord: Coord_t) {
     terminal::print_message(Some("There is a sudden explosion!"));
 
     let _ = dungeon_delete_object(coord);
 
-    player_takes_hit(dice_roll(Dice { dice: 5, sides: 8 }), &trap_hit_label("an exploding chest"));
+    player_takes_hit(
+        dice_roll(Dice { dice: 5, sides: 8 }),
+        &trap_hit_label("an exploding chest"),
+    );
 }
 
-/// C++ player_traps.cpp lines 197–219.
+/// C++ `player_traps.cpp` lines 197–219.
 pub fn chest_trap(coord: Coord_t) {
     let flags = with_state(|state| {
         let treasure_id = state.dg.floor[coord.y as usize][coord.x as usize].treasure_id;

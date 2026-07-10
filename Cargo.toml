@@ -27,6 +27,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
 portable-pty = "0.8"
+vt100 = "0.15"
 
 [features]
 default = []
@@ -41,3 +42,82 @@ differential_live = []
 # overflow-checks stay ON in dev by default; the port must use explicit
 # wrapping_*/as casts where C++ relied on wrap/truncation, so dev builds
 # never mask a semantics bug behind a silent wrap.
+
+# ---------------------------------------------------------------------------
+# Lint policy (mirrors ~/Projects/rust/aro workspace.lints, adapted for this
+# C++→Rust port: FFI unsafe is required; truncating `as` casts are intentional
+# C++ fidelity and are allowed rather than denied).
+# ---------------------------------------------------------------------------
+[lints.rust]
+# ncurses/libc FFI requires unsafe; do not forbid. Prefer scoped unsafe blocks.
+missing_abi = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+# Lint groups (priority -1 so individual overrides take precedence)
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+style = { level = "warn", priority = -1 }
+complexity = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+
+# Pedantic overrides — allow these commonly noisy lints
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+wildcard_imports = "allow"
+return_self_not_must_use = "allow"
+
+# Port-fidelity overrides — 1:1 C++ translation units are large, take many
+# args, and intentionally keep parallel match arms / bool-heavy structs /
+# stack floor arrays matching the reference. Do not "fix" these by reshaping
+# control flow away from the C++ source.
+too_many_lines = "allow"
+too_many_arguments = "allow"
+cognitive_complexity = "allow"
+match_same_arms = "allow"
+struct_excessive_bools = "allow"
+large_stack_arrays = "allow"
+similar_names = "allow"
+doc_markdown = "allow"
+# Hex/bitflag tables mirrored from C++ (`data_*.rs`) — digit separators would
+# churn thousands of lines without improving fidelity to the reference.
+unreadable_literal = "allow"
+
+# Cargo overrides
+multiple_crate_versions = "allow"
+cargo_common_metadata = "allow"
+
+# Panic prevention (restriction lints)
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+panic_in_result_fn = "warn"
+
+# Suppress-annotation prevention
+allow_attributes_without_reason = "warn"
+
+# Debug/print prevention (restriction lints)
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+
+# Type-safety: aro denies these. This port keeps thousands of intentional
+# truncating/wrapping `as` casts to match C++ integer semantics — allow with
+# that documented rationale rather than rewriting the translation unit-by-unit.
+as_conversions = "allow"
+cast_possible_truncation = "allow"
+cast_possible_wrap = "allow"
+cast_sign_loss = "allow"
+cast_lossless = "allow"
+cast_precision_loss = "allow"
+checked_conversions = "allow"
+fn_to_numeric_cast_any = "allow"
+ptr_as_ptr = "deny"
+ref_as_ptr = "deny"

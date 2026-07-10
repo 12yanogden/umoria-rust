@@ -1,5 +1,12 @@
 //! Phase 4.4.5 — player_bash.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::{OBJ_CLOSED_DOOR, OBJ_OPEN_DOOR, OBJ_RUINED_CHEST};
 use umoria::config::monsters::defense::CD_MAX_HP;
@@ -8,9 +15,11 @@ use umoria::data_creatures::CREATURES_LIST;
 use umoria::data_player::CLASS_LEVEL_ADJ;
 use umoria::dice::{max_dice_roll, Dice};
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::{TILE_CORR_FLOOR, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
+use umoria::dungeon_tile::{Tile, TILE_CORR_FLOOR, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
-use umoria::inventory::{inventory_item_copy_to, Inventory, PlayerEquipment, PLAYER_INVENTORY_SIZE};
+use umoria::inventory::{
+    inventory_item_copy_to, Inventory, PlayerEquipment, PLAYER_INVENTORY_SIZE,
+};
 use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
 use umoria::player::{PlayerAttr, PlayerClassLevelAdj, BTH_PER_PLUS_TO_HIT_ADJUST};
 use umoria::player_bash::{
@@ -56,7 +65,7 @@ fn setup_dungeon(height: i16, width: i16, pos: Coord_t) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -119,7 +128,10 @@ fn place_closed_door(coord: Coord_t, misc_use: i16) -> u8 {
     with_state_mut(|s| {
         let treasure_id = s.game.treasure.current_id as u8;
         s.game.treasure.current_id += 1;
-        inventory_item_copy_to(OBJ_CLOSED_DOOR as i16, &mut s.game.treasure.list[treasure_id as usize]);
+        inventory_item_copy_to(
+            OBJ_CLOSED_DOOR as i16,
+            &mut s.game.treasure.list[treasure_id as usize],
+        );
         s.game.treasure.list[treasure_id as usize].misc_use = misc_use;
         s.dg.floor[coord.y as usize][coord.x as usize].treasure_id = treasure_id;
         s.dg.floor[coord.y as usize][coord.x as usize].feature_id = TILE_CORR_FLOOR;
@@ -191,7 +203,10 @@ fn player_bash_wall_message_and_no_rng() {
         },
         player_bash,
     );
-    assert_eq!(last_message_text(), "You bash it, but nothing interesting happens.");
+    assert_eq!(
+        last_message_text(),
+        "You bash it, but nothing interesting happens."
+    );
 }
 
 #[test]
@@ -316,11 +331,15 @@ fn player_bash_door_success_rng_order_seed4() {
     player_bash_closed_door(TARGET, 2);
 
     let chance = 18 + 150 / 2;
-    assert_eq!(next_random_pair(chance * (20 + 3)), (chance * (20 + 3), 857));
+    assert_eq!(
+        next_random_pair(chance * (20 + 3)),
+        (chance * (20 + 3), 857)
+    );
     assert_eq!(next_random_pair(2), (2, 1));
 
     with_state(|s| {
-        let item = &s.game.treasure.list[s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id as usize];
+        let item = &s.game.treasure.list
+            [s.dg.floor[TARGET.y as usize][TARGET.x as usize].treasure_id as usize];
         assert_eq!(item.misc_use, -1);
         assert_eq!(item.id, OBJ_OPEN_DOOR);
     });
@@ -336,7 +355,10 @@ fn player_bash_door_failure_stumble_rng_order_seed7() {
     player_bash_closed_door(TARGET, 2);
 
     let chance = 10;
-    assert_eq!(next_random_pair(chance * (20 + 10)), (chance * (20 + 10), 224));
+    assert_eq!(
+        next_random_pair(chance * (20 + 10)),
+        (chance * (20 + 10), 224)
+    );
     assert_eq!(next_random_pair(150), (150, 53));
     assert_eq!(next_random_pair(2), (2, 2));
 
@@ -374,7 +396,10 @@ fn player_bash_chest_destroy_rng_order_seed9() {
 
     assert_eq!(next_random_pair(10), (10, 4));
     with_state(|s| {
-        assert_eq!(s.game.treasure.list[treasure_id as usize].id, OBJ_RUINED_CHEST);
+        assert_eq!(
+            s.game.treasure.list[treasure_id as usize].id,
+            OBJ_RUINED_CHEST
+        );
         assert_eq!(s.game.treasure.list[treasure_id as usize].flags, 0);
     });
 }

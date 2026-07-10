@@ -1,4 +1,4 @@
-//! Port of src/player_run.cpp — running/find state machine (phase_4.4.3).
+//! Port of `src/player_run.cpp` — running/find state machine (`phase_4.4.3`).
 
 use std::cell::Cell;
 
@@ -21,7 +21,7 @@ thread_local! {
     static FIND_DIRECTION: Cell<i32> = const { Cell::new(0) };
 }
 
-/// Snapshot of C++ static find-mode state (player_run.cpp lines 114–116).
+/// Snapshot of C++ static find-mode state (`player_run.cpp` lines 114–116).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RunFindState {
     pub find_openarea: bool,
@@ -34,11 +34,11 @@ pub struct RunFindState {
 #[doc(hidden)]
 pub fn test_run_find_state() -> RunFindState {
     RunFindState {
-        find_openarea: FIND_OPENAREA.with(|c| c.get()),
-        find_breakright: FIND_BREAKRIGHT.with(|c| c.get()),
-        find_breakleft: FIND_BREAKLEFT.with(|c| c.get()),
-        find_prevdir: FIND_PREVDIR.with(|c| c.get()),
-        find_direction: FIND_DIRECTION.with(|c| c.get()),
+        find_openarea: FIND_OPENAREA.with(std::cell::Cell::get),
+        find_breakright: FIND_BREAKRIGHT.with(std::cell::Cell::get),
+        find_breakleft: FIND_BREAKLEFT.with(std::cell::Cell::get),
+        find_prevdir: FIND_PREVDIR.with(std::cell::Cell::get),
+        find_direction: FIND_DIRECTION.with(std::cell::Cell::get),
     }
 }
 
@@ -67,7 +67,7 @@ fn set_find_openarea(value: bool) {
 }
 
 fn find_openarea() -> bool {
-    FIND_OPENAREA.with(|c| c.get())
+    FIND_OPENAREA.with(std::cell::Cell::get)
 }
 
 fn set_find_breakright(value: bool) {
@@ -75,7 +75,7 @@ fn set_find_breakright(value: bool) {
 }
 
 fn find_breakright() -> bool {
-    FIND_BREAKRIGHT.with(|c| c.get())
+    FIND_BREAKRIGHT.with(std::cell::Cell::get)
 }
 
 fn set_find_breakleft(value: bool) {
@@ -83,7 +83,7 @@ fn set_find_breakleft(value: bool) {
 }
 
 fn find_breakleft() -> bool {
-    FIND_BREAKLEFT.with(|c| c.get())
+    FIND_BREAKLEFT.with(std::cell::Cell::get)
 }
 
 fn set_find_prevdir(value: i32) {
@@ -91,7 +91,7 @@ fn set_find_prevdir(value: i32) {
 }
 
 fn find_prevdir() -> i32 {
-    FIND_PREVDIR.with(|c| c.get())
+    FIND_PREVDIR.with(std::cell::Cell::get)
 }
 
 fn set_find_direction(value: i32) {
@@ -99,10 +99,10 @@ fn set_find_direction(value: i32) {
 }
 
 fn find_direction() -> i32 {
-    FIND_DIRECTION.with(|c| c.get())
+    FIND_DIRECTION.with(std::cell::Cell::get)
 }
 
-/// C++ player_run.cpp lines 119–128.
+/// C++ `player_run.cpp` lines 119–128.
 fn player_can_see_dungeon_wall(dir: i32, coord: Coord_t) -> bool {
     let mut spot = coord;
     if !player_move_position(dir, &mut spot) {
@@ -112,13 +112,13 @@ fn player_can_see_dungeon_wall(dir: i32, coord: Coord_t) -> bool {
     ch == b'#' || ch == b'%'
 }
 
-/// C++ player_run.cpp lines 131–134.
+/// C++ `player_run.cpp` lines 131–134.
 fn player_see_nothing(dir: i32, coord: Coord_t) -> bool {
     let mut spot = coord;
     player_move_position(dir, &mut spot) && cave_get_tile_symbol(spot) == b' '
 }
 
-/// C++ player_run.cpp lines 136–184.
+/// C++ `player_run.cpp` lines 136–184.
 fn find_running_break(dir: i32, coord: Coord_t) {
     let mut deep_left = false;
     let mut deep_right = false;
@@ -166,13 +166,11 @@ fn find_running_break(dir: i32, coord: Coord_t) {
     }
 }
 
-/// C++ player_run.cpp lines 186–220.
+/// C++ `player_run.cpp` lines 186–220.
 pub fn player_find_initialize(direction: i32) {
     let mut coord = with_state(|state| state.py.pos);
 
-    if !player_move_position(direction, &mut coord) {
-        with_state_mut(|state| state.py.running_tracker = 0);
-    } else {
+    if player_move_position(direction, &mut coord) {
         with_state_mut(|state| state.py.running_tracker = 1);
         set_find_direction(direction);
         set_find_prevdir(direction);
@@ -182,14 +180,12 @@ pub fn player_find_initialize(direction: i32) {
         if with_state(|state| state.py.flags.blind < 1) {
             find_running_break(direction, coord);
         }
+    } else {
+        with_state_mut(|state| state.py.running_tracker = 0);
     }
 
-    let (temporary_light_only, run_print_self) = with_state(|state| {
-        (
-            state.py.temporary_light_only,
-            state.options.run_print_self,
-        )
-    });
+    let (temporary_light_only, run_print_self) =
+        with_state(|state| (state.py.temporary_light_only, state.options.run_print_self));
     if !temporary_light_only && !run_print_self {
         let pos = with_state(|state| state.py.pos);
         let ch = cave_get_tile_symbol(pos);
@@ -203,7 +199,7 @@ pub fn player_find_initialize(direction: i32) {
     }
 }
 
-/// C++ player_run.cpp lines 222–235.
+/// C++ `player_run.cpp` lines 222–235.
 pub fn player_run_and_find() {
     let tracker = with_state(|state| state.py.running_tracker);
     with_state_mut(|state| state.py.running_tracker += 1);
@@ -217,7 +213,7 @@ pub fn player_run_and_find() {
     player_move(find_direction(), true);
 }
 
-/// C++ player_run.cpp lines 238–246.
+/// C++ `player_run.cpp` lines 238–246.
 pub fn player_end_running() {
     let pos = with_state_mut(|state| {
         if state.py.running_tracker == 0 {
@@ -231,7 +227,7 @@ pub fn player_end_running() {
     }
 }
 
-/// C++ player_run.cpp lines 248–330.
+/// C++ `player_run.cpp` lines 248–330.
 fn area_affect_stop_looking_at_squares(
     i: i32,
     dir: i32,
@@ -248,15 +244,10 @@ fn area_affect_stop_looking_at_squares(
 
     let mut invisible = true;
 
-    if carrying_light
-        || tile.temporary_light
-        || tile.permanent_light
-        || tile.field_mark
-    {
+    if carrying_light || tile.temporary_light || tile.permanent_light || tile.field_mark {
         if tile.treasure_id != 0 {
-            let tile_id = with_state(|state| {
-                state.game.treasure.list[tile.treasure_id as usize].category_id
-            });
+            let tile_id =
+                with_state(|state| state.game.treasure.list[tile.treasure_id as usize].category_id);
             let ignore_doors = with_state(|state| state.options.run_ignore_doors);
             if tile_id != TV_INVIS_TRAP
                 && tile_id != TV_SECRET_DOOR
@@ -285,29 +276,22 @@ fn area_affect_stop_looking_at_squares(
                     player_end_running();
                     return true;
                 }
-            } else if i > 0 {
-                if find_breakleft() {
-                    player_end_running();
-                    return true;
-                }
+            } else if i > 0 && find_breakleft() {
+                player_end_running();
+                return true;
             }
         } else if *dir_a == 0 {
             *dir_a = new_dir;
-        } else if *dir_b != 0 {
+        } else if *dir_b != 0 || *dir_a != CYCLE[(CHOME[dir as usize] + i - 1) as usize] {
             player_end_running();
             return true;
-        } else if *dir_a != CYCLE[(CHOME[dir as usize] + i - 1) as usize] {
-            player_end_running();
-            return true;
+        } else if (new_dir & 1) == 1 {
+            *check_dir = CYCLE[(CHOME[dir as usize] + i - 2) as usize];
+            *dir_b = new_dir;
         } else {
-            if (new_dir & 1) == 1 {
-                *check_dir = CYCLE[(CHOME[dir as usize] + i - 2) as usize];
-                *dir_b = new_dir;
-            } else {
-                *check_dir = CYCLE[(CHOME[dir as usize] + i + 1) as usize];
-                *dir_b = *dir_a;
-                *dir_a = new_dir;
-            }
+            *check_dir = CYCLE[(CHOME[dir as usize] + i + 1) as usize];
+            *dir_b = *dir_a;
+            *dir_a = new_dir;
         }
     } else if find_openarea() {
         if i < 0 {
@@ -328,7 +312,7 @@ fn area_affect_stop_looking_at_squares(
     false
 }
 
-/// C++ player_run.cpp lines 333–411.
+/// C++ `player_run.cpp` lines 333–411.
 pub fn player_area_affect(direction: i32, coord: Coord_t) {
     let _ = direction;
     if with_state(|state| state.py.flags.blind >= 1) {
@@ -350,7 +334,13 @@ pub fn player_area_affect(direction: i32, coord: Coord_t) {
         let mut spot = coord;
         if player_move_position(new_dir, &mut spot) {
             let _ = area_affect_stop_looking_at_squares(
-                i, direction, new_dir, spot, &mut check_dir, &mut dir_a, &mut dir_b,
+                i,
+                direction,
+                new_dir,
+                spot,
+                &mut check_dir,
+                &mut dir_a,
+                &mut dir_b,
             );
         }
     }

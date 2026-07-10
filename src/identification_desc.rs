@@ -5,8 +5,7 @@ use super::{
     SpecialNameIds,
 };
 use crate::config::identification::{
-    ID_DAMD, ID_EMPTY, ID_MAGIK, ID_NO_SHOW_P1, ID_SHOW_HIT_DAM, ID_SHOW_P1,
-    OD_TRIED,
+    ID_DAMD, ID_EMPTY, ID_MAGIK, ID_NO_SHOW_P1, ID_SHOW_HIT_DAM, ID_SHOW_P1, OD_TRIED,
 };
 use crate::config::treasure::flags::{TR_STEALTH, TR_STR};
 use crate::data_treasure::{GAME_OBJECTS, SPECIAL_ITEM_NAMES};
@@ -14,14 +13,16 @@ use crate::game::{with_state, with_state_mut, State};
 use crate::helpers::{insert_string_into_string, is_vowel};
 use crate::inventory::{Inventory, INSCRIP_SIZE, ITEM_SINGLE_STACK_MIN, PLAYER_INVENTORY_SIZE};
 use crate::treasure::{
-    TV_AMULET, TV_ARROW, TV_BOLT, TV_BOOTS, TV_BOW, TV_CHEST, TV_CLOSED_DOOR, TV_CLOAK, TV_DIGGING,
+    TV_AMULET, TV_ARROW, TV_BOLT, TV_BOOTS, TV_BOW, TV_CHEST, TV_CLOAK, TV_CLOSED_DOOR, TV_DIGGING,
     TV_DOWN_STAIR, TV_FLASK, TV_FOOD, TV_GLOVES, TV_GOLD, TV_HAFTED, TV_HARD_ARMOR, TV_HELM,
     TV_INVIS_TRAP, TV_LIGHT, TV_MAGIC_BOOK, TV_MISC, TV_OPEN_DOOR, TV_POLEARM, TV_POTION1,
     TV_POTION2, TV_PRAYER_BOOK, TV_RING, TV_RUBBLE, TV_SCROLL1, TV_SCROLL2, TV_SECRET_DOOR,
     TV_SHIELD, TV_SLING_AMMO, TV_SOFT_ARMOR, TV_SPIKE, TV_STAFF, TV_STORE_DOOR, TV_SWORD,
     TV_UP_STAIR, TV_VIS_TRAP, TV_WAND,
 };
-use crate::types::{Obj_desc_t, Vtype_t, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE, MORIA_OBJ_DESC_SIZE_LEN};
+use crate::types::{
+    Obj_desc_t, Vtype_t, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE, MORIA_OBJ_DESC_SIZE_LEN,
+};
 use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_io::terminal::{self, Coord};
 
@@ -107,7 +108,12 @@ fn snprintf_vtype(dst: &mut Vtype_t, formatted: &str) {
     dst[n] = 0;
 }
 
-fn snprintf_obj_desc_truncated(dst: &mut Obj_desc_t, prefix: &str, suffix: &[u8], max_suffix: usize) {
+fn snprintf_obj_desc_truncated(
+    dst: &mut Obj_desc_t,
+    prefix: &str,
+    suffix: &[u8],
+    max_suffix: usize,
+) {
     let mut pos = 0usize;
     for byte in prefix.bytes() {
         if pos >= MORIA_OBJ_DESC_SIZE_LEN - 1 {
@@ -128,7 +134,8 @@ fn snprintf_obj_desc_truncated(dst: &mut Obj_desc_t, prefix: &str, suffix: &[u8]
 }
 
 fn insert_into_tmp_val(tmp_val: &mut Obj_desc_t, from: &[u8], insert: Option<&[u8]>) {
-    let vtype: &mut Vtype_t = (&mut tmp_val[..MORIA_MESSAGE_SIZE]).try_into().unwrap();
+    // SAFETY: `Vtype_t` is the C++ prefix of `Obj_desc_t` (`MORIA_MESSAGE_SIZE` bytes).
+    let vtype: &mut Vtype_t = unsafe { &mut *(tmp_val.as_mut_ptr().cast::<Vtype_t>()) };
     insert_string_into_string(vtype, from, insert);
     tmp_val[MORIA_MESSAGE_SIZE - 1] = 0;
 }
@@ -323,11 +330,11 @@ pub fn item_description_for_state(
         c_strcat_obj_str(&mut tmp_val, object_name);
     }
 
-    if item.items_count != 1 {
+    if item.items_count == 1 {
+        insert_into_tmp_val(&mut tmp_val, b"~", None);
+    } else {
         insert_into_tmp_val(&mut tmp_val, b"ch~", Some(b"ches"));
         insert_into_tmp_val(&mut tmp_val, b"~", Some(b"s"));
-    } else {
-        insert_into_tmp_val(&mut tmp_val, b"~", None);
     }
 
     if !add_prefix {
@@ -401,11 +408,7 @@ pub fn item_description_for_state(
         if spell_item_identified(item) {
             snprintf_vtype(
                 &mut tmp_str,
-                &format!(
-                    ",{}{}",
-                    if item.to_ac < 0 { '-' } else { '+' },
-                    abs_to_ac,
-                ),
+                &format!(",{}{}", if item.to_ac < 0 { '-' } else { '+' }, abs_to_ac),
             );
             c_strcat_obj(&mut tmp_val, &tmp_str);
         }
@@ -413,11 +416,7 @@ pub fn item_description_for_state(
     } else if item.to_ac != 0 && spell_item_identified(item) {
         snprintf_vtype(
             &mut tmp_str,
-            &format!(
-                " [{}{}]",
-                if item.to_ac < 0 { '-' } else { '+' },
-                abs_to_ac,
-            ),
+            &format!(" [{}{}]", if item.to_ac < 0 { '-' } else { '+' }, abs_to_ac),
         );
         c_strcat_obj(&mut tmp_val, &tmp_str);
     }
@@ -448,10 +447,7 @@ pub fn item_description_for_state(
                 );
             }
             ItemMiscUse::Charges => {
-                snprintf_vtype(
-                    &mut tmp_str,
-                    &format!(" ({} charges)", item.misc_use),
-                );
+                snprintf_vtype(&mut tmp_str, &format!(" ({} charges)", item.misc_use));
             }
             ItemMiscUse::Plusses if item.misc_use != 0 => {
                 snprintf_vtype(
@@ -499,26 +495,11 @@ pub fn item_description_for_state(
                 (MORIA_OBJ_DESC_SIZE - 4) as usize,
             );
         } else if item.items_count < 1 {
-            snprintf_obj_desc_truncated(
-                out,
-                "no more",
-                suffix,
-                (MORIA_OBJ_DESC_SIZE - 8) as usize,
-            );
+            snprintf_obj_desc_truncated(out, "no more", suffix, (MORIA_OBJ_DESC_SIZE - 8) as usize);
         } else if is_vowel(tmp_val[2]) {
-            snprintf_obj_desc_truncated(
-                out,
-                "an",
-                suffix,
-                (MORIA_OBJ_DESC_SIZE - 3) as usize,
-            );
+            snprintf_obj_desc_truncated(out, "an", suffix, (MORIA_OBJ_DESC_SIZE - 3) as usize);
         } else {
-            snprintf_obj_desc_truncated(
-                out,
-                "a",
-                suffix,
-                (MORIA_OBJ_DESC_SIZE - 2) as usize,
-            );
+            snprintf_obj_desc_truncated(out, "a", suffix, (MORIA_OBJ_DESC_SIZE - 2) as usize);
         }
     } else if item.items_count < 1 {
         let max_width = MORIA_OBJ_DESC_SIZE as usize - "no more ".len();
@@ -539,11 +520,8 @@ pub fn item_description_for_state(
     }
 
     tmp_str = [0u8; MORIA_MESSAGE_SIZE];
-    if let Some(offset) = object_position_offset(item.category_id, item.sub_category_id)
-        .try_into()
-        .ok()
-        .filter(|&offset: &i16| offset >= 0)
-    {
+    let offset = object_position_offset(item.category_id, item.sub_category_id);
+    if offset >= 0 {
         indexx = (offset as usize) << 6;
         indexx += usize::from(item.sub_category_id & (ITEM_SINGLE_STACK_MIN - 1));
         if (state.objects_identified[indexx] & OD_TRIED) != 0
@@ -637,12 +615,7 @@ pub fn item_inscribe() {
 
     let mut msg = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
     with_state(|state| {
-        item_description_for_state(
-            &mut msg,
-            state.py.inventory[item_id as usize],
-            true,
-            state,
-        );
+        item_description_for_state(&mut msg, state.py.inventory[item_id as usize], true, state);
     });
 
     terminal::print_message(Some(&format!("Inscribing {}", c_str_from_buf(&msg))));
@@ -695,8 +668,8 @@ pub fn item_inscribe() {
 /// C++ identification.cpp lines 937–939.
 pub fn item_replace_inscription(item: &mut Inventory, inscription: &[u8]) {
     let len = c_strlen(inscription).min(INSCRIP_SIZE as usize - 1);
-    for i in 0..len {
-        item.inscription[i] = inscription[i] as i8;
+    for (dst, &src) in item.inscription[..len].iter_mut().zip(inscription.iter()) {
+        *dst = src as i8;
     }
     item.inscription[len] = 0;
 }

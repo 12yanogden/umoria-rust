@@ -14,9 +14,8 @@ use crate::dungeon_tile::TILE_LIGHT_FLOOR;
 use crate::game::{with_state, with_state_mut};
 use crate::player::{
     player_calculate_allowed_spells_count, player_calculate_hit_points, player_disarm_adjustment,
-    player_gain_mana, player_get_gender_label, player_rank_title,
-    player_stat_adjustment_wisdom_intelligence, PlayerAttr, PlayerClassLevelAdj, PlayerMisc,
-    BTH_PER_PLUS_TO_HIT_ADJUST, PLAYER_MAX_LEVEL,
+    player_gain_mana, player_rank_title, player_stat_adjustment_wisdom_intelligence, PlayerAttr,
+    PlayerClassLevelAdj, PlayerMisc, BTH_PER_PLUS_TO_HIT_ADJUST, PLAYER_MAX_LEVEL,
 };
 use crate::player_run::player_end_running;
 use crate::spells::spell_chance_of_success_for_state;
@@ -350,7 +349,7 @@ fn print_number(num: i32, coord: Coord) {
 /// C++ ui.cpp lines 209–211.
 pub fn print_character_title() {
     print_character_info_in_field(
-        &player_rank_title(),
+        player_rank_title(),
         Coord {
             y: 4,
             x: STAT_COLUMN,
@@ -777,9 +776,14 @@ pub fn print_character_information() {
         let name = c_str(&state.py.misc.name);
         let race_id = state.py.misc.race_id as usize;
         let class_id = state.py.misc.class_id as usize;
+        let gender_label = if state.py.misc.gender {
+            "Male"
+        } else {
+            "Female"
+        };
         terminal::put_string(&name, Coord { y: 2, x: 15 });
         terminal::put_string(CHARACTER_RACES[race_id].name, Coord { y: 3, x: 15 });
-        terminal::put_string(&player_get_gender_label(), Coord { y: 4, x: 15 });
+        terminal::put_string(gender_label, Coord { y: 4, x: 15 });
         terminal::put_string(CLASSES[class_id].title, Coord { y: 5, x: 15 });
     });
 }
@@ -1213,7 +1217,13 @@ pub fn display_spells_list(
     });
 
     for (i, out_val) in rows.iter().enumerate() {
-        terminal::put_string_clear_to_eol(out_val, Coord { y: 2 + i as i32, x: col });
+        terminal::put_string_clear_to_eol(
+            out_val,
+            Coord {
+                y: 2 + i as i32,
+                x: col,
+            },
+        );
     }
 }
 
@@ -1269,7 +1279,7 @@ fn player_gain_level() {
     }
 }
 
-/// Clamp exp to PLAYER_MAX_EXP (ui.cpp line 761–763).
+/// Clamp exp to `PLAYER_MAX_EXP` (ui.cpp line 761–763).
 #[must_use]
 pub fn simulate_exp_clamp(exp: i32) -> i32 {
     exp.min(PLAYER_MAX_EXP)

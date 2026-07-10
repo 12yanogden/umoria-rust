@@ -1,4 +1,11 @@
 //! Phase 5.5 — game.cpp lifecycle residuals (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::game::{
     abort_program_output, format_option_line, game_options_table, get_all_directions,
@@ -124,8 +131,7 @@ fn step2_map_roguelike_keys_passthrough() {
 #[test]
 fn step2_get_random_direction_golden_and_invariants() {
     const GOLDEN: [i32; 30] = [
-        2, 9, 4, 7, 3, 1, 1, 4, 3, 8, 8, 2, 8, 2, 4, 7, 6, 8, 6, 3, 2, 2, 3, 4, 9, 4, 2, 2, 1,
-        7,
+        2, 9, 4, 7, 3, 1, 1, 4, 3, 8, 8, 2, 8, 2, 4, 7, 6, 8, 6, 3, 2, 2, 3, 4, 9, 4, 2, 2, 1, 7,
     ];
 
     reset_for_new_game(Some(42));
@@ -205,16 +211,30 @@ fn step3_format_option_line_layout() {
     assert_eq!(line_no.len() - 5, 38);
 }
 
+type OptionMaskEntry = (fn(&mut Options), fn(&Options) -> bool, u32);
+
 #[test]
 fn step3_options_bitfield_roundtrip() {
-    let masks: [(fn(&mut Options), fn(&Options) -> bool, u32); 11] = [
+    let masks: [OptionMaskEntry; 11] = [
         (|o| o.run_cut_corners = true, |o| o.run_cut_corners, 0x1),
-        (|o| o.run_examine_corners = true, |o| o.run_examine_corners, 0x2),
+        (
+            |o| o.run_examine_corners = true,
+            |o| o.run_examine_corners,
+            0x2,
+        ),
         (|o| o.run_print_self = true, |o| o.run_print_self, 0x4),
         (|o| o.find_bound = true, |o| o.find_bound, 0x8),
         (|o| o.prompt_to_pickup = true, |o| o.prompt_to_pickup, 0x10),
-        (|o| o.use_roguelike_keys = true, |o| o.use_roguelike_keys, 0x20),
-        (|o| o.show_inventory_weights = true, |o| o.show_inventory_weights, 0x40),
+        (
+            |o| o.use_roguelike_keys = true,
+            |o| o.use_roguelike_keys,
+            0x20,
+        ),
+        (
+            |o| o.show_inventory_weights = true,
+            |o| o.show_inventory_weights,
+            0x40,
+        ),
         (|o| o.highlight_seams = true, |o| o.highlight_seams, 0x80),
         (|o| o.run_ignore_doors = true, |o| o.run_ignore_doors, 0x100),
         (|o| o.error_beep_sound = true, |o| o.error_beep_sound, 0x200),
@@ -307,21 +327,15 @@ fn step3_set_game_options_interactive_loop() {
     ]);
     umoria::game::set_game_options();
     assert!(with_state(|state| state.options.use_roguelike_keys));
-    assert!(
-        test_put_strings()
-            .iter()
-            .any(|(y, x, text)| text == "yes" && *y == 7 && *x == 40)
-    );
+    assert!(test_put_strings()
+        .iter()
+        .any(|(y, x, text)| text == "yes" && *y == 7 && *x == 40));
 
     // '-' at idx 0 wraps to 10; space at idx 10 wraps to 0.
     setup_harness();
     test_set_ui_detail_capture(true);
     test_clear_getch_keys();
-    test_push_getch_keys(&[
-        i32::from(ESCAPE),
-        i32::from(b' '),
-        i32::from(b'-'),
-    ]);
+    test_push_getch_keys(&[i32::from(ESCAPE), i32::from(b' '), i32::from(b'-')]);
     umoria::game::set_game_options();
     let moves = test_move_cursors();
     assert!(moves.contains(&Coord { y: 11, x: 40 }));
@@ -336,11 +350,9 @@ fn step3_set_game_options_interactive_loop() {
     test_push_getch_keys(&[i32::from(ESCAPE), i32::from(b'n'), i32::from(b'-')]);
     umoria::game::set_game_options();
     assert!(!with_state(|state| state.options.display_counts));
-    assert!(
-        test_put_strings()
-            .iter()
-            .any(|(y, x, text)| text == "no " && *y == 11 && *x == 40)
-    );
+    assert!(test_put_strings()
+        .iter()
+        .any(|(y, x, text)| text == "no " && *y == 11 && *x == 40));
 
     // Unknown key → bell, no state change.
     setup_harness();
@@ -359,12 +371,12 @@ fn step3_set_game_options_interactive_loop() {
     test_push_getch_keys(&[i32::from(ESCAPE)]);
     umoria::game::set_game_options();
     let messages = ui_io::test_ui_messages();
-    assert!(messages.iter().any(|m| {
-        m.starts_with("  ESC when finished")
-    }));
-    assert!(messages.iter().any(|m| {
-        m == &format_option_line("Running: cut known corners", true)
-    }));
+    assert!(messages
+        .iter()
+        .any(|m| { m.starts_with("  ESC when finished") }));
+    assert!(messages
+        .iter()
+        .any(|m| { m == &format_option_line("Running: cut known corners", true) }));
 }
 
 // ---------------------------------------------------------------------------
@@ -424,7 +436,10 @@ fn step4_get_direction_with_memory() {
     test_clear_getch_keys();
     test_push_getch_keys(&[i32::from(ESCAPE)]);
     dir = 0;
-    assert!(!get_direction_with_memory(Some("Which direction?"), &mut dir));
+    assert!(!get_direction_with_memory(
+        Some("Which direction?"),
+        &mut dir
+    ));
     assert!(with_state(|state| state.game.player_free_turn));
 }
 

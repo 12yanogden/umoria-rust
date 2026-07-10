@@ -325,7 +325,10 @@ pub fn wizard_character_adjustment() {
     }
 
     let chance = with_state(|state| state.py.misc.chance_in_search);
-    write_prompt_current(&mut input, &format!("Current={chance}  (0-200) Searching = "));
+    write_prompt_current(
+        &mut input,
+        &format!("Current={chance}  (0-200) Searching = "),
+    );
     number = c_strlen(&input) as i32;
     put_string_clear_to_eol(c_str(&input), ui_coord(0));
     if get_string_input(&mut input, ui_coord(number), 3) {
@@ -339,7 +342,10 @@ pub fn wizard_character_adjustment() {
     }
 
     let stealth = with_state(|state| state.py.misc.stealth_factor);
-    write_prompt_current(&mut input, &format!("Current={stealth}  (-1-18) Stealth = "));
+    write_prompt_current(
+        &mut input,
+        &format!("Current={stealth}  (-1-18) Stealth = "),
+    );
     number = c_strlen(&input) as i32;
     put_string_clear_to_eol(c_str(&input), ui_coord(0));
     if get_string_input(&mut input, ui_coord(number), 3) {
@@ -352,7 +358,10 @@ pub fn wizard_character_adjustment() {
     }
 
     let disarm = with_state(|state| state.py.misc.disarm);
-    write_prompt_current(&mut input, &format!("Current={disarm}  (0-200) Disarming = "));
+    write_prompt_current(
+        &mut input,
+        &format!("Current={disarm}  (0-200) Disarming = "),
+    );
     number = c_strlen(&input) as i32;
     put_string_clear_to_eol(c_str(&input), ui_coord(0));
     if get_string_input(&mut input, ui_coord(number), 3) {
@@ -365,7 +374,10 @@ pub fn wizard_character_adjustment() {
     }
 
     let saving_throw = with_state(|state| state.py.misc.saving_throw);
-    write_prompt_current(&mut input, &format!("Current={saving_throw}  (0-100) Save = "));
+    write_prompt_current(
+        &mut input,
+        &format!("Current={saving_throw}  (0-100) Save = "),
+    );
     number = c_strlen(&input) as i32;
     put_string_clear_to_eol(c_str(&input), ui_coord(0));
     if get_string_input(&mut input, ui_coord(number), 3) {
@@ -378,7 +390,10 @@ pub fn wizard_character_adjustment() {
     }
 
     let bth = with_state(|state| state.py.misc.bth);
-    write_prompt_current(&mut input, &format!("Current={bth}  (0-200) Base to hit = "));
+    write_prompt_current(
+        &mut input,
+        &format!("Current={bth}  (0-200) Base to hit = "),
+    );
     number = c_strlen(&input) as i32;
     put_string_clear_to_eol(c_str(&input), ui_coord(0));
     if get_string_input(&mut input, ui_coord(number), 3) {
@@ -449,10 +464,7 @@ pub fn wizard_request_object_id(id: &mut i32, label: &str, start_id: i32, end_id
     }
 
     if given_id < start_id || given_id > end_id {
-        put_string_clear_to_eol(
-            &format!("Invalid ID. Must be {id_str}"),
-            ui_coord(0),
-        );
+        put_string_clear_to_eol(&format!("Invalid ID. Must be {id_str}"), ui_coord(0));
         return false;
     }
     *id = given_id;
@@ -521,11 +533,13 @@ pub fn wizard_create_objects() {
 
     terminal::print_message(Some("Warning: This routine can cause a fatal error."));
 
-    let mut forge = Inventory::default();
-    forge.id = OBJ_WIZARD;
-    forge.special_name_id = 0;
+    let mut forge = Inventory {
+        id: OBJ_WIZARD,
+        special_name_id: 0,
+        identification: ID_KNOWN2 | ID_STORE_BOUGHT,
+        ..Default::default()
+    };
     item_replace_inscription(&mut forge, b"wizard item");
-    forge.identification = ID_KNOWN2 | ID_STORE_BOUGHT;
 
     put_string_clear_to_eol("Tval   : ", ui_coord(0));
     if !get_string_input(&mut input, ui_coord(9), 3) {
@@ -648,9 +662,8 @@ pub fn wizard_create_objects() {
 
     if get_input_confirmation("Allocate?") {
         let py_pos = with_state(|state| state.py.pos);
-        if with_state(|state| {
-            state.dg.floor[py_pos.y as usize][py_pos.x as usize].treasure_id != 0
-        }) {
+        if with_state(|state| state.dg.floor[py_pos.y as usize][py_pos.x as usize].treasure_id != 0)
+        {
             let _ = dungeon_delete_object(py_pos);
         }
 

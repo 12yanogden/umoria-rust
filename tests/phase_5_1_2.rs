@@ -1,4 +1,11 @@
 //! Phase 5.1.2 — saveGame / saveChar / svWrite (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -13,15 +20,17 @@ use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
 use umoria::dungeon_tile::{Tile, TILE_DARK_FLOOR, TILE_LIGHT_FLOOR};
 use umoria::game::{reset_for_new_game, with_state, with_state_mut};
 use umoria::game_save::{
-    self, get_byte, rd_byte, rd_long,     save_char, save_game, set_from_save_file, set_start_time,
-    set_xor_byte, sv_write, test_build_options_l, test_buffer_bytes, test_buffer_inject,
-    test_buffer_len, test_compute_save_timestamp, test_load_save_from_bytes, test_reset_buffer,
-    test_set_forced_seed_byte, test_set_force_save_char_fail, test_set_save_fail_flush,
-    test_set_unix_time, xor_byte,
+    self, get_byte, rd_byte, save_char, save_game, set_from_save_file, set_start_time,
+    set_xor_byte, sv_write, test_buffer_bytes, test_buffer_inject, test_buffer_len,
+    test_build_options_l, test_compute_save_timestamp, test_load_save_from_bytes,
+    test_reset_buffer, test_set_force_save_char_fail, test_set_forced_seed_byte,
+    test_set_save_fail_flush, test_set_unix_time, xor_byte,
 };
 use umoria::inventory::PlayerEquipment;
 use umoria::recall::Recall;
 use umoria::ui_io::{self, test_push_getch_keys, ESCAPE};
+
+type OptionsCase = (fn(&mut umoria::game::State), u32);
 
 fn golden_save(name: &str) -> PathBuf {
     common::golden_root().join("save").join(name)
@@ -98,7 +107,7 @@ fn test_header_bytes_and_seed() {
 fn test_options_bitfield_masks() {
     reset_for_new_game(None);
 
-    let cases: [(fn(&mut umoria::game::State), u32); 11] = [
+    let cases: [OptionsCase; 11] = [
         (|s| s.options.run_cut_corners = true, 0x1),
         (|s| s.options.run_examine_corners = true, 0x2),
         (|s| s.options.run_print_self = true, 0x4),
@@ -237,56 +246,15 @@ fn test_inventory_and_equipment_ranges() {
         assert_eq!(state.py.pack.unique_items, 2);
         assert_eq!(state.py.inventory[0].id, 0x1111);
         assert_eq!(state.py.inventory[1].id, 0x2222);
-        assert_eq!(state.py.inventory[PlayerEquipment::Wield as usize].id, 0x3333);
-        assert_eq!(state.py.inventory[PlayerEquipment::Light as usize].id, 0x4444);
+        assert_eq!(
+            state.py.inventory[PlayerEquipment::Wield as usize].id,
+            0x3333
+        );
+        assert_eq!(
+            state.py.inventory[PlayerEquipment::Light as usize].id,
+            0x4444
+        );
     });
-}
-
-fn skip_to_inventory_section() {
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(get_byte().unwrap());
-    while game_save::rd_short().unwrap() != 0xFFFF {}
-    let _ = rd_long().unwrap();
-    let mut scratch = [0u8; 80];
-    game_save::rd_string(&mut scratch).unwrap();
-    let _ = game_save::rd_bool().unwrap();
-    for _ in 0..4 {
-        let _ = rd_long().unwrap();
-    }
-    for _ in 0..8 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..19 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..4 {
-        let _ = game_save::rd_byte().unwrap();
-    }
-    for _ in 0..4 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..4 {
-        game_save::rd_string(&mut scratch).unwrap();
-    }
-    let mut bytes6 = [0u8; 6];
-    game_save::rd_bytes(&mut bytes6).unwrap();
-    game_save::rd_bytes(&mut bytes6).unwrap();
-    let mut shorts6 = [0u16; 6];
-    game_save::rd_shorts(&mut shorts6).unwrap();
-    game_save::rd_bytes(&mut bytes6).unwrap();
-    let _ = rd_long().unwrap();
-    for _ in 0..23 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..17 {
-        let _ = game_save::rd_bool().unwrap();
-    }
-    let _ = game_save::rd_byte().unwrap();
 }
 
 #[test]
@@ -322,103 +290,6 @@ fn test_timestamp_clamp() {
     set_start_time(100);
     test_set_unix_time(Some(200));
     assert_eq!(test_compute_save_timestamp(), 200);
-}
-
-fn read_timestamp_from_buffer() -> u32 {
-    test_buffer_inject(&test_buffer_bytes());
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(get_byte().unwrap());
-    while game_save::rd_short().unwrap() != 0xFFFF {}
-    let _ = rd_long().unwrap();
-    skip_player_through_stores();
-    rd_long().unwrap()
-}
-
-fn skip_player_through_stores() {
-    let mut scratch = [0u8; 80];
-    game_save::rd_string(&mut scratch).unwrap();
-    let _ = game_save::rd_bool().unwrap();
-    for _ in 0..4 {
-        let _ = rd_long().unwrap();
-    }
-    for _ in 0..8 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..19 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..4 {
-        let _ = game_save::rd_byte().unwrap();
-    }
-    for _ in 0..4 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..4 {
-        game_save::rd_string(&mut scratch).unwrap();
-    }
-    let mut bytes6 = [0u8; 6];
-    game_save::rd_bytes(&mut bytes6).unwrap();
-    game_save::rd_bytes(&mut bytes6).unwrap();
-    let mut shorts6 = [0u16; 6];
-    game_save::rd_shorts(&mut shorts6).unwrap();
-    game_save::rd_bytes(&mut bytes6).unwrap();
-    let _ = rd_long().unwrap();
-    for _ in 0..23 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    for _ in 0..17 {
-        let _ = game_save::rd_bool().unwrap();
-    }
-    let _ = game_save::rd_byte().unwrap();
-    let _ = game_save::rd_short().unwrap();
-    let _ = rd_long().unwrap();
-    let unique = game_save::rd_short().unwrap();
-    for _ in 0..unique {
-        let mut item = Default::default();
-        game_save::rd_item(&mut item).unwrap();
-    }
-    for _ in PlayerEquipment::Wield as u16..umoria::inventory::PLAYER_INVENTORY_SIZE as u16 {
-        let mut item = Default::default();
-        game_save::rd_item(&mut item).unwrap();
-    }
-    let _ = game_save::rd_short().unwrap();
-    let _ = game_save::rd_short().unwrap();
-    for _ in 0..3 {
-        let _ = rd_long().unwrap();
-    }
-    let mut order = [0u8; 32];
-    game_save::rd_bytes(&mut order).unwrap();
-    let mut ident = vec![0u8; umoria::types::OBJECT_IDENT_SIZE as usize];
-    game_save::rd_bytes(&mut ident).unwrap();
-    let _ = rd_long().unwrap();
-    let _ = rd_long().unwrap();
-    let msg_count = game_save::rd_short().unwrap();
-    for _ in 0..msg_count {
-        game_save::rd_string(&mut scratch).unwrap();
-    }
-    for _ in 0..3 {
-        let _ = game_save::rd_short().unwrap();
-    }
-    let mut base = [0u16; umoria::player::PLAYER_MAX_LEVEL as usize];
-    game_save::rd_shorts(&mut base).unwrap();
-    for _ in 0..umoria::store::MAX_STORES {
-        let _ = rd_long().unwrap();
-        let _ = game_save::rd_short().unwrap();
-        let _ = game_save::rd_byte().unwrap();
-        let items = game_save::rd_byte().unwrap();
-        let _ = game_save::rd_short().unwrap();
-        let _ = game_save::rd_short().unwrap();
-        for _ in 0..items {
-            let _ = rd_long().unwrap();
-            let mut item = Default::default();
-            game_save::rd_item(&mut item).unwrap();
-        }
-    }
 }
 
 #[test]
@@ -478,24 +349,6 @@ fn test_creature_and_treasure_sparse_lists() {
         assert_eq!(state.dg.floor[1][2].creature_id, 7);
         assert_eq!(state.dg.floor[3][4].treasure_id, 9);
     });
-}
-
-fn seek_to_level_header() {
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(0);
-    let _ = rd_byte().unwrap();
-    set_xor_byte(get_byte().unwrap());
-    while game_save::rd_short().unwrap() != 0xFFFF {}
-    let _ = rd_long().unwrap();
-    skip_player_through_stores();
-    let _ = rd_long().unwrap();
-    let mut scratch = [0u8; 80];
-    game_save::rd_string(&mut scratch).unwrap();
-    let _ = rd_long().unwrap();
-    let _ = rd_long().unwrap();
 }
 
 #[test]
@@ -593,11 +446,7 @@ fn test_savechar_failure_unlink_and_message() {
 fn test_savegame_retry_rename_flow() {
     ui_io::test_set_ncurses_stub(true);
     ui_io::test_set_ui_capture(true);
-    test_push_getch_keys(&[
-        b'y' as i32,
-        b'n' as i32,
-        ESCAPE as i32,
-    ]);
+    test_push_getch_keys(&[b'y' as i32, b'n' as i32, ESCAPE as i32]);
     reset_for_new_game(None);
     let dir = std::env::temp_dir().join(format!("umoria_save515_{}", std::process::id()));
     fs::create_dir_all(&dir).unwrap();
@@ -614,7 +463,9 @@ fn test_savegame_retry_rename_flow() {
     test_set_force_save_char_fail(false);
 
     let messages = ui_io::test_ui_messages();
-    assert!(messages.iter().any(|m| m.contains("Save file '") && m.contains(" fails.")));
+    assert!(messages
+        .iter()
+        .any(|m| m.contains("Save file '") && m.contains(" fails.")));
     assert!(messages
         .iter()
         .any(|m| m.contains("New Save file [ESC to give up]:")));

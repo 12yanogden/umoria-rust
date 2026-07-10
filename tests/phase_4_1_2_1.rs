@@ -1,5 +1,12 @@
 //! Phase 4.1.2.1 — dungeon generation primitives & helpers.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -12,7 +19,7 @@ use umoria::dungeon_generate::{
     dungeon_place_vault_trap, pick_correct_direction, set_corridors, set_floors, set_rooms,
 };
 use umoria::dungeon_tile::{
-    MAX_CAVE_FLOOR, TILE_BLOCKED_FLOOR, TILE_BOUNDARY_WALL, TILE_CORR_FLOOR, TILE_DARK_FLOOR,
+    Tile, MAX_CAVE_FLOOR, TILE_BLOCKED_FLOOR, TILE_BOUNDARY_WALL, TILE_CORR_FLOOR, TILE_DARK_FLOOR,
     TILE_GRANITE_WALL, TILE_LIGHT_FLOOR, TILE_MAGMA_WALL, TILE_NULL_WALL, TMP1_WALL, TMP2_WALL,
 };
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
@@ -23,7 +30,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
     });
 }
 
@@ -415,6 +422,8 @@ fn dungeon_place_vault_monster_calls_summon() {
     let before = with_state(|s| s.next_free_monster_id);
     umoria::dungeon_generate::dungeon_place_vault_monster(Coord_t { y: 10, x: 10 }, 1);
     let after = with_state(|s| s.next_free_monster_id);
-    assert!(after > before, "vault monster summon should place at least one");
+    assert!(
+        after > before,
+        "vault monster summon should place at least one"
+    );
 }
-

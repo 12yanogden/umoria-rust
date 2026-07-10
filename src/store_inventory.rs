@@ -1,4 +1,4 @@
-//! Port of src/store_inventory.cpp — store pricing, stock maintenance, and inventory ops.
+//! Port of `src/store_inventory.cpp` — store pricing, stock maintenance, and inventory ops.
 
 use crate::config::dungeon::objects::OBJ_NOTHING;
 use crate::config::identification::{ID_DAMD, ID_STORE_BOUGHT};
@@ -12,13 +12,12 @@ use crate::data_treasure::GAME_OBJECTS;
 use crate::game::{random_number_state, with_state, with_state_mut, State};
 use crate::game_objects::{popt, pusht_state};
 use crate::identification::{
-    item_set_colorless_as_identified_for_state,
-    spell_item_identify_and_remove_random_inscription_for_state, spell_item_identified,
-    MAX_MUSHROOMS,
+    item_set_colorless_as_identified_for_state, spell_item_identified,
+    spell_item_identify_and_remove_random_inscription_for_state, MAX_MUSHROOMS,
 };
 use crate::inventory::{
-    inventory_item_copy_to, inventory_item_single_stackable, inventory_item_stackable,
-    Inventory, ITEM_GROUP_MIN, ITEM_SINGLE_STACK_MIN,
+    inventory_item_copy_to, inventory_item_single_stackable, inventory_item_stackable, Inventory,
+    ITEM_GROUP_MIN, ITEM_SINGLE_STACK_MIN,
 };
 use crate::store::{Store, MAX_STORES, STORE_MAX_DISCRETE_ITEMS, STORE_MAX_ITEM_TYPES};
 use crate::treasure::{
@@ -29,7 +28,7 @@ use crate::treasure::{
 
 fn get_weapon_armor_buy_price(item: &Inventory) -> i32 {
     if !spell_item_identified(*item) {
-        return i32::from(GAME_OBJECTS[item.id as usize].cost);
+        return GAME_OBJECTS[item.id as usize].cost;
     }
 
     if item.category_id >= TV_BOW && item.category_id <= TV_SWORD {
@@ -49,7 +48,7 @@ fn get_weapon_armor_buy_price(item: &Inventory) -> i32 {
 
 fn get_ammo_buy_price(item: &Inventory) -> i32 {
     if !spell_item_identified(*item) {
-        return i32::from(GAME_OBJECTS[item.id as usize].cost);
+        return GAME_OBJECTS[item.id as usize].cost;
     }
 
     if item.to_hit < 0 || item.to_damage < 0 || item.to_ac < 0 {
@@ -98,7 +97,7 @@ fn get_ring_amulet_buy_price(state: &State, item: &Inventory) -> i32 {
     }
 
     if !spell_item_identified(*item) {
-        return i32::from(GAME_OBJECTS[item.id as usize].cost);
+        return GAME_OBJECTS[item.id as usize].cost;
     }
 
     item.cost
@@ -127,7 +126,7 @@ fn get_wand_staff_buy_price(state: &State, item: &Inventory) -> i32 {
 
 fn get_pick_shovel_buy_price(item: &Inventory) -> i32 {
     if !spell_item_identified(*item) {
-        return i32::from(GAME_OBJECTS[item.id as usize].cost);
+        return GAME_OBJECTS[item.id as usize].cost;
     }
 
     if item.misc_use < 0 {
@@ -178,7 +177,7 @@ pub(crate) fn store_item_value_for_state(state: &State, item: &Inventory) -> i32
     }
 }
 
-/// C++ store_inventory.cpp lines 59–90.
+/// C++ `store_inventory.cpp` lines 59–90.
 pub fn store_item_value(item: &Inventory) -> i32 {
     with_state(|state| store_item_value_for_state(state, item))
 }
@@ -198,7 +197,8 @@ fn store_item_sell_price_for_state(
 
     let owner = &STORE_OWNERS[store.owner_id as usize];
 
-    price = price * i32::from(RACE_GOLD_ADJUSTMENTS[owner.race as usize][state.py.misc.race_id as usize])
+    price = price
+        * i32::from(RACE_GOLD_ADJUSTMENTS[owner.race as usize][state.py.misc.race_id as usize])
         / 100;
     if price < 1 {
         price = 1;
@@ -214,7 +214,7 @@ fn store_item_sell_price_for_state(
     price
 }
 
-/// C++ store_inventory.cpp lines 195–219.
+/// C++ `store_inventory.cpp` lines 195–219.
 pub fn store_item_sell_price(
     store: &Store,
     min_price: &mut i32,
@@ -224,7 +224,7 @@ pub fn store_item_sell_price(
     with_state(|state| store_item_sell_price_for_state(state, store, min_price, max_price, item))
 }
 
-/// C++ store_inventory.cpp lines 222–245.
+/// C++ `store_inventory.cpp` lines 222–245.
 pub fn store_check_player_items_count(store: &Store, item: &Inventory) -> bool {
     if store.unique_items_counter < STORE_MAX_DISCRETE_ITEMS {
         return true;
@@ -251,13 +251,7 @@ pub fn store_check_player_items_count(store: &Store, item: &Inventory) -> bool {
     store_check
 }
 
-fn store_item_insert(
-    state: &mut State,
-    store_id: i32,
-    pos: i32,
-    i_cost: i32,
-    item: &Inventory,
-) {
+fn store_item_insert(state: &mut State, store_id: i32, pos: i32, i_cost: i32, item: &Inventory) {
     let store = &mut state.stores[store_id as usize];
 
     for i in (pos..i32::from(store.unique_items_counter)).rev() {
@@ -269,12 +263,7 @@ fn store_item_insert(
     store.unique_items_counter += 1;
 }
 
-fn store_carry_item_state(
-    state: &mut State,
-    store_id: i32,
-    index_id: &mut i32,
-    item: &Inventory,
-) {
+fn store_carry_item_state(state: &mut State, store_id: i32, index_id: &mut i32, item: &Inventory) {
     *index_id = -1;
 
     let mut item_cost = 0;
@@ -316,8 +305,8 @@ fn store_carry_item_state(
 
                 if item_sub_category > ITEM_GROUP_MIN {
                     let store = &state.stores[store_id as usize];
-                    let store_item = &state.stores[store_id as usize].inventory[item_id as usize]
-                        .item;
+                    let store_item =
+                        &state.stores[store_id as usize].inventory[item_id as usize].item;
                     let _ = store_item_sell_price_for_state(
                         state,
                         store,
@@ -325,8 +314,7 @@ fn store_carry_item_state(
                         &mut item_cost,
                         store_item,
                     );
-                    state.stores[store_id as usize].inventory[item_id as usize].cost =
-                        -item_cost;
+                    state.stores[store_id as usize].inventory[item_id as usize].cost = -item_cost;
                 } else if state.stores[store_id as usize].inventory[item_id as usize]
                     .item
                     .items_count
@@ -357,7 +345,7 @@ fn store_carry_item_state(
     }
 }
 
-/// C++ store_inventory.cpp lines 261–312.
+/// C++ `store_inventory.cpp` lines 261–312.
 pub fn store_carry_item(store_id: i32, index_id: &mut i32, item: &mut Inventory) {
     with_state_mut(|state| store_carry_item_state(state, store_id, index_id, item));
 }
@@ -366,8 +354,9 @@ fn store_destroy_item_state(state: &mut State, store_id: i32, item_id: i32, only
     let items_count = state.stores[store_id as usize].inventory[item_id as usize]
         .item
         .items_count;
-    let single_stackable =
-        inventory_item_single_stackable(state.stores[store_id as usize].inventory[item_id as usize].item);
+    let single_stackable = inventory_item_single_stackable(
+        state.stores[store_id as usize].inventory[item_id as usize].item,
+    );
 
     let number = if single_stackable {
         if only_one_of {
@@ -381,9 +370,7 @@ fn store_destroy_item_state(state: &mut State, store_id: i32, item_id: i32, only
 
     let store_item = &mut state.stores[store_id as usize].inventory[item_id as usize].item;
 
-    if number != store_item.items_count {
-        store_item.items_count -= number;
-    } else {
+    if number == store_item.items_count {
         let unique = state.stores[store_id as usize].unique_items_counter;
         for i in item_id..i32::from(unique) - 1 {
             state.stores[store_id as usize].inventory[i as usize] =
@@ -395,10 +382,12 @@ fn store_destroy_item_state(state: &mut State, store_id: i32, item_id: i32, only
         );
         state.stores[store_id as usize].inventory[(unique - 1) as usize].cost = 0;
         state.stores[store_id as usize].unique_items_counter -= 1;
+    } else {
+        store_item.items_count -= number;
     }
 }
 
-/// C++ store_inventory.cpp lines 316–345.
+/// C++ `store_inventory.cpp` lines 316–345.
 pub fn store_destroy_item(store_id: i32, item_id: i32, only_one_of: bool) {
     with_state_mut(|state| store_destroy_item_state(state, store_id, item_id, only_one_of));
 }
@@ -419,18 +408,19 @@ fn store_item_create(store_id: i32, max_cost: i16) {
             let item = state.game.treasure.list[free_id as usize];
             let store = state.stores[store_id as usize];
 
-            if store_check_player_items_count(&store, &item) {
-                if item.cost > 0 && item.cost < i32::from(max_cost) {
-                    state.game.treasure.list[free_id as usize].identification |= ID_STORE_BOUGHT;
-                    spell_item_identify_and_remove_random_inscription_for_state(
-                        state,
-                        free_id as usize,
-                    );
-                    let item = state.game.treasure.list[free_id as usize];
-                    let mut dummy = 0;
-                    store_carry_item_state(state, store_id, &mut dummy, &item);
-                    tries = 10;
-                }
+            if store_check_player_items_count(&store, &item)
+                && item.cost > 0
+                && item.cost < i32::from(max_cost)
+            {
+                state.game.treasure.list[free_id as usize].identification |= ID_STORE_BOUGHT;
+                spell_item_identify_and_remove_random_inscription_for_state(
+                    state,
+                    free_id as usize,
+                );
+                let item = state.game.treasure.list[free_id as usize];
+                let mut dummy = 0;
+                store_carry_item_state(state, store_id, &mut dummy, &item);
+                tries = 10;
             }
 
             tries += 1;
@@ -440,7 +430,7 @@ fn store_item_create(store_id: i32, max_cost: i16) {
     });
 }
 
-/// C++ store_inventory.cpp lines 24–56.
+/// C++ `store_inventory.cpp` lines 24–56.
 pub fn store_maintenance() {
     for store_id in 0..MAX_STORES as i32 {
         with_state_mut(|state| {
@@ -453,8 +443,7 @@ pub fn store_maintenance() {
         if should_sell {
             let mut turnaround = with_state_mut(|state| {
                 let unique = state.stores[store_id as usize].unique_items_counter;
-                let mut turnaround =
-                    random_number_state(state, i32::from(STORE_STOCK_TURN_AROUND));
+                let mut turnaround = random_number_state(state, i32::from(STORE_STOCK_TURN_AROUND));
                 if unique >= STORE_MAX_AUTO_BUY_ITEMS {
                     turnaround += 1 + i32::from(unique) - i32::from(STORE_MAX_AUTO_BUY_ITEMS);
                 }
@@ -462,8 +451,7 @@ pub fn store_maintenance() {
             });
             while turnaround >= 0 {
                 let item_id = with_state_mut(|state| {
-                    let counter =
-                        i32::from(state.stores[store_id as usize].unique_items_counter);
+                    let counter = i32::from(state.stores[store_id as usize].unique_items_counter);
                     random_number_state(state, counter) - 1
                 });
                 store_destroy_item(store_id, item_id, false);
@@ -480,8 +468,7 @@ pub fn store_maintenance() {
             });
             let mut turnaround = with_state_mut(|state| {
                 let unique = state.stores[store_id as usize].unique_items_counter;
-                let mut turnaround =
-                    random_number_state(state, i32::from(STORE_STOCK_TURN_AROUND));
+                let mut turnaround = random_number_state(state, i32::from(STORE_STOCK_TURN_AROUND));
                 if unique < STORE_MIN_AUTO_SELL_ITEMS {
                     turnaround += i32::from(STORE_MIN_AUTO_SELL_ITEMS) - i32::from(unique);
                 }

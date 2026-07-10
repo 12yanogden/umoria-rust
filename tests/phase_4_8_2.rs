@@ -1,5 +1,12 @@
 //! Phase 4.8.2 — wizard.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_WIZARD;
 use umoria::config::identification::{ID_KNOWN2, ID_STORE_BOUGHT};
@@ -14,9 +21,7 @@ use umoria::helpers::sscanf_lx;
 use umoria::monster::{Monster, MON_MAX_LEVELS, MON_TOTAL_ALLOCATIONS};
 use umoria::player::{PlayerAttr, PLAYER_MAX_LEVEL};
 use umoria::player_stats::player_initialize_base_experience_levels;
-use umoria::types::{
-    Coord_t, MAX_DUNGEON_OBJECTS, MESSAGE_HISTORY_SIZE, TREASURE_MAX_LEVELS,
-};
+use umoria::types::{Coord_t, MAX_DUNGEON_OBJECTS, MESSAGE_HISTORY_SIZE, TREASURE_MAX_LEVELS};
 use umoria::ui::panel_bounds_fields;
 use umoria::ui_io::{
     ctrl_key, test_clear_getch_keys, test_push_getch_keys, test_set_ncurses_stub, ESCAPE,
@@ -121,13 +126,9 @@ fn push_keys_in_consume_order(keys: &[i32]) {
 }
 
 fn push_string_input(s: &str) {
-    let mut keys: Vec<i32> = s.bytes().map(|b| i32::from(b)).collect();
+    let mut keys: Vec<i32> = s.bytes().map(i32::from).collect();
     keys.push(i32::from(ctrl_key(b'J')));
     push_keys_in_consume_order(&keys);
-}
-
-fn push_confirm_yes() {
-    push_keys_in_consume_order(&[i32::from(b'y')]);
 }
 
 fn push_confirm_no() {
@@ -138,19 +139,10 @@ fn push_escape() {
     push_keys_in_consume_order(&[i32::from(ESCAPE)]);
 }
 
-fn push_input_sequence(values: &[&str]) {
-    let mut keys = Vec::new();
-    for value in values {
-        keys.extend(value.bytes().map(|b| i32::from(b)));
-        keys.push(i32::from(ctrl_key(b'J')));
-    }
-    push_keys_in_consume_order(&keys);
-}
-
 fn push_input_sequence_then_escape(values: &[&str]) {
     let mut keys = Vec::new();
     for value in values {
-        keys.extend(value.bytes().map(|b| i32::from(b)));
+        keys.extend(value.bytes().map(i32::from));
         keys.push(i32::from(ctrl_key(b'J')));
     }
     keys.push(i32::from(ESCAPE));
@@ -168,10 +160,6 @@ fn last_message() -> String {
 
 fn tile_at(coord: Coord_t) -> Tile {
     with_state(|s| s.dg.floor[coord.y as usize][coord.x as usize])
-}
-
-fn rng_snapshot_after(count: usize) -> Vec<i32> {
-    (0..count).map(|_| random_number(100)).collect()
 }
 
 // ---------------------------------------------------------------------------
@@ -280,12 +268,7 @@ fn wizard_drop_random_items_uses_command_count_then_resets() {
     wizard_drop_random_items();
 
     with_state(|s| assert_eq!(s.game.command_count, 0));
-    let placed = with_state(|s| {
-        s.dg.floor
-            .iter()
-            .flatten()
-            .any(|t| t.treasure_id != 0)
-    });
+    let placed = with_state(|s| s.dg.floor.iter().flatten().any(|t| t.treasure_id != 0));
     assert!(placed);
 }
 
@@ -557,7 +540,11 @@ fn wizard_character_adjustment_searching_uses_prompt_length_bug() {
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
     let search_prompt_len = with_state(|s| {
-        format!("Current={}  (0-200) Searching = ", s.py.misc.chance_in_search).len()
+        format!(
+            "Current={}  (0-200) Searching = ",
+            s.py.misc.chance_in_search
+        )
+        .len()
     });
     push_input_sequence_then_escape(&[
         "18", "18", "18", "18", "18", "18", "100", "50", "999", "77",
@@ -601,7 +588,12 @@ fn wizard_request_object_id_valid() {
     push_string_input("42");
 
     let mut id = 0;
-    assert!(wizard_request_object_id(&mut id, "Dungeon/Store object", 0, 366));
+    assert!(wizard_request_object_id(
+        &mut id,
+        "Dungeon/Store object",
+        0,
+        366
+    ));
     assert_eq!(id, 42);
 
     test_set_ncurses_stub(false);
@@ -616,7 +608,12 @@ fn wizard_request_object_id_out_of_range() {
     push_string_input("999");
 
     let mut id = 0;
-    assert!(!wizard_request_object_id(&mut id, "Dungeon/Store object", 0, 366));
+    assert!(!wizard_request_object_id(
+        &mut id,
+        "Dungeon/Store object",
+        0,
+        366
+    ));
     assert_eq!(id, 0);
 
     test_set_ncurses_stub(false);
@@ -761,7 +758,7 @@ fn push_create_object_prompts(values: &[&str], confirm_yes: bool) {
     let mut keys = Vec::new();
     keys.push(i32::from(b' '));
     for value in values {
-        keys.extend(value.bytes().map(|b| i32::from(b)));
+        keys.extend(value.bytes().map(i32::from));
         keys.push(i32::from(ctrl_key(b'J')));
     }
     keys.push(i32::from(if confirm_yes { b'y' } else { b'n' }));

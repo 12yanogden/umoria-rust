@@ -1,5 +1,12 @@
 //! Phase 4.1.2.3 — tunnels & intersection doors in dungeon_generate.cpp.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -9,7 +16,7 @@ use umoria::dungeon_generate::{
     dungeon_place_door_if_next_to_two_walls, reset_door_queue,
 };
 use umoria::dungeon_tile::{
-    TILE_BLOCKED_FLOOR, TILE_CORR_FLOOR, TILE_GRANITE_WALL, TILE_NULL_WALL, TMP2_WALL,
+    Tile, TILE_BLOCKED_FLOOR, TILE_CORR_FLOOR, TILE_GRANITE_WALL, TILE_NULL_WALL, TMP2_WALL,
 };
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::rng::get_seed;
@@ -19,7 +26,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
     });
 }
 

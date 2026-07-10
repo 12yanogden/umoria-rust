@@ -1,5 +1,12 @@
 //! Phase 4.1.2.4 — level/town assembly + generateCave in dungeon_generate.cpp.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -15,7 +22,9 @@ use umoria::dungeon_generate::{
     dungeon_build_store, dungeon_generate, dungeon_place_town_stores, generate_cave, is_nigh_time,
     light_town, monster_linker, town_generation, treasure_linker,
 };
-use umoria::dungeon_tile::{TILE_BOUNDARY_WALL, TILE_CORR_FLOOR, TILE_DARK_FLOOR, TILE_NULL_WALL};
+use umoria::dungeon_tile::{
+    Tile, TILE_BOUNDARY_WALL, TILE_CORR_FLOOR, TILE_DARK_FLOOR, TILE_NULL_WALL,
+};
 use umoria::game::{
     random_number, random_number_normal_distribution, reset_for_new_game, seed_reset_to_old_seed,
     seed_set, with_state, with_state_mut,
@@ -28,7 +37,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
     });
 }
 

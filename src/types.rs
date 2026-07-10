@@ -1,21 +1,21 @@
-//! Port of src/types.h and shared type aliases — see phase_2 for full layouts.
+//! Port of src/types.h and shared type aliases — see `phase_2` for full layouts.
 #![allow(unused_imports)]
 //!
-//! ## Fixed char-buffer semantics (phase_2.1 decision)
+//! ## Fixed char-buffer semantics (`phase_2.1` decision)
 //!
 //! C++ `vtype_t` / `obj_desc_t` are fixed-length C string buffers used by string
-//! helpers (phase_2.3) and the byte-exact save format (phase_5). They are modeled as
+//! helpers (`phase_2.3`) and the byte-exact save format (`phase_5`). They are modeled as
 //! `[u8; N]` (not `String`/`&str`) so NUL-terminated C-string semantics, fixed bounds,
 //! and save-file layout stay exact. Use `u8` rather than `i8`/`c_char` because the save
 //! format and terminal I/O treat these as byte buffers and the sign bit is used as a
-//! standout flag in UI (phase_3).
+//! standout flag in UI (`phase_3`).
 //!
-//! ## CNIL (phase_2.1 decision)
+//! ## CNIL (`phase_2.1` decision)
 //!
 //! C++ `constexpr char *CNIL = nullptr` is a null `char*` sentinel. Call sites that
 //! passed `CNIL` map to `Option::None`; `CNIL` is provided as a documented convenience.
 
-/// C++ `constexpr uint8_t MORIA_MESSAGE_SIZE` (typed as `usize` for Rust `[T; N]` repeat counts in phase_1.3).
+/// C++ `constexpr uint8_t MORIA_MESSAGE_SIZE` (typed as `usize` for Rust `[T; N]` repeat counts in `phase_1.3`).
 pub const MORIA_MESSAGE_SIZE: usize = 80;
 /// Alias for callers that distinguish the C++ `uint8_t` value from the Rust array length.
 pub const MORIA_MESSAGE_SIZE_LEN: usize = MORIA_MESSAGE_SIZE;
@@ -33,7 +33,7 @@ pub const CNIL: Option<&str> = None;
 /// C++ `typedef char vtype_t[MORIA_MESSAGE_SIZE]`.
 #[allow(non_camel_case_types)]
 pub type Vtype_t = [u8; MORIA_MESSAGE_SIZE];
-/// Alias retained for phase_1.3 callers.
+/// Alias retained for `phase_1.3` callers.
 pub type Vtype = Vtype_t;
 
 /// C++ `typedef char obj_desc_t[MORIA_OBJ_DESC_SIZE]`.

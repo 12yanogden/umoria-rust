@@ -1,5 +1,12 @@
 //! Phase 4.4.3 — player_run.cpp running/find state machine parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
 use umoria::dungeon_tile::{

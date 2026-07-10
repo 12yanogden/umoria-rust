@@ -1,10 +1,17 @@
 //! Phase 4.5.3.1 — treasure.cpp core, dispatch & weapon/armor enchantment parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::identification::{ID_SHOW_HIT_DAM, ID_SHOW_P1};
 use umoria::config::treasure::flags::{
-    TR_CON, TR_CURSED, TR_DEX, TR_FREE_ACT, TR_INT, TR_RES_LIGHT, TR_SPEED, TR_STEALTH, TR_STR,
-    TR_TUNNEL, TR_WIS,
+    TR_CON, TR_CURSED, TR_DEX, TR_FREE_ACT, TR_INT, TR_RES_LIGHT, TR_SPEED, TR_STR, TR_TUNNEL,
+    TR_WIS,
 };
 use umoria::data_treasure::GAME_OBJECTS;
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
@@ -12,7 +19,7 @@ use umoria::identification::SpecialNameIds;
 use umoria::inventory::inventory_item_copy_to;
 use umoria::treasure::{
     magic_enchantment_bonus, magic_should_be_enchanted, magic_treasure_magical_ability,
-    staff_magic_charges, wand_magic_charges, TV_AMULET, TV_ARROW, TV_BOW, TV_BOOTS, TV_CHEST,
+    staff_magic_charges, wand_magic_charges, TV_AMULET, TV_ARROW, TV_BOOTS, TV_BOW, TV_CHEST,
     TV_CLOAK, TV_DIGGING, TV_FOOD, TV_GLOVES, TV_HARD_ARMOR, TV_HELM, TV_LIGHT, TV_POTION1,
     TV_RING, TV_SCROLL1, TV_SHIELD, TV_SOFT_ARMOR, TV_SPIKE, TV_STAFF, TV_SWORD, TV_WAND,
 };
@@ -43,19 +50,7 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-fn item_snapshot() -> (
-    i16,
-    i16,
-    i16,
-    u32,
-    u8,
-    i16,
-    i32,
-    u8,
-    u8,
-    u8,
-    u8,
-) {
+fn item_snapshot() -> (i16, i16, i16, u32, u8, i16, i32, u8, u8, u8, u8) {
     with_state(|s| {
         let item = &s.game.treasure.list[1];
         (

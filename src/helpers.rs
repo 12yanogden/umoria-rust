@@ -1,4 +1,4 @@
-//! Port of src/helpers.cpp — see phase_2.
+//! Port of src/helpers.cpp — see `phase_2`.
 
 use std::ffi::CString;
 use std::fmt::Write;
@@ -190,9 +190,8 @@ fn errno_ptr() -> *mut libc::c_int {
 
 /// Parse unsigned hex with C `sscanf("%lx")` semantics — wizard flag entry.
 pub fn sscanf_lx(str: &str, number: &mut i32) -> i32 {
-    let c_str = match CString::new(str) {
-        Ok(s) => s,
-        Err(_) => return 0,
+    let Ok(c_str) = CString::new(str) else {
+        return 0;
     };
 
     unsafe {
@@ -200,7 +199,7 @@ pub fn sscanf_lx(str: &str, number: &mut i32) -> i32 {
         let mut endptr: *mut c_char = ptr::null_mut();
         let num = libc::strtoul(c_str.as_ptr(), &mut endptr, 16);
 
-        if endptr == c_str.as_ptr() as *mut c_char {
+        if endptr == c_str.as_ptr().cast_mut() {
             return 0;
         }
 
@@ -211,9 +210,8 @@ pub fn sscanf_lx(str: &str, number: &mut i32) -> i32 {
 
 /// Parse base-10 integer with C `strtol` semantics — C++ `stringToNumber`.
 pub fn string_to_number(str: &str, number: &mut i32) -> bool {
-    let c_str = match CString::new(str) {
-        Ok(s) => s,
-        Err(_) => return false,
+    let Ok(c_str) = CString::new(str) else {
+        return false;
     };
 
     unsafe {
@@ -259,9 +257,9 @@ pub fn human_date_string(day: &mut [u8; 11]) {
         let fmt = b"%a %b %e\0";
 
         libc::strftime(
-            day.as_mut_ptr() as *mut c_char,
+            day.as_mut_ptr().cast::<c_char>(),
             11,
-            fmt.as_ptr() as *const c_char,
+            fmt.as_ptr().cast::<c_char>(),
             datetime,
         );
     }

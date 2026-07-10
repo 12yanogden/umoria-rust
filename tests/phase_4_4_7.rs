@@ -1,19 +1,24 @@
 //! Phase 4.4.7 — player_eat.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::identification::{OD_KNOWN1, OD_TRIED};
-use umoria::config::player::{PLAYER_FOOD_FULL, PLAYER_FOOD_MAX};
 use umoria::config::player::status::{PY_HUNGRY, PY_WEAK};
+use umoria::config::player::{PLAYER_FOOD_FULL, PLAYER_FOOD_MAX};
 use umoria::data_treasure::GAME_OBJECTS;
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::identification::{
     item_set_as_identified, magic_initialize_item_names, object_position_offset, FlavorTables,
 };
-use umoria::inventory::{
-    inventory_item_copy_to, Inventory, PLAYER_INVENTORY_SIZE,
-};
-use umoria::player::{PLAYER_MAX_LEVEL};
+use umoria::inventory::{inventory_item_copy_to, Inventory, PLAYER_INVENTORY_SIZE};
+use umoria::player::PLAYER_MAX_LEVEL;
 use umoria::player_eat::{player_eat, player_ingest_food};
 use umoria::treasure::TV_FOOD;
 use umoria::types::MESSAGE_HISTORY_SIZE;

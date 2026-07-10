@@ -1,5 +1,11 @@
 //! Phase 1.5 — transcript replay / screen-diff skeleton (staged until phase_5).
-
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 #![allow(unused_imports)]
 
 mod common;
@@ -24,8 +30,7 @@ fn transcript_replay_matches_golden_screen() {
     let keys_path = golden_root().join("transcripts/newchar_seed42.keys");
     assert!(keys_path.is_file(), "keystroke script must exist");
 
-    let expected_screen =
-        ScreenBuffer::from_bytes(&read_golden_bytes(screen_entry)).expect("parse golden screen");
+    let expected_screen = ScreenBuffer::from_bytes(&read_golden_bytes(screen_entry));
 
     #[cfg(feature = "differential_live")]
     {

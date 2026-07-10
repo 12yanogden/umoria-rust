@@ -1,5 +1,12 @@
 //! Phase 4.2.2 — monster movement & AI core parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -12,7 +19,9 @@ use umoria::config::monsters::{self, MON_MULTIPLY_ADJUST};
 use umoria::config::treasure::OBJECTS_RUNE_PROTECTION;
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::dungeon::{coord_distance_between, MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::{MIN_CAVE_WALL, TILE_CORR_FLOOR, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR};
+use umoria::dungeon_tile::{
+    Tile, MIN_CAVE_WALL, TILE_CORR_FLOOR, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR,
+};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::game_objects::popt;
 use umoria::inventory::inventory_item_copy_to;
@@ -37,7 +46,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -381,7 +390,7 @@ fn monster_open_door_locked_force_math_int16_hp() {
         assert_eq!(
             s.game.treasure.list[s.dg.floor[8][10].treasure_id as usize].misc_use,
             5
-        )
+        );
     });
 }
 

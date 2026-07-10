@@ -1,5 +1,12 @@
 //! Phase 4.1.3 — dungeon_los.cpp (los, look, lookRay, lookSee).
 #![allow(clippy::int_plus_one, clippy::too_many_lines)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::monsters::MON_MAX_SIGHT;
 use umoria::dungeon::MAX_HEIGHT;
@@ -122,21 +129,25 @@ fn reference_los(from: Coord_t, to: Coord_t) -> bool {
                 return false;
             }
             dy += slope;
-            if dy < scale_half {
-                xx += x_sign;
-            } else if dy > scale_half {
-                yy += y_sign;
-                if with_state(|s| {
-                    s.dg.floor[yy as usize][xx as usize].feature_id >= MIN_CLOSED_SPACE
-                }) {
-                    return false;
+            match dy.cmp(&scale_half) {
+                std::cmp::Ordering::Less => {
+                    xx += x_sign;
                 }
-                xx += x_sign;
-                dy -= scale;
-            } else {
-                xx += x_sign;
-                yy += y_sign;
-                dy -= scale;
+                std::cmp::Ordering::Greater => {
+                    yy += y_sign;
+                    if with_state(|s| {
+                        s.dg.floor[yy as usize][xx as usize].feature_id >= MIN_CLOSED_SPACE
+                    }) {
+                        return false;
+                    }
+                    xx += x_sign;
+                    dy -= scale;
+                }
+                std::cmp::Ordering::Equal => {
+                    xx += x_sign;
+                    yy += y_sign;
+                    dy -= scale;
+                }
             }
         }
         return true;
@@ -158,19 +169,25 @@ fn reference_los(from: Coord_t, to: Coord_t) -> bool {
             return false;
         }
         dx += slope;
-        if dx < scale_half {
-            yy += y_sign;
-        } else if dx > scale_half {
-            xx += x_sign;
-            if with_state(|s| s.dg.floor[yy as usize][xx as usize].feature_id >= MIN_CLOSED_SPACE) {
-                return false;
+        match dx.cmp(&scale_half) {
+            std::cmp::Ordering::Less => {
+                yy += y_sign;
             }
-            yy += y_sign;
-            dx -= scale;
-        } else {
-            xx += x_sign;
-            yy += y_sign;
-            dx -= scale;
+            std::cmp::Ordering::Greater => {
+                xx += x_sign;
+                if with_state(|s| {
+                    s.dg.floor[yy as usize][xx as usize].feature_id >= MIN_CLOSED_SPACE
+                }) {
+                    return false;
+                }
+                yy += y_sign;
+                dx -= scale;
+            }
+            std::cmp::Ordering::Equal => {
+                xx += x_sign;
+                yy += y_sign;
+                dx -= scale;
+            }
         }
     }
     true

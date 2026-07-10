@@ -69,21 +69,19 @@ pub struct Background {
 
 use crate::config::files;
 use crate::data_player::{CHARACTER_BACKGROUNDS, CHARACTER_RACES, CLASSES};
-use crate::game::{
-    random_number, random_number_normal_distribution, with_state, with_state_mut,
-};
+use crate::game::{random_number, random_number_normal_distribution, with_state, with_state_mut};
 use crate::game_files::display_text_help_file;
 use crate::player::{
     player_armor_class_adjustment, player_damage_adjustment, player_disarm_adjustment,
     player_is_male, player_set_and_use_stat, player_set_gender,
-    player_stat_adjustment_constitution, player_to_hit_adjustment, PlayerAttr,
-    PLAYER_MAX_CLASSES, PLAYER_MAX_LEVEL, PLAYER_MAX_RACES,
+    player_stat_adjustment_constitution, player_to_hit_adjustment, PlayerAttr, PLAYER_MAX_CLASSES,
+    PLAYER_MAX_LEVEL, PLAYER_MAX_RACES,
 };
-use crate::ui_io::terminal::{self, Coord};
 use crate::ui::{
     get_character_name, print_character_abilities, print_character_information,
     print_character_level_experience, print_character_stats, print_character_vital_statistics,
 };
+use crate::ui_io::terminal::{self, Coord};
 
 use crate::ui_io::ESCAPE;
 
@@ -152,9 +150,9 @@ fn character_generate_stats() {
     let mut dice = [0i32; 18];
     loop {
         let mut total = 0;
-        for i in 0..18 {
-            dice[i] = random_number(3 + (i % 3) as i32);
-            total += dice[i];
+        for (i, die) in dice.iter_mut().enumerate() {
+            *die = random_number(3 + (i % 3) as i32);
+            total += *die;
         }
         if total > 42 && total < 54 {
             break;
@@ -163,8 +161,7 @@ fn character_generate_stats() {
 
     with_state_mut(|state| {
         for i in 0..6 {
-            state.py.stats.max[i] =
-                (5 + dice[3 * i] + dice[3 * i + 1] + dice[3 * i + 2]) as u8;
+            state.py.stats.max[i] = (5 + dice[3 * i] + dice[3 * i + 1] + dice[3 * i + 2]) as u8;
         }
     });
 }
@@ -263,9 +260,15 @@ pub fn character_choose_race() {
 pub fn display_character_history() {
     terminal::put_string("Character Background", Coord { y: 14, x: 27 });
     let history = with_state(|state| state.py.misc.history);
-    for i in 0..4 {
-        let line = c_str_from_history(&history[i]);
-        terminal::put_string_clear_to_eol(&line, Coord { y: 15 + i as i32, x: 10 });
+    for (i, entry) in history.iter().enumerate() {
+        let line = c_str_from_history(entry);
+        terminal::put_string_clear_to_eol(
+            &line,
+            Coord {
+                y: 15 + i as i32,
+                x: 10,
+            },
+        );
     }
 }
 
@@ -353,8 +356,7 @@ pub fn character_get_history() {
 
             let end = cursor_start + current_cursor_position;
             let len = current_cursor_position.min(60);
-            state.py.misc.history[line_number][..len]
-                .copy_from_slice(&bytes[cursor_start..end]);
+            state.py.misc.history[line_number][..len].copy_from_slice(&bytes[cursor_start..end]);
             // C++ character.cpp:250 — NUL-terminate when len < 60 (array is [60];
             // writing at index 60 is UB in C++ and omitted here).
             if len < 60 {
@@ -365,11 +367,7 @@ pub fn character_get_history() {
         }
     });
 
-    if social_class > 100 {
-        social_class = 100;
-    } else if social_class < 1 {
-        social_class = 1;
-    }
+    social_class = social_class.clamp(1, 100);
 
     with_state_mut(|state| {
         state.py.misc.social_class = social_class as i16;
@@ -426,10 +424,8 @@ pub fn character_set_age_height_weight() {
     };
 
     let age = (race.base_age as u16).wrapping_add(random_number(race.max_age as i32) as u16);
-    let height =
-        random_number_normal_distribution(height_base as i32, height_mod as i32) as u16;
-    let weight =
-        random_number_normal_distribution(weight_base as i32, weight_mod as i32) as u16;
+    let height = random_number_normal_distribution(height_base as i32, height_mod as i32) as u16;
+    let weight = random_number_normal_distribution(weight_base as i32, weight_mod as i32) as u16;
 
     with_state_mut(|state| {
         state.py.misc.age = age;
@@ -450,11 +446,7 @@ pub fn display_race_classes(race_id: u8, class_list: &mut [u8; PLAYER_MAX_CLASSE
 
     for i in 0..PLAYER_MAX_CLASSES as usize {
         if (CHARACTER_RACES[race_id as usize].classes_bit_field as u32 & mask) != 0 {
-            let description = format!(
-                "{}) {}",
-                (class_id + b'a') as char,
-                CLASSES[i].title
-            );
+            let description = format!("{}) {}", (class_id + b'a') as char, CLASSES[i].title);
             terminal::put_string(&description, coord);
             class_list[class_id as usize] = i as u8;
 
@@ -508,10 +500,10 @@ pub fn generate_character_class(class_id: u8) {
     let hit_die = with_state(|state| state.py.misc.hit_die.wrapping_add(klass.hit_points));
     let max_hp = (player_stat_adjustment_constitution() + i32::from(hit_die)) as i16;
 
-    let min_value =
-        (i32::from(PLAYER_MAX_LEVEL) * 3 / 8 * i32::from(hit_die - 1)) + i32::from(PLAYER_MAX_LEVEL);
-    let max_value =
-        (i32::from(PLAYER_MAX_LEVEL) * 5 / 8 * i32::from(hit_die - 1)) + i32::from(PLAYER_MAX_LEVEL);
+    let min_value = (i32::from(PLAYER_MAX_LEVEL) * 3 / 8 * i32::from(hit_die - 1))
+        + i32::from(PLAYER_MAX_LEVEL);
+    let max_value = (i32::from(PLAYER_MAX_LEVEL) * 5 / 8 * i32::from(hit_die - 1))
+        + i32::from(PLAYER_MAX_LEVEL);
 
     let mut base_hp_levels = [0u16; PLAYER_MAX_LEVEL as usize];
     base_hp_levels[0] = hit_die as u16;
@@ -592,7 +584,8 @@ pub fn monetary_value_calculated_from_stat(stat: u8) -> i32 {
 /// C++ character.cpp lines 444–470.
 pub fn player_calculate_start_gold() {
     let is_male = player_is_male();
-    let (stats, social_class) = with_state(|state| (state.py.stats.max, state.py.misc.social_class));
+    let (stats, social_class) =
+        with_state(|state| (state.py.stats.max, state.py.misc.social_class));
     let gold_roll = random_number(25);
 
     let mut value = monetary_value_calculated_from_stat(stats[PlayerAttr::A_STR as usize]);
@@ -646,9 +639,8 @@ pub fn character_create() {
                 break;
             } else if key == b' ' {
                 break;
-            } else {
-                terminal::terminal_bell_sound();
             }
+            terminal::terminal_bell_sound();
         }
     }
 

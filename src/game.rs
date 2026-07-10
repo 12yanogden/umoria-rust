@@ -1,6 +1,7 @@
 //! Port of src/game.cpp / src/game.h — central mutable game state owner.
 
 use std::cell::RefCell;
+use std::io::{self, Write};
 
 use crate::rng::{rnd_state, set_seed_state};
 use crate::store::Store;
@@ -11,12 +12,12 @@ use crate::types::{
     TREASURE_MAX_LEVELS,
 };
 
-/// Port of `NORMAL_TABLE_SD` in game.h — upstream gap: belongs in types.rs (phase_2.4).
+/// Port of `NORMAL_TABLE_SD` in game.h — upstream gap: belongs in types.rs (`phase_2.4`).
 pub const NORMAL_TABLE_SD: u8 = 64;
 
 const SHRT_MAX: i32 = 32_767;
 
-/// Authoritative `normal_table` from data_tables.cpp lines 93-126.
+/// Authoritative `normal_table` from `data_tables.cpp` lines 93-126.
 const NORMAL_TABLE_VALUES: [u16; NORMAL_TABLE_SIZE] = [
     206, 613, 1022, 1430, 1838, 2245, 2652, 3058, 3463, 3867, 4271, 4673, 5075, 5475, 5874, 6271,
     6667, 7061, 7454, 7845, 8234, 8621, 9006, 9389, 9770, 10148, 10524, 10898, 11269, 11638, 12004,
@@ -56,7 +57,7 @@ pub fn current_unix_time() -> u32 {
 }
 
 fn get_current_unix_time() -> u32 {
-    if let Some(clock) = TEST_UNIX_TIME.with(|t| t.get()) {
+    if let Some(clock) = TEST_UNIX_TIME.with(std::cell::Cell::get) {
         return clock;
     }
     crate::helpers::get_current_unix_time()
@@ -103,7 +104,7 @@ pub struct Rng {
     pub old_seed: u32,
 }
 
-/// Treasure heap inside Game_t (game.h).
+/// Treasure heap inside `Game_t` (game.h).
 #[derive(Clone, Debug)]
 pub struct GameTreasure {
     pub current_id: i16,
@@ -119,7 +120,7 @@ impl Default for GameTreasure {
     }
 }
 
-/// Screen state inside Game_t (game.h).
+/// Screen state inside `Game_t` (game.h).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct GameScreen {
     pub current_screen_id: Screen,
@@ -129,7 +130,7 @@ pub struct GameScreen {
     pub wear_high_id: i32,
 }
 
-/// Port of Game_t (game.h) — defaults match C++ member initializers.
+/// Port of `Game_t` (game.h) — defaults match C++ member initializers.
 #[derive(Clone, Debug)]
 pub struct GameState {
     pub magic_seed: u32,
@@ -355,7 +356,7 @@ pub(crate) fn seed_reset_to_old_seed_state(state: &mut State) {
 }
 
 pub fn seed_reset_to_old_seed() {
-    with_state_mut(|state| seed_reset_to_old_seed_state(state));
+    with_state_mut(seed_reset_to_old_seed_state);
 }
 
 /// Read-only copy of a small scalar from `State.game`.
@@ -404,7 +405,7 @@ macro_rules! py {
     };
 }
 
-/// C++ `Game_t game = Game_t{};` (game.cpp:14) — realized by [`State::default()`].
+// C++ `Game_t game = Game_t{};` (game.cpp:14) — realized by `State::default()`.
 // (No separate global; residuals read/write `State.game` / `State.options` via `with_state`.)
 
 /// Terminal/UI callbacks for lifecycle helpers (avoids `game` ↔ `ui_io` module cycle).
@@ -431,10 +432,16 @@ pub fn install_game_ui_hooks(hooks: GameUiHooks) {
     GAME_UI_HOOKS.with(|h| *h.borrow_mut() = Some(hooks));
 }
 
+#[allow(
+    clippy::panic,
+    reason = "UI hooks are installed once at startup via register_game_ui_hooks()"
+)]
 fn game_ui() -> GameUiHooks {
-    GAME_UI_HOOKS
-        .with(|h| *h.borrow())
-        .expect("game UI hooks not installed — call ui_io::register_game_ui_hooks()")
+    let hooks = GAME_UI_HOOKS.with(|h| *h.borrow());
+    let Some(hooks) = hooks else {
+        panic!("game UI hooks not installed — call ui_io::register_game_ui_hooks()");
+    };
+    hooks
 }
 
 /// One row of the C++ `game_options[]` table (game.cpp:118–134).
@@ -551,11 +558,15 @@ pub fn set_game_options() {
     );
 
     for (index, entry) in table.iter().enumerate() {
-        let line = with_state(|state| format_option_line(entry.prompt, (entry.get)(&state.options)));
-        (ui.put_string_clear_to_eol)(&line, Coord_t {
-            y: index as i32 + 1,
-            x: 0,
-        });
+        let line =
+            with_state(|state| format_option_line(entry.prompt, (entry.get)(&state.options)));
+        (ui.put_string_clear_to_eol)(
+            &line,
+            Coord_t {
+                y: index as i32 + 1,
+                x: 0,
+            },
+        );
     }
     (ui.erase_line)(Coord_t {
         y: max as i32 + 1,
@@ -586,10 +597,13 @@ pub fn set_game_options() {
                 }
             }
             b'y' | b'Y' => {
-                (ui.put_string)("yes", Coord_t {
-                    y: option_id as i32 + 1,
-                    x: 40,
-                });
+                (ui.put_string)(
+                    "yes",
+                    Coord_t {
+                        y: option_id as i32 + 1,
+                        x: 40,
+                    },
+                );
                 with_state_mut(|state| (table[option_id].set)(&mut state.options, true));
                 if option_id + 1 < max {
                     option_id += 1;
@@ -598,10 +612,13 @@ pub fn set_game_options() {
                 }
             }
             b'n' | b'N' => {
-                (ui.put_string)("no ", Coord_t {
-                    y: option_id as i32 + 1,
-                    x: 40,
-                });
+                (ui.put_string)(
+                    "no ",
+                    Coord_t {
+                        y: option_id as i32 + 1,
+                        x: 40,
+                    },
+                );
                 with_state_mut(|state| (table[option_id].set)(&mut state.options, false));
                 if option_id + 1 < max {
                     option_id += 1;
@@ -628,7 +645,7 @@ pub fn test_set_direction(direction: Option<i32>) {
 
 /// C++ `getDirectionWithMemory` (game.cpp:262–296).
 pub fn get_direction_with_memory(prompt: Option<&str>, direction: &mut i32) -> bool {
-    if let Some(dir) = TEST_DIRECTION.with(|d| d.get()) {
+    if let Some(dir) = TEST_DIRECTION.with(std::cell::Cell::get) {
         *direction = dir;
         return true;
     }
@@ -696,13 +713,13 @@ thread_local! {
     static TEST_EXIT_PROGRAM_CALLED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     static TEST_SKIP_PROCESS_EXIT: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
     static TEST_CAPTURE_ABORT: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
-    static TEST_ABORT_OUTPUT: RefCell<Option<String>> = RefCell::new(None);
+    static TEST_ABORT_OUTPUT: RefCell<Option<String>> = const { RefCell::new(None) };
 }
 
 /// Test hook: record [`exit_program`] without terminating the process.
 #[doc(hidden)]
 pub fn test_exit_program_called() -> bool {
-    TEST_EXIT_PROGRAM_CALLED.with(|c| c.get())
+    TEST_EXIT_PROGRAM_CALLED.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
@@ -766,7 +783,7 @@ pub fn abort_program_output(msg: &str) -> String {
 /// C++ game.cpp lines 323–326.
 pub fn exit_program() {
     pre_exit_sequence();
-    if TEST_SKIP_PROCESS_EXIT.with(|c| c.get()) {
+    if TEST_SKIP_PROCESS_EXIT.with(std::cell::Cell::get) {
         return;
     }
     std::process::exit(0);
@@ -776,12 +793,12 @@ pub fn exit_program() {
 pub fn abort_program(msg: &str) {
     pre_exit_sequence();
     let output = abort_program_output(msg);
-    if TEST_CAPTURE_ABORT.with(|c| c.get()) {
+    if TEST_CAPTURE_ABORT.with(std::cell::Cell::get) {
         TEST_ABORT_OUTPUT.with(|o| *o.borrow_mut() = Some(output));
         return;
     }
-    print!("{output}");
-    if TEST_SKIP_PROCESS_EXIT.with(|c| c.get()) {
+    let _ = write!(io::stdout(), "{output}");
+    if TEST_SKIP_PROCESS_EXIT.with(std::cell::Cell::get) {
         return;
     }
     std::process::exit(0);

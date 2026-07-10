@@ -1,4 +1,11 @@
 //! Phase 5.1.3 — loadGame (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -7,12 +14,12 @@ use std::fs;
 use common::{byte_diff, load_manifest, read_golden_bytes};
 use umoria::dungeon::MAX_HEIGHT;
 use umoria::game::{
-    reset_for_new_game, test_exit_program_called, test_reset_exit_program_called,
-    with_state, with_state_mut,
+    reset_for_new_game, test_exit_program_called, test_reset_exit_program_called, with_state,
+    with_state_mut,
 };
 use umoria::game_save::{
-    self, from_save_file, load_game, save_char, set_from_save_file, set_start_time,
-    set_xor_byte, test_buffer_bytes, test_buffer_inject, test_build_options_l, test_load_save_from_bytes,
+    self, from_save_file, load_game, save_char, set_from_save_file, set_start_time, set_xor_byte,
+    test_buffer_bytes, test_buffer_inject, test_build_options_l, test_load_save_from_bytes,
     test_reset_buffer, test_reset_store_maintenance_count, test_set_forced_seed_byte,
     test_set_unix_time, test_store_maintenance_count, wr_byte, wr_long, wr_short,
 };
@@ -126,7 +133,9 @@ fn test_missing_file() {
     assert!(generate);
     assert_eq!(with_state(|state| state.dg.game_turn), before_turn);
     let messages = ui_io::test_ui_messages();
-    assert!(messages.iter().any(|m| m.contains("Save file does not exist.")));
+    assert!(messages
+        .iter()
+        .any(|m| m.contains("Save file does not exist.")));
     assert!(!test_exit_program_called());
     let _ = fs::remove_dir_all(dir);
 }
@@ -137,7 +146,7 @@ fn test_alive_guard() {
     let dir = std::env::temp_dir().join(format!("umoria_load514_{}", std::process::id()));
     fs::create_dir_all(&dir).unwrap();
     let path = dir.join("game.sav");
-    fs::write(&path, &[0u8; 8]).unwrap();
+    fs::write(&path, [0u8; 8]).unwrap();
     with_state_mut(|state| {
         state.config_save_game = path.to_string_lossy().into_owned();
         state.dg.game_turn = 0;
@@ -171,7 +180,9 @@ fn test_version_validation() {
     assert!(messages
         .iter()
         .any(|m| m.contains("Sorry. This save file is from a different version of umoria.")));
-    assert!(messages.iter().any(|m| m.contains("Error during reading of file.")));
+    assert!(messages
+        .iter()
+        .any(|m| m.contains("Error during reading of file.")));
     assert!(test_exit_program_called());
 }
 
@@ -391,7 +402,7 @@ fn test_rle_cave_decode() {
         copy_cstr_into(&mut state.py.misc.name, "Tester");
     });
     // Force a truncated RLE by loading valid golden then corrupting is easier:
-    let mut corrupt = golden.to_vec();
+    let mut corrupt = golden.clone();
     let tail = corrupt.len().saturating_sub(4);
     corrupt[tail] = 0xFF;
     corrupt[tail + 1] = 0xFF;
@@ -471,9 +482,9 @@ fn test_scoreboard_and_noscore_messages() {
     test_buffer_inject(&test_buffer_bytes());
     let mut generate = true;
     assert!(load_game(&mut generate));
-    assert!(ui_io::test_ui_messages().iter().any(|m| {
-        m.contains("This save file cannot be used to get on the score board.")
-    }));
+    assert!(ui_io::test_ui_messages()
+        .iter()
+        .any(|m| { m.contains("This save file cannot be used to get on the score board.") }));
 }
 
 #[test]
@@ -485,7 +496,7 @@ fn test_version_mismatch_accepted_message() {
         .find(|g| g.id == "save_newchar_seed42")
         .expect("golden");
     let golden = read_golden_bytes(entry);
-    let mut bytes = golden.to_vec();
+    let mut bytes = golden.clone();
     bytes[0] = 5;
     bytes[1] = 2;
     bytes[2] = 2;
@@ -494,9 +505,9 @@ fn test_version_mismatch_accepted_message() {
     test_buffer_inject(&bytes);
     let mut generate = true;
     assert!(load_game(&mut generate));
-    assert!(ui_io::test_ui_messages().iter().any(|m| {
-        m.contains("Save file version 5.2 accepted on game version 5.7.")
-    }));
+    assert!(ui_io::test_ui_messages()
+        .iter()
+        .any(|m| { m.contains("Save file version 5.2 accepted on game version 5.7.") }));
 }
 
 #[test]

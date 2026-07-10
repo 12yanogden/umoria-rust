@@ -1,4 +1,11 @@
 //! Phase 5.2 — high-score file (`scores.cpp` → `crate::scores`).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -8,16 +15,16 @@ use std::path::{Path, PathBuf};
 use common::{load_manifest, read_golden_bytes};
 use umoria::game::{reset_for_new_game, with_state, with_state_mut};
 use umoria::game_save::{
-    read_high_score, save_high_score, set_c_getc_eof_mode, set_xor_byte,
-    test_buffer_bytes, test_reset_buffer, HighScore, HIGH_SCORE_RECORD_SIZE,
+    read_high_score, save_high_score, set_c_getc_eof_mode, set_xor_byte, test_buffer_bytes,
+    test_reset_buffer, HighScore, HIGH_SCORE_RECORD_SIZE,
 };
 use umoria::inventory::{Inventory, PLAYER_INVENTORY_SIZE};
 use umoria::player::{player_set_gender, PLAYER_NAME_SIZE};
 use umoria::scores::{
     format_show_scores_line, high_score_gender_label, player_calculate_total_points,
-    record_new_high_score, show_scores_screen,
-    strip_died_from_for_high_score, test_build_new_high_score_entry, test_set_scores_path,
-    HighScore_t, HIGH_SCORE_RECORD_STRIDE, MAX_HIGH_SCORE_ENTRIES, SHOW_SCORES_HEADER,
+    record_new_high_score, show_scores_screen, strip_died_from_for_high_score,
+    test_build_new_high_score_entry, test_set_scores_path, HighScore_t, HIGH_SCORE_RECORD_STRIDE,
+    MAX_HIGH_SCORE_ENTRIES, SHOW_SCORES_HEADER,
 };
 use umoria::store_inventory::store_item_value;
 use umoria::ui_io;
@@ -55,7 +62,11 @@ fn append_encrypted_record(out: &mut Vec<u8>, score: &HighScore) {
 }
 
 fn build_score_file(records: &[HighScore]) -> Vec<u8> {
-    let mut data = vec![CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH];
+    let mut data = vec![
+        CURRENT_VERSION_MAJOR,
+        CURRENT_VERSION_MINOR,
+        CURRENT_VERSION_PATCH,
+    ];
     for record in records {
         append_encrypted_record(&mut data, record);
     }
@@ -63,17 +74,19 @@ fn build_score_file(records: &[HighScore]) -> Vec<u8> {
 }
 
 fn sample_score(points: i32, died_from: &str) -> HighScore {
-    let mut score = HighScore::default();
-    score.points = points;
-    score.birth_date = 42_000;
-    score.mhp = 100;
-    score.chp = 0;
-    score.dungeon_depth = 5;
-    score.level = 10;
-    score.deepest_dungeon_depth = 20;
-    score.gender = b'M';
-    score.race = 0;
-    score.character_class = 0;
+    let mut score = HighScore {
+        points,
+        birth_date: 42_000,
+        mhp: 100,
+        chp: 0,
+        dungeon_depth: 5,
+        level: 10,
+        deepest_dungeon_depth: 20,
+        gender: b'M',
+        race: 0,
+        character_class: 0,
+        ..HighScore::default()
+    };
     copy_cstr(&mut score.name, "Hero");
     copy_cstr(&mut score.died_from, died_from);
     score
@@ -133,18 +146,20 @@ fn test_record_stride_matches_cpp() {
 
 #[test]
 fn test_high_score_field_byte_sum_is_72() {
-    let mut score = HighScore::default();
-    score.points = 123;
-    score.birth_date = 456;
-    score.uid = 7;
-    score.mhp = 80;
-    score.chp = 10;
-    score.dungeon_depth = 1;
-    score.level = 2;
-    score.deepest_dungeon_depth = 3;
-    score.gender = b'F';
-    score.race = 4;
-    score.character_class = 5;
+    let mut score = HighScore {
+        points: 123,
+        birth_date: 456,
+        uid: 7,
+        mhp: 80,
+        chp: 10,
+        dungeon_depth: 1,
+        level: 2,
+        deepest_dungeon_depth: 3,
+        gender: b'F',
+        race: 4,
+        character_class: 5,
+        ..HighScore::default()
+    };
     copy_cstr(&mut score.name, "Name");
     copy_cstr(&mut score.died_from, "orc");
 
@@ -461,7 +476,7 @@ fn test_cap_at_1000_entries() {
     let path = install_scores_path(&dir);
     let mut records = Vec::with_capacity(1_000);
     for i in 0..1_000 {
-        records.push(sample_score(10_000 - i as i32, "cap"));
+        records.push(sample_score(10_000 - i, "cap"));
     }
     fs::write(&path, build_score_file(&records)).unwrap();
     setup_player("orc");
@@ -476,7 +491,10 @@ fn test_cap_at_1000_entries() {
     record_new_high_score();
 
     let data = fs::read(&path).unwrap();
-    assert_eq!(decode_score_file(&data).len(), MAX_HIGH_SCORE_ENTRIES as usize);
+    assert_eq!(
+        decode_score_file(&data).len(),
+        MAX_HIGH_SCORE_ENTRIES as usize
+    );
     let _ = fs::remove_dir_all(&dir);
 }
 
@@ -494,9 +512,7 @@ fn test_died_from_article_stripping() {
         copy_cstr(&mut src, input);
         let out = strip_died_from_for_high_score(&src);
         assert_eq!(
-            std::str::from_utf8(&out)
-                .unwrap()
-                .trim_end_matches('\0'),
+            std::str::from_utf8(&out).unwrap().trim_end_matches('\0'),
             expected,
             "input={input:?}"
         );
@@ -543,21 +559,23 @@ fn test_golden_record_roundtrip_matches_cpp_initial() {
 
 #[test]
 fn test_show_scores_line_format_exact() {
-    let mut score = HighScore_t::default();
-    score.points = 12_345;
-    score.name = {
-        let mut name = [0u8; PLAYER_NAME_SIZE as usize];
-        copy_cstr(&mut name, "Gandalf");
-        name
-    };
-    score.gender = b'M';
-    score.race = 0;
-    score.character_class = 1;
-    score.level = 7;
-    score.died_from = {
-        let mut died = [0u8; 25];
-        copy_cstr(&mut died, "a fiery dragon");
-        died
+    let mut score = HighScore_t {
+        points: 12_345,
+        name: {
+            let mut name = [0u8; PLAYER_NAME_SIZE as usize];
+            copy_cstr(&mut name, "Gandalf");
+            name
+        },
+        gender: b'M',
+        race: 0,
+        character_class: 1,
+        level: 7,
+        died_from: {
+            let mut died = [0u8; 25];
+            copy_cstr(&mut died, "a fiery dragon");
+            died
+        },
+        ..HighScore_t::default()
     };
 
     let stripped = strip_died_from_for_high_score(b"a fiery dragon\0");
@@ -572,8 +590,10 @@ fn test_show_scores_line_format_exact() {
 
 #[test]
 fn test_show_scores_string_truncation() {
-    let mut score = HighScore_t::default();
-    score.points = 1;
+    let mut score = HighScore_t {
+        points: 1,
+        ..HighScore_t::default()
+    };
     copy_cstr(&mut score.name, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     score.gender = b'F';
     score.race = 0;
@@ -599,9 +619,7 @@ fn test_show_scores_pagination_20_per_page() {
     setup_harness();
     let dir = temp_scores_dir("pages");
     let path = install_scores_path(&dir);
-    let records: Vec<_> = (0..25)
-        .map(|i| sample_score(1_000 - i, "mob"))
-        .collect();
+    let records: Vec<_> = (0..25).map(|i| sample_score(1_000 - i, "mob")).collect();
     fs::write(&path, build_score_file(&records)).unwrap();
     let data = fs::read(&path).unwrap();
     assert_eq!(data.len(), 3 + 25 * HIGH_SCORE_RECORD_STRIDE);
@@ -615,9 +633,7 @@ fn test_show_scores_pagination_20_per_page() {
     let score_lines: Vec<_> = messages
         .iter()
         .filter(|line| {
-            !line.starts_with("Rank")
-                && !line.contains("press any key")
-                && line.len() > 30
+            !line.starts_with("Rank") && !line.contains("press any key") && line.len() > 30
         })
         .collect();
     assert!(score_lines.len() >= 25);
@@ -657,9 +673,7 @@ fn test_show_scores_rank_increments_across_pages() {
     setup_harness();
     let dir = temp_scores_dir("rankpage");
     let path = install_scores_path(&dir);
-    let records: Vec<_> = (0..25)
-        .map(|i| sample_score(2_000 - i, "x"))
-        .collect();
+    let records: Vec<_> = (0..25).map(|i| sample_score(2_000 - i, "x")).collect();
     fs::write(&path, build_score_file(&records)).unwrap();
 
     ui_io::test_clear_getch_keys();

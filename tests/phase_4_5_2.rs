@@ -1,12 +1,19 @@
 //! Phase 4.5.2 — game_objects.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::data_treasure::GAME_OBJECTS;
 use umoria::dungeon::{DungeonObject, MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
+use umoria::dungeon_tile::{Tile, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::game_objects::{item_bigger_than_chest, item_get_random_object_id, popt, pusht};
 use umoria::inventory::inventory_item_copy_to;
@@ -42,7 +49,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -200,7 +207,7 @@ fn pusht_moves_last_slot_and_updates_grid_seed42() {
         assert_eq!(s.game.treasure.current_id, 2);
         assert_eq!(s.dg.floor[5][5].treasure_id, 1);
         assert_eq!(s.game.treasure.list[1].category_id, TV_VIS_TRAP);
-        assert_eq!(s.game.treasure.list[2].id, OBJ_NOTHING as u16);
+        assert_eq!(s.game.treasure.list[2].id, OBJ_NOTHING);
     });
     assert_eq!(next_random_pair(100), (100, 2));
 }
@@ -215,7 +222,7 @@ fn pusht_top_slot_skips_grid_move() {
     pusht(2);
     with_state(|s| {
         assert_eq!(s.game.treasure.current_id, 2);
-        assert_eq!(s.game.treasure.list[2].id, OBJ_NOTHING as u16);
+        assert_eq!(s.game.treasure.list[2].id, OBJ_NOTHING);
         assert_eq!(s.game.treasure.list[2].category_id, TV_NOTHING);
     });
 }
@@ -268,7 +275,7 @@ fn pusht_u8_equality_skips_move_when_top_slot() {
     pusht(0);
     with_state(|s| {
         assert_eq!(s.game.treasure.current_id, 0);
-        assert_eq!(s.game.treasure.list[0].id, OBJ_NOTHING as u16);
+        assert_eq!(s.game.treasure.list[0].id, OBJ_NOTHING);
         assert_eq!(s.game.treasure.list[0].category_id, TV_NOTHING);
     });
 }

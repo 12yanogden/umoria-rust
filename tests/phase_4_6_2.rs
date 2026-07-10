@@ -1,7 +1,14 @@
 //! Phase 4.6.2 — store_inventory.cpp parity (pricing, stock maintenance, inventory ops).
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
-use umoria::config::identification::{ID_DAMD, ID_KNOWN2, ID_STORE_BOUGHT, OD_KNOWN1};
+use umoria::config::identification::{ID_DAMD, ID_KNOWN2, ID_STORE_BOUGHT};
 use umoria::config::stores::{
     STORE_MAX_AUTO_BUY_ITEMS, STORE_MIN_AUTO_SELL_ITEMS, STORE_STOCK_TURN_AROUND,
 };
@@ -18,8 +25,8 @@ use umoria::store_inventory::{
     store_item_value, store_maintenance,
 };
 use umoria::treasure::{
-    TV_AMULET, TV_ARROW, TV_BOOTS, TV_DIGGING, TV_FOOD, TV_HARD_ARMOR, TV_POTION1, TV_RING,
-    TV_SCROLL1, TV_STAFF, TV_SWORD, TV_WAND,
+    TV_ARROW, TV_BOOTS, TV_DIGGING, TV_FOOD, TV_HARD_ARMOR, TV_RING, TV_SCROLL1, TV_STAFF,
+    TV_SWORD, TV_WAND,
 };
 
 fn next_random_pair(max: i32) -> (i32, i32) {
@@ -40,18 +47,6 @@ fn make_item_from_object(object_id: i16) -> Inventory {
     let mut item = Inventory::default();
     inventory_item_copy_to(object_id, &mut item);
     item
-}
-
-fn set_store(store_id: usize, owner_id: u8, unique: u8, items: &[(Inventory, i32)]) {
-    with_state_mut(|s| {
-        let store = &mut s.stores[store_id];
-        store.owner_id = owner_id;
-        store.unique_items_counter = unique;
-        for (i, (item, cost)) in items.iter().enumerate() {
-            store.inventory[i].item = *item;
-            store.inventory[i].cost = *cost;
-        }
-    });
 }
 
 fn store_snapshot(store_id: usize) -> (u8, Vec<(u8, u8, u8, i32)>) {
@@ -81,15 +76,6 @@ fn set_all_stores_same(owner_id: u8, unique: u8, item: Inventory, cost: i32) {
                 store.inventory[i].item = item;
                 store.inventory[i].cost = cost;
             }
-        }
-    });
-}
-
-fn mark_object_known(category_id: u8, sub_category_id: u8) {
-    with_state_mut(|s| {
-        let id = umoria::identification::object_position_offset(category_id, sub_category_id);
-        if id >= 0 {
-            s.objects_identified[id as usize] |= OD_KNOWN1;
         }
     });
 }
@@ -135,7 +121,7 @@ fn store_item_value_armor_unidentified_uses_template_cost() {
     let item = make_item_from_object(object_id);
     assert_eq!(
         store_item_value(&item),
-        i32::from(GAME_OBJECTS[object_id as usize].cost)
+        GAME_OBJECTS[object_id as usize].cost
     );
 }
 
@@ -190,7 +176,7 @@ fn store_item_value_ring_known_unidentified_uses_template_cost() {
     item.identification = ID_STORE_BOUGHT;
     assert_eq!(
         store_item_value(&item),
-        i32::from(GAME_OBJECTS[object_id as usize].cost)
+        GAME_OBJECTS[object_id as usize].cost
     );
 }
 
@@ -241,9 +227,11 @@ fn store_item_value_digging_plus_from_misc_delta() {
 #[test]
 fn store_item_value_default_uses_item_cost() {
     reset_for_new_game(Some(1));
-    let mut item = Inventory::default();
-    item.category_id = 99;
-    item.cost = 123;
+    let item = Inventory {
+        category_id: 99,
+        cost: 123,
+        ..Inventory::default()
+    };
     assert_eq!(store_item_value(&item), 123);
 }
 
@@ -281,8 +269,10 @@ fn store_item_sell_price_zero_when_cursed_or_valueless() {
 fn store_item_sell_price_race_gold_and_inflation_seed42() {
     reset_for_new_game(Some(42));
     with_state_mut(|s| s.py.misc.race_id = 0);
-    let mut store = Store::default();
-    store.owner_id = 0;
+    let store = Store {
+        owner_id: 0,
+        ..Store::default()
+    };
     let mut item = make_item_from_object(find_object(TV_SWORD, None));
     item.cost = 100;
     item.identification = ID_KNOWN2;
@@ -298,11 +288,15 @@ fn store_item_sell_price_race_gold_and_inflation_seed42() {
 fn store_item_sell_price_clamps_race_adjust_below_one() {
     reset_for_new_game(Some(1));
     with_state_mut(|s| s.py.misc.race_id = 0);
-    let mut store = Store::default();
-    store.owner_id = 0;
-    let mut item = Inventory::default();
-    item.category_id = 99;
-    item.cost = 1;
+    let store = Store {
+        owner_id: 0,
+        ..Store::default()
+    };
+    let item = Inventory {
+        category_id: 99,
+        cost: 1,
+        ..Inventory::default()
+    };
     let mut min = 0;
     let mut max = 0;
     let price = store_item_sell_price(&store, &mut min, &mut max, &item);
@@ -313,11 +307,15 @@ fn store_item_sell_price_clamps_race_adjust_below_one() {
 fn store_item_sell_price_min_inflate_clamped_to_max() {
     reset_for_new_game(Some(1));
     with_state_mut(|s| s.py.misc.race_id = 0);
-    let mut store = Store::default();
-    store.owner_id = 0;
-    let mut item = Inventory::default();
-    item.category_id = 99;
-    item.cost = 1;
+    let store = Store {
+        owner_id: 0,
+        ..Store::default()
+    };
+    let item = Inventory {
+        category_id: 99,
+        cost: 1,
+        ..Inventory::default()
+    };
     let mut min = 999;
     let mut max = 1;
     let _ = store_item_sell_price(&store, &mut min, &mut max, &item);
@@ -337,8 +335,10 @@ fn store_check_player_items_count_room_available() {
 
 #[test]
 fn store_check_player_items_count_full_non_stackable_false() {
-    let mut store = Store::default();
-    store.unique_items_counter = STORE_MAX_DISCRETE_ITEMS;
+    let mut store = Store {
+        unique_items_counter: STORE_MAX_DISCRETE_ITEMS,
+        ..Store::default()
+    };
     store.inventory[0].item.category_id = TV_SWORD;
     store.inventory[0].item.sub_category_id = 1;
     let item = store.inventory[0].item;
@@ -347,8 +347,10 @@ fn store_check_player_items_count_full_non_stackable_false() {
 
 #[test]
 fn store_check_player_items_count_full_stackable_match() {
-    let mut store = Store::default();
-    store.unique_items_counter = STORE_MAX_DISCRETE_ITEMS;
+    let mut store = Store {
+        unique_items_counter: STORE_MAX_DISCRETE_ITEMS,
+        ..Store::default()
+    };
     store.inventory[0].item.category_id = TV_FOOD;
     store.inventory[0].item.sub_category_id = ITEM_SINGLE_STACK_MIN;
     store.inventory[0].item.items_count = 10;
@@ -359,8 +361,10 @@ fn store_check_player_items_count_full_stackable_match() {
 
 #[test]
 fn store_check_player_items_count_group_requires_misc_match() {
-    let mut store = Store::default();
-    store.unique_items_counter = STORE_MAX_DISCRETE_ITEMS;
+    let mut store = Store {
+        unique_items_counter: STORE_MAX_DISCRETE_ITEMS,
+        ..Store::default()
+    };
     store.inventory[0].item.category_id = TV_ARROW;
     store.inventory[0].item.sub_category_id = ITEM_GROUP_MIN + 1;
     store.inventory[0].item.misc_use = 3;
@@ -398,11 +402,13 @@ fn store_carry_item_merges_stack_and_caps_at_twenty_four() {
         s.stores[0].inventory[0].item.cost = 50;
         s.stores[0].inventory[0].cost = -100;
     });
-    let mut item = Inventory::default();
-    item.category_id = TV_FOOD;
-    item.sub_category_id = ITEM_SINGLE_STACK_MIN;
-    item.items_count = 10;
-    item.cost = 50;
+    let mut item = Inventory {
+        category_id: TV_FOOD,
+        sub_category_id: ITEM_SINGLE_STACK_MIN,
+        items_count: 10,
+        cost: 50,
+        ..Inventory::default()
+    };
     let mut index = -1;
     store_carry_item(0, &mut index, &mut item);
     assert_eq!(index, 0);
@@ -410,7 +416,6 @@ fn store_carry_item_merges_stack_and_caps_at_twenty_four() {
     assert_eq!(count, 24);
 }
 
-#[test]
 #[test]
 fn store_carry_item_insert_before_higher_category_and_negative_cost() {
     // Store sorted by descending category: inserting FOOD (80) into a store
@@ -529,11 +534,13 @@ fn store_destroy_item_non_single_stackable_compacts_slot() {
 #[test]
 fn store_maintenance_seed42_counter15_all_stores() {
     reset_for_new_game(Some(42));
-    let mut item = Inventory::default();
-    item.category_id = TV_FOOD;
-    item.sub_category_id = ITEM_SINGLE_STACK_MIN;
-    item.items_count = 5;
-    item.cost = 50;
+    let item = Inventory {
+        category_id: TV_FOOD,
+        sub_category_id: ITEM_SINGLE_STACK_MIN,
+        items_count: 5,
+        cost: 50,
+        ..Inventory::default()
+    };
     set_all_stores_same(0, 15, item, -100);
 
     store_maintenance();
@@ -627,8 +634,10 @@ fn store_item_value_wand_charge_bonus_integer_division() {
 
 #[test]
 fn store_check_player_items_count_sum255_boundary() {
-    let mut store = Store::default();
-    store.unique_items_counter = STORE_MAX_DISCRETE_ITEMS;
+    let mut store = Store {
+        unique_items_counter: STORE_MAX_DISCRETE_ITEMS,
+        ..Store::default()
+    };
     store.inventory[0].item.category_id = TV_FOOD;
     store.inventory[0].item.sub_category_id = ITEM_SINGLE_STACK_MIN;
     store.inventory[0].item.items_count = 200;

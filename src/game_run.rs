@@ -1,4 +1,4 @@
-//! Port of src/game_run.cpp — boot path (phase_5.6.1) and command dispatch (phase_5.6.3).
+//! Port of `src/game_run.cpp` — boot path (`phase_5.6.1`) and command dispatch (`phase_5.6.3`).
 
 use std::cell::{Cell, RefCell};
 use std::path::Path;
@@ -6,94 +6,92 @@ use std::path::Path;
 use crate::character::character_create;
 use crate::config::dungeon::objects::OBJ_NOTHING;
 use crate::config::files;
+use crate::config::identification::ID_MAGIK;
 use crate::config::identification::ID_SHOW_HIT_DAM;
 use crate::config::monsters::{MON_CHANCE_OF_NEW, MON_ENDGAME_MONSTERS, MON_MAX_SIGHT};
-use crate::config::treasure::OBJECT_LAMP_MAX_CAPACITY;
-use crate::config::spells::{SPELL_TYPE_MAGE, SPELL_TYPE_PRIEST};
-use crate::data_creatures::CREATURES_LIST;
-use crate::data_player::{CLASS_BASE_PROVISIONS, CLASSES, MAGIC_SPELLS};
-use crate::helpers::get_and_clear_first_bit;
-use crate::data_treasure::GAME_OBJECTS;
-use crate::dungeon_generate::generate_cave;
-use crate::game::{
-    current_unix_time, get_direction_with_memory, random_number, seeds_initialize, set_game_options,
-    test_set_direction, with_state, with_state_mut,
+use crate::config::player::status::{
+    PY_ARMOR, PY_BLESSED, PY_BLIND, PY_CONFUSED, PY_DET_INV, PY_FAST, PY_FEAR, PY_HERO, PY_HP,
+    PY_HUNGRY, PY_INVULN, PY_MANA, PY_PARALYSED, PY_POISONED, PY_REPEAT, PY_SEARCH, PY_SHERO,
+    PY_SLOW, PY_SPEED, PY_STATS, PY_STR, PY_STR_WGT, PY_STUDY, PY_TIM_INFRA, PY_WEAK,
 };
-use crate::game_files::display_splash_screen;
-use crate::identification::{
-    identify_game_object, item_append_to_inscription, item_identify_as_store_bought,
-    item_inscribe, item_type_remaining_count_description, magic_initialize_item_names,
-    spell_item_identified,
-};
-use crate::player::{player_calculate_allowed_spells_count, player_gain_mana, PlayerAttr};
-use crate::player_stats::player_initialize_base_experience_levels;
-use crate::store::{store_initialize_owners, COST_ADJUSTMENT};
-use crate::treasure::TV_SWORD;
-use crate::types::{MAX_DUNGEON_OBJECTS, MON_MAX_CREATURES, MON_MAX_LEVELS, TREASURE_MAX_LEVELS};
-use crate::ui::print_character_stats_block;
-use crate::config::identification::ID_MAGIK;
 use crate::config::player::{
     PLAYER_FOOD_ALERT, PLAYER_FOOD_FAINT, PLAYER_FOOD_WEAK, PLAYER_REGEN_FAINT,
     PLAYER_REGEN_HPBASE, PLAYER_REGEN_MNBASE, PLAYER_REGEN_NORMAL, PLAYER_REGEN_WEAK,
 };
-use crate::config::player::status::{
-    PY_ARMOR, PY_BLESSED, PY_BLIND, PY_CONFUSED, PY_DET_INV, PY_FEAR, PY_FAST, PY_HERO, PY_HP,
-    PY_HUNGRY, PY_INVULN, PY_MANA, PY_PARALYSED, PY_POISONED, PY_REPEAT, PY_SEARCH, PY_SHERO,
-    PY_SLOW, PY_SPEED, PY_STATS, PY_STR, PY_STR_WGT, PY_STUDY, PY_TIM_INFRA, PY_WEAK,
-};
+use crate::config::spells::{SPELL_TYPE_MAGE, SPELL_TYPE_PRIEST};
+use crate::config::treasure::OBJECT_LAMP_MAX_CAPACITY;
+use crate::data_creatures::CREATURES_LIST;
+use crate::data_player::{CLASSES, CLASS_BASE_PROVISIONS, MAGIC_SPELLS};
+use crate::data_treasure::GAME_OBJECTS;
+use crate::dungeon::dungeon_display_map;
 use crate::dungeon::{SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::dungeon_generate::generate_cave;
+use crate::dungeon_los::look;
+use crate::game::{
+    current_unix_time, get_direction_with_memory, random_number, seeds_initialize,
+    set_game_options, with_state, with_state_mut,
+};
 use crate::game_death::end_game;
+use crate::game_files::display_splash_screen;
 use crate::game_files::{display_text_help_file, output_random_level_objects_to_file};
 use crate::game_save::{load_game, save_game};
-use crate::inventory::{
-    inventory_carry_item, inventory_destroy_item, inventory_find_range,
-    inventory_item_copy_to, inventory_item_is_cursed, Inventory, PlayerEquipment,
-    PLAYER_INVENTORY_SIZE,
+use crate::helpers::get_and_clear_first_bit;
+use crate::identification::{
+    identify_game_object, item_append_to_inscription, item_identify_as_store_bought, item_inscribe,
+    item_type_remaining_count_description, magic_initialize_item_names, spell_item_identified,
 };
-use crate::ui_inventory::inventory_get_input_for_item_id;
+use crate::inventory::{
+    inventory_carry_item, inventory_destroy_item, inventory_find_range, inventory_item_copy_to,
+    inventory_item_is_cursed, Inventory, PlayerEquipment, PLAYER_INVENTORY_SIZE,
+};
 use crate::mage_spells::get_and_cast_magic_spell;
 use crate::monster::{update_monsters, MON_TOTAL_ALLOCATIONS};
 use crate::monster_manager::{compact_monsters, monster_place_new_within_distance};
+use crate::player::{player_calculate_allowed_spells_count, player_gain_mana, PlayerAttr};
 use crate::player::{
     player_change_speed, player_close_door, player_disturb, player_gain_spells, player_no_light,
     player_open_closed_object, player_recalculate_bonuses, player_rest_off, player_rest_on,
-    player_search, player_search_off, player_search_on, player_strength, player_teleport,
-    player_takes_hit,
+    player_search, player_search_off, player_search_on, player_strength, player_takes_hit,
+    player_teleport,
 };
-use crate::player_move::player_move_position;
-use crate::store::store_maintenance;
-use crate::player_eat::player_eat;
-use crate::player_traps::player_disarm_trap;
 use crate::player_bash::player_bash;
+use crate::player_eat::player_eat;
 use crate::player_move::player_move;
+use crate::player_move::player_move_position;
 use crate::player_pray::pray;
 use crate::player_quaff::quaff;
 use crate::player_run::{player_end_running, player_find_initialize, player_run_and_find};
-use crate::player_throw::player_throw_item;
-use crate::player_tunnel::player_tunnel;
+use crate::player_stats::player_initialize_base_experience_levels;
 use crate::player_stats::player_stat_adjustment_constitution;
+use crate::player_throw::player_throw_item;
+use crate::player_traps::player_disarm_trap;
+use crate::player_tunnel::player_tunnel;
+use crate::scores::show_scores_screen;
 use crate::scrolls::scroll_read;
 use crate::spells::{spell_identify_item, spell_map_current_area, spell_mass_genocide};
 use crate::staves::{staff_use, wand_aim};
+use crate::store::store_maintenance;
+use crate::store::{store_initialize_owners, COST_ADJUSTMENT};
+use crate::treasure::TV_SWORD;
 use crate::treasure::{
     TV_CLOSED_DOOR, TV_DOWN_STAIR, TV_FLASK, TV_MAGIC_BOOK, TV_MAX_ENCHANT, TV_MIN_ENCHANT,
     TV_NEVER, TV_NOTHING, TV_OPEN_DOOR, TV_PRAYER_BOOK, TV_SPIKE, TV_UP_STAIR,
 };
-use crate::dungeon::dungeon_display_map;
-use crate::dungeon_los::look;
-use crate::scores::show_scores_screen;
-use crate::types::{Coord_t, Vtype_t, MORIA_MESSAGE_SIZE, MESSAGE_HISTORY_SIZE};
+use crate::types::{Coord_t, Vtype_t, MESSAGE_HISTORY_SIZE, MORIA_MESSAGE_SIZE};
+use crate::types::{MAX_DUNGEON_OBJECTS, MON_MAX_CREATURES, MON_MAX_LEVELS, TREASURE_MAX_LEVELS};
+use crate::ui::print_character_stats_block;
 use crate::ui::{
     change_character_name, coord_outside_panel, display_character_stats, display_spells_list,
     draw_dungeon_panel, dungeon_reset_view, print_character_blind_status,
     print_character_confused_state, print_character_current_armor_class,
-    print_character_current_depth, print_character_current_hit_points, print_character_current_mana,
-    print_character_fear_state, print_character_hunger_status, print_character_max_hit_points,
-    print_character_movement_state, print_character_poisoned_state, print_character_speed,
-    print_character_study_instruction, print_character_winner,
+    print_character_current_depth, print_character_current_hit_points,
+    print_character_current_mana, print_character_fear_state, print_character_hunger_status,
+    print_character_max_hit_points, print_character_movement_state, print_character_poisoned_state,
+    print_character_speed, print_character_study_instruction, print_character_winner,
 };
+use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_inventory::{inventory_execute_command, player_item_wearing_description};
-use crate::ui_io::{self, terminal, ctrl_key, DELETE, ESCAPE};
+use crate::ui_io::{self, ctrl_key, terminal, DELETE, ESCAPE};
 use crate::wizard::{
     enter_wizard_mode, wizard_character_adjustment, wizard_create_objects, wizard_cure_all,
     wizard_drop_random_items, wizard_gain_experience, wizard_generate_object, wizard_jump_level,
@@ -131,18 +129,13 @@ pub enum BootEvent {
     SaveGame,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum PlayDungeonScript {
+    #[default]
     MarkDead,
     ContinueAlive,
     SetEof,
     ContinueThenDead(u32),
-}
-
-impl Default for PlayDungeonScript {
-    fn default() -> Self {
-        Self::MarkDead
-    }
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -199,15 +192,15 @@ pub enum PlayDungeonTrace {
 }
 
 thread_local! {
-    static DISPATCH_LOG: RefCell<Vec<u8>> = RefCell::new(Vec::new());
+    static DISPATCH_LOG: RefCell<Vec<u8>> = const { RefCell::new(Vec::new()) };
     static TEST_REGEN_HP_AMOUNTS: RefCell<Vec<i32>> = const { RefCell::new(Vec::new()) };
     static TEST_REGEN_MANA_AMOUNTS: RefCell<Vec<i32>> = const { RefCell::new(Vec::new()) };
     static TEST_END_RUNNING_COUNT: Cell<u32> = const { Cell::new(0) };
-    static TEST_BOOT_EVENTS: RefCell<Vec<BootEvent>> = RefCell::new(Vec::new());
+    static TEST_BOOT_EVENTS: RefCell<Vec<BootEvent>> = const { RefCell::new(Vec::new()) };
     static TEST_SKIP_CHARACTER_CREATE: Cell<bool> = const { Cell::new(false) };
     static TEST_SKIP_GENERATE_CAVE: Cell<bool> = const { Cell::new(false) };
     static TEST_SKIP_END_GAME: Cell<bool> = const { Cell::new(false) };
-    static TEST_PLAY_DUNGEON_SCRIPT: Cell<PlayDungeonScript> = Cell::new(PlayDungeonScript::MarkDead);
+    static TEST_PLAY_DUNGEON_SCRIPT: Cell<PlayDungeonScript> = const { Cell::new(PlayDungeonScript::MarkDead) };
     static TEST_PLAY_DUNGEON_OVERRIDE: Cell<bool> = const { Cell::new(false) };
     static TEST_PLAY_DUNGEON_CALLS: Cell<u32> = const { Cell::new(0) };
     static TEST_PLAY_DUNGEON_MAX_TURNS: Cell<u32> = const { Cell::new(0) };
@@ -244,7 +237,7 @@ pub fn test_set_play_dungeon_max_turns(max: u32) {
     TEST_PLAY_DUNGEON_MAX_TURNS.with(|c| c.set(max));
 }
 
-/// C++ `examineBook` (game_run.cpp:2083–2146).
+/// C++ `examineBook` (`game_run.cpp:2083–2146`).
 pub fn examine_book() {
     let mut item_pos_start = 0i32;
     let mut item_pos_end = 0i32;
@@ -321,19 +314,13 @@ pub fn examine_book() {
     }
 }
 
-/// C++ `dungeonGoUpLevel` (game_run.cpp:2149–2163).
+/// C++ `dungeonGoUpLevel` (`game_run.cpp:2149–2163`).
 pub fn dungeon_go_up_level() {
-    let (y, x) = with_state(|state| {
-        (
-            state.py.pos.y as usize,
-            state.py.pos.x as usize,
-        )
-    });
+    let (y, x) = with_state(|state| (state.py.pos.y as usize, state.py.pos.x as usize));
     let tile_id = with_state(|state| state.dg.floor[y][x].treasure_id);
 
     if tile_id != 0
-        && with_state(|state| state.game.treasure.list[tile_id as usize].category_id)
-            == TV_UP_STAIR
+        && with_state(|state| state.game.treasure.list[tile_id as usize].category_id) == TV_UP_STAIR
     {
         with_state_mut(|state| state.dg.current_level -= 1);
         terminal::print_message(Some("You enter a maze of up staircases."));
@@ -345,14 +332,9 @@ pub fn dungeon_go_up_level() {
     }
 }
 
-/// C++ `dungeonGoDownLevel` (game_run.cpp:2166–2180).
+/// C++ `dungeonGoDownLevel` (`game_run.cpp:2166–2180`).
 pub fn dungeon_go_down_level() {
-    let (y, x) = with_state(|state| {
-        (
-            state.py.pos.y as usize,
-            state.py.pos.x as usize,
-        )
-    });
+    let (y, x) = with_state(|state| (state.py.pos.y as usize, state.py.pos.x as usize));
     let tile_id = with_state(|state| state.dg.floor[y][x].treasure_id);
 
     if tile_id != 0
@@ -369,7 +351,7 @@ pub fn dungeon_go_down_level() {
     }
 }
 
-/// C++ `dungeonJamDoor` (game_run.cpp:2183–2248).
+/// C++ `dungeonJamDoor` (`game_run.cpp:2183–2248`).
 pub fn dungeon_jam_door() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -439,23 +421,17 @@ pub fn dungeon_jam_door() {
     } else {
         with_state_mut(|state| state.game.player_free_turn = false);
         let creature_name = with_state(|state| {
-            let monster_creature_id =
-                state.monsters[creature_id as usize].creature_id as usize;
+            let monster_creature_id = state.monsters[creature_id as usize].creature_id as usize;
             CREATURES_LIST[monster_creature_id].name
         });
         let mut msg = [0u8; MORIA_MESSAGE_SIZE];
-        snprintf_vtype(
-            &mut msg,
-            &format!("The {creature_name} is in your way!"),
-        );
+        snprintf_vtype(&mut msg, &format!("The {creature_name} is in your way!"));
         let msg_len = msg.iter().position(|&b| b == 0).unwrap_or(msg.len());
-        terminal::print_message(Some(
-            std::str::from_utf8(&msg[..msg_len]).unwrap_or(""),
-        ));
+        terminal::print_message(Some(std::str::from_utf8(&msg[..msg_len]).unwrap_or("")));
     }
 }
 
-/// C++ `inventoryRefillLamp` (game_run.cpp:2251–2284).
+/// C++ `inventoryRefillLamp` (`game_run.cpp:2251–2284`).
 pub fn inventory_refill_lamp() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -487,9 +463,7 @@ pub fn inventory_refill_lamp() {
 
     let max_capacity = i32::from(OBJECT_LAMP_MAX_CAPACITY);
     let half_capacity = max_capacity / 2;
-    let new_misc = with_state(|state| {
-        state.py.inventory[PlayerEquipment::Light as usize].misc_use
-    });
+    let new_misc = with_state(|state| state.py.inventory[PlayerEquipment::Light as usize].misc_use);
 
     if i32::from(new_misc) > max_capacity {
         with_state_mut(|state| {
@@ -536,7 +510,7 @@ fn vtype_as_str(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).into_owned()
 }
 
-/// C++ `getCommandRepeatCount` (game_run.cpp:951–993).
+/// C++ `getCommandRepeatCount` (`game_run.cpp:951–993`).
 pub fn get_command_repeat_count(last_input_command: &mut u8) -> i32 {
     terminal::put_string_clear_to_eol("Repeat count:", terminal::Coord { y: 0, x: 0 });
 
@@ -551,12 +525,12 @@ pub fn get_command_repeat_count(last_input_command: &mut u8) -> i32 {
             repeat_count /= 10;
             let text = format!("{:07}", repeat_count as i16);
             terminal::put_string_clear_to_eol(&text, terminal::Coord { y: 0, x: 14 });
-        } else if (b'0'..=b'9').contains(last_input_command) {
+        } else if last_input_command.is_ascii_digit() {
             if repeat_count > 99 {
                 let _ = terminal::terminal_bell_sound();
             } else {
                 repeat_count = repeat_count * 10 + u32::from(*last_input_command - b'0');
-                let text = format!("{:07}", repeat_count);
+                let text = format!("{repeat_count:07}");
                 terminal::put_string_clear_to_eol(&text, terminal::Coord { y: 0, x: 14 });
             }
         } else {
@@ -579,16 +553,16 @@ pub fn get_command_repeat_count(last_input_command: &mut u8) -> i32 {
     repeat_count as i32
 }
 
-/// C++ `parseAlternateCtrlInput` (game_run.cpp:995–1014).
+/// C++ `parseAlternateCtrlInput` (`game_run.cpp:995–1014`).
 pub fn parse_alternate_ctrl_input(mut last_input_command: u8) -> u8 {
     if with_state(|state| state.game.command_count > 0) {
         print_character_movement_state();
     }
 
     if terminal::get_command("Control-", &mut last_input_command) {
-        if (b'A'..=b'Z').contains(&last_input_command) {
+        if last_input_command.is_ascii_uppercase() {
             last_input_command = last_input_command.wrapping_sub(b'A' - 1);
-        } else if (b'a'..=b'z').contains(&last_input_command) {
+        } else if last_input_command.is_ascii_lowercase() {
             last_input_command = last_input_command.wrapping_sub(b'a' - 1);
         } else {
             last_input_command = b' ';
@@ -643,7 +617,7 @@ fn direction_to_tunnel_key(direction: i32) -> u8 {
     }
 }
 
-/// C++ `originalCommands` (game_run.cpp:1109–1331).
+/// C++ `originalCommands` (`game_run.cpp:1109–1331`).
 pub fn original_commands(mut command: u8) -> u8 {
     let mut direction = 0i32;
 
@@ -707,7 +681,10 @@ pub fn original_commands(mut command: u8) -> u8 {
         c if c == ctrl_key(b'I') => {}
         c if c == ctrl_key(b'L') => command = b'*',
         b':' => {}
-        c if c == ctrl_key(b'T') || c == ctrl_key(b'E') || c == ctrl_key(b'F') || c == ctrl_key(b'G') => {}
+        c if c == ctrl_key(b'T')
+            || c == ctrl_key(b'E')
+            || c == ctrl_key(b'F')
+            || c == ctrl_key(b'G') => {}
         b'@' | b'+' => {}
         c if c == ctrl_key(b'U') => command = b'&',
         _ => command = b'~',
@@ -716,7 +693,7 @@ pub fn original_commands(mut command: u8) -> u8 {
     command
 }
 
-/// C++ `moveWithoutPickup` (game_run.cpp:1333–1386).
+/// C++ `moveWithoutPickup` (`game_run.cpp:1333–1386`).
 pub fn move_without_pickup(command: &mut u8) -> bool {
     let cmd = *command;
     if cmd != b'-' {
@@ -736,7 +713,7 @@ pub fn move_without_pickup(command: &mut u8) -> bool {
     false
 }
 
-/// C++ `commandQuit` (game_run.cpp:1388–1397).
+/// C++ `commandQuit` (`game_run.cpp:1388–1397`).
 pub fn command_quit() {
     terminal::flush_input_buffer();
 
@@ -749,7 +726,7 @@ pub fn command_quit() {
     }
 }
 
-/// C++ `calculateMaxMessageCount` (game_run.cpp:1399–1412).
+/// C++ `calculateMaxMessageCount` (`game_run.cpp:1399–1412`).
 pub fn calculate_max_message_count() -> u8 {
     let mut max_messages = MESSAGE_HISTORY_SIZE as u8;
 
@@ -766,13 +743,14 @@ pub fn calculate_max_message_count() -> u8 {
     max_messages
 }
 
-/// C++ `commandPreviousMessage` (game_run.cpp:1414–1444).
+/// C++ `commandPreviousMessage` (`game_run.cpp:1414–1444`).
 pub fn command_previous_message() {
     let max_messages = calculate_max_message_count();
 
     if max_messages <= 1 {
         terminal::put_string(">", terminal::Coord { y: 0, x: 0 });
-        let text = with_state(|state| vtype_as_str(&state.messages[state.last_message_id as usize]));
+        let text =
+            with_state(|state| vtype_as_str(&state.messages[state.last_message_id as usize]));
         terminal::put_string_clear_to_eol(&text, terminal::Coord { y: 0, x: 1 });
         return;
     }
@@ -787,7 +765,13 @@ pub fn command_previous_message() {
         remaining -= 1;
         let row = remaining;
         let text = with_state(|state| vtype_as_str(&state.messages[msg_id as usize]));
-        terminal::put_string_clear_to_eol(&text, terminal::Coord { y: i32::from(row), x: 0 });
+        terminal::put_string_clear_to_eol(
+            &text,
+            terminal::Coord {
+                y: i32::from(row),
+                x: 0,
+            },
+        );
 
         if msg_id == 0 {
             msg_id = (MESSAGE_HISTORY_SIZE - 1) as i16;
@@ -804,7 +788,7 @@ pub fn command_previous_message() {
     terminal::terminal_restore_screen();
 }
 
-/// C++ `commandFlipWizardMode` (game_run.cpp:1446–1455).
+/// C++ `commandFlipWizardMode` (`game_run.cpp:1446–1455`).
 pub fn command_flip_wizard_mode() {
     if with_state(|state| state.game.wizard_mode) {
         with_state_mut(|state| state.game.wizard_mode = false);
@@ -816,7 +800,7 @@ pub fn command_flip_wizard_mode() {
     print_character_winner();
 }
 
-/// C++ `commandSaveAndExit` (game_run.cpp:1457–1476).
+/// C++ `commandSaveAndExit` (`game_run.cpp:1457–1476`).
 pub fn command_save_and_exit() {
     if with_state(|state| state.game.total_winner) {
         terminal::print_message(Some(
@@ -840,7 +824,7 @@ pub fn command_save_and_exit() {
     }
 }
 
-/// C++ `commandLocateOnMap` (game_run.cpp:1478–1548).
+/// C++ `commandLocateOnMap` (`game_run.cpp:1478–1548`).
 pub fn command_locate_on_map() {
     if with_state(|state| state.py.flags.blind > 0) || player_no_light() {
         terminal::print_message(Some("You can't see your map."));
@@ -866,19 +850,15 @@ pub fn command_locate_on_map() {
         let tmp_str = if panel.y == old_panel.y && panel.x == old_panel.x {
             String::new()
         } else {
-            let ns = if panel.y < old_panel.y {
-                " North"
-            } else if panel.y > old_panel.y {
-                " South"
-            } else {
-                ""
+            let ns = match panel.y.cmp(&old_panel.y) {
+                std::cmp::Ordering::Less => " North",
+                std::cmp::Ordering::Greater => " South",
+                std::cmp::Ordering::Equal => "",
             };
-            let ew = if panel.x < old_panel.x {
-                " West"
-            } else if panel.x > old_panel.x {
-                " East"
-            } else {
-                ""
+            let ew = match panel.x.cmp(&old_panel.x) {
+                std::cmp::Ordering::Less => " West",
+                std::cmp::Ordering::Greater => " East",
+                std::cmp::Ordering::Equal => "",
             };
             format!("{ns}{ew} of")
         };
@@ -922,7 +902,7 @@ pub fn command_locate_on_map() {
     }
 }
 
-/// C++ `commandToggleSearch` (game_run.cpp:1550–1556).
+/// C++ `commandToggleSearch` (`game_run.cpp:1550–1556`).
 pub fn command_toggle_search() {
     if with_state(|state| state.py.flags.status & PY_SEARCH != 0) {
         player_search_off();
@@ -931,7 +911,7 @@ pub fn command_toggle_search() {
     }
 }
 
-/// C++ `doWizardCommands` (game_run.cpp:1558–1634).
+/// C++ `doWizardCommands` (`game_run.cpp:1558–1634`).
 pub fn do_wizard_commands(command: u8) {
     match command {
         c if c == ctrl_key(b'A') => wizard_cure_all(),
@@ -1068,7 +1048,7 @@ pub const VALID_COUNT_TRUE: &[u8] = &[
     b'+',
 ];
 
-/// C++ `validCountCommand` (game_run.cpp:1898–1986).
+/// C++ `validCountCommand` (`game_run.cpp:1898–1986`).
 pub fn valid_count_command(command: u8) -> bool {
     if VALID_COUNT_FALSE.contains(&command) {
         return false;
@@ -1079,7 +1059,7 @@ pub fn valid_count_command(command: u8) -> bool {
     false
 }
 
-/// C++ `doCommand` (game_run.cpp:1640–1895).
+/// C++ `doCommand` (`game_run.cpp:1640–1895`).
 pub fn do_command(mut command: u8) {
     let do_pickup = move_without_pickup(&mut command);
 
@@ -1226,9 +1206,8 @@ pub fn do_command(mut command: u8) {
         b'q' => quaff(),
         b'r' => scroll_read(),
         b's' => {
-            let (pos, chance) = with_state(|state| {
-                (state.py.pos, i32::from(state.py.misc.chance_in_search))
-            });
+            let (pos, chance) =
+                with_state(|state| (state.py.pos, i32::from(state.py.misc.chance_in_search)));
             player_search(pos, chance);
         }
         b'T' => inventory_execute_command(b't'),
@@ -1255,7 +1234,7 @@ pub fn do_command(mut command: u8) {
     with_state_mut(|state| state.game.last_command = command);
 }
 
-/// C++ `executeInputCommands` (game_run.cpp:1017–1107).
+/// C++ `executeInputCommands` (`game_run.cpp:1017–1107`).
 pub fn execute_input_commands(command: &mut u8, find_count: &mut i32) {
     let mut last_input_command = *command;
 
@@ -1285,7 +1264,7 @@ pub fn execute_input_commands(command: &mut u8, find_count: &mut i32) {
         }
 
         if with_state(|state| state.game.doing_inventory_command != 0) {
-            let inv_cmd = with_state(|state| state.game.doing_inventory_command as u8);
+            let inv_cmd = with_state(|state| state.game.doing_inventory_command);
             inventory_execute_command(inv_cmd);
             if !should_continue_input_loop() {
                 break;
@@ -1294,10 +1273,7 @@ pub fn execute_input_commands(command: &mut u8, find_count: &mut i32) {
         }
 
         let pos = with_state(|state| state.py.pos);
-        terminal::panel_move_cursor(terminal::Coord {
-            y: pos.y,
-            x: pos.x,
-        });
+        terminal::panel_move_cursor(terminal::Coord { y: pos.y, x: pos.x });
 
         with_state_mut(|state| state.message_ready_to_print = false);
 
@@ -1308,7 +1284,7 @@ pub fn execute_input_commands(command: &mut u8, find_count: &mut i32) {
 
             let mut repeat_count = 0i32;
             let use_roguelike = with_state(|state| state.options.use_roguelike_keys);
-            if (use_roguelike && (b'0'..=b'9').contains(&last_input_command))
+            if (use_roguelike && last_input_command.is_ascii_digit())
                 || (!use_roguelike && last_input_command == b'#')
             {
                 repeat_count = get_command_repeat_count(&mut last_input_command);
@@ -1319,33 +1295,27 @@ pub fn execute_input_commands(command: &mut u8, find_count: &mut i32) {
             }
 
             let pos = with_state(|state| state.py.pos);
-            terminal::panel_move_cursor(terminal::Coord {
-                y: pos.y,
-                x: pos.x,
-            });
+            terminal::panel_move_cursor(terminal::Coord { y: pos.y, x: pos.x });
 
             if !use_roguelike {
                 last_input_command = original_commands(last_input_command);
             }
 
             if repeat_count > 0 {
-                if !valid_count_command(last_input_command) {
+                if valid_count_command(last_input_command) {
+                    with_state_mut(|state| state.game.command_count = repeat_count as u32);
+                    print_character_movement_state();
+                } else {
                     with_state_mut(|state| state.game.player_free_turn = true);
                     last_input_command = b' ';
                     terminal::print_message(Some("Invalid command with a count."));
-                } else {
-                    with_state_mut(|state| state.game.command_count = repeat_count as u32);
-                    print_character_movement_state();
                 }
             }
         }
 
         terminal::message_line_clear();
         let pos = with_state(|state| state.py.pos);
-        terminal::panel_move_cursor(terminal::Coord {
-            y: pos.y,
-            x: pos.x,
-        });
+        terminal::panel_move_cursor(terminal::Coord { y: pos.y, x: pos.x });
         terminal::put_qio();
 
         do_command(last_input_command);
@@ -1370,9 +1340,7 @@ pub fn execute_input_commands(command: &mut u8, find_count: &mut i32) {
 
 fn should_continue_input_loop() -> bool {
     with_state(|state| {
-        state.game.player_free_turn
-            && !state.dg.generate_new_level
-            && ui_io::eof_flag() == 0
+        state.game.player_free_turn && !state.dg.generate_new_level && ui_io::eof_flag() == 0
     })
 }
 
@@ -1432,7 +1400,7 @@ pub fn test_regenerate_mana_amounts() -> Vec<i32> {
 
 #[doc(hidden)]
 pub fn test_end_running_count() -> u32 {
-    TEST_END_RUNNING_COUNT.with(|c| c.get())
+    TEST_END_RUNNING_COUNT.with(std::cell::Cell::get)
 }
 
 fn vtype_label(text: &str) -> Vtype_t {
@@ -1656,7 +1624,13 @@ pub fn player_food_consumption() -> i32 {
         state.py.flags.food -= state.py.flags.food_digested;
     });
 
-    let starve_damage = with_state(|state| if state.py.flags.food < 0 { -state.py.flags.food / 16 } else { 0 });
+    let starve_damage = with_state(|state| {
+        if state.py.flags.food < 0 {
+            -state.py.flags.food / 16
+        } else {
+            0
+        }
+    });
     if starve_damage != 0 {
         player_takes_hit(i32::from(starve_damage), &vtype_label("starvation"));
         player_disturb(1, 0);
@@ -1668,7 +1642,10 @@ pub fn player_regenerate_hit_points(percent: i32) {
     TEST_REGEN_HP_AMOUNTS.with(|v| v.borrow_mut().push(percent));
     let old_chp = with_state(|state| state.py.misc.current_hp);
     let (max_hp, fraction) = with_state(|state| {
-        (i32::from(state.py.misc.max_hp), i32::from(state.py.misc.current_hp_fraction))
+        (
+            i32::from(state.py.misc.max_hp),
+            i32::from(state.py.misc.current_hp_fraction),
+        )
     });
     let new_chp = max_hp * percent + i32::from(PLAYER_REGEN_HPBASE);
     with_state_mut(|state| {
@@ -1697,7 +1674,10 @@ pub fn player_regenerate_mana(percent: i32) {
     TEST_REGEN_MANA_AMOUNTS.with(|v| v.borrow_mut().push(percent));
     let old_cmana = with_state(|state| state.py.misc.current_mana);
     let (mana, fraction) = with_state(|state| {
-        (i32::from(state.py.misc.mana), i32::from(state.py.misc.current_mana_fraction))
+        (
+            i32::from(state.py.misc.mana),
+            i32::from(state.py.misc.current_mana_fraction),
+        )
     });
     let new_mana = mana * percent + i32::from(PLAYER_REGEN_MNBASE);
     with_state_mut(|state| {
@@ -1728,9 +1708,11 @@ pub fn player_update_regeneration(amount: i32) {
         amount = amount * 3 / 2;
     }
     if with_state(|state| (state.py.flags.status & PY_SEARCH) != 0 || state.py.flags.rest != 0) {
-        amount = amount * 2;
+        amount *= 2;
     }
-    if with_state(|state| state.py.flags.poisoned < 1 && state.py.misc.current_hp < state.py.misc.max_hp) {
+    if with_state(|state| {
+        state.py.flags.poisoned < 1 && state.py.misc.current_hp < state.py.misc.max_hp
+    }) {
         player_regenerate_hit_points(amount);
     }
     if with_state(|state| state.py.misc.current_mana < state.py.misc.mana) {
@@ -1824,7 +1806,7 @@ pub fn player_update_poisoned_state() {
         -3 | -2 => 3,
         -1 => 2,
         0 => 1,
-        1 | 2 | 3 => i32::from(game_turn % 2 == 0),
+        1..=3 => i32::from(game_turn % 2 == 0),
         4 | 5 => i32::from(game_turn % 3 == 0),
         6 => i32::from(game_turn % 4 == 0),
         _ => 0,
@@ -2158,7 +2140,10 @@ pub fn player_detect_enchantment() {
                 &format!("There's something about what you are {desc}..."),
             );
             player_disturb(0, 0);
-            let msg_len = tmp_str.iter().position(|&b| b == 0).unwrap_or(tmp_str.len());
+            let msg_len = tmp_str
+                .iter()
+                .position(|&b| b == 0)
+                .unwrap_or(tmp_str.len());
             terminal::print_message(Some(std::str::from_utf8(&tmp_str[..msg_len]).unwrap_or("")));
             with_state_mut(|state| {
                 item_append_to_inscription(&mut state.py.inventory[i as usize], ID_MAGIK);
@@ -2178,7 +2163,7 @@ pub fn price_adjust_cost(cost: i32, adjustment: i32) -> i32 {
     ((cost * adjustment) + 50) / 100
 }
 
-/// C++ game_run.cpp lines 236–243.
+/// C++ `game_run.cpp` lines 236–243.
 pub fn price_adjust() {
     if COST_ADJUSTMENT != 100 {
         // C++ mutates the global `game_objects` table at boot. Rust keeps immutable
@@ -2186,7 +2171,7 @@ pub fn price_adjust() {
     }
 }
 
-/// C++ game_run.cpp lines 189–201.
+/// C++ `game_run.cpp` lines 189–201.
 pub fn initialize_monster_levels() {
     with_state_mut(|state| {
         for level in &mut state.monster_levels {
@@ -2204,7 +2189,7 @@ pub fn initialize_monster_levels() {
     });
 }
 
-/// C++ game_run.cpp lines 204–233.
+/// C++ `game_run.cpp` lines 204–233.
 pub fn initialize_treasure_levels() {
     with_state_mut(|state| {
         for level in &mut state.treasure_levels {
@@ -2230,7 +2215,7 @@ pub fn initialize_treasure_levels() {
     });
 }
 
-/// C++ game_run.cpp lines 160–186.
+/// C++ `game_run.cpp` lines 160–186.
 pub fn initialize_character_inventory() {
     with_state_mut(|state| {
         for entry in &mut state.py.inventory {
@@ -2255,7 +2240,7 @@ pub fn initialize_character_inventory() {
     }
 }
 
-/// C++ game_run.cpp lines 252–259.
+/// C++ `game_run.cpp` lines 252–259.
 pub fn reset_dungeon_flags() {
     with_state_mut(|state| {
         state.game.command_count = 0;
@@ -2269,11 +2254,10 @@ pub fn reset_dungeon_flags() {
     });
 }
 
-/// C++ game_run.cpp lines 262–264.
+/// C++ `game_run.cpp` lines 262–264.
 pub fn player_initialize_player_light() {
     with_state_mut(|state| {
-        state.py.carrying_light =
-            state.py.inventory[PlayerEquipment::Light as usize].misc_use > 0;
+        state.py.carrying_light = state.py.inventory[PlayerEquipment::Light as usize].misc_use > 0;
     });
 }
 
@@ -2326,7 +2310,7 @@ pub fn test_set_play_dungeon_script(script: PlayDungeonScript) {
 
 #[doc(hidden)]
 pub fn test_play_dungeon_call_count() -> u32 {
-    TEST_PLAY_DUNGEON_CALLS.with(|c| c.get())
+    TEST_PLAY_DUNGEON_CALLS.with(std::cell::Cell::get)
 }
 
 #[doc(hidden)]
@@ -2336,7 +2320,7 @@ pub fn test_set_load_game_hook(result: bool, generate: bool) {
             enabled: true,
             result,
             generate,
-        })
+        });
     });
 }
 
@@ -2351,12 +2335,12 @@ pub fn test_set_boot_stop_after(event: Option<BootEvent>) {
 }
 
 fn boot_stop_after(event: BootEvent) -> bool {
-    TEST_BOOT_STOP_AFTER.with(|c| c.get()) == Some(event)
+    TEST_BOOT_STOP_AFTER.with(std::cell::Cell::get) == Some(event)
 }
 
 fn boot_load_game(generate: &mut bool) -> bool {
     record_boot_event(BootEvent::LoadGame);
-    let hook = TEST_LOAD_GAME_HOOK.with(|c| c.get());
+    let hook = TEST_LOAD_GAME_HOOK.with(std::cell::Cell::get);
     if hook.enabled {
         *generate = hook.generate;
         return hook.result;
@@ -2372,24 +2356,24 @@ fn boot_load_game(generate: &mut bool) -> bool {
 
 fn boot_generate_cave() {
     record_boot_event(BootEvent::GenerateCave);
-    if !TEST_SKIP_GENERATE_CAVE.with(|c| c.get()) {
+    if !TEST_SKIP_GENERATE_CAVE.with(std::cell::Cell::get) {
         generate_cave();
     }
 }
 
 fn boot_end_game() {
     record_boot_event(BootEvent::EndGame);
-    if !TEST_SKIP_END_GAME.with(|c| c.get()) {
+    if !TEST_SKIP_END_GAME.with(std::cell::Cell::get) {
         end_game();
     }
 }
 
 fn apply_play_dungeon_test_script(call: u32) {
-    if !TEST_PLAY_DUNGEON_OVERRIDE.with(|c| c.get()) {
+    if !TEST_PLAY_DUNGEON_OVERRIDE.with(std::cell::Cell::get) {
         return;
     }
 
-    match TEST_PLAY_DUNGEON_SCRIPT.with(|c| c.get()) {
+    match TEST_PLAY_DUNGEON_SCRIPT.with(std::cell::Cell::get) {
         PlayDungeonScript::MarkDead => {
             with_state_mut(|state| state.game.character_is_dead = true);
         }
@@ -2479,7 +2463,11 @@ fn play_dungeon_turn_body(last_input_command: &mut u8, find_count: &mut i32, tur
             state.game.command_count,
             state.py.running_tracker,
             state.py.flags.rest,
-            if state.py.running_tracker != 0 { 0 } else { 10_000 },
+            if state.py.running_tracker != 0 {
+                0
+            } else {
+                10_000
+            },
         )
     });
     if (command_count > 0 || running != 0 || rest != 0)
@@ -2531,7 +2519,7 @@ fn play_dungeon_turn_body(last_input_command: &mut u8, find_count: &mut i32, tur
 
     let (level, confused) = with_state(|state| (state.py.misc.level, state.py.flags.confused));
     let chance = 10 + 750 / (5 + i32::from(level));
-    if (game_turn & 0xF) == 0 && confused == 0 && random_number(chance) == 1 {
+    if game_turn.trailing_zeros() >= 4 && confused == 0 && random_number(chance) == 1 {
         trace_play_dungeon(PlayDungeonTrace::DetectEnchantment);
         player_detect_enchantment();
     }
@@ -2553,7 +2541,7 @@ fn play_dungeon_turn_body(last_input_command: &mut u8, find_count: &mut i32, tur
     });
     if paralysis < 1 && rest == 0 && !character_is_dead {
         trace_play_dungeon(PlayDungeonTrace::ExecuteInputCommands);
-        if TEST_SKIP_INPUT_COMMAND_LOOP.with(|c| c.get()) {
+        if TEST_SKIP_INPUT_COMMAND_LOOP.with(std::cell::Cell::get) {
             with_state_mut(|state| state.game.player_free_turn = false);
         } else {
             execute_input_commands(last_input_command, find_count);
@@ -2561,10 +2549,7 @@ fn play_dungeon_turn_body(last_input_command: &mut u8, find_count: &mut i32, tur
     } else {
         trace_play_dungeon(PlayDungeonTrace::PanelMoveCursor);
         let pos = with_state(|state| state.py.pos);
-        terminal::panel_move_cursor(terminal::Coord {
-            y: pos.y,
-            x: pos.x,
-        });
+        terminal::panel_move_cursor(terminal::Coord { y: pos.y, x: pos.x });
         terminal::put_qio();
     }
 
@@ -2578,13 +2563,13 @@ fn play_dungeon_turn_body(last_input_command: &mut u8, find_count: &mut i32, tur
         update_monsters(true);
     }
 
-    let max_turns = TEST_PLAY_DUNGEON_MAX_TURNS.with(|c| c.get());
+    let max_turns = TEST_PLAY_DUNGEON_MAX_TURNS.with(std::cell::Cell::get);
     if max_turns != 0 && turn + 1 >= max_turns {
         with_state_mut(|state| state.dg.generate_new_level = true);
     }
 }
 
-/// C++ `playDungeon` (game_run.cpp:2287–2425).
+/// C++ `playDungeon` (`game_run.cpp:2287–2425`).
 pub fn play_dungeon() {
     record_boot_event(BootEvent::PlayDungeon);
     let call = TEST_PLAY_DUNGEON_CALLS.with(|c| {
@@ -2594,7 +2579,7 @@ pub fn play_dungeon() {
 
     play_dungeon_prologue();
 
-    let test_override = TEST_PLAY_DUNGEON_OVERRIDE.with(|c| c.get());
+    let test_override = TEST_PLAY_DUNGEON_OVERRIDE.with(std::cell::Cell::get);
     if !test_override {
         let mut find_count = 0i32;
         let mut last_input_command = 0u8;
@@ -2609,7 +2594,7 @@ pub fn play_dungeon() {
     apply_play_dungeon_test_script(call);
 }
 
-/// C++ game_run.cpp lines 28–157.
+/// C++ `game_run.cpp` lines 28–157.
 pub fn start_moria(seed: u32, start_new_game: bool, roguelike_keys: bool) {
     with_state_mut(|state| state.options.use_roguelike_keys = roguelike_keys);
     record_boot_event(BootEvent::SetRoguelikeKeys);
@@ -2662,7 +2647,7 @@ pub fn start_moria(seed: u32, start_new_game: bool, roguelike_keys: bool) {
 
     if result {
         record_boot_event(BootEvent::ChangeCharacterName);
-        if !TEST_SKIP_CHANGE_CHARACTER_NAME.with(|c| c.get()) {
+        if !TEST_SKIP_CHANGE_CHARACTER_NAME.with(std::cell::Cell::get) {
             change_character_name();
         }
 
@@ -2673,7 +2658,7 @@ pub fn start_moria(seed: u32, start_new_game: bool, roguelike_keys: bool) {
         });
     } else {
         record_boot_event(BootEvent::CharacterCreate);
-        if !TEST_SKIP_CHARACTER_CREATE.with(|c| c.get()) {
+        if !TEST_SKIP_CHARACTER_CREATE.with(std::cell::Cell::get) {
             character_create();
         }
 
@@ -2734,11 +2719,13 @@ pub fn start_moria(seed: u32, start_new_game: bool, roguelike_keys: bool) {
         if ui_io::eof_flag() != 0 {
             record_boot_event(BootEvent::EofSave);
             with_state_mut(|state| {
-                copy_cstr(&mut state.game.character_died_from, "(end of input: saved)")
+                copy_cstr(&mut state.game.character_died_from, "(end of input: saved)");
             });
             record_boot_event(BootEvent::SaveGame);
             if !save_game() {
-                with_state_mut(|state| copy_cstr(&mut state.game.character_died_from, "unexpected eof"));
+                with_state_mut(|state| {
+                    copy_cstr(&mut state.game.character_died_from, "unexpected eof");
+                });
             }
             with_state_mut(|state| state.game.character_is_dead = true);
         }

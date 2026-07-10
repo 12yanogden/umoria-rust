@@ -1,3 +1,10 @@
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 mod common;
 
 #[test]
@@ -7,7 +14,9 @@ fn probe_rng_values() {
     eprintln!("rn7={}", random_number(7));
     reset_for_new_game(Some(42));
     eprintln!("frost rolls");
-    for _ in 0..3 { eprintln!("100={}", random_number(100)); }
+    for _ in 0..3 {
+        eprintln!("100={}", random_number(100));
+    }
     reset_for_new_game(Some(99));
     eprintln!("poison roll={}", random_number(10));
     reset_for_new_game(Some(42));

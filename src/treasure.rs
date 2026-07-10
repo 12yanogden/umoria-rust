@@ -6,10 +6,9 @@ use crate::config::treasure::chests::{
 };
 use crate::config::treasure::flags::{
     TR_AGGRAVATE, TR_BLIND, TR_CHR, TR_CON, TR_CURSED, TR_DEX, TR_FFALL, TR_FLAME_TONGUE,
-    TR_FREE_ACT, TR_FROST_BRAND, TR_INFRA, TR_INT, TR_REGEN, TR_RES_ACID, TR_RES_COLD,
-    TR_RES_FIRE, TR_RES_LIGHT, TR_SEARCH, TR_SEE_INVIS, TR_SLAY_ANIMAL, TR_SLAY_DRAGON,
-    TR_SLAY_EVIL, TR_SLAY_UNDEAD, TR_SPEED, TR_STEALTH, TR_STR, TR_SUST_STAT, TR_TELEPORT,
-    TR_TIMID, TR_WIS,
+    TR_FREE_ACT, TR_FROST_BRAND, TR_INFRA, TR_INT, TR_REGEN, TR_RES_ACID, TR_RES_COLD, TR_RES_FIRE,
+    TR_RES_LIGHT, TR_SEARCH, TR_SEE_INVIS, TR_SLAY_ANIMAL, TR_SLAY_DRAGON, TR_SLAY_EVIL,
+    TR_SLAY_UNDEAD, TR_SPEED, TR_STEALTH, TR_STR, TR_SUST_STAT, TR_TELEPORT, TR_TIMID, TR_WIS,
 };
 use crate::config::treasure::{
     LEVEL_MIN_OBJECT_STD, LEVEL_STD_OBJECT_ADJUST, OBJECT_BASE_MAGIC, OBJECT_CHANCE_CURSED,
@@ -86,12 +85,7 @@ pub fn magic_should_be_enchanted(state: &mut State, chance: i32) -> bool {
 
 /// Port of `magicEnchantmentBonus` in treasure.cpp.
 #[doc(hidden)]
-pub fn magic_enchantment_bonus(
-    state: &mut State,
-    base: i32,
-    max_standard: i32,
-    level: i32,
-) -> i32 {
+pub fn magic_enchantment_bonus(state: &mut State, base: i32, max_standard: i32, level: i32) -> i32 {
     let mut stand_deviation =
         (i32::from(LEVEL_STD_OBJECT_ADJUST) * level / 100) + i32::from(LEVEL_MIN_OBJECT_STD);
 
@@ -144,7 +138,7 @@ fn magical_armor(state: &mut State, item_id: i32, special: i32, level: i32) {
                 (*ptr).special_name_id = SpecialNameIds::SN_RC as u8;
                 (*ptr).cost += 600;
             }
-            7 | 8 | 9 => {
+            7..=9 => {
                 (*ptr).flags |= TR_RES_LIGHT;
                 (*ptr).special_name_id = SpecialNameIds::SN_RL as u8;
                 (*ptr).cost += 500;
@@ -169,21 +163,14 @@ fn magical_sword(state: &mut State, item_id: i32, special: i32, level: i32) {
         (*ptr).to_hit += magic_enchantment_bonus(state, 0, 40, level) as i16;
 
         let damage_bonus = max_dice_roll((*ptr).damage);
-        (*ptr).to_damage += magic_enchantment_bonus(
-            state,
-            0,
-            4 * damage_bonus,
-            damage_bonus * level / 10,
-        ) as i16;
+        (*ptr).to_damage +=
+            magic_enchantment_bonus(state, 0, 4 * damage_bonus, damage_bonus * level / 10) as i16;
 
         if magic_should_be_enchanted(state, 3 * special / 2) {
             match random_number_state(state, 16) {
                 1 => {
-                    (*ptr).flags |= TR_SEE_INVIS
-                        | TR_SUST_STAT
-                        | TR_SLAY_UNDEAD
-                        | TR_SLAY_EVIL
-                        | TR_STR;
+                    (*ptr).flags |=
+                        TR_SEE_INVIS | TR_SUST_STAT | TR_SLAY_UNDEAD | TR_SLAY_EVIL | TR_STR;
                     (*ptr).to_hit += 5;
                     (*ptr).to_damage += 5;
                     (*ptr).to_ac += random_number_state(state, 4) as i16;
@@ -238,14 +225,14 @@ fn magical_sword(state: &mut State, item_id: i32, special: i32, level: i32) {
                     (*ptr).special_name_id = SpecialNameIds::SN_SU as u8;
                     (*ptr).cost += 5000;
                 }
-                11 | 12 | 13 => {
+                11..=13 => {
                     (*ptr).flags |= TR_FLAME_TONGUE;
                     (*ptr).to_hit += 1;
                     (*ptr).to_damage += 3;
                     (*ptr).special_name_id = SpecialNameIds::SN_FT as u8;
                     (*ptr).cost += 2000;
                 }
-                14 | 15 | 16 => {
+                14..=16 => {
                     (*ptr).flags |= TR_FROST_BRAND;
                     (*ptr).to_hit += 1;
                     (*ptr).to_damage += 1;
@@ -264,12 +251,9 @@ fn cursed_sword(state: &mut State, item_id: i32, level: i32) {
         (*ptr).to_hit -= magic_enchantment_bonus(state, 1, 55, level) as i16;
 
         let damage_bonus = max_dice_roll((*ptr).damage);
-        (*ptr).to_damage -= magic_enchantment_bonus(
-            state,
-            1,
-            11 * damage_bonus / 2,
-            damage_bonus * level / 10,
-        ) as i16;
+        (*ptr).to_damage -=
+            magic_enchantment_bonus(state, 1, 11 * damage_bonus / 2, damage_bonus * level / 10)
+                as i16;
         (*ptr).flags |= TR_CURSED;
         (*ptr).cost = 0;
     }
@@ -550,7 +534,7 @@ fn process_rings(state: &mut State, item_id: i32, level: i32, cursed: i32) {
     let ptr = item_ptr(state, item_id);
     unsafe {
         match (*ptr).sub_category_id {
-            0 | 1 | 2 | 3 => {
+            0..=3 => {
                 if magic_should_be_enchanted(state, cursed) {
                     (*ptr).misc_use = (-magic_enchantment_bonus(state, 1, 20, level)) as i16;
                     (*ptr).flags |= TR_CURSED;
@@ -605,7 +589,7 @@ fn process_rings(state: &mut State, item_id: i32, level: i32, cursed: i32) {
                     (*ptr).cost = -(*ptr).cost;
                 }
             }
-            24 | 25 | 26 | 27 | 28 | 29 => {
+            24..=29 => {
                 (*ptr).identification |= ID_NO_SHOW_P1;
             }
             30 => {
@@ -693,7 +677,7 @@ fn staff_magic(state: &mut State, id: u8) -> i32 {
         7 | 8 => random_number_state(state, 3) + 1,
         9 => random_number_state(state, 5) + 6,
         10 => random_number_state(state, 10) + 12,
-        11 | 12 | 13 => random_number_state(state, 5) + 6,
+        11..=13 => random_number_state(state, 5) + 6,
         14 => random_number_state(state, 10) + 12,
         15 => random_number_state(state, 3) + 4,
         16 | 17 => random_number_state(state, 5) + 6,
@@ -785,7 +769,7 @@ fn magical_chests(state: &mut State, item_id: i32, level: i32) {
                 (*ptr).flags |= CH_POISON | CH_LOCKED;
                 (*ptr).special_name_id = SpecialNameIds::SN_POISON_NEEDLE as u8;
             }
-            7 | 8 | 9 => {
+            7..=9 => {
                 (*ptr).flags |= CH_PARALYSED | CH_LOCKED;
                 (*ptr).special_name_id = SpecialNameIds::SN_GAS_TRAP as u8;
             }
@@ -793,11 +777,11 @@ fn magical_chests(state: &mut State, item_id: i32, level: i32) {
                 (*ptr).flags |= CH_EXPLODE | CH_LOCKED;
                 (*ptr).special_name_id = SpecialNameIds::SN_EXPLOSION_DEVICE as u8;
             }
-            12 | 13 | 14 => {
+            12..=14 => {
                 (*ptr).flags |= CH_SUMMON | CH_LOCKED;
                 (*ptr).special_name_id = SpecialNameIds::SN_SUMMONING_RUNES as u8;
             }
-            15 | 16 | 17 => {
+            15..=17 => {
                 (*ptr).flags |= CH_PARALYSED | CH_POISON | CH_LOSE_STR | CH_LOCKED;
                 (*ptr).special_name_id = SpecialNameIds::SN_MULTIPLE_TRAPS as u8;
             }
@@ -809,12 +793,7 @@ fn magical_chests(state: &mut State, item_id: i32, level: i32) {
     }
 }
 
-fn magical_projectile_adjustment(
-    state: &mut State,
-    item_id: i32,
-    special: i32,
-    level: i32,
-) {
+fn magical_projectile_adjustment(state: &mut State, item_id: i32, special: i32, level: i32) {
     let ptr = item_ptr(state, item_id);
     unsafe {
         (*ptr).to_hit += magic_enchantment_bonus(state, 1, 35, level) as i16;
@@ -822,7 +801,7 @@ fn magical_projectile_adjustment(
 
         if magic_should_be_enchanted(state, 3 * special / 2) {
             match random_number_state(state, 10) {
-                1 | 2 | 3 => {
+                1..=3 => {
                     (*ptr).special_name_id = SpecialNameIds::SN_SLAYING as u8;
                     (*ptr).to_hit += 5;
                     (*ptr).to_damage += 5;
@@ -988,7 +967,7 @@ pub(crate) fn magic_treasure_magical_ability_state(state: &mut State, item_id: i
             }
         }
         TV_HELM => {
-            if sub_category_id >= 6 && sub_category_id <= 8 {
+            if (6..=8).contains(&sub_category_id) {
                 chance += cost / 100;
                 special += special;
             }
@@ -1005,14 +984,12 @@ pub(crate) fn magic_treasure_magical_ability_state(state: &mut State, item_id: i
         TV_AMULET => {
             process_amulets(state, item_id, level, cursed);
         }
-        TV_LIGHT => {
-            if (sub_category_id % 2) == 1 {
-                let ptr = item_ptr(state, item_id);
-                unsafe {
-                    let misc_cap = (*ptr).misc_use;
-                    (*ptr).misc_use = random_number_state(state, i32::from(misc_cap)) as i16;
-                    (*ptr).sub_category_id -= 1;
-                }
+        TV_LIGHT if (sub_category_id % 2) == 1 => {
+            let ptr = item_ptr(state, item_id);
+            unsafe {
+                let misc_cap = (*ptr).misc_use;
+                (*ptr).misc_use = random_number_state(state, i32::from(misc_cap)) as i16;
+                (*ptr).sub_category_id -= 1;
             }
         }
         TV_WAND => {
@@ -1079,19 +1056,15 @@ pub(crate) fn magic_treasure_magical_ability_state(state: &mut State, item_id: i
                     (*ptr).depth_first_found = 1;
                 } else if sub_category_id == 69 {
                     (*ptr).depth_first_found = 0;
-                } else if sub_category_id == 80 {
-                    (*ptr).depth_first_found = 5;
-                } else if sub_category_id == 81 {
+                } else if sub_category_id == 80 || sub_category_id == 81 {
                     (*ptr).depth_first_found = 5;
                 }
             }
         }
-        TV_POTION1 => {
-            if sub_category_id == 76 {
-                let ptr = item_ptr(state, item_id);
-                unsafe {
-                    (*ptr).depth_first_found = 0;
-                }
+        TV_POTION1 if sub_category_id == 76 => {
+            let ptr = item_ptr(state, item_id);
+            unsafe {
+                (*ptr).depth_first_found = 0;
             }
         }
         _ => {}

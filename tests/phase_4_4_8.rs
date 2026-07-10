@@ -1,5 +1,12 @@
 //! Phase 4.4.8 — player_quaff.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::player::PLAYER_MAX_EXP;
@@ -25,9 +32,9 @@ fn potion2_flag(id: i32) -> u32 {
 
 fn sample_base_exp_levels() -> [u32; PLAYER_MAX_LEVEL as usize] {
     [
-        10, 25, 45, 70, 100, 140, 200, 280, 380, 500, 650, 850, 1100, 1400, 1800, 2300, 2900,
-        3600, 4400, 5400, 6800, 8400, 10200, 12500, 17500, 25000, 35000, 50000, 75000, 100000,
-        150000, 200000, 300000, 400000, 500000, 750000, 1500000, 2500000, 5000000, 10000000,
+        10, 25, 45, 70, 100, 140, 200, 280, 380, 500, 650, 850, 1100, 1400, 1800, 2300, 2900, 3600,
+        4400, 5400, 6800, 8400, 10200, 12500, 17500, 25000, 35000, 50000, 75000, 100000, 150000,
+        200000, 300000, 400000, 500000, 750000, 1500000, 2500000, 5000000, 10000000,
     ]
 }
 
@@ -354,7 +361,6 @@ fn lose_experience_large_exp_scale_branch_seed42() {
     });
     assert!(drink(potion2_flag(34), POTION2));
     with_state(|s| assert_eq!(s.py.misc.exp, expected_remain));
-    assert!(50_000 > 32_767, "uses scaled randomNumber branch");
 }
 
 // ---------------------------------------------------------------------------

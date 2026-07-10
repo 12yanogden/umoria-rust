@@ -1,6 +1,13 @@
 //! Phase 2.7 — data_treasure.cpp (game_objects + special_item_names)
 //! Phase 2.8 (partial) — descriptive string arrays from data_tables.cpp
 #![allow(clippy::assertions_on_constants)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::data_treasure::{
     AMULETS, COLORS, GAME_OBJECTS, METALS, MUSHROOMS, ROCKS, SPECIAL_ITEM_NAMES, SYLLABLES, WOODS,

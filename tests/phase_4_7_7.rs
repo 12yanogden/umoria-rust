@@ -1,18 +1,26 @@
 //! Phase 4.7.7 — scroll reading (scrolls.cpp) parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_NOTHING;
 use umoria::config::monsters::MON_ENDGAME_MONSTERS;
 use umoria::config::treasure::flags::TR_CURSED;
 use umoria::data_creatures::CREATURES_LIST;
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
+use umoria::dungeon_tile::{Tile, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::inventory::{
     inventory_item_copy_to, inventory_item_is_cursed, Inventory, PlayerEquipment,
     PLAYER_INVENTORY_SIZE,
 };
 use umoria::monster::{MON_MAX_CREATURES, MON_MAX_LEVELS};
+use umoria::player::PLAYER_MAX_LEVEL;
 use umoria::scrolls::{
     inventory_item_id_of_cursed_equipment, player_can_read_scroll, scroll_confuse_monster,
     scroll_curse_armor, scroll_curse_weapon, scroll_enchant_armor, scroll_enchant_item_to_ac,
@@ -20,7 +28,6 @@ use umoria::scrolls::{
     scroll_read, scroll_remove_curse, scroll_summon_monster, scroll_summon_undead,
     scroll_teleport_level, scroll_word_of_recall,
 };
-use umoria::player::PLAYER_MAX_LEVEL;
 use umoria::spells::spell_enchant_item;
 use umoria::treasure::{TV_HARD_ARMOR, TV_SCROLL1, TV_SCROLL2, TV_SWORD};
 use umoria::types::Coord_t;
@@ -45,7 +52,7 @@ fn setup_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -100,13 +107,14 @@ fn init_monster_levels() {
 }
 
 fn make_scroll(flags: u32, category_id: u8) -> Inventory {
-    let mut item = Inventory::default();
-    item.category_id = category_id;
-    item.sub_category_id = 64;
-    item.flags = flags;
-    item.items_count = 1;
-    item.weight = 5;
-    item
+    Inventory {
+        category_id,
+        sub_category_id: 64,
+        flags,
+        items_count: 1,
+        weight: 5,
+        ..Default::default()
+    }
 }
 
 fn pack_scroll(slot: i32, flags: u32, category_id: u8) {
@@ -288,7 +296,10 @@ fn scroll_enchant_weapon_to_hit_rng_order_seed42() {
     let (m2, r2) = next_random_pair(100);
     assert_eq!((m1, r1), (10, 2));
     assert_eq!((m2, r2), (100, 36));
-    assert_eq!(with_state(|s| s.py.inventory[PlayerEquipment::Wield as usize].to_hit), 1);
+    assert_eq!(
+        with_state(|s| s.py.inventory[PlayerEquipment::Wield as usize].to_hit),
+        1
+    );
 }
 
 #[test]
@@ -535,7 +546,7 @@ fn scroll_read_escape_leaves_scroll_no_rng() {
             pack_scroll(0, 0x1, TV_SCROLL1);
             test_push_getch_keys(&[i32::from(ESCAPE)]);
         },
-        || scroll_read(),
+        scroll_read,
     );
     assert_eq!(with_state(|s| s.py.pack.unique_items), 1);
 }
@@ -565,10 +576,12 @@ fn scroll_read_scroll2_enchant_weapon_type_seed777() {
     scroll_read();
 
     assert_eq!(with_state(|s| s.py.pack.unique_items), 0);
-    assert!(
-        with_state(|s| s.py.inventory[PlayerEquipment::Wield as usize].to_hit > 0
-            || s.py.inventory[PlayerEquipment::Wield as usize].to_damage > 0)
-    );
+    assert!(with_state(|s| s.py.inventory
+        [PlayerEquipment::Wield as usize]
+        .to_hit
+        > 0
+        || s.py.inventory[PlayerEquipment::Wield as usize].to_damage
+            > 0));
 }
 
 #[test]

@@ -1,5 +1,12 @@
 //! Phase 4.5.4.1 — identification state, flavor init & identify logic parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use std::collections::HashMap;
 use std::fs;
@@ -16,12 +23,10 @@ use umoria::identification::{
     item_set_as_tried, item_set_colorless_as_identified, magic_initialize_item_names,
     object_description, object_position_offset, spell_item_identified,
     spell_item_identify_and_remove_random_inscription, spell_item_remove_identification,
-    FlavorTables, MAX_AMULETS, MAX_COLORS, MAX_METALS, MAX_MUSHROOMS, MAX_ROCKS, MAX_TITLES,
-    MAX_WOODS, SpecialNameIds,
+    FlavorTables, SpecialNameIds, MAX_AMULETS, MAX_COLORS, MAX_METALS, MAX_MUSHROOMS, MAX_ROCKS,
+    MAX_TITLES, MAX_WOODS,
 };
-use umoria::inventory::{
-    inventory_item_single_stackable, Inventory, ITEM_SINGLE_STACK_MIN, PLAYER_INVENTORY_SIZE,
-};
+use umoria::inventory::{inventory_item_single_stackable, Inventory, ITEM_SINGLE_STACK_MIN};
 use umoria::rng::get_seed;
 use umoria::treasure::{
     TV_AMULET, TV_FOOD, TV_HARD_ARMOR, TV_POTION1, TV_POTION2, TV_RING, TV_SCROLL1, TV_SCROLL2,
@@ -76,9 +81,7 @@ fn setup_main_rng(seed: u32) {
     });
 }
 
-fn flavor_snapshot(
-    state: &State,
-) -> (
+type FlavorSnapshot = (
     Vec<String>,
     Vec<String>,
     Vec<String>,
@@ -86,7 +89,9 @@ fn flavor_snapshot(
     Vec<String>,
     Vec<String>,
     Vec<String>,
-) {
+);
+
+fn flavor_snapshot(state: &State) -> FlavorSnapshot {
     let colors: Vec<_> = (0..MAX_COLORS as usize)
         .map(|i| state.flavor.color_name(i).to_string())
         .collect();
@@ -122,11 +127,12 @@ fn ident_flag(category_id: u8, sub_category_id: u8) -> u8 {
 }
 
 fn make_item(category_id: u8, sub_category_id: u8, items_count: u8) -> Inventory {
-    let mut item = Inventory::default();
-    item.category_id = category_id;
-    item.sub_category_id = sub_category_id;
-    item.items_count = items_count;
-    item
+    Inventory {
+        category_id,
+        sub_category_id,
+        items_count,
+        ..Inventory::default()
+    }
 }
 
 #[test]
@@ -155,10 +161,7 @@ fn magic_initialize_item_names_matches_cpp_goldens() {
         assert_eq!(&snap.3, golden.sections.get("rocks").unwrap());
         assert_eq!(&snap.4, golden.sections.get("amulets").unwrap());
         assert_eq!(&snap.5, golden.sections.get("mushrooms").unwrap());
-        assert_eq!(
-            &snap.6,
-            golden.sections.get("magic_item_titles").unwrap()
-        );
+        assert_eq!(&snap.6, golden.sections.get("magic_item_titles").unwrap());
     }
 }
 
@@ -185,8 +188,8 @@ fn object_position_offset_exhaustive() {
         (TV_POTION1, 64, 5),
         (TV_POTION2, 80, 5),
         (TV_FOOD, 64, 6),
-        (TV_FOOD, 64 + MAX_MUSHROOMS as u8 - 1, 6),
-        (TV_FOOD, 64 + MAX_MUSHROOMS as u8, -1),
+        (TV_FOOD, 64 + MAX_MUSHROOMS - 1, 6),
+        (TV_FOOD, 64 + MAX_MUSHROOMS, -1),
         (TV_SWORD, 64, -1),
         (TV_HARD_ARMOR, 64, -1),
     ];

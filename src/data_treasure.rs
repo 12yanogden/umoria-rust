@@ -1,4 +1,4 @@
-//! Port of src/data_treasure.cpp — immutable object/treasure tables.
+//! Port of `src/data_treasure.cpp` — immutable object/treasure tables.
 
 use std::sync::LazyLock;
 

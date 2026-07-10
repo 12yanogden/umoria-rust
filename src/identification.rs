@@ -389,6 +389,26 @@ pub fn object_position_offset(category_id: u8, sub_category_id: u8) -> i16 {
     }
 }
 
+/// Tomb/death flow: identify one player inventory slot by index.
+pub(crate) fn identify_player_inventory_slot(state: &mut State, index: usize) {
+    let (category_id, sub_category_id) = {
+        let item = &state.py.inventory[index];
+        (item.category_id, item.sub_category_id)
+    };
+    if let Some(id) = object_ident_index(category_id, sub_category_id) {
+        state.objects_identified[id] |= OD_KNOWN1;
+        clear_object_tried_flag(state, id);
+    }
+    {
+        let item = &mut state.py.inventory[index];
+        item.identification &= !(ID_MAGIK | ID_EMPTY);
+    }
+    if let Some(id) = object_ident_index(category_id, sub_category_id) {
+        clear_object_tried_flag(state, id);
+    }
+    state.py.inventory[index].identification |= ID_KNOWN2;
+}
+
 /// C++ identification.cpp lines 345–359.
 pub fn item_set_as_identified(category_id: u8, sub_category_id: u8) {
     with_state_mut(|state| {
@@ -480,7 +500,12 @@ pub fn item_set_colorless_as_identified(
     identification: u8,
 ) -> bool {
     with_state(|state| {
-        item_set_colorless_as_identified_for_state(state, category_id, sub_category_id, identification)
+        item_set_colorless_as_identified_for_state(
+            state,
+            category_id,
+            sub_category_id,
+            identification,
+        )
     })
 }
 
@@ -519,10 +544,7 @@ pub fn item_identify_for_slot(
                 item_append_to_inscription(&mut state.py.inventory[index as usize], ID_DAMD);
             }
             ItemIdentifySlot::Treasure => {
-                item_append_to_inscription(
-                    &mut state.game.treasure.list[index as usize],
-                    ID_DAMD,
-                );
+                item_append_to_inscription(&mut state.game.treasure.list[index as usize], ID_DAMD);
             }
         }
     }
@@ -554,9 +576,7 @@ pub fn item_identify_for_slot(
 
         if matching_cat && matching_sub_cat && i != *item_id && total_items_count < 256 {
             if *item_id > i {
-                let j = *item_id;
-                *item_id = i;
-                i = j;
+                std::mem::swap(&mut *item_id, &mut i);
             }
 
             merged = true;
@@ -572,10 +592,7 @@ pub fn item_identify_for_slot(
                 state.py.inventory[j] = state.py.inventory[j + 1];
             }
 
-            inventory_item_copy_to(
-                OBJ_NOTHING as i16,
-                &mut state.py.inventory[new_unique],
-            );
+            inventory_item_copy_to(OBJ_NOTHING as i16, &mut state.py.inventory[new_unique]);
         }
         i += 1;
     }

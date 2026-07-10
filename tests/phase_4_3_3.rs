@@ -1,15 +1,24 @@
 //! Phase 4.3.3 — character.cpp character creation parity.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
 use umoria::character::{
-    character_generate_stats_and_race, character_get_history,
-    character_set_age_height_weight, create_modify_player_stat, decrement_stat,
-    generate_character_class, increment_stat, monetary_value_calculated_from_stat,
-    player_calculate_start_gold, player_clear_history,
+    character_generate_stats_and_race, character_get_history, character_set_age_height_weight,
+    create_modify_player_stat, decrement_stat, generate_character_class, increment_stat,
+    monetary_value_calculated_from_stat, player_calculate_start_gold, player_clear_history,
 };
 use umoria::data_player::{CHARACTER_BACKGROUNDS, CHARACTER_RACES, CLASSES};
-use umoria::game::{random_number, random_number_normal_distribution, reset_for_new_game, with_state, with_state_mut};
+use umoria::game::{
+    random_number, random_number_normal_distribution, reset_for_new_game, with_state,
+    with_state_mut,
+};
 use umoria::player::{PlayerAttr, PLAYER_MAX_LEVEL};
 use umoria::rng::get_seed;
 use umoria::ui_io;
@@ -67,9 +76,9 @@ fn cpp_character_generate_stats() -> [u8; 6] {
     let mut dice = [0i32; 18];
     loop {
         let mut total = 0;
-        for i in 0..18 {
-            dice[i] = random_number(3 + (i % 3) as i32);
-            total += dice[i];
+        for (i, dice_entry) in dice.iter_mut().enumerate() {
+            *dice_entry = random_number(3 + (i % 3) as i32);
+            total += *dice_entry;
         }
         if total > 42 && total < 54 {
             break;
@@ -137,11 +146,7 @@ fn cpp_character_get_history(race_id: u8) -> (i16, [[u8; 60]; 4]) {
         }
     }
 
-    if social_class > 100 {
-        social_class = 100;
-    } else if social_class < 1 {
-        social_class = 1;
-    }
+    social_class = social_class.clamp(1, 100);
 
     let mut history = [[0u8; 60]; 4];
     let bytes = history_block.as_bytes();
@@ -224,10 +229,10 @@ fn cpp_generate_character_class(class_id: u8) {
     });
 
     let hit_die = with_state(|s| s.py.misc.hit_die);
-    let min_value =
-        (i32::from(PLAYER_MAX_LEVEL) * 3 / 8 * i32::from(hit_die - 1)) + i32::from(PLAYER_MAX_LEVEL);
-    let max_value =
-        (i32::from(PLAYER_MAX_LEVEL) * 5 / 8 * i32::from(hit_die - 1)) + i32::from(PLAYER_MAX_LEVEL);
+    let min_value = (i32::from(PLAYER_MAX_LEVEL) * 3 / 8 * i32::from(hit_die - 1))
+        + i32::from(PLAYER_MAX_LEVEL);
+    let max_value = (i32::from(PLAYER_MAX_LEVEL) * 5 / 8 * i32::from(hit_die - 1))
+        + i32::from(PLAYER_MAX_LEVEL);
 
     let mut base_hp_levels = [0u16; PLAYER_MAX_LEVEL as usize];
     base_hp_levels[0] = hit_die as u16;
@@ -289,10 +294,7 @@ fn create_modify_player_stat_band_parity_exhaustive() {
             let rust = create_modify_player_stat(stat, adjustment);
             reset_for_new_game(Some(42));
             let cpp = cpp_create_modify_player_stat(stat, adjustment);
-            assert_eq!(
-                rust, cpp,
-                "stat={stat} adjustment={adjustment}"
-            );
+            assert_eq!(rust, cpp, "stat={stat} adjustment={adjustment}");
         }
     }
 }
@@ -337,7 +339,8 @@ fn character_get_history_parity_all_races() {
             reset_for_new_game(Some(seed));
             with_state_mut(|s| s.py.misc.race_id = race_id);
             character_get_history();
-            let (rust_social, rust_history) = with_state(|s| (s.py.misc.social_class, s.py.misc.history));
+            let (rust_social, rust_history) =
+                with_state(|s| (s.py.misc.social_class, s.py.misc.history));
             let rust_seed = get_seed();
 
             reset_for_new_game(Some(seed));

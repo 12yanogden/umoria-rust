@@ -1,4 +1,4 @@
-//! Port of src/player_move.cpp — see phase_4.4.
+//! Port of `src/player_move.cpp` — see `phase_4.4`.
 
 use crate::config::options::prompt_to_pickup;
 use crate::config::player::status::PY_SEARCH;
@@ -12,13 +12,13 @@ use crate::dungeon_tile::{MAX_OPEN_SPACE, MIN_CLOSED_SPACE, TILE_LIGHT_FLOOR};
 use crate::game::{random_number, with_state, with_state_mut};
 use crate::identification::item_description;
 use crate::inventory::{
-    damage_acid, damage_corroding_gas, damage_fire, damage_poisoned_gas,
-    inventory_can_carry_item, inventory_can_carry_item_count, inventory_carry_item, Inventory,
+    damage_acid, damage_corroding_gas, damage_fire, damage_poisoned_gas, inventory_can_carry_item,
+    inventory_can_carry_item_count, inventory_carry_item, Inventory,
 };
 use crate::monster_manager::monster_summon;
 use crate::player::{
-    player_attack_position, player_search, player_takes_hit, player_test_being_hit,
-    CLASS_MISC_HIT, PlayerAttr,
+    player_attack_position, player_search, player_takes_hit, player_test_being_hit, PlayerAttr,
+    CLASS_MISC_HIT,
 };
 use crate::player_run::{player_area_affect, player_end_running};
 use crate::player_stats::player_stat_random_decrease;
@@ -26,7 +26,7 @@ use crate::store::store_enter;
 use crate::treasure::{
     TV_CLOSED_DOOR, TV_GOLD, TV_INVIS_TRAP, TV_MAX_PICK_UP, TV_RUBBLE, TV_STORE_DOOR, TV_VIS_TRAP,
 };
-use crate::types::{CNIL, Coord_t, Obj_desc_t, Vtype_t, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE};
+use crate::types::{Coord_t, Obj_desc_t, Vtype_t, CNIL, MORIA_MESSAGE_SIZE, MORIA_OBJ_DESC_SIZE};
 use crate::ui::{coord_outside_panel, draw_dungeon_panel, print_character_gold_value};
 use crate::ui_io::terminal::{self, get_input_confirmation};
 
@@ -150,14 +150,14 @@ fn trap_hidden_object(coord: Coord_t) {
 fn trap_strength_dart(item: Inventory, dam: i32) {
     let ac = with_state(|state| i32::from(state.py.misc.ac) + i32::from(state.py.misc.magical_ac));
     if player_test_being_hit(125, 0, 0, ac, CLASS_MISC_HIT) {
-        if !with_state(|state| state.py.flags.sustain_str) {
+        if with_state(|state| state.py.flags.sustain_str) {
+            terminal::print_message(Some("A small dart hits you."));
+        } else {
             let _ = player_stat_random_decrease(PlayerAttr::A_STR);
             let mut description = [0u8; MORIA_OBJ_DESC_SIZE as usize];
             item_description(&mut description, item, true);
             player_takes_hit(dam, &obj_desc_as_vtype(&description));
             terminal::print_message(Some("A small dart weakens you!"));
-        } else {
-            terminal::print_message(Some("A small dart hits you."));
         }
     } else {
         terminal::print_message(Some("A small dart barely misses you."));
@@ -247,14 +247,14 @@ fn trap_slow_dart(item: Inventory, dam: i32) {
 fn trap_constitution_dart(item: Inventory, dam: i32) {
     let ac = with_state(|state| i32::from(state.py.misc.ac) + i32::from(state.py.misc.magical_ac));
     if player_test_being_hit(125, 0, 0, ac, CLASS_MISC_HIT) {
-        if !with_state(|state| state.py.flags.sustain_con) {
+        if with_state(|state| state.py.flags.sustain_con) {
+            terminal::print_message(Some("A small dart hits you."));
+        } else {
             let _ = player_stat_random_decrease(PlayerAttr::A_CON);
             let mut description = [0u8; MORIA_OBJ_DESC_SIZE as usize];
             item_description(&mut description, item, true);
             player_takes_hit(dam, &obj_desc_as_vtype(&description));
             terminal::print_message(Some("A small dart saps your health!"));
-        } else {
-            terminal::print_message(Some("A small dart hits you."));
         }
     } else {
         terminal::print_message(Some("A small dart barely misses you."));
@@ -309,8 +309,7 @@ fn carry(coord: Coord_t, pickup: bool) {
     });
 
     if tile_flags > TV_MAX_PICK_UP {
-        if tile_flags == TV_INVIS_TRAP || tile_flags == TV_VIS_TRAP || tile_flags == TV_STORE_DOOR
-        {
+        if tile_flags == TV_INVIS_TRAP || tile_flags == TV_VIS_TRAP || tile_flags == TV_STORE_DOOR {
             player_steps_on_trap(coord);
         }
         return;
@@ -327,7 +326,10 @@ fn carry(coord: Coord_t, pickup: bool) {
             state.py.misc.au += cost;
         });
         item_description(&mut description, item, true);
-        let end = description.iter().position(|&b| b == 0).unwrap_or(description.len());
+        let end = description
+            .iter()
+            .position(|&b| b == 0)
+            .unwrap_or(description.len());
         let desc = String::from_utf8_lossy(&description[..end]);
         let cost = with_state(|state| {
             state.game.treasure.list
@@ -347,7 +349,10 @@ fn carry(coord: Coord_t, pickup: bool) {
             if let Some(last) = description.iter().rposition(|&b| b != 0) {
                 description[last] = b'?';
             }
-            let end = description.iter().position(|&b| b == 0).unwrap_or(description.len());
+            let end = description
+                .iter()
+                .position(|&b| b == 0)
+                .unwrap_or(description.len());
             let desc = String::from_utf8_lossy(&description[..end]);
             pickup = get_input_confirmation(&format!("Pick up {desc}"));
         }
@@ -357,18 +362,22 @@ fn carry(coord: Coord_t, pickup: bool) {
             if let Some(last) = description.iter().rposition(|&b| b != 0) {
                 description[last] = b'?';
             }
-            let end = description.iter().position(|&b| b == 0).unwrap_or(description.len());
+            let end = description
+                .iter()
+                .position(|&b| b == 0)
+                .unwrap_or(description.len());
             let desc = String::from_utf8_lossy(&description[..end]);
-            pickup = get_input_confirmation(&format!(
-                "Exceed your weight limit to pick up {desc}"
-            ));
+            pickup = get_input_confirmation(&format!("Exceed your weight limit to pick up {desc}"));
         }
 
         if pickup {
             let locn = inventory_carry_item(item);
             let carried = with_state(|state| state.py.inventory[locn as usize]);
             item_description(&mut description, carried, true);
-            let end = description.iter().position(|&b| b == 0).unwrap_or(description.len());
+            let end = description
+                .iter()
+                .position(|&b| b == 0)
+                .unwrap_or(description.len());
             let desc = String::from_utf8_lossy(&description[..end]);
             let formatted = format!("You have {desc} ({})", (locn as u8 + b'a') as char);
             terminal::print_message(Some(&formatted));
@@ -376,7 +385,10 @@ fn carry(coord: Coord_t, pickup: bool) {
         }
     } else {
         item_description(&mut description, item, true);
-        let end = description.iter().position(|&b| b == 0).unwrap_or(description.len());
+        let end = description
+            .iter()
+            .position(|&b| b == 0)
+            .unwrap_or(description.len());
         let desc = String::from_utf8_lossy(&description[..end]);
         terminal::print_message(Some(&format!("You can't carry {desc}")));
     }
@@ -449,7 +461,7 @@ pub fn player_move_position(dir: i32, coord: &mut Coord_t) -> bool {
     })
 }
 
-/// C++ player_move.cpp lines 426–548.
+/// C++ `player_move.cpp` lines 426–548.
 pub fn player_move(direction: i32, do_pickup: bool) {
     let mut direction = direction;
     if player_random_movement(direction) {
@@ -470,12 +482,7 @@ pub fn player_move(direction: i32, do_pickup: bool) {
         } else {
             false
         };
-        (
-            tile.creature_id,
-            tile.feature_id,
-            tile.treasure_id,
-            lit,
-        )
+        (tile.creature_id, tile.feature_id, tile.treasure_id, lit)
     });
 
     if creature_id < 2 || (!monster_lit && feature_id >= MIN_CLOSED_SPACE) {
@@ -507,11 +514,7 @@ pub fn player_move(direction: i32, do_pickup: bool) {
 
             let (tile_feature, blind, perma_lit_room) = with_state(|state| {
                 let tile = &state.dg.floor[coord.y as usize][coord.x as usize];
-                (
-                    tile.feature_id,
-                    state.py.flags.blind,
-                    tile.perma_lit_room,
-                )
+                (tile.feature_id, state.py.flags.blind, tile.perma_lit_room)
             });
 
             if tile_feature == TILE_LIGHT_FLOOR {
@@ -540,9 +543,8 @@ pub fn player_move(direction: i32, do_pickup: bool) {
             if treasure_id != 0 {
                 carry(coord, do_pickup);
 
-                let rubble_category = with_state(|state| {
-                    state.game.treasure.list[treasure_id as usize].category_id
-                });
+                let rubble_category =
+                    with_state(|state| state.game.treasure.list[treasure_id as usize].category_id);
                 if rubble_category == TV_RUBBLE {
                     with_state_mut(|state| {
                         dungeon_move_creature_record(state.py.pos, old_coord);
@@ -566,9 +568,8 @@ pub fn player_move(direction: i32, do_pickup: bool) {
         } else {
             let running = with_state(|state| state.py.running_tracker);
             if running == 0 && treasure_id != 0 {
-                let category_id = with_state(|state| {
-                    state.game.treasure.list[treasure_id as usize].category_id
-                });
+                let category_id =
+                    with_state(|state| state.game.treasure.list[treasure_id as usize].category_id);
                 if category_id == TV_RUBBLE {
                     terminal::print_message(Some("There is rubble blocking your way."));
                 } else if category_id == TV_CLOSED_DOOR {

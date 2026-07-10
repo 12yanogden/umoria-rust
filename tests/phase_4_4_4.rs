@@ -1,12 +1,19 @@
 //! Phase 4.4.4 — player_tunnel.cpp parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::treasure::flags::TR_TUNNEL;
 use umoria::dice::{max_dice_roll, Dice};
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
 use umoria::dungeon_tile::{
-    MIN_CLOSED_SPACE, TILE_BOUNDARY_WALL, TILE_CORR_FLOOR, TILE_GRANITE_WALL, TILE_LIGHT_FLOOR,
-    TILE_MAGMA_WALL, TILE_QUARTZ_WALL,
+    Tile, MIN_CLOSED_SPACE, TILE_BOUNDARY_WALL, TILE_CORR_FLOOR, TILE_GRANITE_WALL,
+    TILE_LIGHT_FLOOR, TILE_MAGMA_WALL, TILE_QUARTZ_WALL,
 };
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::inventory::{Inventory, PlayerEquipment};
@@ -22,7 +29,7 @@ fn setup_open_dungeon(height: i16, width: i16) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 0..height {
             for x in 0..width {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -59,9 +66,8 @@ fn cpp_digging_ability(str: u8, weapon: Inventory, weapon_is_heavy: bool) -> i32
     if (weapon.flags & TR_TUNNEL) != 0 {
         digging_ability += 25 + i32::from(weapon.misc_use) * 50;
     } else {
-        digging_ability += max_dice_roll(weapon.damage)
-            + i32::from(weapon.to_hit)
-            + i32::from(weapon.to_damage);
+        digging_ability +=
+            max_dice_roll(weapon.damage) + i32::from(weapon.to_hit) + i32::from(weapon.to_damage);
         digging_ability >>= 1;
     }
     if weapon_is_heavy {
@@ -129,10 +135,7 @@ fn player_digging_ability_weapon_formula() {
     };
     let expected = cpp_digging_ability(18, weapon, false);
     assert_eq!(player_digging_ability(weapon), expected);
-    assert_eq!(
-        expected,
-        (18 + max_dice_roll(weapon.damage) + 5 + 7) / 2
-    );
+    assert_eq!(expected, (18 + max_dice_roll(weapon.damage) + 5 + 7) / 2);
 }
 
 #[test]
@@ -224,10 +227,7 @@ fn player_tunnel_illegal_empty_air_sets_free_turn() {
     });
     player_tunnel(6);
     with_state(|s| assert!(s.game.player_free_turn));
-    assert_eq!(
-        last_message_text(),
-        "Tunnel through what?  Empty air?!?"
-    );
+    assert_eq!(last_message_text(), "Tunnel through what?  Empty air?!?");
 }
 
 #[test]
@@ -248,10 +248,7 @@ fn player_tunnel_boundary_wall_message_no_rng() {
         },
         || player_tunnel(6),
     );
-    assert_eq!(
-        last_message_text(),
-        "This seems to be permanent rock."
-    );
+    assert_eq!(last_message_text(), "This seems to be permanent rock.");
     with_state(|s| assert_eq!(s.dg.floor[5][6].feature_id, TILE_BOUNDARY_WALL));
 }
 
@@ -314,10 +311,7 @@ fn player_tunnel_granite_rng_and_failure_message() {
         ..Default::default()
     });
     player_tunnel(6);
-    assert_eq!(
-        last_message_text(),
-        "You tunnel into the granite wall."
-    );
+    assert_eq!(last_message_text(), "You tunnel into the granite wall.");
     with_state(|s| assert_eq!(s.dg.floor[5][6].feature_id, TILE_GRANITE_WALL));
     assert_eq!(next_random_pair(1200), (1200, 273));
 }
@@ -337,10 +331,7 @@ fn player_tunnel_magma_rng_and_failure_message() {
         ..Default::default()
     });
     player_tunnel(6);
-    assert_eq!(
-        last_message_text(),
-        "You tunnel into the magma intrusion."
-    );
+    assert_eq!(last_message_text(), "You tunnel into the magma intrusion.");
     assert_eq!(next_random_pair(600), (600, 273));
 }
 
@@ -359,10 +350,7 @@ fn player_tunnel_quartz_rng_and_failure_message() {
         ..Default::default()
     });
     player_tunnel(6);
-    assert_eq!(
-        last_message_text(),
-        "You tunnel into the quartz vein."
-    );
+    assert_eq!(last_message_text(), "You tunnel into the quartz vein.");
     assert_eq!(next_random_pair(400), (400, 273));
 }
 
@@ -477,10 +465,7 @@ fn player_tunnel_secret_door_triggers_search() {
         ..Default::default()
     });
     player_tunnel(6);
-    assert_eq!(
-        last_message_text(),
-        "You tunnel into the granite wall."
-    );
+    assert_eq!(last_message_text(), "You tunnel into the granite wall.");
     // player_search at py.pos consumes nine randomNumber(100) rolls.
     assert_eq!(next_random_pair(100), (100, 8));
 }

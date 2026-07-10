@@ -1,4 +1,11 @@
 //! Phase 5.1.1 — XOR stream primitives & serializers (strict TDD).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 mod common;
 
@@ -8,10 +15,11 @@ use std::path::PathBuf;
 use common::{byte_diff, golden_root, load_manifest, read_golden_bytes};
 use umoria::dice::Dice;
 use umoria::game_save::{
-    self, get_byte, read_high_score, rd_bool, rd_byte, rd_bytes, rd_item, rd_long, rd_monster,
-    rd_short, rd_shorts, rd_string, save_high_score, set_fileptr, set_xor_byte, test_buffer_bytes,
-    test_buffer_len, test_reset_buffer, test_rewind_buffer, test_write_raw, wr_bool, wr_byte, wr_bytes, wr_item,
-    wr_long, wr_monster, wr_short, wr_shorts, wr_string, HighScore, HIGH_SCORE_RECORD_SIZE,
+    self, get_byte, rd_bool, rd_byte, rd_bytes, rd_item, rd_long, rd_monster, rd_short, rd_shorts,
+    rd_string, read_high_score, save_high_score, set_fileptr, set_xor_byte, test_buffer_bytes,
+    test_buffer_len, test_reset_buffer, test_rewind_buffer, test_write_raw, wr_bool, wr_byte,
+    wr_bytes, wr_item, wr_long, wr_monster, wr_short, wr_shorts, wr_string, HighScore,
+    HIGH_SCORE_RECORD_SIZE,
 };
 use umoria::inventory::{Inventory, INSCRIP_SIZE};
 use umoria::monster::Monster;
@@ -213,7 +221,7 @@ fn test_wrbool_is_zero_or_one() {
         wr_bool(true).unwrap();
         assert_eq!(test_buffer_bytes(), &[0x5C ^ 1]);
         wr_bool(false).unwrap();
-        assert_eq!(test_buffer_bytes(), &[0x5C ^ 1, (0x5C ^ 1) ^ 0]);
+        assert_eq!(test_buffer_bytes(), &[0x5C ^ 1, 0x5C ^ 1]);
     });
 }
 
@@ -321,7 +329,12 @@ fn test_item_roundtrip_all_fields() {
         let mut decoded = Inventory::default();
         rd_item(&mut decoded).unwrap();
         assert_item_eq(&item, &decoded);
-        assert_eq!(written.len(), fs::read(golden_game_save("wr_item_seed5a.bin")).unwrap().len());
+        assert_eq!(
+            written.len(),
+            fs::read(golden_game_save("wr_item_seed5a.bin"))
+                .unwrap()
+                .len()
+        );
     });
 }
 

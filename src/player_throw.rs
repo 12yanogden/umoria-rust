@@ -1,4 +1,4 @@
-//! Port of src/player_throw.cpp — see phase_4.4.6.
+//! Port of `src/player_throw.cpp` — see `phase_4.4.6`.
 
 use crate::config::player::status::PY_STR_WGT;
 use crate::data_creatures::CREATURES_LIST;
@@ -18,7 +18,7 @@ use crate::player::{
 use crate::player_magic::item_magic_ability_damage;
 use crate::player_move::player_move_position;
 use crate::treasure::{TV_ARROW, TV_BOLT, TV_BOW, TV_NOTHING, TV_SLING_AMMO};
-use crate::types::{Coord_t, MORIA_OBJ_DESC_SIZE_LEN, Obj_desc_t};
+use crate::types::{Coord_t, Obj_desc_t, MORIA_OBJ_DESC_SIZE_LEN};
 use crate::ui::{coord_inside_panel, display_character_experience};
 use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_io::{
@@ -26,7 +26,7 @@ use crate::ui_io::{
     terminal::{self, panel_put_tile, put_qio, Coord},
 };
 
-/// C++ player_throw.cpp lines 10–23.
+/// C++ `player_throw.cpp` lines 10–23.
 fn inventory_throw(item_id: i32, treasure: &mut Inventory) {
     let item = with_state(|state| state.py.inventory[item_id as usize]);
     *treasure = item;
@@ -59,9 +59,8 @@ pub fn weapon_missile_facts(
 
     *damage = dice_roll(item.damage) + i32::from(item.to_damage);
     *base_to_hit = with_state(|state| i32::from(state.py.misc.bth_with_bows) * 75 / 100);
-    *plus_to_hit = with_state(|state| {
-        i32::from(state.py.misc.plusses_to_hit) + i32::from(item.to_hit)
-    });
+    *plus_to_hit =
+        with_state(|state| i32::from(state.py.misc.plusses_to_hit) + i32::from(item.to_hit));
 
     if with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].category_id)
         != TV_NOTHING
@@ -71,31 +70,26 @@ pub fn weapon_missile_facts(
         });
     }
 
-    *distance = (with_state(|state| {
-        i32::from(state.py.stats.used[PlayerAttr::A_STR as usize]) + 20
-    }) * 10)
-        / weight;
+    *distance =
+        (with_state(|state| i32::from(state.py.stats.used[PlayerAttr::A_STR as usize]) + 20) * 10)
+            / weight;
     if *distance > 10 {
         *distance = 10;
     }
 
-    if with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].category_id)
-        != TV_BOW
+    if with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].category_id) != TV_BOW
     {
         return;
     }
 
-    let bow_misc = with_state(|state| {
-        state.py.inventory[PlayerEquipment::Wield as usize].misc_use
-    });
+    let bow_misc = with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].misc_use);
 
     match bow_misc {
         1 if item.category_id == TV_SLING_AMMO => {
             *base_to_hit = with_state(|state| i32::from(state.py.misc.bth_with_bows));
-            *plus_to_hit += 2
-                * with_state(|state| {
-                    i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
-                });
+            *plus_to_hit += 2 * with_state(|state| {
+                i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
+            });
             *damage += with_state(|state| {
                 i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_damage)
             });
@@ -104,10 +98,9 @@ pub fn weapon_missile_facts(
         }
         2 if item.category_id == TV_ARROW => {
             *base_to_hit = with_state(|state| i32::from(state.py.misc.bth_with_bows));
-            *plus_to_hit += 2
-                * with_state(|state| {
-                    i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
-                });
+            *plus_to_hit += 2 * with_state(|state| {
+                i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
+            });
             *damage += with_state(|state| {
                 i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_damage)
             });
@@ -116,10 +109,9 @@ pub fn weapon_missile_facts(
         }
         3 if item.category_id == TV_ARROW => {
             *base_to_hit = with_state(|state| i32::from(state.py.misc.bth_with_bows));
-            *plus_to_hit += 2
-                * with_state(|state| {
-                    i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
-                });
+            *plus_to_hit += 2 * with_state(|state| {
+                i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
+            });
             *damage += with_state(|state| {
                 i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_damage)
             });
@@ -128,10 +120,9 @@ pub fn weapon_missile_facts(
         }
         4 if item.category_id == TV_ARROW => {
             *base_to_hit = with_state(|state| i32::from(state.py.misc.bth_with_bows));
-            *plus_to_hit += 2
-                * with_state(|state| {
-                    i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
-                });
+            *plus_to_hit += 2 * with_state(|state| {
+                i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
+            });
             *damage += with_state(|state| {
                 i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_damage)
             });
@@ -140,10 +131,9 @@ pub fn weapon_missile_facts(
         }
         5 if item.category_id == TV_BOLT => {
             *base_to_hit = with_state(|state| i32::from(state.py.misc.bth_with_bows));
-            *plus_to_hit += 2
-                * with_state(|state| {
-                    i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
-                });
+            *plus_to_hit += 2 * with_state(|state| {
+                i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
+            });
             *damage += with_state(|state| {
                 i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_damage)
             });
@@ -152,10 +142,9 @@ pub fn weapon_missile_facts(
         }
         6 if item.category_id == TV_BOLT => {
             *base_to_hit = with_state(|state| i32::from(state.py.misc.bth_with_bows));
-            *plus_to_hit += 2
-                * with_state(|state| {
-                    i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
-                });
+            *plus_to_hit += 2 * with_state(|state| {
+                i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_hit)
+            });
             *damage += with_state(|state| {
                 i32::from(state.py.inventory[PlayerEquipment::Wield as usize].to_damage)
             });
@@ -227,7 +216,7 @@ fn copy_str_into_obj_desc(out: &mut Obj_desc_t, s: &str) {
     out[n] = 0;
 }
 
-/// C++ player_throw.cpp lines 156–276.
+/// C++ `player_throw.cpp` lines 156–276.
 pub fn player_throw_item() {
     if with_state(|state| state.py.pack.unique_items) == 0 {
         terminal::print_message(Some("But you are not carrying anything."));
@@ -269,7 +258,7 @@ pub fn player_throw_item() {
     weapon_missile_facts(thrown_item, &mut tbth, &mut tpth, &mut tdam, &mut tdis);
 
     let tile_char = thrown_item.sprite;
-    let mut visible = false;
+    let mut visible;
     let mut current_distance = 0;
 
     let mut coord = with_state(|state| state.py.pos);
@@ -326,17 +315,17 @@ pub fn player_throw_item() {
                     item_description(&mut description, thrown_item, false);
                     let desc = c_str_to_string(&description);
 
-                    if !lit {
-                        let formatted = format!("You hear a cry as the {desc} finds a mark.");
-                        copy_str_into_obj_desc(&mut msg, &formatted);
-                        terminal::print_message(Some(&formatted));
-                        visible = false;
-                    } else {
+                    if lit {
                         let creature_name = CREATURES_LIST[monster_creature_id as usize].name;
                         let formatted = format!("The {desc} hits the {creature_name}.");
                         copy_str_into_obj_desc(&mut msg, &formatted);
                         terminal::print_message(Some(&formatted));
                         visible = true;
+                    } else {
+                        let formatted = format!("You hear a cry as the {desc} finds a mark.");
+                        copy_str_into_obj_desc(&mut msg, &formatted);
+                        terminal::print_message(Some(&formatted));
+                        visible = false;
                     }
 
                     tdam = item_magic_ability_damage(
@@ -358,12 +347,12 @@ pub fn player_throw_item() {
                     let damage = monster_take_hit(creature_id as i32, tdam);
 
                     if damage >= 0 {
-                        if !visible {
-                            terminal::print_message(Some("You have killed something!"));
-                        } else {
+                        if visible {
                             let creature_name = CREATURES_LIST[damage as usize].name;
                             let formatted = format!("You have killed the {creature_name}.");
                             terminal::print_message(Some(&formatted));
+                        } else {
+                            terminal::print_message(Some("You have killed something!"));
                         }
                         display_character_experience();
                     }
@@ -371,22 +360,24 @@ pub fn player_throw_item() {
                     inventory_drop_or_throw_item(old_coord, thrown_item);
                 }
             } else {
-                let (inside_panel, blind, temporary_light, permanent_light) =
-                    with_state(|state| {
-                        let tile = &state.dg.floor[coord.y as usize][coord.x as usize];
-                        (
-                            coord_inside_panel(coord),
-                            state.py.flags.blind,
-                            tile.temporary_light,
-                            tile.permanent_light,
-                        )
-                    });
+                let (inside_panel, blind, temporary_light, permanent_light) = with_state(|state| {
+                    let tile = &state.dg.floor[coord.y as usize][coord.x as usize];
+                    (
+                        coord_inside_panel(coord),
+                        state.py.flags.blind,
+                        tile.temporary_light,
+                        tile.permanent_light,
+                    )
+                });
 
                 if inside_panel && blind < 1 && (temporary_light || permanent_light) {
-                    panel_put_tile(tile_char, Coord {
-                        y: coord.y,
-                        x: coord.x,
-                    });
+                    panel_put_tile(
+                        tile_char,
+                        Coord {
+                            y: coord.y,
+                            x: coord.x,
+                        },
+                    );
                     put_qio();
                 }
             }

@@ -1,4 +1,4 @@
-//! Port of src/data_store_owners.cpp — immutable store owner table.
+//! Port of `src/data_store_owners.cpp` — immutable store owner table.
 
 use std::sync::LazyLock;
 

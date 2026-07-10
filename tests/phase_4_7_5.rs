@@ -1,26 +1,33 @@
 //! Phase 4.7.5 — terrain & wall spells (spells.cpp) parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::dungeon::objects::OBJ_RUBBLE;
 use umoria::config::monsters::defense::CD_STONE;
-use umoria::config::treasure::OBJECT_BOLTS_MAX_RANGE;
 use umoria::config::treasure::chests::{CH_LOCKED, CH_TRAPPED};
-use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH, coord_distance_between, coord_in_bounds};
+use umoria::config::treasure::OBJECT_BOLTS_MAX_RANGE;
+use umoria::dungeon::{coord_distance_between, coord_in_bounds, MAX_HEIGHT, MAX_WIDTH};
 use umoria::dungeon_tile::{
-    Tile, MAX_CAVE_FLOOR, MAX_OPEN_SPACE, MIN_CAVE_WALL, MIN_CLOSED_SPACE, TILE_CORR_FLOOR,
-    TILE_GRANITE_WALL, TILE_LIGHT_FLOOR, TILE_MAGMA_WALL, TILE_QUARTZ_WALL,
+    Tile, MAX_CAVE_FLOOR, MIN_CAVE_WALL, MIN_CLOSED_SPACE, TILE_CORR_FLOOR, TILE_GRANITE_WALL,
+    TILE_MAGMA_WALL, TILE_QUARTZ_WALL,
 };
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::game_objects::popt;
 use umoria::identification::SpecialNameIds;
 use umoria::inventory::{inventory_item_copy_to, Inventory};
-use umoria::monster::{Monster, MON_TOTAL_ALLOCATIONS};
+use umoria::monster::Monster;
 use umoria::player_move::player_move_position;
 use umoria::spells::{
-    spell_build_wall, spell_destroy_area, spell_destroy_doors_traps_in_direction,
-    spell_earthquake, spell_wall_to_mud, spell_warding_glyph,
+    spell_build_wall, spell_destroy_area, spell_destroy_doors_traps_in_direction, spell_earthquake,
+    spell_wall_to_mud, spell_warding_glyph,
 };
-use umoria::treasure::{TV_CHEST, TV_CLOSED_DOOR, TV_RUBBLE, TV_VIS_TRAP};
+use umoria::treasure::{TV_CHEST, TV_VIS_TRAP};
 use umoria::types::Coord_t;
 use umoria::ui::panel_bounds_fields;
 use umoria::ui_io::test_set_ncurses_stub;
@@ -86,13 +93,6 @@ fn fill_corridor(start: Coord_t, direction: i32, length: i32, feature_id: u8) {
     }
 }
 
-fn reset_monster_slots() {
-    with_state_mut(|s| {
-        s.next_free_monster_id = 2;
-        s.monsters = [Monster::default(); MON_TOTAL_ALLOCATIONS as usize];
-    });
-}
-
 fn place_monster(id: i32, creature_id: u16, hp: i16, coord: Coord_t) {
     with_state_mut(|s| {
         s.monsters[id as usize] = Monster {
@@ -142,22 +142,25 @@ fn reference_earthquake_rng_after(player_pos: Coord_t) -> (i32, i32) {
                 y: coord_y,
                 x: coord_x,
             };
+            // Keep nested `if`s (not `&&`-collapsed): floor RNG must run whenever the
+            // 1-in-8 roll hits, even when `creature_id <= 1`. Collapsing would only be
+            // safe if the floor check stayed outside the creature branch.
+            #[allow(
+                clippy::collapsible_if,
+                reason = "nested structure mirrors C++ earthquake RNG; floor roll is sibling of creature branch"
+            )]
             if (coord.y != player_pos.y || coord.x != player_pos.x) && coord_in_bounds(coord) {
                 if random_number(8) == 1 {
                     let tile = tile_at(coord);
                     if tile.creature_id > 1 {
-                        let creature_id = with_state(|s| {
-                            s.monsters[tile.creature_id as usize].creature_id
-                        });
-                        let creature = &umoria::data_creatures::CREATURES_LIST[creature_id as usize];
-                        if (creature.movement
-                            & umoria::config::monsters::move_flags::CM_PHASE)
-                            == 0
+                        let creature_id =
+                            with_state(|s| s.monsters[tile.creature_id as usize].creature_id);
+                        let creature =
+                            &umoria::data_creatures::CREATURES_LIST[creature_id as usize];
+                        if (creature.movement & umoria::config::monsters::move_flags::CM_PHASE) == 0
+                            || creature.sprite == b'E'
+                            || creature.sprite == b'X'
                         {
-                            for _ in 0..4 {
-                                random_number(8);
-                            }
-                        } else if creature.sprite == b'E' || creature.sprite == b'X' {
                             for _ in 0..4 {
                                 random_number(8);
                             }
@@ -279,7 +282,7 @@ fn spell_destroy_area_rng_order_and_blind_seed42() {
 
     with_state(|s| assert_eq!(s.py.flags.blind, expected_blind));
     assert_eq!(next_random_pair(8), expected_next);
-    assert!(expected_blind >= 11 && expected_blind <= 20);
+    assert!((11..=20).contains(&expected_blind));
 }
 
 #[test]
@@ -298,7 +301,10 @@ fn spell_destroy_area_skips_grid_when_current_level_zero() {
 
     spell_destroy_area(Coord_t { y: 33, x: 33 });
 
-    assert_eq!(tile_at(Coord_t { y: 33, x: 34 }).feature_id, TILE_GRANITE_WALL);
+    assert_eq!(
+        tile_at(Coord_t { y: 33, x: 34 }).feature_id,
+        TILE_GRANITE_WALL
+    );
     with_state(|s| assert!(s.py.flags.blind >= 11 && s.py.flags.blind <= 20));
 }
 
@@ -322,7 +328,10 @@ fn spell_wall_to_mud_granite_turns_to_floor_seed42() {
     );
 
     let _ = spell_wall_to_mud(Coord_t { y: 10, x: 10 }, 2);
-    assert_eq!(tile_at(Coord_t { y: 13, x: 10 }).feature_id, TILE_CORR_FLOOR);
+    assert_eq!(
+        tile_at(Coord_t { y: 13, x: 10 }).feature_id,
+        TILE_CORR_FLOOR
+    );
 }
 
 fn sum_four_d8() -> i32 {
@@ -345,7 +354,7 @@ fn spell_wall_to_mud_rubble_deletes_object_seed42() {
     );
     place_treasure_at(rubble, OBJ_RUBBLE);
 
-    spell_wall_to_mud(Coord_t { y: 10, x: 10 }, 2);
+    let _ = spell_wall_to_mud(Coord_t { y: 10, x: 10 }, 2);
 
     assert_eq!(tile_at(rubble).treasure_id, 0);
 }
@@ -360,7 +369,10 @@ fn spell_build_wall_crushes_monster_with_four_d8_seed42() {
 
     assert!(spell_build_wall(Coord_t { y: 10, x: 10 }, 2));
 
-    assert_eq!(tile_at(Coord_t { y: 13, x: 10 }).feature_id, TILE_MAGMA_WALL);
+    assert_eq!(
+        tile_at(Coord_t { y: 13, x: 10 }).feature_id,
+        TILE_MAGMA_WALL
+    );
     with_state(|s| {
         let damage = 50 - i32::from(s.monsters[2].hp);
         assert!((4..=32).contains(&damage));
@@ -396,11 +408,14 @@ fn spell_wall_to_mud_stone_creature_takes_fixed_damage_seed42() {
     fill_corridor(Coord_t { y: 10, x: 10 }, 2, 3, TILE_CORR_FLOOR);
     place_monster(2, STONE_GOLEM_ID, 500, Coord_t { y: 13, x: 10 });
 
-    spell_wall_to_mud(Coord_t { y: 10, x: 10 }, 2);
+    let _ = spell_wall_to_mud(Coord_t { y: 10, x: 10 }, 2);
 
     with_state(|s| assert!(s.monsters[2].hp < 500));
     with_state(|s| {
-        assert_ne!(s.creature_recall[STONE_GOLEM_ID as usize].defenses & CD_STONE, 0);
+        assert_ne!(
+            s.creature_recall[STONE_GOLEM_ID as usize].defenses & CD_STONE,
+            0
+        );
     });
 }
 
@@ -443,7 +458,7 @@ fn spell_destroy_doors_traps_in_direction_deletes_trap_seed42() {
     });
     seal_directional_ray(Coord_t { y: 10, x: 10 }, 2);
 
-    spell_destroy_doors_traps_in_direction(Coord_t { y: 10, x: 10 }, 2);
+    let _ = spell_destroy_doors_traps_in_direction(Coord_t { y: 10, x: 10 }, 2);
     assert_eq!(tile_at(trap).treasure_id, 0);
 }
 

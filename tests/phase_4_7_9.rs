@@ -1,9 +1,16 @@
 //! Phase 4.7.9 — mage_spells.cpp driver parity.
 #![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::data_player::MAGIC_SPELLS;
 use umoria::dungeon::{MAX_HEIGHT, MAX_WIDTH};
-use umoria::dungeon_tile::TILE_LIGHT_FLOOR;
+use umoria::dungeon_tile::{Tile, TILE_LIGHT_FLOOR};
 use umoria::game::{random_number, reset_for_new_game, with_state, with_state_mut};
 use umoria::mage_spells::{
     can_read_spells, cast_spell, get_and_cast_magic_spell, spell_chance_of_success,
@@ -13,9 +20,7 @@ use umoria::player::PLAYER_MAX_LEVEL;
 use umoria::treasure::TV_MAGIC_BOOK;
 use umoria::types::{Coord_t, MESSAGE_HISTORY_SIZE};
 use umoria::ui::panel_bounds_fields;
-use umoria::ui_io::{
-    test_clear_getch_keys, test_push_getch_keys, test_set_ncurses_stub, ESCAPE,
-};
+use umoria::ui_io::{test_clear_getch_keys, test_push_getch_keys, test_set_ncurses_stub, ESCAPE};
 
 const MAGE_CLASS_ID: u8 = 1;
 const WARRIOR_CLASS_ID: u8 = 0;
@@ -43,7 +48,7 @@ fn setup_dungeon(height: i16, width: i16, pos: Coord_t) {
     with_state_mut(|s| {
         s.dg.height = height;
         s.dg.width = width;
-        s.dg.floor = [[Default::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
+        s.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
         for y in 1..height - 1 {
             for x in 1..width - 1 {
                 s.dg.floor[y as usize][x as usize].feature_id = TILE_LIGHT_FLOOR;
@@ -55,9 +60,9 @@ fn setup_dungeon(height: i16, width: i16, pos: Coord_t) {
 
 fn sample_base_exp_levels() -> [u32; PLAYER_MAX_LEVEL as usize] {
     [
-        10, 25, 45, 70, 100, 140, 200, 280, 380, 500, 650, 850, 1100, 1400, 1800, 2300, 2900,
-        3600, 4400, 5400, 6800, 8400, 10200, 12500, 17500, 25000, 35000, 50000, 75000, 100000,
-        150000, 200000, 300000, 400000, 500000, 750000, 1500000, 2500000, 5000000, 10000000,
+        10, 25, 45, 70, 100, 140, 200, 280, 380, 500, 650, 850, 1100, 1400, 1800, 2300, 2900, 3600,
+        4400, 5400, 6800, 8400, 10200, 12500, 17500, 25000, 35000, 50000, 75000, 100000, 150000,
+        200000, 300000, 400000, 500000, 750000, 1500000, 2500000, 5000000, 10000000,
     ]
 }
 
@@ -311,10 +316,12 @@ fn first_successful_cast_awards_exp_once() {
     setup_mage_caster(pos, 100, DETECT_MONSTERS_BIT);
     cast_detect_monsters_from_book();
 
-    let gain =
-        i32::from(MAGIC_SPELLS[MAGE_CLASS_ID as usize - 1][1].exp_gain_for_learning) << 2;
+    let gain = i32::from(MAGIC_SPELLS[MAGE_CLASS_ID as usize - 1][1].exp_gain_for_learning) << 2;
     assert_eq!(with_state(|s| s.py.misc.exp), gain);
-    assert_ne!(with_state(|s| s.py.flags.spells_worked & DETECT_MONSTERS_BIT), 0);
+    assert_ne!(
+        with_state(|s| s.py.flags.spells_worked & DETECT_MONSTERS_BIT),
+        0
+    );
 
     let exp_after_first = with_state(|s| s.py.misc.exp);
     cast_detect_monsters_from_book();
@@ -374,16 +381,22 @@ fn spells_worked_bit_and_exp_add_match_cpp() {
         );
     });
     assert_eq!(with_state(|s| s.py.flags.spells_worked), 1u32 << 4);
-    assert_eq!(with_state(|s| s.py.misc.exp), (i32::MAX - 3).wrapping_add(8));
+    assert_eq!(
+        with_state(|s| s.py.misc.exp),
+        (i32::MAX - 3).wrapping_add(8)
+    );
 }
 
 #[test]
 fn faint_paralysis_truncates_to_i16() {
     let raw = 40000i32;
-    assert_eq!(raw as i16, with_state_mut(|s| {
-        s.py.flags.paralysis = raw as i16;
-        s.py.flags.paralysis
-    }));
+    assert_eq!(
+        raw as i16,
+        with_state_mut(|s| {
+            s.py.flags.paralysis = raw as i16;
+            s.py.flags.paralysis
+        })
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -399,7 +412,7 @@ fn get_and_cast_no_spell_book_consumes_no_rng() {
             setup_mage_caster(pos, 100, 1);
             with_state_mut(|s| s.py.pack.unique_items = 0);
         },
-        || get_and_cast_magic_spell(),
+        get_and_cast_magic_spell,
     );
 }
 
@@ -413,7 +426,7 @@ fn get_and_cast_escape_at_spell_prompt_consumes_no_rng() {
             test_clear_getch_keys();
             test_push_getch_keys(&[b'a' as i32, i32::from(ESCAPE)]);
         },
-        || get_and_cast_magic_spell(),
+        get_and_cast_magic_spell,
     );
 }
 

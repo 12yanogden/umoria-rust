@@ -1,4 +1,11 @@
 //! Phase 2.6 — data_player.cpp static tables (+ blows_table from data_tables.cpp).
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
+)]
 
 use umoria::config::spells::{SPELL_TYPE_MAGE, SPELL_TYPE_NONE};
 use umoria::data_player::{
@@ -23,11 +30,11 @@ fn table_dimensions() {
         assert_eq!(row.len(), PLAYER_MAX_LEVEL as usize);
     }
     assert_eq!(CLASS_LEVEL_ADJ.len(), PLAYER_MAX_CLASSES as usize);
-    for row in CLASS_LEVEL_ADJ.iter() {
+    for row in &CLASS_LEVEL_ADJ {
         assert_eq!(row.len(), CLASS_MAX_LEVEL_ADJUST as usize);
     }
     assert_eq!(CLASS_BASE_PROVISIONS.len(), PLAYER_MAX_CLASSES as usize);
-    for row in CLASS_BASE_PROVISIONS.iter() {
+    for row in &CLASS_BASE_PROVISIONS {
         assert_eq!(row.len(), 5);
     }
     assert_eq!(MAGIC_SPELLS.len(), PLAYER_MAX_CLASSES as usize - 1);
@@ -36,7 +43,7 @@ fn table_dimensions() {
     }
     assert_eq!(SPELL_NAMES.len(), 62);
     assert_eq!(BLOWS_TABLE.len(), 7);
-    for row in BLOWS_TABLE.iter() {
+    for row in &BLOWS_TABLE {
         assert_eq!(row.len(), 6);
     }
 }
