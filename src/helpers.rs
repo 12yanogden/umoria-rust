@@ -217,7 +217,15 @@ pub fn string_to_number(str: &str, number: &mut i32) -> bool {
     unsafe {
         *errno_ptr() = 0;
         let mut endptr: *mut c_char = ptr::null_mut();
-        let num = libc::strtol(c_str.as_ptr(), &mut endptr, 10);
+        let start = c_str.as_ptr();
+        let num = libc::strtol(start, &mut endptr, 10);
+
+        // No conversion (e.g. ""). glibc leaves errno=0 and *endptr==NUL, so the
+        // trailing-garbage check alone is not enough; macOS sets EINVAL instead.
+        // See http://rus.har.mn/blog/2014-05-19/strtol-error-checking/
+        if endptr == start.cast_mut() {
+            return false;
+        }
 
         if *errno_ptr() == ERANGE {
             return false;
