@@ -1,0 +1,43 @@
+[package]
+name = "umoria"
+version = "5.7.15"          # mirror CURRENT_VERSION_* in src/version.h
+edition = "2021"
+rust-version = "1.80"       # LazyLock statics (phase_1.3); conservative stable floor
+license = "GPL-3.0-or-later"
+publish = false
+# Exclude the C++ reference tree from any packaging (kept in-tree for CMake).
+exclude = ["src/*.cpp", "src/*.h", "umoria/", "data/"]
+
+[lib]
+name = "umoria"
+path = "src/lib.rs"
+
+[[bin]]
+name = "umoria"             # match the C++ executable + CLI/default game.sav
+path = "src/main.rs"
+
+[dependencies]
+ncurses = "6.0.1"   # thin FFI over system ncurses; 1:1 with ui_io.cpp's calls
+libc = "0.2"        # select()/FD_SET, write(), getlogin/getpwuid/getuid/setuid/getgid for the non-curses helpers
+
+[dev-dependencies]
+ncurses = "6.0.1"   # integration tests link-check ncurses directly
+# HOOK (phase_1.5): differential fidelity-test deps added here.
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+portable-pty = "0.8"
+
+[features]
+default = []
+differential_live = []
+
+[profile.release]
+# Notes: C++ reference builds -O2 (Release). Keep Rust release defaults
+# (opt-level = 3). Do NOT enable settings that change integer/overflow
+# semantics; phase_2 relies on explicit wrapping ops, not profile flags.
+
+[profile.dev]
+# overflow-checks stay ON in dev by default; the port must use explicit
+# wrapping_*/as casts where C++ relied on wrap/truncation, so dev builds
+# never mask a semantics bug behind a silent wrap.

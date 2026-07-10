@@ -1,0 +1,219 @@
+magic_seed=42
+main_seed_before=12346
+main_seed_after=12347
+[colors]
+Icky Green
+Light Brown
+Clear
+Tangerine
+Metallic Purple
+Chartreuse
+Dark Red
+Cyan
+Light Green
+Violet
+Misty
+Crimson
+Blue
+Cloudy
+Gold Speckled
+Black
+Copper Speckled
+Dark Green
+Grey Speckled
+Indigo
+Smoky
+Orange
+Red Speckled
+Magenta
+White
+Brown
+Brown Speckled
+Hazy
+Green Speckled
+Metallic Green
+Green
+Metallic Blue
+Orange Speckled
+Red
+Light Blue
+Silver Speckled
+Metallic Red
+Pink
+Yellow
+Pink Speckled
+Vermilion
+Dark Blue
+Purple Speckled
+Puce
+Blue Speckled
+Bubbling
+Purple
+Azure
+Grey
+[woods]
+Dogwood
+Maple
+Sycamore
+Eucalyptus
+Mahogany
+Cedar
+Walnut
+Ironwood
+Redwood
+Mulberry
+Birch
+Aspen
+Balsa
+Oak
+Locust
+Banyan
+Teak
+Pine
+Elm
+Rosewood
+Spruce
+Cottonwood
+Cypress
+Hickory
+Hemlock
+[metals]
+Gold
+Chromium
+Titanium
+Nickel-Plated
+Aluminum
+Tin
+Iron
+Silver
+Zirconium
+Magnesium
+Molybdenum
+Tin-Plated
+Rusty
+Aluminum-Plated
+Cast Iron
+Tungsten
+Zinc
+Copper
+Steel
+Nickel
+Copper-Plated
+Zinc-Plated
+Gold-Plated
+Steel-Plated
+Silver-Plated
+[rocks]
+Fluorite
+Beryl
+Moonstone
+Carnelian
+Calcite
+Aquamarine
+Jasper
+Rhodonite
+Garnet
+Marble
+Alexandrite
+Ruby
+Jade
+Zircon
+Amethyst
+Quartzite
+Bloodstone
+Opal
+Azurite
+Lapis Lazuli
+Diamond
+Malachite
+Turquoise
+Granite
+Topaz
+Sapphire
+Tiger Eye
+Quartz
+Pearl
+Emerald
+Corundum
+Onyx
+[amulets]
+Ivory
+Coral
+Bone
+Amber
+Tortoise Shell
+Agate
+Bronze
+Brass
+Obsidian
+Driftwood
+Pewter
+[mushrooms]
+Black
+Dark Green
+Light Green
+Wooden
+Grey
+White Spotted
+Slimy
+Black Spotted
+Light Blue
+Plaid
+Furry
+Ecru
+Blue
+Green
+White
+Dark Blue
+Wrinkled
+Brown
+Tan
+Dark Red
+Yellow
+Red
+[magic_item_titles]
+eshwah po
+od valrea
+eling con
+bek bat
+tue tem s
+ing futab
+mikkli i
+bubin iau
+umgar imi
+alakho al
+wedsef kl
+la vomhe
+esh danbu
+cre plu
+comp ulkv
+umprok u
+bat miish
+rhovesh p
+tue ere
+mur prokp
+plu aus m
+bargre ne
+dansan kh
+plesat ro
+ther miva
+poel doe
+uni wah b
+turspet m
+eep ta
+evsfid oo
+sno man
+cos vompr
+nin ip pl
+mewerg an
+compood w
+jogan wun
+arg ulkun
+oodrea io
+arze snor
+x cos gan
+prok micw
+klibu roa
+skisna se
+tox iteti
+bat hydbj

@@ -1,0 +1,219 @@
+magic_seed=12345
+main_seed_before=12346
+main_seed_after=12347
+[colors]
+Icky Green
+Light Brown
+Clear
+Orange
+Orange Speckled
+Purple Speckled
+Chartreuse
+Red
+Green Speckled
+Cloudy
+Dark Red
+Dark Blue
+Crimson
+Magenta
+Bubbling
+Puce
+Red Speckled
+Hazy
+Brown Speckled
+Green
+Gold Speckled
+Metallic Blue
+Light Blue
+Grey
+Dark Green
+Light Green
+Copper Speckled
+Brown
+Tangerine
+Black
+Metallic Purple
+Silver Speckled
+Blue Speckled
+Pink
+Indigo
+Vermilion
+Purple
+Metallic Green
+Blue
+Pink Speckled
+Violet
+Azure
+Smoky
+Misty
+Metallic Red
+White
+Cyan
+Grey Speckled
+Yellow
+[woods]
+Dogwood
+Walnut
+Sycamore
+Spruce
+Locust
+Hickory
+Teak
+Redwood
+Birch
+Aspen
+Balsa
+Ironwood
+Eucalyptus
+Hemlock
+Oak
+Rosewood
+Maple
+Pine
+Mulberry
+Elm
+Cedar
+Cottonwood
+Banyan
+Cypress
+Mahogany
+[metals]
+Rusty
+Cast Iron
+Zinc
+Molybdenum
+Gold
+Magnesium
+Copper
+Silver
+Nickel
+Chromium
+Steel
+Titanium
+Copper-Plated
+Aluminum-Plated
+Gold-Plated
+Steel-Plated
+Iron
+Tungsten
+Aluminum
+Zirconium
+Nickel-Plated
+Silver-Plated
+Zinc-Plated
+Tin-Plated
+Tin
+[rocks]
+Rhodonite
+Carnelian
+Pearl
+Corundum
+Sapphire
+Moonstone
+Zircon
+Jasper
+Opal
+Jade
+Malachite
+Lapis Lazuli
+Amethyst
+Fluorite
+Bloodstone
+Quartzite
+Marble
+Beryl
+Azurite
+Calcite
+Quartz
+Aquamarine
+Alexandrite
+Garnet
+Tiger Eye
+Onyx
+Topaz
+Diamond
+Ruby
+Granite
+Emerald
+Turquoise
+[amulets]
+Agate
+Obsidian
+Brass
+Bone
+Tortoise Shell
+Coral
+Ivory
+Bronze
+Driftwood
+Pewter
+Amber
+[mushrooms]
+Furry
+Green
+Light Blue
+Plaid
+Wooden
+Ecru
+White Spotted
+Black Spotted
+Tan
+Light Green
+Red
+Blue
+White
+Grey
+Slimy
+Yellow
+Black
+Brown
+Dark Red
+Wrinkled
+Dark Blue
+Dark Green
+[magic_item_titles]
+bar eng
+vomeep he
+sun mik
+gre rok p
+bu ag
+stawun in
+bitnih we
+sneyerg r
+gop vly t
+miknin u
+tueaus po
+beknes sa
+ulkapp so
+tox ple u
+oshu cos
+seh valas
+yp mi wun
+bek me mu
+sne sna
+therpet v
+tursa ban
+marre mic
+appdok or
+vlyviv co
+rok bit g
+prokhe me
+rhov creu
+temwun ni
+mung ause
+orn batab
+tue mipet
+jorog ion
+jo ulkerk
+trolha mo
+man rogsk
+forgre me
+umzun gop
+a arzenis
+dalf trol
+poion nin
+bjorarg f
+mon nelg
+tem lechb
+la compis
+sta wun s

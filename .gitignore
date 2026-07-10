@@ -68,6 +68,9 @@ dkms.conf
 
 *.cbp
 
+# Cargo
+/target
+
 # build directories
 umoria.xcodeproj
 nbproject

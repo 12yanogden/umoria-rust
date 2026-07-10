@@ -1,0 +1,219 @@
+magic_seed=1700000000
+main_seed_before=12346
+main_seed_after=12347
+[colors]
+Icky Green
+Light Brown
+Clear
+Grey
+Violet
+Crimson
+Green Speckled
+Metallic Red
+Dark Blue
+Misty
+Orange
+Metallic Blue
+Copper Speckled
+Vermilion
+Blue
+Blue Speckled
+Grey Speckled
+Red Speckled
+Pink
+Light Blue
+Metallic Green
+Light Green
+Dark Green
+Pink Speckled
+Chartreuse
+Purple Speckled
+Tangerine
+Dark Red
+Orange Speckled
+Hazy
+Brown Speckled
+White
+Purple
+Gold Speckled
+Puce
+Green
+Brown
+Silver Speckled
+Yellow
+Red
+Indigo
+Cloudy
+Metallic Purple
+Black
+Smoky
+Cyan
+Magenta
+Azure
+Bubbling
+[woods]
+Mulberry
+Teak
+Eucalyptus
+Sycamore
+Maple
+Balsa
+Mahogany
+Cottonwood
+Locust
+Hemlock
+Hickory
+Birch
+Walnut
+Cypress
+Banyan
+Rosewood
+Spruce
+Ironwood
+Oak
+Cedar
+Aspen
+Elm
+Dogwood
+Pine
+Redwood
+[metals]
+Zinc-Plated
+Zirconium
+Magnesium
+Molybdenum
+Iron
+Cast Iron
+Gold-Plated
+Titanium
+Silver
+Tin-Plated
+Rusty
+Aluminum-Plated
+Gold
+Tungsten
+Copper
+Copper-Plated
+Nickel
+Chromium
+Steel
+Nickel-Plated
+Aluminum
+Silver-Plated
+Zinc
+Steel-Plated
+Tin
+[rocks]
+Rhodonite
+Jade
+Garnet
+Pearl
+Beryl
+Carnelian
+Malachite
+Tiger Eye
+Fluorite
+Sapphire
+Turquoise
+Moonstone
+Topaz
+Corundum
+Opal
+Granite
+Zircon
+Calcite
+Onyx
+Jasper
+Azurite
+Quartz
+Alexandrite
+Marble
+Aquamarine
+Emerald
+Ruby
+Bloodstone
+Amethyst
+Lapis Lazuli
+Quartzite
+Diamond
+[amulets]
+Amber
+Driftwood
+Ivory
+Coral
+Bronze
+Tortoise Shell
+Bone
+Brass
+Pewter
+Agate
+Obsidian
+[mushrooms]
+Light Green
+Dark Green
+Grey
+Tan
+Brown
+Wooden
+Plaid
+Black
+Black Spotted
+Red
+Green
+White
+Blue
+Dark Blue
+White Spotted
+Yellow
+Furry
+Ecru
+Slimy
+Dark Red
+Light Blue
+Wrinkled
+[magic_item_titles]
+oxybat do
+me he tue
+nelg fory
+iv lech w
+kho peter
+cos ri
+orncos bo
+bytrea pa
+ner greby
+wun tox
+lechviv z
+pot whont
+engtab se
+danbar su
+tox petsa
+ash man m
+whon shu
+turs potb
+aks compr
+snopot iv
+nisbie zu
+bin wergu
+sehorn as
+bat seh
+rok tox
+potmi sta
+anban ban
+snik ag
+rea friak
+wun rhovw
+proktrol
+comprea a
+forsat io
+he anviv
+aks me
+snamur it
+wed trol
+compulk p
+tue bat
+eng snoni
+wahwed pa
+satski mu
+mung fors
+buish val
+rokha he

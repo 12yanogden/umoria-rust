@@ -1,0 +1,27 @@
+DESC	misc	1	a Rat Skeleton.
+DESC	misc_no_prefix	0	Rat Skeleton
+DESC	arrow_2d6	1	a Bolt (2d6).
+DESC	bow_x3	1	a Long Bow (x3).
+DESC	sword_hit_dam	1	a Bastard Sword (3d8) (+2,+5).
+DESC	sword_cursed_str	1	a Bastard Sword (2d6) (-2 to STR).
+DESC	helm_ac_bracket	1	a Steel Helm [0,+3].
+DESC	shield_ac5	1	a Medium Metal Shield [5,+0].
+DESC	light_turns	1	an Orcish Pick (3d3).
+DESC	potion_unknown	1	an Icky Green Potion.
+DESC	potion_known	1	a Potion of Constitution.
+DESC	scroll_unknown	1	a Scroll titled "eshwah po".
+DESC	staff_charges	1	an Ironwood Staff (5 charges).
+DESC	ring_plus2	1	a Ruby Ring (+2).
+DESC	amulet_plus1	1	a Tortoise Shell Amulet (+1).
+DESC	mushroom_unknown	1	a Dark Green Mushroom.
+DESC	mushroom_plural	1	3 Dark Green Mushrooms.
+DESC	gold	1	gold.
+DESC	store_door	1	the entrance to the Armory.
+DESC	special_name	1	a Bastard Sword of Slaying (2d6).
+DESC	inscription_flags	1	an Ironwood Staff (3 charges) {magik empty abc}.
+DESC	tried_potion	1	a Light Brown Potion {tried}.
+DESC	store_bought_potion	1	a Potion of Constitution.
+DESC	digging_zplusses	1	a Dwarven Pick (8d8) (+3).
+DESC	no_more_potion	1	no more Icky Green Potions.
+DESC	magic_book	1	a Book of Magic Spells [Magick I].
+DESC	prayer_book	1	a Holy Book of Prayers [Chants and Blessings].

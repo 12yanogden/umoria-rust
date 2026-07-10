@@ -1,0 +1,24 @@
+Rank  Points Name              Sex Race       Class  Lvl Killed By
+
+1         47 test                M Human      Mage     1 Interrupting
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       [ press any key to continue ]

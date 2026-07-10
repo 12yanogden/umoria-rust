@@ -1,0 +1,219 @@
+magic_seed=1
+main_seed_before=12346
+main_seed_after=12347
+[colors]
+Icky Green
+Light Brown
+Clear
+Grey
+Magenta
+Black
+Green Speckled
+Silver Speckled
+Purple Speckled
+Cyan
+Metallic Green
+Yellow
+Light Blue
+Blue
+Brown
+Pink Speckled
+Orange
+Pink
+Dark Green
+Tangerine
+Red Speckled
+Puce
+Violet
+Grey Speckled
+Dark Blue
+Crimson
+Bubbling
+Vermilion
+Chartreuse
+Misty
+Indigo
+Cloudy
+Brown Speckled
+Red
+Green
+Smoky
+White
+Dark Red
+Metallic Purple
+Metallic Blue
+Copper Speckled
+Azure
+Hazy
+Blue Speckled
+Light Green
+Metallic Red
+Gold Speckled
+Orange Speckled
+Purple
+[woods]
+Eucalyptus
+Cedar
+Locust
+Mahogany
+Elm
+Pine
+Redwood
+Banyan
+Hickory
+Birch
+Maple
+Rosewood
+Dogwood
+Mulberry
+Sycamore
+Teak
+Oak
+Balsa
+Aspen
+Ironwood
+Cottonwood
+Hemlock
+Cypress
+Spruce
+Walnut
+[metals]
+Tin
+Gold-Plated
+Gold
+Molybdenum
+Iron
+Aluminum-Plated
+Steel-Plated
+Tin-Plated
+Steel
+Zinc
+Tungsten
+Copper
+Silver
+Zirconium
+Copper-Plated
+Nickel
+Rusty
+Magnesium
+Zinc-Plated
+Nickel-Plated
+Silver-Plated
+Titanium
+Aluminum
+Chromium
+Cast Iron
+[rocks]
+Aquamarine
+Diamond
+Carnelian
+Amethyst
+Malachite
+Garnet
+Turquoise
+Marble
+Quartz
+Topaz
+Rhodonite
+Ruby
+Granite
+Quartzite
+Emerald
+Jasper
+Beryl
+Zircon
+Corundum
+Jade
+Fluorite
+Calcite
+Onyx
+Alexandrite
+Bloodstone
+Moonstone
+Tiger Eye
+Lapis Lazuli
+Azurite
+Pearl
+Opal
+Sapphire
+[amulets]
+Driftwood
+Tortoise Shell
+Obsidian
+Coral
+Ivory
+Bone
+Brass
+Amber
+Pewter
+Agate
+Bronze
+[mushrooms]
+White
+Black Spotted
+Ecru
+Dark Green
+Plaid
+Light Blue
+Red
+Wooden
+Yellow
+Wrinkled
+Green
+Tan
+Slimy
+Blue
+Brown
+Black
+Furry
+White Spotted
+Dark Blue
+Grey
+Light Green
+Dark Red
+[magic_item_titles]
+rol oxy
+lech rol
+bit viv c
+ner bek s
+arglech l
+nesur anr
+gari igan
+ski xfri
+ganre see
+umsa gar
+creag tue
+tem cos
+ab micre
+sno ypval
+so comp n
+botdok ne
+sa bjorbi
+ox bat
+prokdalf
+hydski mu
+sri see
+snikval a
+sefiv un
+mung arze
+u mar
+jodok ria
+ivbot itb
+petgre wu
+ornsnik p
+oi tabu d
+bat mik
+mungrea g
+see marbe
+dalf ti r
+snikeep p
+bitvly ee
+nep rhov
+fa metem
+seh greiv
+nelg erwa
+iox wergr
+san umro
+buing tab
+mur vom b
+evscon bo

@@ -1,0 +1,213 @@
+{
+  "umoria_version": "5.7.15",
+  "generated_with": {
+    "cmake": "cmake version 4.3.4",
+    "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+    "os": "Darwin andromeda 25.5.0 Darwin Kernel Version 25.5.0: Mon Apr 27 20:39:29 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T8142 arm64",
+    "ncurses": "pkg-config ncurses 6.0.20150808",
+    "faketime": null,
+    "regen_command": "tools/capture/regen.sh"
+  },
+  "goldens": [
+    {
+      "id": "rng_normalDist_seed1",
+      "kind": "rng",
+      "file": "rng/normalDist_seed1.txt",
+      "seed": 1,
+      "hash_method": "sha256",
+      "sha256": "0996a21e52d1ee99453d1cb7573a0013986b3d0f956b4d941a6430754e23a3b5"
+    },
+    {
+      "id": "rng_normalDist_seed12345",
+      "kind": "rng",
+      "file": "rng/normalDist_seed12345.txt",
+      "seed": 12345,
+      "hash_method": "sha256",
+      "sha256": "713e70899d95d70ead209bb8fa27c0746c7826e215a94e0a9fb47906f9926029"
+    },
+    {
+      "id": "rng_normalDist_seed2147483647",
+      "kind": "rng",
+      "file": "rng/normalDist_seed2147483647.txt",
+      "seed": 2147483647,
+      "hash_method": "sha256",
+      "sha256": "0996a21e52d1ee99453d1cb7573a0013986b3d0f956b4d941a6430754e23a3b5"
+    },
+    {
+      "id": "rng_normalDist_seed42",
+      "kind": "rng",
+      "file": "rng/normalDist_seed42.txt",
+      "seed": 42,
+      "hash_method": "sha256",
+      "sha256": "a3d0728b5843fe3b6ca38503f91eb7c6f126bada1283c254640cb71574ba42e5"
+    },
+    {
+      "id": "rng_normal_table",
+      "kind": "rng",
+      "file": "rng/normal_table.txt",
+      "hash_method": "sha256",
+      "sha256": "bbca0cc873d59194b83b9e434ba14f9022badcfa8755cb8027e5013c6f78a658"
+    },
+    {
+      "id": "rng_randomNumber_seed1",
+      "kind": "rng",
+      "file": "rng/randomNumber_seed1.txt",
+      "seed": 1,
+      "hash_method": "sha256",
+      "sha256": "520920b5be2de38555d4efb510298e8b55cc56f08cea63b2a30f96bec5bba1cf"
+    },
+    {
+      "id": "rng_randomNumber_seed12345",
+      "kind": "rng",
+      "file": "rng/randomNumber_seed12345.txt",
+      "seed": 12345,
+      "hash_method": "sha256",
+      "sha256": "188829fbbaad696853ff0631d298323fa05d1ac41a1666be7be1f762ce055e96"
+    },
+    {
+      "id": "rng_randomNumber_seed2147483647",
+      "kind": "rng",
+      "file": "rng/randomNumber_seed2147483647.txt",
+      "seed": 2147483647,
+      "hash_method": "sha256",
+      "sha256": "520920b5be2de38555d4efb510298e8b55cc56f08cea63b2a30f96bec5bba1cf"
+    },
+    {
+      "id": "rng_randomNumber_seed42",
+      "kind": "rng",
+      "file": "rng/randomNumber_seed42.txt",
+      "seed": 42,
+      "hash_method": "sha256",
+      "sha256": "69855da30d0d9198be63151b5bc60fcaedbf56fba06fd262ca5be014ca1ae00d"
+    },
+    {
+      "id": "rng_rnd_seed1",
+      "kind": "rng",
+      "file": "rng/rnd_seed1.txt",
+      "seed": 1,
+      "hash_method": "sha256",
+      "sha256": "998567c235b157996b5822f6a7058499efd9fe66563606e18c2cf37a86beab48"
+    },
+    {
+      "id": "rng_rnd_seed12345",
+      "kind": "rng",
+      "file": "rng/rnd_seed12345.txt",
+      "seed": 12345,
+      "hash_method": "sha256",
+      "sha256": "4375f5949643d79df7c966421995dcfe0ebc1d662f29aaad50af08ddbd109e57"
+    },
+    {
+      "id": "rng_rnd_seed2147483647",
+      "kind": "rng",
+      "file": "rng/rnd_seed2147483647.txt",
+      "seed": 2147483647,
+      "hash_method": "sha256",
+      "sha256": "65b17fd83b47ebc562a8449036ffff6527e191212bc0a8992a2efae3cfc00721"
+    },
+    {
+      "id": "rng_rnd_seed42",
+      "kind": "rng",
+      "file": "rng/rnd_seed42.txt",
+      "seed": 42,
+      "hash_method": "sha256",
+      "sha256": "0e3e7261f0be66129ec45bc7dae2d579c6b17ccdca8bcdf7e14b4c72effe146b"
+    },
+    {
+      "id": "rng_z10001",
+      "kind": "rng",
+      "file": "rng/z10001.txt",
+      "seed": 1,
+      "hash_method": "sha256",
+      "sha256": "c0c3756cc5d7f563916fd4607ff8ade5b4b38c96df665364dd06e93258736f03"
+    },
+    {
+      "id": "save_newchar_seed42",
+      "kind": "save",
+      "file": "save/newchar_seed42.sav",
+      "seed": 42,
+      "inputs": "transcripts/newchar_seed42.keys",
+      "env": {
+        "TERM": "xterm",
+        "LINES": 24,
+        "COLS": 80
+      },
+      "volatile_byte_ranges": [
+        {
+          "offset": 3894,
+          "length": 4,
+          "why": "save timestamp l = getCurrentUnixTime() (game_save.cpp:299)"
+        },
+        {
+          "offset": 3910,
+          "length": 4,
+          "why": "py.misc.date_of_birth (game_save.cpp:309)"
+        }
+      ],
+      "hash_method": "sha256-masked-save",
+      "sha256": "23abbcae788b15f7120fb2446d9f72c1105244523a8d25a9edeba5b819bb7bb6"
+    },
+    {
+      "id": "scores_scores_initial",
+      "kind": "scores",
+      "file": "scores/scores_initial.dat",
+      "volatile_byte_ranges": [
+        {
+          "offset": 8,
+          "length": 4,
+          "why": "HighScore_t.birth_date record 0 = 8 + 64*N (game_save.cpp:1189)"
+        }
+      ],
+      "note": "pristine committed high-score file (copy of data/scores.dat)",
+      "hash_method": "sha256-masked-score",
+      "sha256": "c08d874d67fbcf46080d8fc2d880d68b9f5863b129ba7f2d719e0e032530f63e"
+    },
+    {
+      "id": "scores_scores_screen",
+      "kind": "scores",
+      "file": "scores/scores_screen.txt",
+      "seed": 42,
+      "inputs": "transcripts/scores_screen.keys",
+      "extra_args": [
+        "-d"
+      ],
+      "env": {
+        "TERM": "xterm",
+        "LINES": 24,
+        "COLS": 80
+      },
+      "note": "umoria -d showScoresScreen() output (deterministic; no timestamps)",
+      "hash_method": "sha256",
+      "sha256": "2f691fb3808d73a501055ec7eeee99164586ff63186967e458e3bf283c96e78b"
+    },
+    {
+      "id": "transcript_newchar_seed42",
+      "kind": "transcript",
+      "file": "transcripts/newchar_seed42.keys",
+      "note": "keystroke input script",
+      "hash_method": "sha256",
+      "sha256": "79c544dfc0a3d8909397df39c59a1a8968df415141c73e62e255232f77e28552"
+    },
+    {
+      "id": "transcript_newchar_seed42",
+      "kind": "transcript",
+      "file": "transcripts/newchar_seed42.screen",
+      "seed": 42,
+      "inputs": "transcripts/newchar_seed42.keys",
+      "env": {
+        "TERM": "xterm",
+        "LINES": 24,
+        "COLS": 80
+      },
+      "hash_method": "sha256",
+      "sha256": "f522d66325ae8c89a169e87221ea144f9da30af72daf415debdd0b71fa073c05"
+    },
+    {
+      "id": "transcript_scores_screen",
+      "kind": "transcript",
+      "file": "transcripts/scores_screen.keys",
+      "note": "keystroke input script",
+      "hash_method": "sha256",
+      "sha256": "f9d5a339690cbf5f812a570fafd8779d13ab674d33d6596d00577d1017bd3550"
+    }
+  ]
+}
