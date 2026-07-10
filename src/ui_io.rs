@@ -1271,9 +1271,19 @@ pub mod terminal {
     }
 }
 
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+fn errno_ptr() -> *mut libc::c_int {
+    unsafe { libc::__error() }
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "ios")))]
+fn errno_ptr() -> *mut libc::c_int {
+    unsafe { libc::__errno_location() }
+}
+
 fn set_errno(err: i32) {
     unsafe {
-        *libc::__error() = err;
+        *errno_ptr() = err;
     }
 }
 
