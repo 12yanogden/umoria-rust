@@ -43,6 +43,8 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --all-features
+      - name: RefCell nest anti-pattern scan
+        run: bash scripts/check_refcell_nests.sh
 
   doc:
     name: Docs

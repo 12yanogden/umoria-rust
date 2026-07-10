@@ -27,7 +27,7 @@ use crate::{inventory::ITEM_GROUP_MIN, inventory::ITEM_SINGLE_STACK_MAX};
 /// C++ ui_inventory.cpp:8-14 — `inventoryItemWeightText`.
 #[must_use]
 pub fn inventory_item_weight_text(item_id: usize) -> String {
-    with_state_mut(|state| {
+    with_state(|state| {
         let item = &state.py.inventory[item_id];
         let total_weight = i32::from(item.weight) * i32::from(item.items_count);
         let quotient = total_weight / 10;
@@ -87,13 +87,6 @@ pub fn equipment_position_description(id: u8, weight: u16, str_used: u8) -> &'st
     }
 }
 
-fn equipment_position_description_state(id: u8, weight: u16) -> &'static str {
-    with_state_mut(|state| {
-        let str_used = state.py.stats.used[PlayerAttr::A_STR as usize];
-        equipment_position_description(id, weight, str_used)
-    })
-}
-
 fn write_c_string(out: &mut Obj_desc_t, s: &str) {
     let bytes = s.as_bytes();
     let n = bytes.len().min(MORIA_OBJ_DESC_SIZE_LEN - 1);
@@ -125,29 +118,30 @@ pub fn display_inventory_items(
 
     let lim = if weighted { 68 } else { 76 };
 
-    with_state_mut(|state| {
-        for i in item_id_start..=item_id_end {
-            let iu = i as usize;
-            if mask_skipped(mask, iu) {
-                continue;
-            }
-
-            let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-            item_description(&mut description, state.py.inventory[iu], true);
-            truncate_desc(&mut description, lim);
-
-            let desc_str = c_string_to_str(&description);
-            descriptions[iu] = format!("{}) {}", (b'a' + i as u8) as char, desc_str);
-
-            let mut l = descriptions[iu].len() as i32 + 2;
-            if weighted {
-                l += 9;
-            }
-            if l > len {
-                len = l;
-            }
-        }
+    // Snapshot items first — item_description re-enters game state.
+    let items: Vec<(usize, i32, crate::inventory::Inventory)> = with_state(|state| {
+        (item_id_start..=item_id_end)
+            .filter(|&i| !mask_skipped(mask, i as usize))
+            .map(|i| (i as usize, i, state.py.inventory[i as usize]))
+            .collect()
     });
+
+    for &(iu, i, item) in &items {
+        let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
+        item_description(&mut description, item, true);
+        truncate_desc(&mut description, lim);
+
+        let desc_str = c_string_to_str(&description);
+        descriptions[iu] = format!("{}) {}", (b'a' + i as u8) as char, desc_str);
+
+        let mut l = descriptions[iu].len() as i32 + 2;
+        if weighted {
+            l += 9;
+        }
+        if l > len {
+            len = l;
+        }
+    }
 
     column = 79 - len;
     if column < 0 {
@@ -156,12 +150,8 @@ pub fn display_inventory_items(
 
     let mut current_line = 1;
 
-    for i in item_id_start..=item_id_end {
-        let iu = i as usize;
-        if mask_skipped(mask, iu) {
-            continue;
-        }
-
+    #[allow(clippy::explicit_counter_loop)]
+    for &(iu, _, _) in &items {
         if column == 0 {
             terminal::put_string_clear_to_eol(
                 &descriptions[iu],
@@ -217,92 +207,88 @@ pub fn display_equipment(show_weights: bool, mut column: i32) -> i32 {
     let mut len = 79 - column;
     let lim = if show_weights { 52 } else { 60 };
 
-    with_state_mut(|state| {
-        let mut line = 0usize;
-        for i in PlayerEquipment::Wield as usize..PLAYER_INVENTORY_SIZE as usize {
-            if state.py.inventory[i].category_id == TV_NOTHING {
-                continue;
-            }
-
-            let equipped =
-                equipment_position_description_state(i as u8, state.py.inventory[i].weight);
-
-            let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-            item_description(&mut description, state.py.inventory[i], true);
-            truncate_desc(&mut description, lim);
-
-            let desc_str = c_string_to_str(&description);
-            descriptions.push(format!(
-                "{}) {:14}: {}",
-                (line as u8 + b'a') as char,
-                equipped,
-                desc_str
-            ));
-
-            let mut l = descriptions[line].len() as i32 + 2;
-            if show_weights {
-                l += 9;
-            }
-            if l > len {
-                len = l;
-            }
-            line += 1;
-        }
+    // Snapshot equipment rows — description helpers and terminal I/O re-enter state.
+    let rows: Vec<(usize, u16, crate::inventory::Inventory, u8)> = with_state(|state| {
+        let str_used = state.py.stats.used[PlayerAttr::A_STR as usize];
+        (PlayerEquipment::Wield as usize..PLAYER_INVENTORY_SIZE as usize)
+            .filter(|&i| state.py.inventory[i].category_id != TV_NOTHING)
+            .map(|i| {
+                let item = state.py.inventory[i];
+                (i, item.weight, item, str_used)
+            })
+            .collect()
     });
+
+    for &(slot, weight, item, str_used) in &rows {
+        let equipped = equipment_position_description(slot as u8, weight, str_used);
+
+        let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
+        item_description(&mut description, item, true);
+        truncate_desc(&mut description, lim);
+
+        let desc_str = c_string_to_str(&description);
+        let line = descriptions.len();
+        descriptions.push(format!(
+            "{}) {:14}: {}",
+            (line as u8 + b'a') as char,
+            equipped,
+            desc_str
+        ));
+
+        let mut l = descriptions[line].len() as i32 + 2;
+        if show_weights {
+            l += 9;
+        }
+        if l > len {
+            len = l;
+        }
+    }
 
     column = 79 - len;
     if column < 0 {
         column = 0;
     }
 
-    let mut line = 0;
-    with_state_mut(|state| {
-        for i in PlayerEquipment::Wield as usize..PLAYER_INVENTORY_SIZE as usize {
-            if state.py.inventory[i].category_id == TV_NOTHING {
-                continue;
-            }
-
-            if column == 0 {
-                terminal::put_string_clear_to_eol(
-                    &descriptions[line],
-                    Coord {
-                        y: line as i32 + 1,
-                        x: column,
-                    },
-                );
-            } else {
-                terminal::put_string(
-                    "  ",
-                    Coord {
-                        y: line as i32 + 1,
-                        x: column,
-                    },
-                );
-                terminal::put_string_clear_to_eol(
-                    &descriptions[line],
-                    Coord {
-                        y: line as i32 + 1,
-                        x: column + 2,
-                    },
-                );
-            }
-
-            if show_weights {
-                let mut text = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-                inventory_item_weight_text_buf(&mut text, i);
-                terminal::put_string_clear_to_eol(
-                    c_string_to_str(&text),
-                    Coord {
-                        y: line as i32 + 1,
-                        x: 71,
-                    },
-                );
-            }
-
-            line += 1;
+    for (line, &(slot, _, _, _)) in rows.iter().enumerate() {
+        if column == 0 {
+            terminal::put_string_clear_to_eol(
+                &descriptions[line],
+                Coord {
+                    y: line as i32 + 1,
+                    x: column,
+                },
+            );
+        } else {
+            terminal::put_string(
+                "  ",
+                Coord {
+                    y: line as i32 + 1,
+                    x: column,
+                },
+            );
+            terminal::put_string_clear_to_eol(
+                &descriptions[line],
+                Coord {
+                    y: line as i32 + 1,
+                    x: column + 2,
+                },
+            );
         }
-    });
 
+        if show_weights {
+            let mut text = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
+            inventory_item_weight_text_buf(&mut text, slot);
+            terminal::put_string_clear_to_eol(
+                c_string_to_str(&text),
+                Coord {
+                    y: line as i32 + 1,
+                    x: 71,
+                },
+            );
+        }
+    }
+
+    let line = rows.len();
     terminal::erase_line(Coord {
         y: line as i32 + 1,
         x: column,
@@ -464,10 +450,10 @@ pub fn ui_command_switch_screen(next_screen: Screen) {
 
 /// C++ ui_inventory.cpp:326-337 — `verifyAction`.
 fn verify_action(prompt: &str, item: i32) -> bool {
+    // Snapshot first — item_description re-enters game state.
+    let item_snap = with_state(|state| state.py.inventory[item as usize]);
     let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-    with_state_mut(|state| {
-        item_description(&mut description, state.py.inventory[item as usize], true);
-    });
+    item_description(&mut description, item_snap, true);
 
     let len = description
         .iter()
@@ -698,14 +684,9 @@ fn ui_command_inventory_unwield_item() {
     }
 
     if player_worn_item_is_cursed(PlayerEquipment::Wield) {
+        let wield = with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize]);
         let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-        with_state_mut(|state| {
-            item_description(
-                &mut description,
-                state.py.inventory[PlayerEquipment::Wield as usize],
-                false,
-            );
-        });
+        item_description(&mut description, wield, false);
         let msg = format!(
             "The {} you are wielding appears to be cursed.",
             c_string_to_str(&description)
@@ -716,45 +697,45 @@ fn ui_command_inventory_unwield_item() {
 
     with_state_mut(|state| {
         state.game.player_free_turn = false;
-    });
-
-    with_state_mut(|state| {
         state.py.inventory.swap(
             PlayerEquipment::Auxiliary as usize,
             PlayerEquipment::Wield as usize,
         );
     });
 
-    with_state_mut(|state| {
-        if state.game.screen.current_screen_id == Screen::Equipment {
-            state.game.screen.screen_left_pos = display_equipment(
-                state.options.show_inventory_weights,
-                state.game.screen.screen_left_pos,
-            );
-        }
+    let (on_equipment, show_weights, left_pos) = with_state(|state| {
+        (
+            state.game.screen.current_screen_id == Screen::Equipment,
+            state.options.show_inventory_weights,
+            state.game.screen.screen_left_pos,
+        )
     });
+    if on_equipment {
+        let new_left = display_equipment(show_weights, left_pos);
+        with_state_mut(|state| {
+            state.game.screen.screen_left_pos = new_left;
+        });
+    }
 
-    with_state_mut(|state| {
-        player_adjust_bonuses_for_item(state.py.inventory[PlayerEquipment::Auxiliary as usize], -1);
-        player_adjust_bonuses_for_item(state.py.inventory[PlayerEquipment::Wield as usize], 1);
+    let (aux, wield) = with_state(|state| {
+        (
+            state.py.inventory[PlayerEquipment::Auxiliary as usize],
+            state.py.inventory[PlayerEquipment::Wield as usize],
+        )
     });
+    player_adjust_bonuses_for_item(aux, -1);
+    player_adjust_bonuses_for_item(wield, 1);
 
-    with_state_mut(|state| {
-        if state.py.inventory[PlayerEquipment::Wield as usize].category_id == TV_NOTHING {
-            terminal::print_message(Some("No primary weapon."));
-        } else {
-            let label = *b"Primary weapon   : \0";
-            let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-            item_description(
-                &mut description,
-                state.py.inventory[PlayerEquipment::Wield as usize],
-                true,
-            );
-            let label_str = c_string_to_str(&label);
-            let msg = format!("{}{}", label_str, c_string_to_str(&description));
-            terminal::print_message(Some(&msg));
-        }
-    });
+    if wield.category_id == TV_NOTHING {
+        terminal::print_message(Some("No primary weapon."));
+    } else {
+        let label = *b"Primary weapon   : \0";
+        let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
+        item_description(&mut description, wield, true);
+        let label_str = c_string_to_str(&label);
+        let msg = format!("{}{}", label_str, c_string_to_str(&description));
+        terminal::print_message(Some(&msg));
+    }
 
     with_state_mut(|state| {
         state.py.weapon_is_heavy = false;
@@ -928,14 +909,9 @@ pub fn inventory_get_slot_to_wear_equipment(category_id: u8) -> i32 {
 }
 
 fn inventory_item_is_cursed_message(item_id: i32) {
+    let item_snap = with_state(|state| state.py.inventory[item_id as usize]);
     let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-    with_state_mut(|state| {
-        item_description(
-            &mut description,
-            state.py.inventory[item_id as usize],
-            false,
-        );
-    });
+    item_description(&mut description, item_snap, false);
 
     let mut msg = format!("The {} you are ", c_string_to_str(&description));
     if item_id == PlayerEquipment::Head as i32 {
@@ -973,25 +949,28 @@ fn execute_remove_item_command(
     if which_ch.is_ascii_uppercase() && !verify_action(prompt, resolved) {
         resolved = -1;
     } else {
-        with_state_mut(|state| {
-            if inventory_item_is_cursed(state.py.inventory[resolved as usize]) {
-                resolved = -1;
-                terminal::print_message(Some("Hmmm, it seems to be cursed."));
-            } else if *command == b't'
-                && !inventory_can_carry_item_count(state.py.inventory[resolved as usize])
-            {
-                let y = state.py.pos.y as usize;
-                let x = state.py.pos.x as usize;
-                if state.dg.floor[y][x].treasure_id != 0 {
-                    resolved = -1;
-                    terminal::print_message(Some("You can't carry it."));
-                } else if terminal::get_input_confirmation("You can't carry it.  Drop it?") {
-                    *command = b'r';
-                } else {
-                    resolved = -1;
-                }
-            }
+        // Snapshot then call helpers outside — they re-enter game state.
+        let (item, floor_treasure_id) = with_state(|state| {
+            let y = state.py.pos.y as usize;
+            let x = state.py.pos.x as usize;
+            (
+                state.py.inventory[resolved as usize],
+                state.dg.floor[y][x].treasure_id,
+            )
         });
+        if inventory_item_is_cursed(item) {
+            resolved = -1;
+            terminal::print_message(Some("Hmmm, it seems to be cursed."));
+        } else if *command == b't' && !inventory_can_carry_item_count(item) {
+            if floor_treasure_id != 0 {
+                resolved = -1;
+                terminal::print_message(Some("You can't carry it."));
+            } else if terminal::get_input_confirmation("You can't carry it.  Drop it?") {
+                *command = b'r';
+            } else {
+                resolved = -1;
+            }
+        }
     }
 
     if resolved >= 0 {
@@ -1041,20 +1020,24 @@ fn execute_wear_item_command(item_id: i32, which: &[u8], prompt: &str) {
     }
 
     if resolved >= 0 {
-        with_state_mut(|state| {
-            if state.py.inventory[slot as usize].category_id != TV_NOTHING {
-                if inventory_item_is_cursed(state.py.inventory[slot as usize]) {
-                    inventory_item_is_cursed_message(slot);
-                    resolved = -1;
-                } else if state.py.inventory[resolved as usize].sub_category_id == ITEM_GROUP_MIN
-                    && state.py.inventory[resolved as usize].items_count > 1
-                    && !inventory_can_carry_item_count(state.py.inventory[slot as usize])
-                {
-                    terminal::print_message(Some("You will have to drop something first."));
-                    resolved = -1;
-                }
-            }
+        let (slot_item, pack_item) = with_state(|state| {
+            (
+                state.py.inventory[slot as usize],
+                state.py.inventory[resolved as usize],
+            )
         });
+        if slot_item.category_id != TV_NOTHING {
+            if inventory_item_is_cursed(slot_item) {
+                inventory_item_is_cursed_message(slot);
+                resolved = -1;
+            } else if pack_item.sub_category_id == ITEM_GROUP_MIN
+                && pack_item.items_count > 1
+                && !inventory_can_carry_item_count(slot_item)
+            {
+                terminal::print_message(Some("You will have to drop something first."));
+                resolved = -1;
+            }
+        }
     }
 
     if resolved == -1 {
@@ -1138,13 +1121,14 @@ fn execute_wear_item_command(item_id: i32, which: &[u8], prompt: &str) {
 
     player_strength();
 
-    with_state_mut(|state| {
-        if inventory_item_is_cursed(state.py.inventory[slot as usize]) {
-            terminal::print_message(Some("Oops! It feels deathly cold!"));
+    let worn = with_state(|state| state.py.inventory[slot as usize]);
+    if inventory_item_is_cursed(worn) {
+        terminal::print_message(Some("Oops! It feels deathly cold!"));
+        with_state_mut(|state| {
             item_append_to_inscription(&mut state.py.inventory[slot as usize], ID_DAMD);
             state.py.inventory[slot as usize].cost = -1;
-        }
-    });
+        });
+    }
 }
 
 fn execute_drop_item_command(item_id: i32, which: &[u8], prompt: &str) {
@@ -1152,30 +1136,26 @@ fn execute_drop_item_command(item_id: i32, which: &[u8], prompt: &str) {
     let mut confirmed = -1i32;
     let mut resolved = item_id;
 
-    with_state_mut(|state| {
-        if state.py.inventory[resolved as usize].items_count > 1 {
-            let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-            item_description(
-                &mut description,
-                state.py.inventory[resolved as usize],
-                true,
-            );
-            let len = description
-                .iter()
-                .position(|&b| b == 0)
-                .unwrap_or(description.len());
-            if len > 0 {
-                description[len - 1] = b'?';
-            }
-            let msg = format!("Drop all {}", c_string_to_str(&description));
-            confirmed = terminal::get_input_confirmation_with_abort(0, &msg);
-            if confirmed == -1 {
-                resolved = -1;
-            }
-        } else if which_ch.is_ascii_uppercase() && !verify_action(prompt, resolved) {
+    let items_count = with_state(|state| state.py.inventory[resolved as usize].items_count);
+    if items_count > 1 {
+        let item_snap = with_state(|state| state.py.inventory[resolved as usize]);
+        let mut description = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
+        item_description(&mut description, item_snap, true);
+        let len = description
+            .iter()
+            .position(|&b| b == 0)
+            .unwrap_or(description.len());
+        if len > 0 {
+            description[len - 1] = b'?';
+        }
+        let msg = format!("Drop all {}", c_string_to_str(&description));
+        confirmed = terminal::get_input_confirmation_with_abort(0, &msg);
+        if confirmed == -1 {
             resolved = -1;
         }
-    });
+    } else if which_ch.is_ascii_uppercase() && !verify_action(prompt, resolved) {
+        resolved = -1;
+    }
 
     if resolved >= 0 {
         with_state_mut(|state| {
@@ -1288,49 +1268,62 @@ fn select_item_commands(command: &mut u8, which: &mut u8, mut selecting: bool) -
 }
 
 fn inventory_display_appropriate_header() {
-    with_state_mut(|state| {
-        let msg = if state.game.screen.current_screen_id == Screen::Inventory {
-            let weight_quotient = state.py.pack.weight / 10;
-            let weight_remainder = state.py.pack.weight % 10;
-
-            if !state.options.show_inventory_weights || state.py.pack.unique_items == 0 {
-                format!(
-                    "You are carrying {weight_quotient}.{weight_remainder} pounds. In your pack there is {}",
-                    if state.py.pack.unique_items == 0 {
-                        "nothing."
-                    } else {
-                        "-"
-                    }
-                )
-            } else {
-                let cap = player_carrying_load_limit();
-                let capacity_quotient = cap / 10;
-                let capacity_remainder = cap % 10;
-                format!(
-                    "You are carrying {weight_quotient}.{weight_remainder} pounds. Your capacity is {capacity_quotient}.{capacity_remainder} pounds. In your pack is -"
-                )
-            }
-        } else if state.game.screen.current_screen_id == Screen::Wear {
-            if state.game.screen.wear_high_id < state.game.screen.wear_low_id {
-                "You have nothing you could wield.".to_string()
-            } else {
-                "You could wield -".to_string()
-            }
-        } else if state.game.screen.current_screen_id == Screen::Equipment {
-            if state.py.equipment_count == 0 {
-                "You are not using anything.".to_string()
-            } else {
-                "You are using -".to_string()
-            }
-        } else {
-            "Allowed commands:".to_string()
-        };
-
-        terminal::put_string_clear_to_eol(&msg, Coord { y: 0, x: 0 });
-        terminal::erase_line(Coord {
-            y: state.game.screen.screen_bottom_pos,
-            x: state.game.screen.screen_left_pos,
+    let screen_id = with_state(|state| state.game.screen.current_screen_id);
+    let (msg, bottom_y, bottom_x) = if screen_id == Screen::Inventory {
+        let (weight, unique_items, show_weights, bottom_y, bottom_x) = with_state(|state| {
+            (
+                state.py.pack.weight,
+                state.py.pack.unique_items,
+                state.options.show_inventory_weights,
+                state.game.screen.screen_bottom_pos,
+                state.game.screen.screen_left_pos,
+            )
         });
+        let weight_quotient = weight / 10;
+        let weight_remainder = weight % 10;
+        let msg = if !show_weights || unique_items == 0 {
+            format!(
+                "You are carrying {weight_quotient}.{weight_remainder} pounds. In your pack there is {}",
+                if unique_items == 0 { "nothing." } else { "-" }
+            )
+        } else {
+            let cap = player_carrying_load_limit();
+            let capacity_quotient = cap / 10;
+            let capacity_remainder = cap % 10;
+            format!(
+                "You are carrying {weight_quotient}.{weight_remainder} pounds. Your capacity is {capacity_quotient}.{capacity_remainder} pounds. In your pack is -"
+            )
+        };
+        (msg, bottom_y, bottom_x)
+    } else {
+        with_state(|state| {
+            let msg = if state.game.screen.current_screen_id == Screen::Wear {
+                if state.game.screen.wear_high_id < state.game.screen.wear_low_id {
+                    "You have nothing you could wield.".to_string()
+                } else {
+                    "You could wield -".to_string()
+                }
+            } else if state.game.screen.current_screen_id == Screen::Equipment {
+                if state.py.equipment_count == 0 {
+                    "You are not using anything.".to_string()
+                } else {
+                    "You are using -".to_string()
+                }
+            } else {
+                "Allowed commands:".to_string()
+            };
+            (
+                msg,
+                state.game.screen.screen_bottom_pos,
+                state.game.screen.screen_left_pos,
+            )
+        })
+    };
+
+    terminal::put_string_clear_to_eol(&msg, Coord { y: 0, x: 0 });
+    terminal::erase_line(Coord {
+        y: bottom_y,
+        x: bottom_x,
     });
 }
 
@@ -1416,12 +1409,13 @@ pub fn inventory_execute_command(mut command: u8) {
                 },
             );
             command = terminal::get_key_input();
-            with_state_mut(|state| {
-                terminal::erase_line(Coord {
-                    y: state.game.screen.screen_bottom_pos,
-                    x: state.game.screen.screen_left_pos,
-                });
+            let (y, x) = with_state(|state| {
+                (
+                    state.game.screen.screen_bottom_pos,
+                    state.game.screen.screen_left_pos,
+                )
             });
+            terminal::erase_line(Coord { y, x });
         }
 
         if command == ESCAPE {

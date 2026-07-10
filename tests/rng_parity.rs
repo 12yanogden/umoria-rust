@@ -1,4 +1,4 @@
-//! Phase 1.5 — RNG golden parity (staged until phase_2.2).
+//! RNG golden parity checks.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,

@@ -1,4 +1,4 @@
-//! Phase 1.5 — score byte-exact round-trip skeleton (staged until phase_5).
+//! Score byte-exact round-trip against golden fixtures.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -12,7 +12,7 @@ mod common;
 use common::{byte_diff, load_manifest, read_golden_bytes, GoldenKind};
 
 #[test]
-#[ignore = "enable when phase_5 lands (scores)"]
+#[ignore = "enable when score round-trip is wired"]
 fn scores_byte_exact_roundtrip_matches_cpp_golden() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let entry = manifest
@@ -25,7 +25,7 @@ fn scores_byte_exact_roundtrip_matches_cpp_golden() {
     let golden = read_golden_bytes(entry);
     assert!(
         !golden.is_empty(),
-        "golden scores artifact must be non-empty; round-trip lands in phase_5"
+        "golden scores artifact must be non-empty; round-trip not yet wired"
     );
 
     // Phase 5: round-trip via umoria::scores, byte_diff vs golden.

@@ -5,7 +5,9 @@ use crate::config::monsters::defense::CD_EVIL;
 use crate::config::player::PLAYER_USE_DEVICE_DIFFICULTY;
 use crate::data_player::{CLASS_LEVEL_ADJ, SPELL_NAMES};
 use crate::dice::{dice_roll, Dice};
-use crate::game::{get_random_direction, random_number, with_state, with_state_mut};
+use crate::game::{
+    get_random_direction, random_number, random_number_state, with_state, with_state_mut,
+};
 use crate::helpers::get_and_clear_first_bit;
 use crate::identification::{
     item_append_to_inscription, item_charges_remaining_description, item_identify,
@@ -148,7 +150,7 @@ fn staff_discharge(item_id: i32) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.fast += (random_number(30) + 15) as i16;
+                    state.py.flags.fast += (random_number_state(state, 30) + 15) as i16;
                 });
             }
             18 => {
@@ -156,7 +158,7 @@ fn staff_discharge(item_id: i32) -> bool {
                     identified = true;
                 }
                 with_state_mut(|state| {
-                    state.py.flags.slow += (random_number(30) + 15) as i16;
+                    state.py.flags.slow += (random_number_state(state, 30) + 15) as i16;
                 });
             }
             19 => identified = spell_mass_polymorph(),
@@ -231,7 +233,8 @@ pub fn staff_use() {
             item_identify(&mut item_id);
         }
     } else if !item_set_colorless_as_identified(category_id, sub_category_id, identification) {
-        with_state(|state| item_set_as_tried(state.py.inventory[item_id as usize]));
+        let item = with_state(|state| state.py.inventory[item_id as usize]);
+        item_set_as_tried(item);
     }
 
     item_charges_remaining_description(item_id);
@@ -459,7 +462,8 @@ pub fn wand_aim() {
             item_identify(&mut item_id);
         }
     } else if !item_set_colorless_as_identified(category_id, sub_category_id, identification) {
-        with_state(|state| item_set_as_tried(state.py.inventory[item_id as usize]));
+        let item = with_state(|state| state.py.inventory[item_id as usize]);
+        item_set_as_tried(item);
     }
 
     item_charges_remaining_description(item_id);

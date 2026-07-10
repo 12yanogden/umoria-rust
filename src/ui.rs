@@ -902,47 +902,47 @@ pub fn format_exp_to_advance_line(
 
 /// C++ ui.cpp lines 539–555.
 pub fn print_character_level_experience() {
-    with_state_mut(|state| {
-        let misc = &state.py.misc;
-        print_header_long_number7_spaces(
-            "Level      ",
-            i32::from(misc.level),
-            Coord { y: 9, x: 28 },
-        );
-        print_header_long_number7_spaces("Experience ", misc.exp, Coord { y: 10, x: 28 });
-        print_header_long_number7_spaces("Max Exp    ", misc.max_exp, Coord { y: 11, x: 28 });
+    let (level, exp, max_exp, au, max_hp, current_hp, mana, current_mana, base_exp, exp_factor) =
+        with_state(|state| {
+            let misc = state.py.misc;
+            (
+                misc.level,
+                misc.exp,
+                misc.max_exp,
+                misc.au,
+                misc.max_hp,
+                misc.current_hp,
+                misc.mana,
+                misc.current_mana,
+                state.py.base_exp_levels,
+                misc.experience_factor,
+            )
+        });
 
-        if misc.level >= u16::from(PLAYER_MAX_LEVEL) {
-            terminal::put_string_clear_to_eol("Exp to Adv.: *******", Coord { y: 12, x: 28 });
-        } else {
-            let val = (state.py.base_exp_levels[(misc.level - 1) as usize]
-                * u32::from(misc.experience_factor)
-                / 100) as i32;
-            print_header_long_number7_spaces("Exp to Adv.", val, Coord { y: 12, x: 28 });
-        }
+    print_header_long_number7_spaces("Level      ", i32::from(level), Coord { y: 9, x: 28 });
+    print_header_long_number7_spaces("Experience ", exp, Coord { y: 10, x: 28 });
+    print_header_long_number7_spaces("Max Exp    ", max_exp, Coord { y: 11, x: 28 });
 
-        print_header_long_number7_spaces("Gold       ", misc.au, Coord { y: 13, x: 28 });
-        print_header_number(
-            "Max Hit Points ",
-            i32::from(misc.max_hp),
-            Coord { y: 9, x: 52 },
-        );
-        print_header_number(
-            "Cur Hit Points ",
-            i32::from(misc.current_hp),
-            Coord { y: 10, x: 52 },
-        );
-        print_header_number(
-            "Max Mana       ",
-            i32::from(misc.mana),
-            Coord { y: 11, x: 52 },
-        );
-        print_header_number(
-            "Cur Mana       ",
-            i32::from(misc.current_mana),
-            Coord { y: 12, x: 52 },
-        );
-    });
+    if level >= u16::from(PLAYER_MAX_LEVEL) {
+        terminal::put_string_clear_to_eol("Exp to Adv.: *******", Coord { y: 12, x: 28 });
+    } else {
+        let val = (base_exp[(level - 1) as usize] * u32::from(exp_factor) / 100) as i32;
+        print_header_long_number7_spaces("Exp to Adv.", val, Coord { y: 12, x: 28 });
+    }
+
+    print_header_long_number7_spaces("Gold       ", au, Coord { y: 13, x: 28 });
+    print_header_number("Max Hit Points ", i32::from(max_hp), Coord { y: 9, x: 52 });
+    print_header_number(
+        "Cur Hit Points ",
+        i32::from(current_hp),
+        Coord { y: 10, x: 52 },
+    );
+    print_header_number("Max Mana       ", i32::from(mana), Coord { y: 11, x: 52 });
+    print_header_number(
+        "Cur Mana       ",
+        i32::from(current_mana),
+        Coord { y: 12, x: 52 },
+    );
 }
 
 /// Pure ability math from ui.cpp lines 561–582.

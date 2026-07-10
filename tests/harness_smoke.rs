@@ -1,4 +1,4 @@
-//! Phase 1.5 — differential fidelity harness smoke + helper unit tests.
+//! Differential fidelity harness smoke + helper unit tests.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,

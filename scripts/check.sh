@@ -15,6 +15,9 @@ cargo clippy --all-targets --all-features -- -Dwarnings
 echo "==> cargo test --all-features"
 cargo test --all-features
 
+echo "==> scripts/check_refcell_nests.sh"
+bash scripts/check_refcell_nests.sh
+
 echo "==> cargo doc --no-deps --all-features (-D warnings)"
 RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
 

@@ -466,7 +466,8 @@ pub fn quaff() {
             item_identify(&mut item_id);
         }
     } else if !item_set_colorless_as_identified(category_id, sub_category_id, identification) {
-        with_state(|state| item_set_as_tried(state.py.inventory[item_id as usize]));
+        let item = with_state(|state| state.py.inventory[item_id as usize]);
+        item_set_as_tried(item);
     }
 
     player_ingest_food(i32::from(misc_use));

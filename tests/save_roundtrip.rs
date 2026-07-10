@@ -1,4 +1,4 @@
-//! Phase 1.5 / 5.8 — save byte-exact round-trip vs C++ golden fixtures.
+//! Save byte-exact round-trip vs C++ golden fixtures.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,

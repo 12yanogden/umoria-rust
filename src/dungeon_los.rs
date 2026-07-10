@@ -9,7 +9,7 @@ use crate::dungeon_tile::{
     Tile, MAX_OPEN_SPACE, MIN_CLOSED_SPACE, TILE_BOUNDARY_WALL, TILE_GRANITE_WALL, TILE_MAGMA_WALL,
     TILE_QUARTZ_WALL,
 };
-use crate::game::{get_all_directions, with_state, with_state_mut};
+use crate::game::{get_all_directions, with_state};
 use crate::helpers::is_vowel;
 use crate::identification::item_description;
 use crate::recall::memory_recall;
@@ -516,13 +516,9 @@ pub fn look_see(mut coord: Coord_t, transparent: &mut bool) -> bool {
                 };
             } else if rocks_and_objects == 0 && category_id != TV_INVIS_TRAP {
                 let mut obj_string = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
-                with_state_mut(|s| {
-                    item_description(
-                        &mut obj_string,
-                        s.game.treasure.list[tile.treasure_id as usize],
-                        true,
-                    );
-                });
+                // Snapshot the item — item_description re-enters game state.
+                let item = with_state(|s| s.game.treasure.list[tile.treasure_id as usize]);
+                item_description(&mut obj_string, item, true);
                 snprintf_obj_desc(
                     &mut msg,
                     &format!(

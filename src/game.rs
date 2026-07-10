@@ -1,5 +1,7 @@
 //! Port of src/game.cpp / src/game.h — central mutable game state owner.
 
+#[cfg(debug_assertions)]
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::io::{self, Write};
 
@@ -240,12 +242,131 @@ thread_local! {
     static STATE: RefCell<State> = RefCell::new(State::default());
 }
 
-pub fn with_state<R>(f: impl FnOnce(&State) -> R) -> R {
-    STATE.with(|s| f(&s.borrow()))
+const STATE_REENTRY_HINT: &str = "\
+nested State borrow via with_state/with_state_mut. \
+Hold only a short borrow, copy Inventory/flags/coords, release, then call \
+re-entering helpers (item_description, terminal::*, player_stat_*, display_*). \
+See store::display_store_inventory / dungeon_los::look_see.";
+
+// Debug-only reentrancy tracking for clearer panics than bare RefCell.
+// 0 = unlocked, 1 = shared (with_state), 2 = exclusive (with_state_mut).
+#[cfg(debug_assertions)]
+thread_local! {
+    static STATE_BORROW_KIND: Cell<u8> = const { Cell::new(0) };
+    static STATE_BORROW_DEPTH: Cell<u32> = const { Cell::new(0) };
 }
 
+#[cfg(debug_assertions)]
+#[allow(clippy::panic, clippy::manual_assert)]
+fn enter_state_shared() {
+    STATE_BORROW_KIND.with(|kind| {
+        assert!(
+            kind.get() != 2,
+            "with_state re-entered while with_state_mut borrow is active \
+             (nested RefCell borrow — snapshot state, release, then call helpers)"
+        );
+        kind.set(1);
+    });
+    STATE_BORROW_DEPTH.with(|d| d.set(d.get() + 1));
+}
+
+#[cfg(debug_assertions)]
+fn exit_state_shared() {
+    STATE_BORROW_DEPTH.with(|d| {
+        let n = d.get().saturating_sub(1);
+        d.set(n);
+        if n == 0 {
+            STATE_BORROW_KIND.with(|kind| kind.set(0));
+        }
+    });
+}
+
+#[cfg(debug_assertions)]
+#[allow(clippy::panic, clippy::manual_assert)]
+fn enter_state_exclusive() {
+    STATE_BORROW_KIND.with(|kind| {
+        assert!(
+            kind.get() == 0,
+            "with_state_mut re-entered while game state is already borrowed \
+             (nested RefCell borrow — snapshot state, release, then call helpers)"
+        );
+        kind.set(2);
+    });
+    STATE_BORROW_DEPTH.with(|d| d.set(1));
+}
+
+#[cfg(debug_assertions)]
+fn exit_state_exclusive() {
+    STATE_BORROW_DEPTH.with(|d| d.set(0));
+    STATE_BORROW_KIND.with(|kind| kind.set(0));
+}
+
+#[cfg(debug_assertions)]
+struct SharedBorrowGuard;
+
+#[cfg(debug_assertions)]
+impl Drop for SharedBorrowGuard {
+    fn drop(&mut self) {
+        exit_state_shared();
+    }
+}
+
+#[cfg(debug_assertions)]
+struct ExclusiveBorrowGuard;
+
+#[cfg(debug_assertions)]
+impl Drop for ExclusiveBorrowGuard {
+    fn drop(&mut self) {
+        exit_state_exclusive();
+    }
+}
+
+#[allow(clippy::panic)]
+pub fn with_state<R>(f: impl FnOnce(&State) -> R) -> R {
+    #[cfg(debug_assertions)]
+    {
+        enter_state_shared();
+        let _guard = SharedBorrowGuard;
+        STATE.with(|s| {
+            let borrow = s
+                .try_borrow()
+                .unwrap_or_else(|_| panic!("{STATE_REENTRY_HINT}"));
+            f(&borrow)
+        })
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        STATE.with(|s| {
+            let borrow = s
+                .try_borrow()
+                .unwrap_or_else(|_| panic!("{STATE_REENTRY_HINT}"));
+            f(&borrow)
+        })
+    }
+}
+
+#[allow(clippy::panic)]
 pub fn with_state_mut<R>(f: impl FnOnce(&mut State) -> R) -> R {
-    STATE.with(|s| f(&mut s.borrow_mut()))
+    #[cfg(debug_assertions)]
+    {
+        enter_state_exclusive();
+        let _guard = ExclusiveBorrowGuard;
+        STATE.with(|s| {
+            let mut borrow = s
+                .try_borrow_mut()
+                .unwrap_or_else(|_| panic!("{STATE_REENTRY_HINT}"));
+            f(&mut borrow)
+        })
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        STATE.with(|s| {
+            let mut borrow = s
+                .try_borrow_mut()
+                .unwrap_or_else(|_| panic!("{STATE_REENTRY_HINT}"));
+            f(&mut borrow)
+        })
+    }
 }
 
 /// Deterministic reset/reseed used by the harness between golden runs.

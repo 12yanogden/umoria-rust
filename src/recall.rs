@@ -718,62 +718,61 @@ pub fn memory_recall(monster_id: i32) -> u8 {
         (saved, wizard)
     });
 
-    with_state(|state| {
-        let memory = &state.creature_recall[monster_id as usize];
-        let creature = &CREATURES_LIST[monster_id as usize];
+    // Snapshot recall data — memory_print / terminal I/O re-enter game state.
+    let memory = with_state(|state| state.creature_recall[monster_id as usize]);
+    let creature = &CREATURES_LIST[monster_id as usize];
 
-        let spells = memory.spells & creature.spells & !CS_FREQ;
-        let mv = memory.movement | (creature.movement & CM_WIN);
-        let defense = memory.defenses & creature.defenses;
+    let spells = memory.spells & creature.spells & !CS_FREQ;
+    let mv = memory.movement | (creature.movement & CM_WIN);
+    let defense = memory.defenses & creature.defenses;
 
-        let mut msg = [0u8; MORIA_MESSAGE_SIZE];
-        vtype_set_cstr(&mut msg, &format!("The {}:\n", creature.name));
-        memory_print(&vtype_cstr(&msg));
+    let mut msg = [0u8; MORIA_MESSAGE_SIZE];
+    vtype_set_cstr(&mut msg, &format!("The {}:\n", creature.name));
+    memory_print(&vtype_cstr(&msg));
 
-        memory_conflict_history(memory.deaths, memory.kills);
-        let mut known = memory_depth_found_at(creature.level, memory.kills);
-        known = memory_movement(mv, creature.speed, known);
+    memory_conflict_history(memory.deaths, memory.kills);
+    let mut known = memory_depth_found_at(creature.level, memory.kills);
+    known = memory_movement(mv, creature.speed, known);
 
-        if known {
-            memory_print(".");
-        }
+    if known {
+        memory_print(".");
+    }
 
-        if memory.kills != 0 {
-            memory_kill_points(creature.defenses, creature.kill_exp_value, creature.level);
-        }
+    if memory.kills != 0 {
+        memory_kill_points(creature.defenses, creature.kill_exp_value, creature.level);
+    }
 
-        memory_magic_skills(spells, memory.spells, creature.spells);
-        memory_kill_difficulty(creature, u32::from(memory.kills));
-        memory_special_abilities(mv);
-        memory_weaknesses(u32::from(defense));
+    memory_magic_skills(spells, memory.spells, creature.spells);
+    memory_kill_difficulty(creature, u32::from(memory.kills));
+    memory_special_abilities(mv);
+    memory_weaknesses(u32::from(defense));
 
+    if (defense & CD_INFRA) != 0 {
+        memory_print(" It is warm blooded");
+    }
+
+    if (defense & CD_NO_SLEEP) != 0 {
         if (defense & CD_INFRA) != 0 {
-            memory_print(" It is warm blooded");
+            memory_print(", and");
+        } else {
+            memory_print(" It");
         }
+        memory_print(" cannot be charmed or slept");
+    }
 
-        if (defense & CD_NO_SLEEP) != 0 {
-            if (defense & CD_INFRA) != 0 {
-                memory_print(", and");
-            } else {
-                memory_print(" It");
-            }
-            memory_print(" cannot be charmed or slept");
-        }
+    if (defense & (CD_NO_SLEEP | CD_INFRA)) != 0 {
+        memory_print(".");
+    }
 
-        if (defense & (CD_NO_SLEEP | CD_INFRA)) != 0 {
-            memory_print(".");
-        }
+    memory_awareness(creature, &memory);
+    memory_loot_carried(creature.movement, mv);
+    memory_attack_number_and_damage(&memory, creature);
 
-        memory_awareness(creature, memory);
-        memory_loot_carried(creature.movement, mv);
-        memory_attack_number_and_damage(memory, creature);
+    if (creature.movement & CM_WIN) != 0 {
+        memory_print(" Killing one of these wins the game!");
+    }
 
-        if (creature.movement & CM_WIN) != 0 {
-            memory_print(" Killing one of these wins the game!");
-        }
-
-        memory_print("\n");
-    });
+    memory_print("\n");
 
     let () = ();
 

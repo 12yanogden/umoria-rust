@@ -214,7 +214,7 @@ pub fn score_getc() -> u8 {
     }
 }
 
-/// Test harness: route wr/rd through an in-memory buffer (see `tests/phase_5_1_1.rs`).
+/// Test harness: route wr/rd through an in-memory buffer (see `tests/game_save_stream.rs`).
 pub fn test_reset_buffer() {
     TEST_BUFFER.with(|buf| *buf.borrow_mut() = Some(Cursor::new(Vec::new())));
     FILEPTR.with(|fp| *fp.borrow_mut() = None);
@@ -975,12 +975,10 @@ fn open_save_file(filename: &str) -> io::Result<(Option<i32>, bool)> {
         }
         Err(_) if path.exists() => {
             let overwrite = from_save_file() != 0
-                || with_state(|state| {
-                    state.game.wizard_mode
-                        && terminal::get_input_confirmation(
-                            "Can't make new save file. Overwrite old?",
-                        )
-                });
+                || (with_state(|state| state.game.wizard_mode)
+                    && terminal::get_input_confirmation(
+                        "Can't make new save file. Overwrite old?",
+                    ));
             if overwrite {
                 let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
                 OpenOptions::new()

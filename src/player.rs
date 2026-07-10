@@ -1775,11 +1775,12 @@ pub fn player_attack_monster(coord: Coord_t) {
             } else {
                 print_message(Some(&format!("{name} appears confused.")));
                 with_state_mut(|state| {
+                    let roll = random_number_state(state, 16);
                     let monster = &mut state.monsters[creature_id as usize];
                     if monster.confused_amount != 0 {
                         monster.confused_amount += 3;
                     } else {
-                        monster.confused_amount = (2 + random_number(16)) as u8;
+                        monster.confused_amount = (2 + roll) as u8;
                     }
                 });
             }
@@ -1800,7 +1801,7 @@ pub fn player_attack_monster(coord: Coord_t) {
         }
 
         if (TV_SLING_AMMO..=TV_SPIKE).contains(&weapon_id) {
-            with_state_mut(|state| {
+            let depleted = with_state_mut(|state| {
                 let item = &mut state.py.inventory[PlayerEquipment::Wield as usize];
                 item.items_count -= 1;
                 state.py.pack.weight -= item.weight as i16;
@@ -1809,11 +1810,16 @@ pub fn player_attack_monster(coord: Coord_t) {
                 if item.items_count == 0 {
                     state.py.equipment_count -= 1;
                     let copy = *item;
-                    player_adjust_bonuses_for_item(copy, -1);
                     inventory_item_copy_to(OBJ_NOTHING as i16, item);
-                    player_recalculate_bonuses();
+                    Some(copy)
+                } else {
+                    None
                 }
             });
+            if let Some(copy) = depleted {
+                player_adjust_bonuses_for_item(copy, -1);
+                player_recalculate_bonuses();
+            }
         }
     }
 }

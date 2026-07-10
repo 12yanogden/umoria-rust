@@ -16,7 +16,7 @@ use crate::data_stores::{
     SPEECH_SELLING_HAGGLE_FINAL as SPEECH_SELLING_HAGGLE_FINAL_TABLE,
     SPEECH_SORRY as SPEECH_SORRY_TABLE,
 };
-use crate::game::{random_number, random_number_state, with_state, with_state_mut, State};
+use crate::game::{random_number, random_number_state, with_state, with_state_mut};
 use crate::helpers::{insert_number_into_string, string_to_number};
 use crate::identification::{
     item_description, item_identify, spell_item_identify_and_remove_random_inscription,
@@ -270,27 +270,31 @@ fn display_store_haggle_commands(haggle_type: i32) {
     terminal::erase_line(Coord { y: 23, x: 0 });
 }
 
-fn display_store_inventory_for_state(state: &mut State, store_id: usize, item_pos_start: i32) {
-    let store = &mut state.stores[store_id];
+/// Display store inventory without holding a `with_state_mut` borrow.
+/// `item_description`, charisma pricing, and terminal I/O all re-enter game state.
+fn display_store_inventory(store_id: usize, item_pos_start: i32) {
+    let unique = with_state(|state| state.stores[store_id].unique_items_counter);
     let mut item_pos_end = ((item_pos_start / 12) + 1) * 12;
-    if item_pos_end > i32::from(store.unique_items_counter) {
-        item_pos_end = i32::from(store.unique_items_counter);
+    if item_pos_end > i32::from(unique) {
+        item_pos_end = i32::from(unique);
     }
 
     let mut item_line_num = item_pos_start % 12;
-    let mut item_pos_start = item_pos_start;
+    let mut item_pos = item_pos_start;
 
-    while item_pos_start < item_pos_end {
-        let item = &mut store.inventory[item_pos_start as usize].item;
-        let current_item_count = item.items_count;
+    while item_pos < item_pos_end {
+        // Short borrow: copy row data, then release before re-entrant helpers.
+        let (mut item, cost) = with_state(|state| {
+            let rec = &state.stores[store_id].inventory[item_pos as usize];
+            (rec.item, rec.cost)
+        });
 
-        if inventory_item_single_stackable(*item) {
+        if inventory_item_single_stackable(item) {
             item.items_count = 1;
         }
 
         let mut description = [0u8; MORIA_OBJ_DESC_SIZE as usize];
-        item_description(&mut description, *item, true);
-        item.items_count = current_item_count;
+        item_description(&mut description, item, true);
 
         let desc = CStr::from_bytes_until_nul(&description)
             .map(|c| c.to_string_lossy().into_owned())
@@ -304,16 +308,15 @@ fn display_store_inventory_for_state(state: &mut State, store_id: usize, item_po
             },
         );
 
-        let current_item_count = store.inventory[item_pos_start as usize].cost;
-        let price_msg = if current_item_count <= 0 {
-            let mut value = -current_item_count;
+        let price_msg = if cost <= 0 {
+            let mut value = -cost;
             value = value * player_stat_adjustment_charisma() / 100;
             if value <= 0 {
                 value = 1;
             }
             format!("{value:>9}")
         } else {
-            format!("{current_item_count:>9} [Fixed]")
+            format!("{cost:>9} [Fixed]")
         };
 
         terminal::put_string_clear_to_eol(
@@ -324,7 +327,7 @@ fn display_store_inventory_for_state(state: &mut State, store_id: usize, item_po
             },
         );
 
-        item_pos_start += 1;
+        item_pos += 1;
         item_line_num += 1;
     }
 
@@ -337,7 +340,7 @@ fn display_store_inventory_for_state(state: &mut State, store_id: usize, item_po
         }
     }
 
-    if store.unique_items_counter > 12 {
+    if unique > 12 {
         terminal::put_string("- cont. -", Coord { y: 17, x: 60 });
     } else {
         terminal::erase_line(Coord { y: 17, x: 60 });
@@ -379,9 +382,7 @@ fn display_store(store_id: i32, current_top_item_id: i32) {
     terminal::put_string("Asking Price", Coord { y: 4, x: 60 });
     display_player_remaining_gold();
     display_store_commands();
-    with_state_mut(|state| {
-        display_store_inventory_for_state(state, store_id as usize, current_top_item_id);
-    });
+    display_store_inventory(store_id as usize, current_top_item_id);
 }
 
 fn store_get_item_id(
@@ -1132,13 +1133,8 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
             store_destroy_item(store_id, item_id, true);
 
             let mut description = [0u8; MORIA_OBJ_DESC_SIZE as usize];
-            with_state(|state| {
-                item_description(
-                    &mut description,
-                    state.py.inventory[new_item_id as usize],
-                    true,
-                );
-            });
+            let purchased = with_state(|state| state.py.inventory[new_item_id as usize]);
+            item_description(&mut description, purchased, true);
             let desc = CStr::from_bytes_until_nul(&description)
                 .map(|c| c.to_string_lossy().into_owned())
                 .unwrap_or_default();
@@ -1151,13 +1147,7 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
                 with_state(|state| state.stores[store_id as usize].unique_items_counter);
             if *current_top_item_id >= unique_after as i32 {
                 *current_top_item_id = 0;
-                with_state_mut(|state| {
-                    display_store_inventory_for_state(
-                        state,
-                        store_id as usize,
-                        *current_top_item_id,
-                    );
-                });
+                display_store_inventory(store_id as usize, *current_top_item_id);
             } else {
                 let (same_count, store_item_cost) = with_state(|state| {
                     (
@@ -1174,9 +1164,7 @@ fn store_purchase_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool 
                         display_single_cost(store_id, item_id);
                     }
                 } else {
-                    with_state_mut(|state| {
-                        display_store_inventory_for_state(state, store_id as usize, item_id);
-                    });
+                    display_store_inventory(store_id as usize, item_id);
                 }
             }
             display_player_remaining_gold();
@@ -1350,32 +1338,16 @@ fn store_sell_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool {
         if item_pos_id >= 0 {
             if item_pos_id < 12 {
                 if *current_top_item_id < 12 {
-                    with_state_mut(|state| {
-                        display_store_inventory_for_state(state, store_id as usize, item_pos_id);
-                    });
+                    display_store_inventory(store_id as usize, item_pos_id);
                 } else {
                     *current_top_item_id = 0;
-                    with_state_mut(|state| {
-                        display_store_inventory_for_state(
-                            state,
-                            store_id as usize,
-                            *current_top_item_id,
-                        );
-                    });
+                    display_store_inventory(store_id as usize, *current_top_item_id);
                 }
             } else if *current_top_item_id > 11 {
-                with_state_mut(|state| {
-                    display_store_inventory_for_state(state, store_id as usize, item_pos_id);
-                });
+                display_store_inventory(store_id as usize, item_pos_id);
             } else {
                 *current_top_item_id = 12;
-                with_state_mut(|state| {
-                    display_store_inventory_for_state(
-                        state,
-                        store_id as usize,
-                        *current_top_item_id,
-                    );
-                });
+                display_store_inventory(store_id as usize, *current_top_item_id);
             }
         }
         display_player_remaining_gold();
@@ -1417,25 +1389,13 @@ pub fn store_enter(store_id: i32) {
                     if current_top_item_id == 0 {
                         if unique > 12 {
                             current_top_item_id = 12;
-                            with_state_mut(|state| {
-                                display_store_inventory_for_state(
-                                    state,
-                                    store_id as usize,
-                                    current_top_item_id,
-                                );
-                            });
+                            display_store_inventory(store_id as usize, current_top_item_id);
                         } else {
                             terminal::print_message(Some("Entire inventory is shown."));
                         }
                     } else {
                         current_top_item_id = 0;
-                        with_state_mut(|state| {
-                            display_store_inventory_for_state(
-                                state,
-                                store_id as usize,
-                                current_top_item_id,
-                            );
-                        });
+                        display_store_inventory(store_id as usize, current_top_item_id);
                     }
                 }
                 b'E' | b'e' | b'I' | b'i' | b'T' | b't' | b'W' | b'w' | b'X' | b'x' => {
@@ -1451,13 +1411,7 @@ pub fn store_enter(store_id: i32) {
                     let new_chr =
                         with_state(|state| state.py.stats.used[PlayerAttr::A_CHR as usize]);
                     if saved_chr != new_chr {
-                        with_state_mut(|state| {
-                            display_store_inventory_for_state(
-                                state,
-                                store_id as usize,
-                                current_top_item_id,
-                            );
-                        });
+                        display_store_inventory(store_id as usize, current_top_item_id);
                     }
 
                     with_state_mut(|state| state.game.player_free_turn = false);

@@ -1,4 +1,4 @@
-//! Phase 1.5 — transcript replay / screen-diff skeleton (staged until phase_5).
+//! Transcript replay / screen-diff skeleton.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -46,7 +46,7 @@ fn transcript_replay_matches_golden_screen() {
         assert_eq!(
             expected_screen.rows(),
             24,
-            "golden screen should be 24 rows; PTY replay lands in phase_5"
+            "golden screen should be 24 rows; PTY replay not yet wired"
         );
         assert!(
             expected_screen.cols() >= 79,
