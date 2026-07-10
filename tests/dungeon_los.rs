@@ -1,5 +1,9 @@
 //! `dungeon_los` (`los`, `look`, `lookRay`, `lookSee`).
-#![allow(clippy::int_plus_one, clippy::too_many_lines)]
+#![allow(
+    clippy::int_plus_one,
+    clippy::too_many_lines,
+    reason = "test assertions mirror C++ inclusive bound comparisons; integration test covers a large C++ scenario in one function"
+)]
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,

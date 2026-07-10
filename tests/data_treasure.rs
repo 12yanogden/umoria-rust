@@ -1,6 +1,9 @@
 //! `data_treasure` (`game_objects` + `special_item_names`).
 //! Phase 2.8 (partial) — descriptive string arrays from data_tables.cpp
-#![allow(clippy::assertions_on_constants)]
+#![allow(
+    clippy::assertions_on_constants,
+    reason = "constant assertions document table sizes from C++ headers"
+)]
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -58,7 +61,10 @@ fn assert_object(index: usize, expected: DungeonObject) {
     );
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(
+    clippy::too_many_arguments,
+    reason = "test helper mirrors multi-arg C++ setup"
+)]
 fn obj(
     name: &'static str,
     flags: u32,

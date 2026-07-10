@@ -257,7 +257,11 @@ thread_local! {
 }
 
 #[cfg(debug_assertions)]
-#[allow(clippy::panic, clippy::manual_assert)]
+#[allow(
+    clippy::panic,
+    clippy::manual_assert,
+    reason = "intentional panic on nested game-state RefCell re-entry; assert! used for nested borrow diagnostics in debug builds"
+)]
 fn enter_state_shared() {
     STATE_BORROW_KIND.with(|kind| {
         assert!(
@@ -282,7 +286,11 @@ fn exit_state_shared() {
 }
 
 #[cfg(debug_assertions)]
-#[allow(clippy::panic, clippy::manual_assert)]
+#[allow(
+    clippy::panic,
+    clippy::manual_assert,
+    reason = "intentional panic on nested game-state RefCell re-entry; assert! used for nested borrow diagnostics in debug builds"
+)]
 fn enter_state_exclusive() {
     STATE_BORROW_KIND.with(|kind| {
         assert!(
@@ -321,7 +329,10 @@ impl Drop for ExclusiveBorrowGuard {
     }
 }
 
-#[allow(clippy::panic)]
+#[allow(
+    clippy::panic,
+    reason = "intentional panic on nested game-state RefCell re-entry"
+)]
 pub fn with_state<R>(f: impl FnOnce(&State) -> R) -> R {
     #[cfg(debug_assertions)]
     {
@@ -345,7 +356,10 @@ pub fn with_state<R>(f: impl FnOnce(&State) -> R) -> R {
     }
 }
 
-#[allow(clippy::panic)]
+#[allow(
+    clippy::panic,
+    reason = "intentional panic on nested game-state RefCell re-entry"
+)]
 pub fn with_state_mut<R>(f: impl FnOnce(&mut State) -> R) -> R {
     #[cfg(debug_assertions)]
     {

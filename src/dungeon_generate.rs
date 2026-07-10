@@ -120,7 +120,10 @@ pub fn dungeon_blank_entire_cave() {
 }
 
 /// C++ `dungeon_generate.cpp` lines 68–79.
-#[allow(clippy::explicit_counter_loop)]
+#[allow(
+    clippy::explicit_counter_loop,
+    reason = "manual index mirrors C++ loop structure"
+)]
 pub fn dungeon_fill_empty_tiles_with(rock_type: u8) {
     with_state_mut(|state| {
         for y in (1..state.dg.height - 1).rev() {
@@ -1350,7 +1353,10 @@ pub fn dungeon_generate() {
     }
 
     let mut alloc_level = i32::from(current_level) / 3;
-    #[allow(clippy::manual_clamp)] // C++ dungeon_generate.cpp lines 1079–1084
+    #[allow(
+        clippy::manual_clamp,
+        reason = "if/else clamp mirrors C++ dungeon_generate.cpp lines 1079–1084"
+    )]
     if alloc_level < 2 {
         alloc_level = 2;
     } else if alloc_level > 10 {

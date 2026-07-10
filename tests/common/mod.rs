@@ -1,6 +1,9 @@
 //! Shared helpers for phase 1.5 differential fidelity tests.
 
-#![allow(dead_code)]
+#![allow(
+    dead_code,
+    reason = "translation units retain C++ symbols not yet referenced from Rust call sites"
+)]
 
 use serde::Deserialize;
 use serde_json::Value;

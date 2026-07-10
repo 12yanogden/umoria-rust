@@ -1,5 +1,8 @@
 //! Tunnels & intersection doors in `dungeon_generate`.
-#![allow(clippy::int_plus_one)]
+#![allow(
+    clippy::int_plus_one,
+    reason = "test assertions mirror C++ inclusive bound comparisons"
+)]
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,

@@ -1,5 +1,8 @@
 //! Port of src/types.h and shared type aliases — see `phase_2` for full layouts.
-#![allow(unused_imports)]
+#![allow(
+    unused_imports,
+    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+)]
 //!
 //! ## Fixed char-buffer semantics (`phase_2.1` decision)
 //!
@@ -31,13 +34,19 @@ pub const MORIA_OBJ_DESC_SIZE_LEN: usize = MORIA_OBJ_DESC_SIZE as usize;
 pub const CNIL: Option<&str> = None;
 
 /// C++ `typedef char vtype_t[MORIA_MESSAGE_SIZE]`.
-#[allow(non_camel_case_types)]
+#[allow(
+    non_camel_case_types,
+    reason = "C++ typedef / enum member names preserved for fidelity"
+)]
 pub type Vtype_t = [u8; MORIA_MESSAGE_SIZE];
 /// Alias retained for `phase_1.3` callers.
 pub type Vtype = Vtype_t;
 
 /// C++ `typedef char obj_desc_t[MORIA_OBJ_DESC_SIZE]`.
-#[allow(non_camel_case_types)]
+#[allow(
+    non_camel_case_types,
+    reason = "C++ typedef / enum member names preserved for fidelity"
+)]
 pub type Obj_desc_t = [u8; MORIA_OBJ_DESC_SIZE_LEN];
 /// Alias matching common Rust naming.
 pub type ObjDesc = Obj_desc_t;
@@ -88,7 +97,10 @@ pub enum Screen {
 
 /// C++ `typedef struct { int y; int x; } Coord_t`.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-#[allow(non_camel_case_types)]
+#[allow(
+    non_camel_case_types,
+    reason = "C++ typedef / enum member names preserved for fidelity"
+)]
 pub struct Coord_t {
     pub y: i32,
     pub x: i32,

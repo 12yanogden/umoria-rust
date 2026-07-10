@@ -1287,10 +1287,16 @@ fn set_errno(err: i32) {
     }
 }
 
-#[allow(unused_imports)]
+#[allow(
+    unused_imports,
+    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+)]
 pub use terminal::Coord;
 
-#[allow(unused_imports)]
+#[allow(
+    unused_imports,
+    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+)]
 pub use crate::game::get_direction_with_memory;
 
 /// Test hook for direction-taking player actions (open/close door).

@@ -19,7 +19,11 @@ pub type ClassRankTitle = &'static str;
 /// Port of `PlayerClassLevelAdj` in player.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
-#[allow(non_camel_case_types, clippy::upper_case_acronyms)]
+#[allow(
+    non_camel_case_types,
+    clippy::upper_case_acronyms,
+    reason = "C++ typedef / enum member names preserved for fidelity; C++ enum acronyms preserved for fidelity"
+)]
 pub enum PlayerClassLevelAdj {
     BTH = 0,
     BTHB,
@@ -31,7 +35,10 @@ pub enum PlayerClassLevelAdj {
 /// Port of `PlayerAttr` in player.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
-#[allow(non_camel_case_types)]
+#[allow(
+    non_camel_case_types,
+    reason = "C++ typedef / enum member names preserved for fidelity"
+)]
 pub enum PlayerAttr {
     A_STR = 0,
     A_INT,
@@ -350,7 +357,10 @@ pub fn player_get_gender_label() -> &'static str {
     }
 }
 
-#[allow(unused_imports)]
+#[allow(
+    unused_imports,
+    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+)]
 pub use crate::player_stats::{
     player_armor_class_adjustment, player_attack_blows, player_calculate_hit_points,
     player_damage_adjustment, player_disarm_adjustment, player_initialize_base_experience_levels,

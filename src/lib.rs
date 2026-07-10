@@ -1,5 +1,8 @@
 //! Umoria library crate — 1:1 mirror of `src/*.cpp` translation units.
-#![allow(dead_code)]
+#![allow(
+    dead_code,
+    reason = "translation units retain C++ symbols not yet referenced from Rust call sites"
+)]
 
 // --- phase 2: foundation (config, helpers, rng, data tables, types) ---
 pub mod config;

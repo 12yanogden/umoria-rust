@@ -12,7 +12,10 @@ pub const MAX_SYLLABLES: u8 = 153;
 /// Port of `SpecialNameIds` in identification.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
-#[allow(non_camel_case_types)]
+#[allow(
+    non_camel_case_types,
+    reason = "C++ typedef / enum member names preserved for fidelity"
+)]
 pub enum SpecialNameIds {
     SN_NULL = 0,
     SN_R,

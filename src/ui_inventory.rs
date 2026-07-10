@@ -150,7 +150,10 @@ pub fn display_inventory_items(
 
     let mut current_line = 1;
 
-    #[allow(clippy::explicit_counter_loop)]
+    #[allow(
+        clippy::explicit_counter_loop,
+        reason = "manual index mirrors C++ loop structure"
+    )]
     for &(iu, _, _) in &items {
         if column == 0 {
             terminal::put_string_clear_to_eol(
@@ -1499,7 +1502,10 @@ fn inventory_switch_pack_menu(
 /// C++ ui_inventory.cpp:1152-1304 — `inventoryGetInputForItemId`.
 // `done = true;` immediately preceding `break;` mirrors ui_inventory.cpp:1273-1277
 // verbatim; the assignment is dead but preserved for fidelity.
-#[allow(unused_assignments)]
+#[allow(
+    unused_assignments,
+    reason = "dead assignment preserved for C++ control-flow fidelity"
+)]
 pub fn inventory_get_input_for_item_id(
     command_key_id: &mut i32,
     prompt: &str,

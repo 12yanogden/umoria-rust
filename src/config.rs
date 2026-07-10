@@ -6,7 +6,10 @@
 //! Runtime-mutable C++ globals (`config::options`, `config::files::save_game`) are owned by
 //! `game::State` (`phase_1.3`). This module exposes their default values only.
 
-#![allow(non_upper_case_globals)] // C++ `config::*` names are lowercase snake_case.
+#![allow(
+    non_upper_case_globals,
+    reason = "C++ config::* names are lowercase snake_case"
+)]
 
 pub mod files {
     pub const splash_screen: &str = "data/splash.txt";

@@ -1,5 +1,8 @@
 //! Types, config, and version constant parity with C++.
-#![allow(clippy::assertions_on_constants)]
+#![allow(
+    clippy::assertions_on_constants,
+    reason = "constant assertions document table sizes from C++ headers"
+)]
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,

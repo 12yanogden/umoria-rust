@@ -85,7 +85,10 @@ fn encode_tile_standout_high_bit_sign_extends() {
 // ---------------------------------------------------------------------------
 #[test]
 fn terminal_api_surface_signatures_exist() {
-    #[allow(dead_code)]
+    #[allow(
+        dead_code,
+        reason = "translation units retain C++ symbols not yet referenced from Rust call sites"
+    )]
     fn assert_signatures() {
         let _: fn() -> bool = terminal::terminal_initialize;
         let _: fn() = terminal::terminal_restore;
