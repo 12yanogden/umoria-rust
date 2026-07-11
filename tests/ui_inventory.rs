@@ -746,26 +746,3 @@ fn inventory_wear_cursed_slot_message_does_not_panic() {
     umoria::ui_inventory::inventory_execute_command(b'w');
     test_set_ncurses_stub(false);
 }
-
-// ---------------------------------------------------------------------------
-// Screen capture — needs PTY / UI capture harness (not unit-testable via stub)
-// ---------------------------------------------------------------------------
-#[test]
-#[ignore = "needs PTY/screen-capture harness for Equipment screen golden"]
-fn capture_display_equipment() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for Inventory screen golden"]
-fn capture_display_inventory_items() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for Help menu golden"]
-fn capture_show_equipment_help_menu() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for inventoryExecuteCommand flow"]
-fn capture_inventory_execute_command() {}
-
-#[test]
-#[ignore = "needs PTY/key-injection harness for inventoryGetInputForItemId flow"]
-fn capture_inventory_get_input_for_item_id() {}

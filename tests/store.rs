@@ -78,25 +78,6 @@ fn speech_roll(max: i32) -> i32 {
     random_number(max)
 }
 
-#[test]
-#[ignore = "manual RNG probe for seed42 calibration"]
-fn probe_seed42_values() {
-    reset_for_new_game(Some(42));
-    eprintln!("14: {}", random_number(14));
-    eprintln!("16: {}", random_number(16));
-    eprintln!("3: {}", random_number(3));
-    eprintln!("15: {}", random_number(15));
-    eprintln!("5: {}", random_number(5));
-    eprintln!("10: {}", random_number(10));
-    reset_for_new_game(Some(42));
-    store_initialize_owners();
-    let owners: Vec<u8> = with_state(|s| s.stores.iter().map(|st| st.owner_id).collect());
-    eprintln!("owners: {owners:?}");
-    for max in [3, 3, 3, 3, 3, 3] {
-        eprintln!("post-init 3: {}", random_number(max));
-    }
-}
-
 fn setup_stub_io() {
     test_set_ncurses_stub(true);
     test_clear_getch_keys();

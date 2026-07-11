@@ -27,8 +27,9 @@ KEYS="$TDIR/$NAME.keys"
 [[ -f "$KEYS" ]] || { echo "play.sh: missing keystroke script $KEYS" >&2; exit 1; }
 mkdir -p "$TDIR" "$SDIR"
 
-# Fresh save target inside the run dir; copied out afterward if created.
+# Fresh save/score state inside the run dir; copied out afterward if created.
 rm -f "$RUNDIR/game.sav"
+cp "$ROOT/tests/golden/scores/scores_initial.dat" "$RUNDIR/scores.dat"
 
 python3 "$ROOT/tools/capture/pty_driver.py" \
     --binary "$BIN" \

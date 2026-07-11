@@ -432,7 +432,3 @@ fn get_and_cast_escape_at_spell_prompt_consumes_no_rng() {
         get_and_cast_magic_spell,
     );
 }
-
-#[test]
-#[ignore = "needs recorded-input/PTY playthrough harness for mage spell casting"]
-fn playthrough_mage_spell_cast_capture() {}

@@ -185,7 +185,7 @@
       "file": "transcripts/newchar_seed42.keys",
       "note": "keystroke input script",
       "hash_method": "sha256",
-      "sha256": "79c544dfc0a3d8909397df39c59a1a8968df415141c73e62e255232f77e28552"
+      "sha256": "8d2fc5c11c1bad389c0c9757a0e72e93d3df4672381f8f46903538a720dee938"
     },
     {
       "id": "transcript_newchar_seed42",
@@ -199,7 +199,7 @@
         "COLS": 80
       },
       "hash_method": "sha256",
-      "sha256": "f522d66325ae8c89a169e87221ea144f9da30af72daf415debdd0b71fa073c05"
+      "sha256": "be94d3d77c83fc1ba02340cc2c87d9dd53b386edeaf2f04ea048a9a41fbf5118"
     },
     {
       "id": "transcript_scores_screen",

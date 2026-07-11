@@ -84,24 +84,3 @@ jobs:
           # Avoid restoring pre-TERM ncurses build artifacts that lack TRUE/OK/ERR.
           cache: false
       - run: cargo check --all-features
-
-  differential:
-    name: Differential (ignored)
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install ncurses
-        run: sudo apt-get update && sudo apt-get install -y libncurses-dev cmake pkg-config
-      - name: Install pyte (transcript screen renderer)
-        run: pip3 install --user pyte
-      - name: Build C++ reference
-        run: tools/capture/build_ref.sh
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - uses: Swatinem/rust-cache@v2
-      - name: Build
-        run: cargo build
-      - name: Run ignored differential tests
-        run: cargo test -- --ignored
-      - name: Run differential_live feature tests
-        run: cargo test --features differential_live -- --ignored

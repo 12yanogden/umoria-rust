@@ -541,33 +541,6 @@ fn c27_header_and_number_snprintf_widths() {
     assert_eq!(format_number(999999), "999999");
 }
 
-// ---------------------------------------------------------------------------
-// B12–B25 — screen-capture rendering (needs PTY / UI capture harness)
-// ---------------------------------------------------------------------------
-#[test]
-#[ignore = "needs PTY/screen-capture harness for displayCharacterStats grid output"]
-fn b12_display_character_stats_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacterStatsBlock"]
-fn b13_print_character_stats_block_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacterInformation"]
-fn b14_print_character_information_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacterStats sheet"]
-fn b15_print_character_stats_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacterVitalStatistics"]
-fn b16_print_character_vital_statistics_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacterLevelExperience"]
-fn b17_print_character_level_experience_capture() {}
-
 #[test]
 fn print_character_level_experience_does_not_panic() {
     reset_for_new_game(Some(1));
@@ -592,34 +565,3 @@ fn print_character_level_experience_does_not_panic() {
     umoria::ui::print_character_level_experience();
     umoria::ui_io::test_set_ncurses_stub(false);
 }
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacterAbilities"]
-fn b18_print_character_abilities_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacter composition"]
-fn b19_print_character_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for drawDungeonPanel"]
-fn b20_draw_dungeon_panel_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for drawCavePanel"]
-fn b21_draw_cave_panel_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for dungeonResetView"]
-fn b22_dungeon_reset_view_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for printCharacterCurrentDepth at {23,65}"]
-fn b23_print_character_current_depth_capture() {}
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for individual status printers at exact coords"]
-fn b24_individual_status_printer_capture() {}
-
-#[test]
-#[ignore = "needs PTY/key-injection harness for getAndChangeCharacterName"]
-fn b25_get_and_change_character_name_capture() {}

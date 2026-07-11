@@ -19,8 +19,8 @@ use common::{
 
 /// Smoke check: golden screen artifact exists and has expected dimensions.
 ///
-/// Live PTY replay lives in [`transcript_replay_live_matches_golden_screen`] and is
-/// exercised by the Differential CI job (`cargo test --features differential_live -- --ignored`).
+/// Live PTY replay lives in [`transcript_replay_live_matches_golden_screen`]
+/// (enabled with `--features differential_live`, which CI's Test job uses via `--all-features`).
 #[test]
 fn transcript_replay_matches_golden_screen() {
     let manifest = load_manifest().expect("manifest.json should parse");
@@ -37,26 +37,30 @@ fn transcript_replay_matches_golden_screen() {
     let keys_path = golden_root().join("transcripts/newchar_seed42.keys");
     assert!(keys_path.is_file(), "keystroke script must exist");
 
-    let expected_screen = ScreenBuffer::from_bytes(&read_golden_bytes(screen_entry));
-    assert_eq!(
-        expected_screen.rows(),
-        24,
-        "golden screen should be 24 rows; PTY replay not yet wired"
+    let golden_bytes = read_golden_bytes(screen_entry);
+    let expected_screen = ScreenBuffer::from_bytes(&golden_bytes);
+    assert!(
+        expected_screen.rows() > 0 && expected_screen.rows() <= 24,
+        "golden screen should be a non-empty terminal frame (1..=24 rows)"
     );
     assert!(
-        expected_screen.cols() >= 79,
-        "golden screen should be ~80 columns wide"
+        expected_screen.cols() >= 50,
+        "golden scores screen should have a reasonably wide table row"
+    );
+    let screen_text = String::from_utf8_lossy(&golden_bytes);
+    assert!(
+        screen_text.contains("Rank") && screen_text.contains("(saved)"),
+        "newchar_seed42 golden should end on the high-score screen after save+quit"
     );
     let _ = seed;
     let _ = keys_path;
 }
 
-/// Live PTY replay against the C++/Rust binary — ignored by default.
+/// Live PTY replay against the binary — required under `differential_live`.
 ///
-/// Run with: `cargo test --features differential_live -- --ignored`
+/// Default `cargo test` skips this (feature off). CI runs `cargo test --all-features`.
 #[cfg(feature = "differential_live")]
 #[test]
-#[ignore = "PTY live replay; run via Differential CI job"]
 fn transcript_replay_live_matches_golden_screen() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let screen_entry = manifest

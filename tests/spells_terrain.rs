@@ -512,14 +512,6 @@ fn spell_destroy_area_blind_accumulates_int16_seed42() {
     });
 }
 
-// ---------------------------------------------------------------------------
-// 6. Playthrough parity — phase_1 harness (ignored until capture wired)
-// ---------------------------------------------------------------------------
-
-#[test]
-#[ignore = "needs recorded-input/PTY playthrough harness for terrain spells"]
-fn playthrough_terrain_spells_capture_parity() {}
-
 #[test]
 fn bolt_max_range_is_eighteen_for_directional_spells() {
     assert_eq!(OBJECT_BOLTS_MAX_RANGE, 18);

@@ -503,12 +503,6 @@ fn look_image_returns_early() {
 }
 
 #[test]
-#[ignore = "needs recorded-input/transcript harness for look playthrough parity"]
-fn look_transcript_parity_newchar_seed42() {
-    // Recorded-input look sessions vs C++ transcript — requires PTY capture.
-}
-
-#[test]
 fn look_directional_scan_order() {
     reset_for_new_game(None);
     setup_dungeon(30, 30);

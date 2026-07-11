@@ -39,19 +39,6 @@ fn t1_put_string_truncation_boundaries() {
     );
 }
 
-#[test]
-#[ignore = "needs PTY/screen-capture harness for putString grid write"]
-fn t1_put_string_capture_hundred_as_at_x10() {
-    let _ = (&"A".repeat(100), Coord { y: 5, x: 10 });
-}
-
-// ---------------------------------------------------------------------------
-// T2 — cursor/char/clear (capture → ignored; pure MSG_LINE guard via T4/T5)
-// ---------------------------------------------------------------------------
-#[test]
-#[ignore = "needs PTY/screen-capture harness for moveCursor/addChar/clear"]
-fn t2_output_primitives_capture() {}
-
 // ---------------------------------------------------------------------------
 // T3 — panel coordinate interpolation (pure)
 // ---------------------------------------------------------------------------
@@ -62,10 +49,6 @@ fn t3_panel_screen_coord_subtracts_offsets() {
     let screen = panel_screen_coord(coord, 2, 13);
     assert_eq!(screen, Coord { y: 8, x: 17 });
 }
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for panelMoveCursor/panelPutTile"]
-fn t3_panel_primitives_capture() {}
 
 // ---------------------------------------------------------------------------
 // T4 — message ring buffer & message line cap (pure)
@@ -95,10 +78,6 @@ fn t4_message_ring_wrap_and_truncation() {
         [b'X'; MORIA_MESSAGE_SIZE - 1]
     );
 }
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for messageLinePrintMessage cursor save"]
-fn t4_message_line_print_capture() {}
 
 // ---------------------------------------------------------------------------
 // T5 — printMessage combine / -more- thresholds (pure)
@@ -131,10 +110,6 @@ fn t5_more_prompt_accepts_space_escape_cr_lf() {
     assert!(more_prompt_accepts_key(b'\r'));
     assert!(!more_prompt_accepts_key(b'q'));
 }
-
-#[test]
-#[ignore = "needs PTY/screen-capture + key-injection harness for -more- loop"]
-fn t5_more_prompt_input_and_capture() {}
 
 // ---------------------------------------------------------------------------
 // T6 — getKeyInput
@@ -225,12 +200,8 @@ fn t8_trim_trailing_blanks_on_submit() {
     assert_eq!(buf[len], 0);
 }
 
-#[test]
-#[ignore = "needs PTY/screen-capture harness for getStringInput loop"]
-fn t8_get_string_input_editing_capture() {}
-
 // ---------------------------------------------------------------------------
-// T9 — confirmations (pure + capture ignored)
+// T9 — confirmations (pure)
 // ---------------------------------------------------------------------------
 #[test]
 fn t9_confirmation_key_codes() {
@@ -241,10 +212,6 @@ fn t9_confirmation_key_codes() {
     assert_eq!(confirmation_key_result(b'N'), 0);
     assert_eq!(confirmation_key_result(b'q'), -1);
 }
-
-#[test]
-#[ignore = "needs PTY/screen-capture harness for confirmation prompt layout"]
-fn t9_confirmation_prompt_capture() {}
 
 // ---------------------------------------------------------------------------
 // T10 — putQIO / bell / flush
@@ -361,7 +328,7 @@ fn t12_check_file_permissions_success_on_normal_process() {
 }
 
 // ---------------------------------------------------------------------------
-// T13 — terminal lifecycle (capture → ignored)
+// T13 — terminal lifecycle
 // ---------------------------------------------------------------------------
 #[test]
 fn t13_terminal_initialize_and_restore() {
