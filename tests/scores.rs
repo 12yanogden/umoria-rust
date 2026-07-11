@@ -134,12 +134,12 @@ fn setup_player(died_from: &str) {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 0 — stride / field size
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn test_record_stride_matches_cpp() {
+fn test_record_stride_matches_expected() {
     assert_eq!(HIGH_SCORE_RECORD_STRIDE, 73);
     assert_eq!(HIGH_SCORE_RECORD_SIZE, 73);
 }
@@ -179,9 +179,9 @@ fn test_high_score_field_byte_sum_is_72() {
     assert_eq!(round, score);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 1 — gender label
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn test_gender_label_male() {
@@ -197,9 +197,9 @@ fn test_gender_label_female() {
     assert_eq!(high_score_gender_label(), b'F');
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 2 — playerCalculateTotalPoints
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn test_points_basic() {
@@ -276,9 +276,9 @@ fn test_points_current_level_factor() {
     assert_eq!(player_calculate_total_points(), 200);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 3 — recordNewHighScore
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn test_new_empty_file_writes_version_header() {
@@ -520,7 +520,7 @@ fn test_died_from_article_stripping() {
 }
 
 #[test]
-fn test_golden_record_roundtrip_matches_cpp_initial() {
+fn test_golden_record_roundtrip_matches_expected_initial() {
     let manifest = load_manifest().expect("manifest");
     let entry = manifest
         .goldens
@@ -553,9 +553,9 @@ fn test_golden_record_roundtrip_matches_cpp_initial() {
     let _ = fs::remove_dir_all(&dir);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 4 — showScoresScreen
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn test_show_scores_line_format_exact() {
@@ -582,10 +582,7 @@ fn test_show_scores_line_format_exact() {
     score.died_from = stripped;
 
     let line = format_show_scores_line(1, &score);
-    assert_eq!(
-        line,
-        "1      12345 Gandalf             M Human      Mage     7 fiery dragon          "
-    );
+    assert_eq!(line, "1      12345 Gandalf             M Human      Mage     7 fiery dragon          ");
 }
 
 #[test]

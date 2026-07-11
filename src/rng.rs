@@ -1,4 +1,4 @@
-//! Port of src/rng.cpp — Schrage PMMLCG proxied through `State.rng`.
+//! Classic Umoria RNG (period 2^31-1 LCG).
 
 use crate::game::{with_state, with_state_mut, State};
 
@@ -44,7 +44,7 @@ mod tests {
     use crate::game::reset_for_new_game;
 
     #[test]
-    fn set_seed_edge_cases_match_cpp_widths() {
+    fn set_seed_edge_cases_match_seed_widths() {
         reset_for_new_game(None);
         let cases = [
             (0u32, 1u32),

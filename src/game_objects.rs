@@ -1,4 +1,4 @@
-//! Port of `src/game_objects.cpp` — object heap and random object selection.
+//! Object heap and random object selection
 
 use crate::config::dungeon::objects::OBJ_NOTHING;
 use crate::config::treasure::TREASURE_CHANCE_OF_GREAT_ITEM;
@@ -15,7 +15,7 @@ use crate::types::{Coord_t, LEVEL_MAX_OBJECTS, TREASURE_MAX_LEVELS};
 use crate::ui::draw_dungeon_panel;
 use crate::ui_io::terminal;
 
-/// C++ `game_objects.cpp` lines 14–67.
+/// 67
 fn compact_objects() {
     terminal::print_message(Some("Compacting objects..."));
 
@@ -70,7 +70,7 @@ fn compact_objects() {
     }
 }
 
-/// C++ game_objects.cpp lines 101–117.
+/// 117
 #[doc(hidden)]
 pub fn item_bigger_than_chest(obj: &DungeonObject) -> bool {
     match obj.category_id {
@@ -80,7 +80,7 @@ pub fn item_bigger_than_chest(obj: &DungeonObject) -> bool {
     }
 }
 
-/// C++ `game_objects.cpp` lines 70–76.
+/// 76
 pub fn popt() -> i32 {
     let needs_compact =
         with_state(|state| state.game.treasure.current_id == i16::from(LEVEL_MAX_OBJECTS));
@@ -94,7 +94,7 @@ pub fn popt() -> i32 {
     })
 }
 
-/// C++ `game_objects.cpp` lines 81–97.
+/// 97
 pub fn pusht_state(state: &mut State, treasure_id: u8) {
     let current = state.game.treasure.current_id;
     if i32::from(treasure_id) != i32::from(current) - 1 {
@@ -115,12 +115,12 @@ pub fn pusht_state(state: &mut State, treasure_id: u8) {
     );
 }
 
-/// C++ `game_objects.cpp` lines 81–97.
+/// 97
 pub fn pusht(treasure_id: u8) {
     with_state_mut(|state| pusht_state(state, treasure_id));
 }
 
-/// C++ `game_objects.cpp` lines 120–171.
+/// 171
 pub fn item_get_random_object_id(level: i32, must_be_small: bool) -> i32 {
     with_state_mut(|state| {
         let mut level = level;

@@ -26,9 +26,9 @@ use umoria::ui::{
     stat_rating, stats_as_string, BLANK_LENGTH,
 };
 
-// ---------------------------------------------------------------------------
-// A1 — statsAsString (ui.cpp 144–154)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A1 — statsAsString
+// --------------------------------------------------------------------------
 #[test]
 fn a1_stats_as_string_at_or_below_18() {
     assert_eq!(stats_as_string(3), "     3");
@@ -42,9 +42,9 @@ fn a1_stats_as_string_percentile_cases() {
     assert_eq!(stats_as_string(117), " 18/99");
 }
 
-// ---------------------------------------------------------------------------
-// A2 — statRating (ui.cpp 504–528)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A2 — statRating
+// --------------------------------------------------------------------------
 #[test]
 fn a2_stat_rating_buckets() {
     assert_eq!(stat_rating(Coord_t { x: -3, y: 1 }), "Very Bad");
@@ -64,14 +64,14 @@ fn a2_stat_rating_buckets() {
 }
 
 #[test]
-fn a2_stat_rating_cpp_truncation_toward_zero() {
+fn a2_stat_rating_expected_truncation_toward_zero() {
     assert_eq!(stat_rating(Coord_t { x: 12, y: -5 }), "Very Bad");
     assert_eq!(stat_rating(Coord_t { x: -1, y: 12 }), "Bad");
 }
 
-// ---------------------------------------------------------------------------
-// A3 — printCharacterAbilities integer math (ui.cpp 561–582)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A3 — printCharacterAbilities integer math
+// --------------------------------------------------------------------------
 #[test]
 fn a3_ability_computations_with_zero_adjustments() {
     let misc = umoria::player::PlayerMisc {
@@ -137,9 +137,9 @@ fn a3_ability_computations_clamp_fos_and_infra() {
     assert_eq!(xinfra, "40 feet");
 }
 
-// ---------------------------------------------------------------------------
-// A4 — panelBounds + coordOutsidePanel + coordInsidePanel (ui.cpp 22–79)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A4 — panelBounds + coordOutsidePanel + coordInsidePanel
+// --------------------------------------------------------------------------
 #[test]
 fn a4_panel_bounds_from_row_col() {
     let fields = panel_bounds_fields(2, 3);
@@ -283,18 +283,18 @@ fn a4_coord_outside_panel_find_bound_calls_player_end_running() {
     umoria::ui_io::test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
-// A5 — printCharacterCurrentDepth formatting (ui.cpp 244–256)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A5 — printCharacterCurrentDepth formatting
+// --------------------------------------------------------------------------
 #[test]
 fn a5_character_current_depth_strings() {
     assert_eq!(format_character_current_depth(0), "Town level");
     assert_eq!(format_character_current_depth(3), "150 feet");
 }
 
-// ---------------------------------------------------------------------------
-// A6 — printCharacterMovementState (ui.cpp 306–357)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A6 — printCharacterMovementState
+// --------------------------------------------------------------------------
 #[test]
 fn a6_movement_state_paralysis_and_rest() {
     use umoria::config::player::status::{PY_REPEAT, PY_REST};
@@ -331,9 +331,9 @@ fn a6_movement_state_repeat_search_and_blank() {
     assert_eq!(s, blank_string_tail(10));
 }
 
-// ---------------------------------------------------------------------------
-// A7 — printCharacterSpeed (ui.cpp 360–379)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A7 — printCharacterSpeed
+// --------------------------------------------------------------------------
 #[test]
 fn a7_speed_display_buckets() {
     assert_eq!(speed_display_string(3, false), "Very Slow");
@@ -344,9 +344,9 @@ fn a7_speed_display_buckets() {
     assert_eq!(speed_display_string(0, true), "Fast     ");
 }
 
-// ---------------------------------------------------------------------------
-// A8 — printCharacterLevelExperience exp-to-advance (ui.cpp 539–555)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A8 — printCharacterLevelExperience exp-to-advance
+// --------------------------------------------------------------------------
 fn sample_base_exp_levels() -> [u32; PLAYER_MAX_LEVEL as usize] {
     [
         10, 25, 45, 70, 100, 140, 200, 280, 380, 500, 650, 850, 1100, 1400, 1800, 2300, 2900, 3600,
@@ -368,9 +368,9 @@ fn a8_exp_to_advance_formatting() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// A9 — displayCharacterExperience clamp + loop (ui.cpp 760–773)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A9 — displayCharacterExperience clamp + loop
+// --------------------------------------------------------------------------
 #[test]
 fn a9_experience_clamp_and_level_up_count() {
     let levels = sample_base_exp_levels();
@@ -383,9 +383,9 @@ fn a9_experience_clamp_and_level_up_count() {
     assert_eq!(max_exp, exp);
 }
 
-// ---------------------------------------------------------------------------
-// A10 — playerGainLevel exp halving (ui.cpp 728–757)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A10 — playerGainLevel exp halving
+// --------------------------------------------------------------------------
 #[test]
 fn a10_player_gain_level_exp_halving_math() {
     let levels = sample_base_exp_levels();
@@ -437,9 +437,9 @@ fn a10_player_gain_level_full_side_effects() {
     umoria::ui_io::test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
-// A11 — displaySpellsList row formatting (ui.cpp 670–724)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// A11 — displaySpellsList row formatting
+// --------------------------------------------------------------------------
 #[test]
 fn a11_spell_comment_selection() {
     assert_eq!(format_spell_comment(false, 0, 0, 0, 0), "");
@@ -513,9 +513,9 @@ fn a11_display_spells_list_full_string_with_fail_chance() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// C26 — blank_string tail slices (ui.cpp 8–12, pointer-into-array padding)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// C26 — blank_string tail slices
+// --------------------------------------------------------------------------
 #[test]
 fn c26_blank_string_tail_slice_lengths() {
     for n in [13, 6, 5, 8, 6, 8, 10, 9, 5, 23] {
@@ -526,17 +526,14 @@ fn c26_blank_string_tail_slice_lengths() {
     assert_eq!(BLANK_LENGTH, 24);
 }
 
-// ---------------------------------------------------------------------------
-// C27 — header/number formatters (ui.cpp 174–206)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// C27 — header/number formatters
+// --------------------------------------------------------------------------
 #[test]
 fn c27_header_and_number_snprintf_widths() {
     assert_eq!(format_header_number("LEV ", 3), "LEV :      3");
     assert_eq!(format_header_long_number("EXP ", 12345), "EXP :  12345");
-    assert_eq!(
-        format_header_long_number7_spaces("Level      ", 7),
-        "Level      :       7"
-    );
+    assert_eq!(format_header_long_number7_spaces("Level      ", 7), "Level      :       7");
     assert_eq!(format_long_number(-42), "   -42");
     assert_eq!(format_number(999999), "999999");
 }

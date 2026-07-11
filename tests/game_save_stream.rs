@@ -138,9 +138,9 @@ fn inject_test_buffer(bytes: &[u8]) {
     umoria::game_save::test_buffer_inject(bytes);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. wrByte XOR chain
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_wrbyte_xor_chain() {
     with_buffer(0, || {
@@ -152,22 +152,22 @@ fn test_wrbyte_xor_chain() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. wrShort little-endian chained
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_wrshort_little_endian_chained() {
     with_buffer(0xA5, || {
         wr_short(0x1234).unwrap();
-        // low: 0xA5 ^ 0x34 = 0x91; high xor uses running 0x91 ^ 0x12 = 0x83
+ // low: 0xA5 ^ 0x34 = 0x91; high xor uses running 0x91 ^ 0x12 = 0x83
         assert_eq!(game_save::xor_byte(), 0x83);
         assert_bytes(&[0x91, 0x83]);
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. wrLong four-byte order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_wrlong_four_byte_order() {
     with_buffer(0, || {
@@ -176,9 +176,9 @@ fn test_wrlong_four_byte_order() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. wrString includes NUL
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_wrstring_includes_nul() {
     with_buffer(0, || {
@@ -194,9 +194,9 @@ fn test_wrstring_includes_nul() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. wrBytes / wrShorts counts
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_wrbytes_and_wrshorts_counts() {
     with_buffer(0x10, || {
@@ -212,9 +212,9 @@ fn test_wrbytes_and_wrshorts_counts() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. wrBool is 0/1
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_wrbool_is_zero_or_one() {
     with_buffer(0x5C, || {
@@ -225,9 +225,9 @@ fn test_wrbool_is_zero_or_one() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. getByte is raw (no XOR)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_getbyte_is_raw_no_xor() {
     with_buffer(0xAB, || {
@@ -241,9 +241,9 @@ fn test_getbyte_is_raw_no_xor() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. rd* mirror wr* round-trip
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_rd_primitives_mirror_wr() {
     with_buffer(0x3C, || {
@@ -275,9 +275,9 @@ fn test_rd_primitives_mirror_wr() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 9. rdShort / rdLong xor_byte progression
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_rdshort_rdlong_xor_state_progression() {
     with_buffer(0, || {
@@ -299,9 +299,9 @@ fn test_rdshort_rdlong_xor_state_progression() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 10. rdString reads terminator
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_rdstring_reads_terminator() {
     with_buffer(0x7E, || {
@@ -315,9 +315,9 @@ fn test_rdstring_reads_terminator() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 11. Item round-trip all fields
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_item_roundtrip_all_fields() {
     let item = sentinel_item();
@@ -338,9 +338,9 @@ fn test_item_roundtrip_all_fields() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 12. Monster round-trip all fields
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_monster_roundtrip_all_fields() {
     let monster = sentinel_monster();
@@ -361,9 +361,9 @@ fn test_monster_roundtrip_all_fields() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 13. HighScore record size + round-trip
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_highscore_record_is_64_bytes() {
     let score = scores_initial_first_record();
@@ -380,11 +380,11 @@ fn test_highscore_record_is_64_bytes() {
     });
 }
 
-// ---------------------------------------------------------------------------
-// 14. HighScore matches C++ golden (scores_initial.dat record 0)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 14. HighScore matches expected golden (scores_initial.dat record 0)
+// --------------------------------------------------------------------------
 #[test]
-fn test_highscore_matches_cpp_golden() {
+fn test_highscore_matches_expected_golden() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let entry = manifest
         .goldens
@@ -392,7 +392,7 @@ fn test_highscore_matches_cpp_golden() {
         .find(|g| g.id == "scores_scores_initial")
         .expect("scores_scores_initial golden must exist in manifest");
     let golden_file = read_golden_bytes(entry);
-    let cpp_record = &golden_file[3..3 + HIGH_SCORE_RECORD_SIZE];
+    let expected_record = &golden_file[3..3 + HIGH_SCORE_RECORD_SIZE];
 
     let score = scores_initial_first_record();
     with_buffer(0, || {
@@ -400,44 +400,44 @@ fn test_highscore_matches_cpp_golden() {
         save_high_score(&score).unwrap();
         let rust_record = test_buffer_bytes();
         assert!(
-            byte_diff(cpp_record, &rust_record).is_none(),
-            "Rust save_high_score must match C++ scores_initial.dat record 0"
+            byte_diff(expected_record, &rust_record).is_none(),
+            "Rust save_high_score must match expected scores_initial.dat record 0"
         );
     });
 }
 
-// ---------------------------------------------------------------------------
-// 15. wrItem / wrMonster match C++ goldens (hand-captured XOR bytes)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 15. wrItem / wrMonster match expected goldens (hand-captured XOR bytes)
+// --------------------------------------------------------------------------
 #[test]
-fn test_wr_item_matches_cpp_golden() {
+fn test_wr_item_matches_expected_golden() {
     let golden = fs::read(golden_game_save("wr_item_seed5a.bin")).expect("item golden");
     let item = sentinel_item();
     with_buffer(0x5A, || {
         wr_item(&item).unwrap();
         assert!(
             byte_diff(&golden, &test_buffer_bytes()).is_none(),
-            "wr_item ciphertext must match C++ golden"
+            "wr_item ciphertext must match expected golden"
         );
     });
 }
 
 #[test]
-fn test_wr_monster_matches_cpp_golden() {
+fn test_wr_monster_matches_expected_golden() {
     let golden = fs::read(golden_game_save("wr_monster_seed5a.bin")).expect("monster golden");
     let monster = sentinel_monster();
     with_buffer(0x5A, || {
         wr_monster(&monster).unwrap();
         assert!(
             byte_diff(&golden, &test_buffer_bytes()).is_none(),
-            "wr_monster ciphertext must match C++ golden"
+            "wr_monster ciphertext must match expected golden"
         );
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 16. setFileptr targets score file
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn test_setfileptr_targets_score_file() {
     let dir = std::env::temp_dir().join(format!("umoria_gs511_{}", std::process::id()));

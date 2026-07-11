@@ -1,7 +1,7 @@
 //! Level/town assembly + `generateCave` in `dungeon_generate`.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -66,9 +66,9 @@ fn count_feature(feature_id: u8) -> i32 {
     })
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. treasureLinker / monsterLinker
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn treasure_linker_resets_heap_to_nothing_and_current_id() {
     reset_for_new_game(None);
@@ -106,9 +106,9 @@ fn monster_linker_resets_monsters_and_next_free_id() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // isNighTime
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn is_nigh_time_alternates_on_game_turn_halves() {
     reset_for_new_game(None);
@@ -124,9 +124,9 @@ fn is_nigh_time_alternates_on_game_turn_halves() {
     assert!(!is_nigh_time());
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. dungeonBuildStore / dungeonPlaceTownStores
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 fn init_treasure_levels() {
     with_state_mut(|state| {
         state.treasure_levels = [0; TREASURE_MAX_LEVELS as usize + 1];
@@ -216,9 +216,9 @@ fn dungeon_place_town_stores_six_stores_shuffle_seed42() {
     assert_eq!(next_random_pair(4), (4, 3));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Town seed-bracket (partial — before lightTown/storeMaintenance stubs)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn town_seed_bracket_restores_main_rng_after_stairs_seed42() {
     reset_for_new_game(Some(42));
@@ -244,9 +244,9 @@ fn town_seed_bracket_restores_main_rng_after_stairs_seed42() {
     assert_eq!(next_random_pair(64), (64, 53));
 }
 
-// ---------------------------------------------------------------------------
-// 3. dungeonGenerate RNG sub-sequence (post full generation, C++-verified)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 3. dungeonGenerate RNG sub-sequence (post full generation, -verified)
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_generate_rng_after_full_generation_seed42_level5() {
     reset_for_new_game(Some(42));
@@ -259,7 +259,7 @@ fn dungeon_generate_rng_after_full_generation_seed42_level5() {
 
     dungeon_generate();
 
-    // C++ reference (seed 42, level 5): post-dungeonGenerate randomNumber(8) == 7
+ // reference (seed 42, level 5): post-dungeonGenerate randomNumber(8) == 7
     assert_eq!(next_random_pair(8), (8, 7));
 }
 
@@ -283,9 +283,9 @@ fn dungeon_generate_room_map_seeding_rng_order_seed42() {
     assert_eq!(next_random_pair(25), (25, 20));
 }
 
-// ---------------------------------------------------------------------------
-// generateCave setup + full goldens (C++-verified)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// generateCave setup + full goldens (-verified)
+// --------------------------------------------------------------------------
 #[test]
 fn generate_cave_resets_panel_and_town_dimensions() {
     reset_for_new_game(Some(42));
@@ -328,7 +328,7 @@ fn generate_cave_dungeon_dimensions_and_panel_max_seed42() {
         assert_eq!(s.dg.panel.row, 4);
         assert_eq!(s.dg.panel.col, 4);
     });
-    // C++ reference (seed 42, level 5): post-generateCave randomNumber(8) == 7
+ // reference (seed 42, level 5): post-generateCave randomNumber(8) == 7
     assert_eq!(next_random_pair(8), (8, 7));
 }
 

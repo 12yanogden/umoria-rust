@@ -1,4 +1,4 @@
-//! Item description formatting — phase 4.5.4.2 (`itemDescription` and helpers).
+//! Item description formatting.
 
 use super::{
     item_set_colorless_as_identified_for_state, object_position_offset, spell_item_identified,
@@ -134,7 +134,7 @@ fn snprintf_obj_desc_truncated(
 }
 
 fn insert_into_tmp_val(tmp_val: &mut Obj_desc_t, from: &[u8], insert: Option<&[u8]>) {
-    // SAFETY: `Vtype_t` is the C++ prefix of `Obj_desc_t` (`MORIA_MESSAGE_SIZE` bytes).
+    // SAFETY: `Vtype_t` is the prefix of `Obj_desc_t` (`MORIA_MESSAGE_SIZE` bytes)
     let vtype: &mut Vtype_t = unsafe { &mut *(tmp_val.as_mut_ptr().cast::<Vtype_t>()) };
     insert_string_into_string(vtype, from, insert);
     tmp_val[MORIA_MESSAGE_SIZE - 1] = 0;
@@ -144,7 +144,7 @@ fn item_store_bought(identification: u8) -> bool {
     (identification & crate::config::identification::ID_STORE_BOUGHT) != 0
 }
 
-/// C++ identification.cpp lines 493–504.
+/// 504
 pub fn bow_damage_value(misc_use: i16) -> i32 {
     if misc_use == 1 || misc_use == 2 {
         2
@@ -157,7 +157,7 @@ pub fn bow_damage_value(misc_use: i16) -> i32 {
     }
 }
 
-/// C++ identification.cpp lines 520–861.
+/// 861
 pub fn item_description(out: &mut Obj_desc_t, item: Inventory, add_prefix: bool) {
     with_state(|state| item_description_for_state(out, item, add_prefix, state));
 }
@@ -567,7 +567,7 @@ pub fn item_description_for_state(
     c_strcat_obj_str(out, ".");
 }
 
-/// C++ identification.cpp lines 864–874.
+/// 874
 pub fn item_charges_remaining_description(item_id: i32) {
     let message = with_state(|state| {
         let item = state.py.inventory[item_id as usize];
@@ -581,7 +581,7 @@ pub fn item_charges_remaining_description(item_id: i32) {
     }
 }
 
-/// C++ identification.cpp lines 877–891.
+/// 891
 pub fn item_type_remaining_count_description(item_id: i32) {
     let message = with_state_mut(|state| {
         let mut item = state.py.inventory[item_id as usize];
@@ -593,7 +593,7 @@ pub fn item_type_remaining_count_description(item_id: i32) {
     terminal::print_message(Some(&message));
 }
 
-/// C++ identification.cpp lines 894–929.
+/// 929
 pub fn item_inscribe() {
     let (unique, equip) = with_state(|s| (s.py.pack.unique_items, s.py.equipment_count));
     if unique == 0 && equip == 0 {
@@ -665,7 +665,7 @@ pub fn item_inscribe() {
     }
 }
 
-/// C++ identification.cpp lines 937–939.
+/// 939
 pub fn item_replace_inscription(item: &mut Inventory, inscription: &[u8]) {
     let len = c_strlen(inscription).min(INSCRIP_SIZE as usize - 1);
     for (dst, &src) in item.inscription[..len].iter_mut().zip(inscription.iter()) {

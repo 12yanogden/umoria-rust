@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Phase 1.4.3 - OS-uniform pseudo-terminal driver for the reference binary.
+"""OS-uniform pseudo-terminal driver for the umoria binary.
 
 ncurses requires a real tty (``initscr``), so a plain stdin pipe is not enough.
-This wrapper spawns the Umoria reference binary under a pty with a fixed window
-size (24x80) and ``TERM=xterm``, feeds a recorded keystroke script with pacing,
-captures the raw pty output, and emits a stable ``*.screen`` text.
+This wrapper spawns ``umoria`` under a pty with a fixed window size (24x80) and
+``TERM=xterm``, feeds a recorded keystroke script with pacing, captures the raw
+pty output, and emits a stable ``*.screen`` text.
 
 The ``*.screen`` is produced by feeding the raw pty bytes through a real terminal
 emulator (``pyte``) into a fixed 24x80 cell buffer and dumping the final screen.
@@ -13,9 +13,9 @@ cursor position, so the final visible screen is identical regardless of how the
 byte stream was chunked across reads or how many intermediate redraws ncurses
 emitted. The older approach (strip ANSI escapes and concatenate the whole byte
 stream) was timing/chunking dependent and is kept only as a graceful fallback if
-``pyte`` is unavailable. See phase_1.4.6.
+``pyte`` is unavailable.
 
-It is a capture *tool* only: it never modifies game logic and links nothing.
+It is a capture *tool* only: it never modifies game logic.
 
 Usage:
     pty_driver.py --binary PATH --seed N [--save PATH] --keys FILE
@@ -65,7 +65,7 @@ def run(args):
         if args.cwd:
             os.chdir(args.cwd)
         os.execvpe(argv[0], argv, env)
-        os._exit(127)  # exec failed
+        os._exit(127) # exec failed
 
     # Parent.
     try:
@@ -87,7 +87,7 @@ def run(args):
                 chunk = os.read(master_fd, 4096)
             except OSError as e:
                 if e.errno in (errno.EIO,):
-                    return False  # child exited / pty closed
+                    return False # child exited / pty closed
                 raise
             if not chunk:
                 return False

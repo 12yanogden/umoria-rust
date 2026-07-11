@@ -1,4 +1,4 @@
-//! Port of `src/ui_io.cpp` — transient terminal I/O statics (not saved).
+//! Transient terminal I/O statics (not saved)
 
 use std::cell::{Cell, RefCell};
 use std::io::{self, Write};
@@ -13,19 +13,16 @@ use crate::player::PLAYER_NAME_SIZE;
 use crate::types::Coord_t;
 use crate::types::{Vtype_t, MESSAGE_HISTORY_SIZE, MORIA_MESSAGE_SIZE};
 
-/// C++ `ui.h` `MSG_LINE`.
 pub const MSG_LINE: i32 = 0;
 
-/// C++ `ui.h` `CTRL_KEY(x)`.
 #[must_use]
 pub const fn ctrl_key(x: u8) -> u8 {
     x & 0x1f
 }
 
-/// C++ `ui.h` `DELETE`.
 pub const DELETE: u8 = 0x7f;
 
-/// C++ `ui.h` `ESCAPE` (`'\033'`).
+/// ASCII escape (`0x1B`).
 pub const ESCAPE: u8 = 0o33;
 
 const MORE_THRESHOLD: i32 = 73;
@@ -34,7 +31,7 @@ const CONFIRM_PROMPT_COL: i32 = 73;
 const TILDE_USER_MAX: usize = 127;
 const TILDE_EXPANDED_MAX: usize = 1024;
 
-/// Screen I/O events recorded when UI trace mode is enabled (`phase_5.3` tests).
+/// Screen I/O events recorded when UI trace mode is enabled ( tests)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiTraceEvent {
     ClearScreen,
@@ -313,8 +310,8 @@ fn read_getch() -> i32 {
 // Pure helpers (C-faithful; unit-tested without a TTY)
 // ---------------------------------------------------------------------------
 
-/// Reproduces C++ `putString` truncation: clamp `x` to 79, copy at most `79 - x` bytes.
-/// C++ `ui_io.cpp` lines 147–154.
+/// Truncate a string for screen output: clamp `x` to 79, copy at most `79 - x` bytes.
+/// 154
 pub fn truncate_for_put_string(s: &str, x: i32) -> String {
     let x = if x > SCREEN_LAST_COL {
         SCREEN_LAST_COL
@@ -326,8 +323,7 @@ pub fn truncate_for_put_string(s: &str, x: i32) -> String {
     String::from_utf8_lossy(&s.as_bytes()[..take]).into_owned()
 }
 
-/// Reproduces C++ `messageLinePrintMessage`'s `message.resize(79)` (truncate or NUL-pad).
-/// C++ `ui_io.cpp` line 221.
+/// Truncate or NUL-pad a message to 79 bytes.
 pub fn cap_message_line(mut message: String) -> String {
     if message.len() > 79 {
         message.truncate(79);
@@ -340,27 +336,25 @@ pub fn cap_message_line(mut message: String) -> String {
     message
 }
 
-/// Reproduces C `char` → `chtype` sign-extension for `mvaddch` (standout high-bit path).
+/// Sign-extend a display byte to `chtype` for the standout high-bit path.
 pub fn encode_tile(byte: u8) -> chtype {
     (byte as i8) as chtype
 }
 
-/// C++ `strlen(messages[id]) + 1` — `ui_io.cpp` line 251.
+///  line 251
 pub fn message_old_len(msg: &[u8]) -> i32 {
     vtype_strlen(msg) as i32 + 1
 }
 
-/// Combine when `new_len + old_len + 2 < 73` — `ui_io.cpp` lines 257–277.
 pub fn should_combine_messages(old_len: i32, new_len: i32) -> bool {
     new_len + old_len + 2 < MORE_THRESHOLD
 }
 
-/// `-more-` when `msg == nullptr` OR `new_len + old_len + 2 >= 73` — `ui_io.cpp` line 263.
+/// Whether to show `-more-` when the message is absent or the combined length exceeds the threshold.
 pub fn should_show_more(msg_is_none: bool, old_len: i32, new_len: i32) -> bool {
     msg_is_none || new_len + old_len + 2 >= MORE_THRESHOLD
 }
 
-/// Clamp `old_len` to 73 for `-more-` placement — `ui_io.cpp` lines 265–267.
 pub fn clamp_more_column(old_len: i32) -> i32 {
     if old_len > MORE_THRESHOLD {
         MORE_THRESHOLD
@@ -369,7 +363,6 @@ pub fn clamp_more_column(old_len: i32) -> i32 {
     }
 }
 
-/// Ring-buffer advance — `ui_io.cpp` lines 304–308.
 pub fn advance_message_ring_index(last_message_id: i16) -> i16 {
     let next = last_message_id + 1;
     if next >= MESSAGE_HISTORY_SIZE as i16 {
@@ -383,7 +376,6 @@ fn vtype_strlen(buf: &[u8]) -> usize {
     buf.iter().position(|&b| b == 0).unwrap_or(buf.len())
 }
 
-/// `strncpy` + forced NUL at `[MORIA_MESSAGE_SIZE-1]` — `ui_io.cpp` lines 310–311.
 pub fn copy_message_to_ring_slot(slot: &mut Vtype_t, msg: &str) {
     let bytes = msg.as_bytes();
     let copy_len = bytes.len().min(MORIA_MESSAGE_SIZE);
@@ -394,7 +386,6 @@ pub fn copy_message_to_ring_slot(slot: &mut Vtype_t, msg: &str) {
     slot[MORIA_MESSAGE_SIZE - 1] = 0;
 }
 
-/// `strcat(messages[id], "  ")` + `strcat(..., msg)` — `ui_io.cpp` lines 300–301.
 pub fn append_message_slot(slot: &mut Vtype_t, msg: &str) {
     c_strcat(slot, "  ");
     c_strcat(slot, msg);
@@ -408,7 +399,6 @@ fn c_strcat(dst: &mut Vtype_t, src: &str) {
     dst[base + copy_len] = 0;
 }
 
-/// Panel coord interpolation — `ui_io.cpp` lines 184–185, 196–197.
 pub fn panel_screen_coord(coord: terminal::Coord, row_prt: i32, col_prt: i32) -> terminal::Coord {
     terminal::Coord {
         y: coord.y - row_prt,
@@ -416,7 +406,6 @@ pub fn panel_screen_coord(coord: terminal::Coord, row_prt: i32, col_prt: i32) ->
     }
 }
 
-/// `end_col = coord.x + slen - 1`, clamped to 79 — `ui_io.cpp` lines 409–414.
 pub fn clamp_string_input_end_col(start_col: i32, slen: i32) -> i32 {
     let end_col = start_col + slen - 1;
     if end_col > SCREEN_LAST_COL {
@@ -426,12 +415,11 @@ pub fn clamp_string_input_end_col(start_col: i32, slen: i32) -> i32 {
     }
 }
 
-/// C `isprint` for ASCII locale — `ui_io.cpp` line 441.
+/// C `isprint` for ASCII locale —  line 441
 pub fn is_printable_key(key: i32) -> bool {
     (0x20..=0x7e).contains(&key)
 }
 
-/// Trailing blank trim on submit — `ui_io.cpp` lines 456–460.
 pub fn trim_trailing_spaces(buf: &mut [u8]) -> usize {
     let mut len = vtype_strlen(buf);
     while len > 0 && buf[len - 1] == b' ' {
@@ -443,12 +431,11 @@ pub fn trim_trailing_spaces(buf: &mut [u8]) -> usize {
     len
 }
 
-/// Accepted keys in `-more-` loop — `ui_io.cpp` line 274.
+/// Accepted keys in `-more-` loop —  line 274
 pub fn more_prompt_accepts_key(key: u8) -> bool {
     key == b' ' || key == ESCAPE || key == b'\n' || key == b'\r'
 }
 
-/// Return codes for confirmation — `ui_io.cpp` lines 494–500.
 pub fn confirmation_key_result(key: u8) -> i32 {
     if key == b'N' || key == b'n' {
         0
@@ -477,14 +464,14 @@ fn abort_on_err(result: i32) {
 // ---------------------------------------------------------------------------
 
 pub mod terminal {
-    //! Thin Rust terminal module mirroring `ui.h` / `ui_io.cpp` public surface.
+    // ! Thin Rust terminal module mirroring  /  public surface
 
     use super::*;
     use crate::game_death::end_game;
     use crate::game_save::save_game;
     use crate::player::player_disturb;
 
-    /// Mirrors C++ `Coord_t { int y; int x; }`.
+    /// Mirrors `Coord_t { int y; int x; }`
     #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
     pub struct Coord {
         pub y: i32,
@@ -507,7 +494,7 @@ pub mod terminal {
 
     // --- init / teardown ---
 
-    /// C++ `ui_io.cpp` lines 37–58.
+    /// 58
     pub fn terminal_initialize() -> bool {
         if ncurses_stubbed() {
             set_curses_on(true);
@@ -535,7 +522,7 @@ pub mod terminal {
         true
     }
 
-    /// C++ `ui_io.cpp` lines 21–34.
+    /// 34
     pub(super) fn moria_terminal_initialize() {
         register_game_ui_hooks();
         if ncurses_stubbed() {
@@ -555,7 +542,7 @@ pub mod terminal {
         set_curses_on(true);
     }
 
-    /// C++ `ui_io.cpp` lines 61–80.
+    /// 80
     pub fn terminal_restore() {
         if !curses_on() {
             return;
@@ -575,7 +562,7 @@ pub mod terminal {
         set_curses_on(false);
     }
 
-    /// C++ `ui_io.cpp` lines 82–84.
+    /// 84
     pub fn terminal_save_screen() {
         trace_ui(UiTraceEvent::TerminalSaveScreen);
         if ncurses_stubbed() {
@@ -588,7 +575,7 @@ pub mod terminal {
         });
     }
 
-    /// C++ `ui_io.cpp` lines 86–89.
+    /// 89
     pub fn terminal_restore_screen() {
         trace_ui(UiTraceEvent::TerminalRestoreScreen);
         if ncurses_stubbed() {
@@ -602,7 +589,7 @@ pub mod terminal {
         });
     }
 
-    /// C++ `ui_io.cpp` lines 91–100.
+    /// 100
     pub fn terminal_bell_sound() -> isize {
         put_qio();
 
@@ -619,7 +606,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 103–108.
+    /// 108
     pub fn put_qio() {
         trace_ui(UiTraceEvent::PutQio);
         with_state_mut(|state| state.screen_has_changed = true);
@@ -628,7 +615,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 111–118.
+    /// 118
     pub fn flush_input_buffer() {
         if TEST_UI_CAPTURE.with(std::cell::Cell::get) || TEST_UI_DETAIL.with(std::cell::Cell::get) {
             TEST_FLUSH_COUNT.with(|c| c.set(c.get().wrapping_add(1)));
@@ -639,7 +626,7 @@ pub mod terminal {
         while check_for_non_blocking_key_press(0) {}
     }
 
-    /// C++ `ui_io.cpp` lines 121–126.
+    /// 126
     pub fn clear_screen() {
         trace_ui(UiTraceEvent::ClearScreen);
         let flush = with_state_mut(|state| state.message_ready_to_print);
@@ -651,7 +638,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 128–131.
+    /// 131
     pub fn clear_to_bottom(row: i32) {
         if !ncurses_stubbed() {
             let _ = ncurses::mv(row, 0);
@@ -659,7 +646,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 134–136.
+    /// 136
     pub fn move_cursor(coord: Coord) {
         record_move_cursor(coord);
         if ncurses_stubbed() {
@@ -668,7 +655,7 @@ pub mod terminal {
         let _ = ncurses::mv(coord.y, coord.x);
     }
 
-    /// C++ `ui_io.cpp` lines 138–142.
+    /// 142
     pub fn add_char(ch: u8, coord: Coord) {
         if ncurses_stubbed() {
             return;
@@ -676,7 +663,7 @@ pub mod terminal {
         abort_on_err(ncurses::mvaddch(coord.y, coord.x, encode_tile(ch)));
     }
 
-    /// C++ `ui_io.cpp` lines 145–158.
+    /// 158
     pub fn put_string(out_str: &str, coord: Coord) {
         capture_put_string(coord.y, coord.x, out_str);
         trace_ui(UiTraceEvent::PutString {
@@ -691,7 +678,7 @@ pub mod terminal {
         abort_on_err(ncurses::mvaddstr(coord.y, coord.x, &truncated).unwrap_or(ncurses::ERR));
     }
 
-    /// C++ `ui_io.cpp` lines 161–169.
+    /// 169
     pub fn put_string_clear_to_eol(s: &str, coord: Coord) {
         trace_ui(UiTraceEvent::PutStringClearToEol {
             text: s.to_owned(),
@@ -710,7 +697,7 @@ pub mod terminal {
         put_string(s, coord);
     }
 
-    /// C++ `ui_io.cpp` lines 172–179.
+    /// 179
     pub fn erase_line(coord: Coord) {
         if TEST_UI_CAPTURE.with(std::cell::Cell::get) || TEST_UI_DETAIL.with(std::cell::Cell::get) {
             TEST_ERASE_LINES.with(|m| m.borrow_mut().push((coord.y, coord.x)));
@@ -725,7 +712,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 182–190.
+    /// 190
     pub fn panel_move_cursor(coord: Coord) {
         let (row_prt, col_prt) = panel_offsets();
         let screen = panel_screen_coord(coord, row_prt, col_prt);
@@ -735,7 +722,7 @@ pub mod terminal {
         abort_on_err(ncurses::mv(screen.y, screen.x));
     }
 
-    /// C++ `ui_io.cpp` lines 194–202.
+    /// 202
     pub fn panel_put_tile(ch: u8, coord: Coord) {
         let (row_prt, col_prt) = panel_offsets();
         let screen = panel_screen_coord(coord, row_prt, col_prt);
@@ -745,7 +732,7 @@ pub mod terminal {
         abort_on_err(ncurses::mvaddch(screen.y, screen.x, encode_tile(ch)));
     }
 
-    /// C++ `ui_io.cpp` lines 212–227.
+    /// 227
     pub fn message_line_print_message(message: String) {
         if ncurses_stubbed() {
             return;
@@ -761,7 +748,7 @@ pub mod terminal {
         let _ = ncurses::mv(saved.y, saved.x);
     }
 
-    /// C++ `ui_io.cpp` lines 231–241.
+    /// 241
     pub fn message_line_clear() {
         if ncurses_stubbed() {
             return;
@@ -772,7 +759,7 @@ pub mod terminal {
         let _ = ncurses::mv(saved.y, saved.x);
     }
 
-    /// C++ `ui_io.cpp` lines 245–313.
+    /// 313
     pub fn print_message(msg: Option<&str>) {
         if let Some(text) = msg {
             capture_ui_message(text);
@@ -837,14 +824,14 @@ pub mod terminal {
         });
     }
 
-    /// C++ `ui_io.cpp` lines 316–324.
+    /// 324
     pub fn print_message_no_command_interrupt(msg: &str) {
         let saved = with_state_mut(|state| state.game.command_count);
         print_message(Some(msg));
         with_state_mut(|state| state.game.command_count = saved);
     }
 
-    /// C++ `ui_io.cpp` lines 331–374.
+    /// 374
     pub fn get_key_input() -> u8 {
         put_qio();
         with_state_mut(|state| state.game.command_count = 0);
@@ -894,7 +881,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 378–387.
+    /// 387
     pub fn get_command(prompt: &str, command: &mut u8) -> bool {
         if !prompt.is_empty() {
             put_string_clear_to_eol(prompt, Coord { y: 0, x: 0 });
@@ -904,17 +891,17 @@ pub mod terminal {
         *command != ESCAPE
     }
 
-    /// C++ `ui_io.cpp` lines 394–396.
+    /// 396
     pub fn get_menu_item_id(prompt: &str, command: &mut u8) -> bool {
         get_command(prompt, command)
     }
 
-    /// C++ `ui_io.cpp` lines 390–392.
+    /// 392
     pub fn get_tile_character(prompt: &str, command: &mut u8) -> bool {
         get_command(prompt, command)
     }
 
-    /// C++ `ui_io.cpp` lines 400–463.
+    /// 463
     pub fn get_string_input(in_str: &mut [u8], mut coord: Coord, slen: i32) -> bool {
         if !ncurses_stubbed() {
             let _ = ncurses::mv(coord.y, coord.x);
@@ -975,7 +962,7 @@ pub mod terminal {
             return false;
         }
 
-        // C++ ui_io.cpp lines 456–460: trim trailing blanks, then terminate at p.
+        // trim trailing blanks, then terminate at p
         while p > 0 && in_str[p - 1] == b' ' {
             p -= 1;
         }
@@ -986,12 +973,12 @@ pub mod terminal {
         true
     }
 
-    /// C++ `ui_io.cpp` lines 466–469.
+    /// 469
     pub fn get_input_confirmation(prompt: &str) -> bool {
         get_input_confirmation_with_abort(0, prompt) == 1
     }
 
-    /// C++ `ui_io.cpp` lines 473–501.
+    /// 501
     pub fn get_input_confirmation_with_abort(column: i32, prompt: &str) -> i32 {
         put_string_clear_to_eol(prompt, Coord { y: 0, x: column });
 
@@ -1002,7 +989,7 @@ pub mod terminal {
             if x > CONFIRM_PROMPT_COL {
                 let _ = ncurses::mv(0, CONFIRM_PROMPT_COL);
             } else if y != 0 {
-                // C++ compiler-warning no-op — ui_io.cpp lines 481–483.
+                // 483
             }
             let _ = ncurses::addstr(" [y/n]");
         }
@@ -1016,7 +1003,7 @@ pub mod terminal {
         confirmation_key_result(key)
     }
 
-    /// C++ `ui_io.cpp` lines 504–508.
+    /// 508
     pub fn wait_for_continue_key(line_number: i32) {
         trace_ui(UiTraceEvent::WaitForContinueKey { line: line_number });
         if TEST_UI_CAPTURE.with(std::cell::Cell::get) || TEST_UI_DETAIL.with(std::cell::Cell::get) {
@@ -1036,7 +1023,7 @@ pub mod terminal {
         });
     }
 
-    /// C++ `ui_io.cpp` lines 523–556.
+    /// 556
     pub fn check_for_non_blocking_key_press(microseconds: i32) -> bool {
         #[cfg(windows)]
         {
@@ -1099,7 +1086,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 559–585.
+    /// 585
     pub fn get_default_player_name(buffer: &mut [u8]) {
         buffer.fill(0);
         let default_name = "X";
@@ -1152,7 +1139,7 @@ pub mod terminal {
         }
     }
 
-    /// C++ `ui_io.cpp` lines 658–671.
+    /// 671
     pub fn check_file_permissions() -> bool {
         #[cfg(unix)]
         {
@@ -1175,7 +1162,7 @@ pub mod terminal {
     }
 
     #[cfg(unix)]
-    /// C++ `ui_io.cpp` lines 616–652.
+    /// 652
     pub fn tilde(file: &str) -> Option<String> {
         let mut expanded = String::new();
 
@@ -1234,9 +1221,9 @@ pub mod terminal {
     }
 
     #[cfg(unix)]
-    /// C++ `ui_io.cpp` lines 596–603.
+    /// 603
     pub fn tfopen(file: &str, mode: &str) -> Option<std::fs::File> {
-        // C++ only sets errno=ENOENT when tilde() fails; fopen errno is preserved.
+        // only sets errno=ENOENT when tilde() fails; fopen errno is preserved
         let expanded = tilde(file)?;
         std::fs::OpenOptions::new()
             .read(mode.contains('r'))
@@ -1248,9 +1235,9 @@ pub mod terminal {
     }
 
     #[cfg(unix)]
-    /// C++ `ui_io.cpp` lines 606–613.
+    /// 613
     pub fn topen(file: &str, flags: i32, mode: libc::mode_t) -> i32 {
-        // C++ only sets errno=ENOENT when tilde() fails; open errno is preserved.
+        // only sets errno=ENOENT when tilde() fails; open errno is preserved
         let Some(expanded) = tilde(file) else {
             set_errno(libc::ENOENT);
             return -1;
@@ -1289,13 +1276,13 @@ fn set_errno(err: i32) {
 
 #[allow(
     unused_imports,
-    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+    reason = "re-exports kept for call-site convenience"
 )]
 pub use terminal::Coord;
 
 #[allow(
     unused_imports,
-    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+    reason = "re-exports kept for call-site convenience"
 )]
 pub use crate::game::get_direction_with_memory;
 

@@ -1,7 +1,7 @@
 //! Dungeon generation primitives & helpers.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -75,15 +75,15 @@ fn count_feature(feature_id: u8) -> i32 {
     })
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. dungeonFloorTileForLevel / pickCorrectDirection / chanceOfRandomDirection
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_floor_tile_for_level_rng_order_seed42() {
     reset_for_new_game(Some(42));
     setup_dungeon(66, 198);
     with_state_mut(|s| s.dg.current_level = 10);
-    // seed 42: randomNumber(25) == 9; 10 <= 9 is false -> dark floor
+ // seed 42: randomNumber(25) == 9; 10 <= 9 is false -> dark floor
     assert_eq!(dungeon_floor_tile_for_level(), TILE_DARK_FLOOR);
     assert_eq!(next_random_pair(25), (25, 23));
 }
@@ -119,7 +119,7 @@ fn pick_correct_direction_no_tie_break_rng_when_one_axis_zero() {
 fn pick_correct_direction_tie_break_rng_order_seed42() {
     reset_for_new_game(Some(42));
     setup_dungeon(10, 10);
-    // randomNumber(2) == 2 -> zero horizontal
+ // randomNumber(2) == 2 -> zero horizontal
     let (v, h) = pick_correct_direction(Coord_t { y: 5, x: 5 }, Coord_t { y: 8, x: 10 });
     assert_eq!((v, h), (1, 0));
     assert_eq!(next_random_pair(12), (12, 9));
@@ -129,7 +129,7 @@ fn pick_correct_direction_tie_break_rng_order_seed42() {
 fn pick_correct_direction_tie_break_vertical_seed1() {
     reset_for_new_game(Some(1));
     setup_dungeon(10, 10);
-    // randomNumber(2) == 1 -> zero vertical
+ // randomNumber(2) == 1 -> zero vertical
     let (v, h) = pick_correct_direction(Coord_t { y: 3, x: 3 }, Coord_t { y: 7, x: 8 });
     assert_eq!((v, h), (0, 1));
 }
@@ -138,7 +138,7 @@ fn pick_correct_direction_tie_break_vertical_seed1() {
 fn chance_of_random_direction_rng_order_seed42() {
     reset_for_new_game(Some(42));
     setup_dungeon(10, 10);
-    // randomNumber(4) == 2 -> vertical 1
+ // randomNumber(4) == 2 -> vertical 1
     assert_eq!(chance_of_random_direction(), (1, 0));
     assert_eq!(next_random_pair(12), (12, 9));
 }
@@ -147,13 +147,13 @@ fn chance_of_random_direction_rng_order_seed42() {
 fn chance_of_random_direction_vertical_up_seed1() {
     reset_for_new_game(Some(1));
     setup_dungeon(10, 10);
-    // randomNumber(4) == 4 -> horizontal -1
+ // randomNumber(4) == 4 -> horizontal -1
     assert_eq!(chance_of_random_direction(), (0, -1));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. dungeonPlaceStreamerRock golden
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_streamer_rock_rng_and_grid_seed42() {
     reset_for_new_game(Some(42));
@@ -172,9 +172,9 @@ fn dungeon_place_streamer_rock_rng_and_grid_seed42() {
     assert_eq!(next_random_pair(25), (25, 22));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. dungeonPlaceDoor distribution/order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_door_open_seed42() {
     reset_for_new_game(Some(42));
@@ -183,7 +183,7 @@ fn dungeon_place_door_open_seed42() {
     with_state_mut(|s| s.game.treasure.current_id = 1);
 
     let coord = Coord_t { y: 10, x: 10 };
-    // door_type=randomNumber(3)=2, sub=randomNumber(12)=9 -> closed
+ // door_type=randomNumber(3)=2, sub=randomNumber(12)=9 -> closed
     dungeon_place_door(coord);
 
     assert_eq!(tile_at(coord).feature_id, TILE_BLOCKED_FLOOR);
@@ -259,9 +259,9 @@ fn dungeon_place_door_secret_seed100() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. dungeonPlaceStairs search
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_stairs_down_finds_first_open_cell_seed42() {
     reset_for_new_game(Some(42));
@@ -290,9 +290,9 @@ fn dungeon_place_stairs_down_finds_first_open_cell_seed42() {
     assert_eq!(next_random_pair(25), (25, 5));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. dungeonPlaceVaultTrap retry
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_vault_trap_places_on_valid_floor_seed42() {
     reset_for_new_game(Some(42));
@@ -318,9 +318,9 @@ fn dungeon_place_vault_trap_places_on_valid_floor_seed42() {
     assert_eq!(next_random_pair(25), (25, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Fill / boundary / newSpot / set* predicates
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_blank_entire_cave_zeros_grid() {
     reset_for_new_game(None);

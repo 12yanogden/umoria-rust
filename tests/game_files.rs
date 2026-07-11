@@ -81,7 +81,7 @@ fn push_any_key() {
 }
 
 fn setup_ui_harness() {
-    // Full TLS reset: cargo reuses worker threads across tests.
+ // Full TLS reset: cargo reuses worker threads across tests.
     test_set_ncurses_stub(true);
     test_set_eof_flag(0);
     test_set_select_ready(None);
@@ -123,9 +123,9 @@ fn write_name(out: &mut [u8], name: &str) {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 1 — fgets + text readers + initializeScoreFile
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn fgets_parity_79_and_78_byte_caps() {
@@ -309,9 +309,9 @@ fn initialize_score_file_opens_rb_plus() {
     test_reset_highscore_fp();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 2 — wizard random-object dump
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn output_random_level_objects_prompt_flow_and_bounds() {
@@ -347,7 +347,7 @@ fn output_random_level_objects_prompt_flow_and_bounds() {
 
 #[test]
 fn output_random_level_objects_writes_header_and_completed() {
-    // Relative filename + splash tests' chdir must not race.
+ // Relative filename + splash tests' chdir must not race.
     let _cwd = CWD_LOCK.lock().unwrap();
     let out = PathBuf::from("w5.txt");
     let _ = fs::remove_file(&out);
@@ -356,7 +356,7 @@ fn output_random_level_objects_writes_header_and_completed() {
     reset_for_new_game(Some(12345));
     init_treasure_levels();
     test_clear_getch_keys();
-    // LIFO: last push consumed first → level, count, small?, filename.
+ // LIFO: last push consumed first → level, count, small?, filename.
     push_string_input(out.to_str().unwrap());
     push_confirm_no();
     push_string_input("2");
@@ -381,9 +381,9 @@ fn output_random_level_objects_writes_header_and_completed() {
     let _ = fs::remove_file(out);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 3 — character sheet writer
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn character_sheet_header_form_feed_and_exp_to_adv() {
@@ -426,7 +426,7 @@ fn character_sheet_header_form_feed_and_exp_to_adv() {
 }
 
 #[test]
-fn derived_ability_arithmetic_matches_cpp_truncation() {
+fn derived_ability_arithmetic_matches_expected_truncation() {
     player_initialize_base_experience_levels();
     with_state_mut(|s| {
         s.py.misc.class_id = 0;
@@ -451,9 +451,9 @@ fn derived_ability_arithmetic_matches_cpp_truncation() {
     assert_eq!(derived.infra, "20 feet");
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 4 — equipment & inventory writers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn equipment_placement_description_literals() {
@@ -514,9 +514,9 @@ fn equipment_and_inventory_sections_in_output_file() {
     let _ = fs::remove_file(full_path);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 5 — outputPlayerCharacterToFile open/replace logic
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn output_player_character_new_and_replace_paths() {
@@ -545,9 +545,9 @@ fn output_player_character_new_and_replace_paths() {
     let _ = fs::remove_file(path);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 fn tempfile_dir(name: &str) -> PathBuf {
     let path = std::env::temp_dir().join(format!("umoria-phase-5-3-{name}"));

@@ -1,7 +1,7 @@
-//! Types, config, and version constant parity with C++.
+//! Types, config, and version constants.
 #![allow(
     clippy::assertions_on_constants,
-    reason = "constant assertions document table sizes from C++ headers"
+    reason = "constant assertions document table sizes from headers"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -15,9 +15,9 @@ use umoria::config;
 use umoria::types;
 use umoria::version;
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Size constants
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn moria_message_size_is_80() {
     assert_eq!(types::MORIA_MESSAGE_SIZE, 80);
@@ -36,9 +36,9 @@ fn vtype_and_obj_desc_buffer_lengths() {
     assert_eq!(o.len(), 160);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Coord_t shape
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn coord_t_field_access_and_round_trip() {
     let c = types::Coord_t { y: -3, x: 7 };
@@ -49,11 +49,11 @@ fn coord_t_field_access_and_round_trip() {
     assert_eq!(c2.x, 7);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. options 11 bool defaults
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn options_defaults_match_cpp() {
+fn options_defaults_match_expected() {
     use config::options::*;
     assert!(display_counts);
     assert!(!find_bound);
@@ -68,11 +68,11 @@ fn options_defaults_match_cpp() {
     assert!(error_beep_sound);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. File path strings
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn files_paths_match_cpp() {
+fn files_paths_match_expected() {
     use config::files::*;
     assert_eq!(save_game, "game.sav");
     assert_eq!(scores, "scores.dat");
@@ -82,11 +82,11 @@ fn files_paths_match_cpp() {
     assert_eq!(death_royal, "data/death_royal.txt");
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Dungeon scalars
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn dungeon_scalars_match_cpp() {
+fn dungeon_scalars_match_expected() {
     use config::dungeon::*;
     assert_eq!(DUN_RANDOM_DIR, 9);
     assert_eq!(DUN_DIR_CHANGE, 70);
@@ -103,11 +103,11 @@ fn dungeon_scalars_match_cpp() {
     assert_eq!(DUN_UNUSUAL_ROOMS, 300);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Dungeon objects
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn dungeon_objects_match_cpp() {
+fn dungeon_objects_match_expected() {
     use config::dungeon::objects::*;
     assert_eq!(OBJ_OPEN_DOOR, 367);
     assert_eq!(OBJ_CLOSED_DOOR, 368);
@@ -130,11 +130,11 @@ fn dungeon_objects_match_cpp() {
     assert_eq!(LEVEL_TOTAL_GOLD_AND_GEMS, 2);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Treasure scalars
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn treasure_scalars_match_cpp() {
+fn treasure_scalars_match_expected() {
     use config::treasure::*;
     assert_eq!(MIN_TREASURE_LIST_ID, 1);
     assert_eq!(TREASURE_CHANCE_OF_GREAT_ITEM, 12);
@@ -150,11 +150,11 @@ fn treasure_scalars_match_cpp() {
     assert_eq!(OBJECTS_RUNE_PROTECTION, 3000);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. Treasure flags TR_*
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn treasure_flags_match_cpp() {
+fn treasure_flags_match_expected() {
     use config::treasure::flags::*;
     assert_eq!(TR_STATS, 0x0000_003F);
     assert_eq!(TR_STR, 0x1);
@@ -192,11 +192,11 @@ fn treasure_flags_match_cpp() {
     assert_eq!(TR_CURSED, 0x80000000);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 9. Treasure chests CH_*
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn treasure_chests_match_cpp() {
+fn treasure_chests_match_expected() {
     use config::treasure::chests::*;
     assert_eq!(CH_LOCKED, 0x1);
     assert_eq!(CH_TRAPPED, 0x1F0);
@@ -207,11 +207,11 @@ fn treasure_chests_match_cpp() {
     assert_eq!(CH_SUMMON, 0x100);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 10. Monster scalars + move/spells/defense flags
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn monster_scalars_match_cpp() {
+fn monster_scalars_match_expected() {
     use config::monsters::*;
     assert_eq!(MON_CHANCE_OF_NEW, 160);
     assert_eq!(MON_MAX_SIGHT, 20);
@@ -231,7 +231,7 @@ fn monster_scalars_match_cpp() {
 }
 
 #[test]
-fn monster_move_flags_match_cpp() {
+fn monster_move_flags_match_expected() {
     use config::monsters::move_flags::*;
     assert_eq!(CM_ALL_MV_FLAGS, 0x3F);
     assert_eq!(CM_ATTACK_ONLY, 0x1);
@@ -262,7 +262,7 @@ fn monster_move_flags_match_cpp() {
 }
 
 #[test]
-fn monster_spell_flags_match_cpp() {
+fn monster_spell_flags_match_expected() {
     use config::monsters::spells::*;
     assert_eq!(CS_FREQ, 0xF);
     assert_eq!(CS_SPELLS, 0x0001_FFF0);
@@ -288,7 +288,7 @@ fn monster_spell_flags_match_cpp() {
 }
 
 #[test]
-fn monster_defense_flags_match_cpp() {
+fn monster_defense_flags_match_expected() {
     use config::monsters::defense::*;
     assert_eq!(CD_DRAGON, 0x0001);
     assert_eq!(CD_ANIMAL, 0x0002);
@@ -306,11 +306,11 @@ fn monster_defense_flags_match_cpp() {
     assert_eq!(CD_MAX_HP, 0x4000);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 11. Player, identification, spells, stores
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn player_scalars_and_status_match_cpp() {
+fn player_scalars_and_status_match_expected() {
     use config::player::status::*;
     use config::player::*;
     assert_eq!(PLAYER_MAX_EXP, 9_999_999);
@@ -361,7 +361,7 @@ fn player_scalars_and_status_match_cpp() {
 }
 
 #[test]
-fn identification_spells_stores_match_cpp() {
+fn identification_spells_stores_match_expected() {
     use config::identification::*;
     use config::spells::*;
     use config::stores::*;
@@ -387,19 +387,19 @@ fn identification_spells_stores_match_cpp() {
     assert_eq!(STORE_STOCK_TURN_AROUND, 9);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 12. Version constants
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn version_constants_match_cpp() {
+fn version_constants_match_expected() {
     assert_eq!(version::CURRENT_VERSION_MAJOR, 5);
     assert_eq!(version::CURRENT_VERSION_MINOR, 7);
     assert_eq!(version::CURRENT_VERSION_PATCH, 15);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 13. Type-width / signedness compile-time guards
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn type_width_compile_time_guards() {
     const _: u8 = config::dungeon::DUN_ROOMS_MEAN;

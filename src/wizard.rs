@@ -1,4 +1,4 @@
-//! Port of src/wizard.cpp — wizard/debug commands.
+//! Wizard/debug commands
 
 use crate::config::dungeon::objects::OBJ_WIZARD;
 use crate::config::identification::{ID_KNOWN2, ID_STORE_BOUGHT};
@@ -35,7 +35,7 @@ fn ui_coord(x: i32) -> Coord {
     Coord { y: 0, x }
 }
 
-/// C++ wizard.cpp lines 13–28.
+/// 28
 pub fn enter_wizard_mode() -> bool {
     let mut answer = false;
 
@@ -57,7 +57,7 @@ pub fn enter_wizard_mode() -> bool {
     false
 }
 
-/// C++ wizard.cpp lines 30–49.
+/// 49
 pub fn wizard_cure_all() {
     let _ = spell_remove_curse_from_all_worn_items();
     let _ = player_cure_blindness();
@@ -81,7 +81,7 @@ pub fn wizard_cure_all() {
     });
 }
 
-/// C++ wizard.cpp lines 52–64.
+/// 64
 pub fn wizard_drop_random_items() {
     let count = with_state_mut(|state| {
         if state.game.command_count > 0 {
@@ -98,7 +98,7 @@ pub fn wizard_drop_random_items() {
     draw_dungeon_panel();
 }
 
-/// C++ wizard.cpp lines 67–97.
+/// 97
 pub fn wizard_jump_level() {
     let command_count = with_state(|state| state.game.command_count);
     let i = if command_count > 0 {
@@ -133,7 +133,7 @@ pub fn wizard_jump_level() {
     }
 }
 
-/// C++ wizard.cpp lines 100–110.
+/// 110
 pub fn wizard_gain_experience() {
     with_state_mut(|state| {
         if state.game.command_count > 0 {
@@ -148,7 +148,7 @@ pub fn wizard_gain_experience() {
     display_character_experience();
 }
 
-/// C++ wizard.cpp lines 113–119.
+/// 119
 pub fn wizard_summon_monster() {
     let mut coord = with_state(|state| Coord_t {
         y: state.py.pos.y,
@@ -159,14 +159,14 @@ pub fn wizard_summon_monster() {
     update_monsters(false);
 }
 
-/// C++ wizard.cpp lines 122–143.
+/// 143
 pub fn wizard_light_up_dungeon() {
     let flag = with_state(|state| {
         !state.dg.floor[state.py.pos.y as usize][state.py.pos.x as usize].permanent_light
     });
 
     with_state_mut(|state| {
-        // C++ wizard.cpp:130-136 writes neighbors with no bounds check (UB on OOB).
+        // UB on OOB
         // Match all in-array writes; skip only indices outside the allocated floor.
         for y in 0..state.dg.height {
             for x in 0..state.dg.width {
@@ -195,7 +195,7 @@ pub fn wizard_light_up_dungeon() {
     draw_dungeon_panel();
 }
 
-/// C++ wizard.cpp lines 146–352.
+/// 352
 pub fn wizard_character_adjustment() {
     let mut number = 0i32;
     let mut input = [0u8; MORIA_MESSAGE_SIZE];
@@ -447,7 +447,7 @@ pub fn wizard_character_adjustment() {
     }
 }
 
-/// C++ wizard.cpp lines 355–379.
+/// 379
 pub fn wizard_request_object_id(id: &mut i32, label: &str, start_id: i32, end_id: i32) -> bool {
     let id_str = format!("{start_id}-{end_id}");
     let msg = format!("{label} ID ({id_str}): ");
@@ -471,7 +471,7 @@ pub fn wizard_request_object_id(id: &mut i32, label: &str, start_id: i32, end_id
     true
 }
 
-/// C++ wizard.cpp lines 382–412.
+/// 412
 pub fn wizard_generate_object() {
     let mut id = 0;
     if !wizard_request_object_id(&mut id, "Dungeon/Store object", 0, 366) {
@@ -526,7 +526,7 @@ pub fn wizard_generate_object() {
     }
 }
 
-/// C++ wizard.cpp lines 415–571.
+/// 571
 pub fn wizard_create_objects() {
     let mut number = 0i32;
     let mut input = [0u8; MORIA_MESSAGE_SIZE];

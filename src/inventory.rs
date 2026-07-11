@@ -1,4 +1,4 @@
-//! Port of src/inventory.cpp — pack/equipment bookkeeping and elemental item damage.
+//! Pack/equipment bookkeeping and elemental item damage
 
 use std::os::raw::c_char;
 
@@ -36,7 +36,6 @@ pub const ITEM_GROUP_MAX: u8 = 255;
 
 pub const INSCRIP_SIZE: u8 = 13;
 
-/// Port of `PlayerEquipment` in inventory.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum PlayerEquipment {
@@ -54,7 +53,6 @@ pub enum PlayerEquipment {
     Auxiliary,
 }
 
-/// Port of `Inventory_t` in inventory.h.
 #[derive(Clone, Copy, Debug)]
 pub struct Inventory {
     pub id: u16,
@@ -102,7 +100,7 @@ impl Default for Inventory {
     }
 }
 
-/// C++ inventory.cpp lines 10–17.
+/// 17
 pub fn inventory_collect_all_item_flags() -> u32 {
     with_state(|state| {
         let mut flags = 0u32;
@@ -113,7 +111,7 @@ pub fn inventory_collect_all_item_flags() -> u32 {
     })
 }
 
-/// C++ inventory.cpp lines 336–358.
+/// 358
 pub fn inventory_item_copy_to(from_item_id: i16, to_item: &mut Inventory) {
     let from = &GAME_OBJECTS[from_item_id as usize];
     to_item.id = from_item_id as u16;
@@ -136,7 +134,7 @@ pub fn inventory_item_copy_to(from_item_id: i16, to_item: &mut Inventory) {
     to_item.identification = 0;
 }
 
-/// C++ inventory.cpp lines 20–38.
+/// 38
 pub fn inventory_destroy_item(item_id: i32) {
     with_state_mut(|state| {
         let item = &mut state.py.inventory[item_id as usize];
@@ -165,7 +163,7 @@ pub fn inventory_destroy_item(item_id: i32) {
     });
 }
 
-/// C++ inventory.cpp lines 43–48.
+/// 48
 pub fn inventory_take_one_item(to_item: &mut Inventory, from_item: &Inventory) {
     *to_item = *from_item;
     if to_item.items_count > 1 && inventory_item_single_stackable(*to_item) {
@@ -173,7 +171,7 @@ pub fn inventory_take_one_item(to_item: &mut Inventory, from_item: &Inventory) {
     }
 }
 
-/// C++ inventory.cpp lines 52–90.
+/// 90
 pub fn inventory_drop_item(item_id: i32, drop_all: bool) {
     let needs_delete = with_state(|state| {
         state.dg.floor[state.py.pos.y as usize][state.py.pos.x as usize].treasure_id != 0
@@ -233,7 +231,7 @@ pub fn inventory_drop_item(item_id: i32, drop_all: bool) {
     print_message(Some(&format!("Dropped {desc}")));
 }
 
-/// C++ inventory.cpp lines 94–104.
+/// 104
 pub fn inventory_damage_item(item_type: fn(&Inventory) -> bool, chance_percentage: i32) -> i32 {
     let mut damage = 0;
     let mut i = 0;
@@ -250,12 +248,11 @@ pub fn inventory_damage_item(item_type: fn(&Inventory) -> bool, chance_percentag
     damage
 }
 
-/// C++ inventory.cpp lines 107–126.
+/// 126
 pub fn inventory_diminish_light_attack(noticed: bool) -> bool {
     let mut noticed = noticed;
     let mut dim_message = None;
     with_state_mut(|state| {
-        // C++ inventory.cpp: randomNumber(250) only when misc_use > 0.
         let light_idx = PlayerEquipment::Light as usize;
         if state.py.inventory[light_idx].misc_use > 0 {
             let roll = random_number_state(state, 250);
@@ -281,7 +278,7 @@ pub fn inventory_diminish_light_attack(noticed: bool) -> bool {
     noticed
 }
 
-/// C++ inventory.cpp lines 129–145.
+/// 145
 pub fn inventory_diminish_charges_attack(
     creature_level: u8,
     monster_hp: &mut i16,
@@ -312,7 +309,7 @@ pub fn inventory_diminish_charges_attack(
     noticed
 }
 
-/// C++ inventory.cpp lines 148–208.
+/// 208
 pub fn execute_disenchant_attack() -> bool {
     let item_id = match random_number(7) {
         1 => PlayerEquipment::Wield as i32,
@@ -325,7 +322,6 @@ pub fn execute_disenchant_attack() -> bool {
         _ => return false,
     };
 
-    // C++ inventory.cpp: each randomNumber(2) is only drawn when that bonus is > 0.
     let mut success = false;
     with_state_mut(|state| {
         let idx = item_id as usize;
@@ -360,7 +356,7 @@ pub fn execute_disenchant_attack() -> bool {
     success
 }
 
-/// C++ inventory.cpp lines 212–243.
+/// 243
 pub fn inventory_can_carry_item_count(item: Inventory) -> bool {
     with_state(|state| {
         if state.py.pack.unique_items < PlayerEquipment::Wield as i16 {
@@ -400,7 +396,7 @@ pub fn inventory_can_carry_item_count(item: Inventory) -> bool {
     })
 }
 
-/// C++ inventory.cpp lines 247–257.
+/// 257
 pub fn inventory_can_carry_item(item: Inventory) -> bool {
     with_state(|state| {
         let mut limit = {
@@ -425,7 +421,7 @@ pub fn inventory_can_carry_item(item: Inventory) -> bool {
     })
 }
 
-/// C++ inventory.cpp lines 263–303.
+/// 303
 pub fn inventory_carry_item(new_item: Inventory) -> i32 {
     with_state_mut(|state| {
         let is_known = item_set_colorless_as_identified_for_state(
@@ -496,7 +492,7 @@ pub fn inventory_carry_item(new_item: Inventory) -> i32 {
     })
 }
 
-/// C++ inventory.cpp lines 307–333.
+/// 333
 pub fn inventory_find_range(
     item_id_start: i32,
     item_id_end: i32,
@@ -531,27 +527,27 @@ pub fn inventory_find_range(
     })
 }
 
-/// C++ inventory.cpp lines 361–362.
+/// 362
 pub fn inventory_item_single_stackable(item: Inventory) -> bool {
     item.sub_category_id >= ITEM_SINGLE_STACK_MIN && item.sub_category_id <= ITEM_SINGLE_STACK_MAX
 }
 
-/// C++ inventory.cpp lines 366–367.
+/// 367
 pub fn inventory_item_stackable(item: Inventory) -> bool {
     item.sub_category_id >= ITEM_SINGLE_STACK_MIN
 }
 
-/// C++ inventory.cpp lines 370–372.
+/// 372
 pub fn inventory_item_is_cursed(item: Inventory) -> bool {
     (item.flags & TR_CURSED) != 0
 }
 
-/// C++ inventory.cpp lines 374–376.
+/// 376
 pub fn inventory_item_remove_curse(item: &mut Inventory) {
     item.flags &= !TR_CURSED;
 }
 
-/// C++ inventory.cpp lines 448–450.
+/// 450
 pub fn set_null(_item: &Inventory) -> bool {
     false
 }
@@ -581,17 +577,17 @@ fn set_acid_affected_items(item: &Inventory) -> bool {
     }
 }
 
-/// C++ inventory.cpp lines 507–508.
+/// 508
 pub fn set_frost_destroyable_items(item: &Inventory) -> bool {
     item.category_id == TV_POTION1 || item.category_id == TV_POTION2 || item.category_id == TV_FLASK
 }
 
-/// C++ inventory.cpp lines 511–512.
+/// 512
 pub fn set_lightning_destroyable_items(item: &Inventory) -> bool {
     item.category_id == TV_RING || item.category_id == TV_WAND || item.category_id == TV_SPIKE
 }
 
-/// C++ inventory.cpp lines 515–538.
+/// 538
 pub fn set_acid_destroyable_items(item: &Inventory) -> bool {
     match item.category_id {
         TV_ARROW | TV_BOW | TV_HAFTED | TV_POLEARM | TV_BOOTS | TV_GLOVES | TV_CLOAK | TV_HELM
@@ -601,7 +597,7 @@ pub fn set_acid_destroyable_items(item: &Inventory) -> bool {
     }
 }
 
-/// C++ inventory.cpp lines 541–564.
+/// 564
 pub fn set_fire_destroyable_items(item: &Inventory) -> bool {
     match item.category_id {
         TV_ARROW | TV_BOW | TV_HAFTED | TV_POLEARM | TV_BOOTS | TV_GLOVES | TV_CLOAK
@@ -612,7 +608,7 @@ pub fn set_fire_destroyable_items(item: &Inventory) -> bool {
     }
 }
 
-/// C++ inventory.cpp lines 381–444.
+/// 444
 pub fn damage_minus_ac(typ_dam: u32) -> bool {
     let mut items = [0u8; 6];
     let mut items_count = 0usize;
@@ -681,7 +677,7 @@ pub fn damage_minus_ac(typ_dam: u32) -> bool {
     true
 }
 
-/// C++ inventory.cpp lines 568–575.
+/// 575
 pub fn damage_corroding_gas(creature_name: &Vtype_t) {
     if !damage_minus_ac(TR_RES_ACID) {
         player_takes_hit(random_number(8), creature_name);
@@ -692,7 +688,7 @@ pub fn damage_corroding_gas(creature_name: &Vtype_t) {
     }
 }
 
-/// C++ inventory.cpp lines 579–582.
+/// 582
 pub fn damage_poisoned_gas(damage: i32, creature_name: &Vtype_t) {
     player_takes_hit(damage, creature_name);
 
@@ -702,7 +698,7 @@ pub fn damage_poisoned_gas(damage: i32, creature_name: &Vtype_t) {
     });
 }
 
-/// C++ inventory.cpp lines 586–599.
+/// 599
 pub fn damage_fire(damage: i32, creature_name: &Vtype_t) {
     let mut damage = damage;
     with_state(|state| {
@@ -721,7 +717,7 @@ pub fn damage_fire(damage: i32, creature_name: &Vtype_t) {
     }
 }
 
-/// C++ inventory.cpp lines 603–616.
+/// 616
 pub fn damage_cold(damage: i32, creature_name: &Vtype_t) {
     let mut damage = damage;
     with_state(|state| {
@@ -740,7 +736,7 @@ pub fn damage_cold(damage: i32, creature_name: &Vtype_t) {
     }
 }
 
-/// C++ inventory.cpp lines 620–629.
+/// 629
 pub fn damage_lightning_bolt(damage: i32, creature_name: &Vtype_t) {
     let mut damage = damage;
     with_state(|state| {
@@ -756,7 +752,7 @@ pub fn damage_lightning_bolt(damage: i32, creature_name: &Vtype_t) {
     }
 }
 
-/// C++ inventory.cpp lines 633–648.
+/// 648
 pub fn damage_acid(damage: i32, creature_name: &Vtype_t) {
     let mut flag = 0;
 

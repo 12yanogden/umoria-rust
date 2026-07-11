@@ -1,7 +1,7 @@
-//! `player_run` running/find state machine parity.
+//! `player_run` running/find state machine tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -98,9 +98,9 @@ fn run_until_stopped(max_steps: usize) -> Vec<Coord_t> {
     path
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. playerEndRunning
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_end_running_noop_when_not_running() {
@@ -125,9 +125,9 @@ fn player_end_running_clears_tracker_once() {
     with_state(|s| assert_eq!(s.py.running_tracker, 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. playerFindInitialize
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_find_initialize_enclosed_corridor_sets_corridor_flags() {
@@ -196,9 +196,9 @@ fn player_find_initialize_invalid_direction_clears_running() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. playerAreaAffect — table-driven geometry
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_area_affect_blind_is_noop() {
@@ -397,9 +397,9 @@ fn player_area_affect_open_door_respected_with_ignore_doors_off() {
     with_state(|s| assert_eq!(s.py.running_tracker, 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Corridor-run scripted layouts
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn run_straight_corridor_east_stops_at_end() {
@@ -519,9 +519,9 @@ fn run_open_area_stops_before_enclosed_space() {
     with_state(|s| assert_eq!(s.py.running_tracker, 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Disturbance interruption
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_disturb_stops_active_run() {
@@ -543,9 +543,9 @@ fn player_disturb_stops_active_run() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. No RNG in pure find helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_area_affect_consumes_no_rng() {
@@ -615,6 +615,6 @@ fn find_running_break_via_initialize_consumes_no_rng_when_blind() {
 }
 
 #[test]
-fn max_open_space_constant_matches_cpp() {
+fn max_open_space_constant_matches_expected() {
     assert_eq!(MAX_OPEN_SPACE, 3);
 }

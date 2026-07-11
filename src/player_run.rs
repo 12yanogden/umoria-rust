@@ -1,4 +1,4 @@
-//! Port of `src/player_run.cpp` — running/find state machine (`phase_4.4.3`).
+//! Running / find state machine.
 
 use std::cell::Cell;
 
@@ -21,7 +21,6 @@ thread_local! {
     static FIND_DIRECTION: Cell<i32> = const { Cell::new(0) };
 }
 
-/// Snapshot of C++ static find-mode state (`player_run.cpp` lines 114–116).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RunFindState {
     pub find_openarea: bool,
@@ -102,7 +101,7 @@ fn find_direction() -> i32 {
     FIND_DIRECTION.with(std::cell::Cell::get)
 }
 
-/// C++ `player_run.cpp` lines 119–128.
+/// 128
 fn player_can_see_dungeon_wall(dir: i32, coord: Coord_t) -> bool {
     let mut spot = coord;
     if !player_move_position(dir, &mut spot) {
@@ -112,13 +111,13 @@ fn player_can_see_dungeon_wall(dir: i32, coord: Coord_t) -> bool {
     ch == b'#' || ch == b'%'
 }
 
-/// C++ `player_run.cpp` lines 131–134.
+/// 134
 fn player_see_nothing(dir: i32, coord: Coord_t) -> bool {
     let mut spot = coord;
     player_move_position(dir, &mut spot) && cave_get_tile_symbol(spot) == b' '
 }
 
-/// C++ `player_run.cpp` lines 136–184.
+/// 184
 fn find_running_break(dir: i32, coord: Coord_t) {
     let mut deep_left = false;
     let mut deep_right = false;
@@ -166,7 +165,7 @@ fn find_running_break(dir: i32, coord: Coord_t) {
     }
 }
 
-/// C++ `player_run.cpp` lines 186–220.
+/// 220
 pub fn player_find_initialize(direction: i32) {
     let mut coord = with_state(|state| state.py.pos);
 
@@ -199,7 +198,7 @@ pub fn player_find_initialize(direction: i32) {
     }
 }
 
-/// C++ `player_run.cpp` lines 222–235.
+/// 235
 pub fn player_run_and_find() {
     let tracker = with_state(|state| state.py.running_tracker);
     with_state_mut(|state| state.py.running_tracker += 1);
@@ -213,7 +212,7 @@ pub fn player_run_and_find() {
     player_move(find_direction(), true);
 }
 
-/// C++ `player_run.cpp` lines 238–246.
+/// 246
 pub fn player_end_running() {
     let pos = with_state_mut(|state| {
         if state.py.running_tracker == 0 {
@@ -227,7 +226,7 @@ pub fn player_end_running() {
     }
 }
 
-/// C++ `player_run.cpp` lines 248–330.
+/// 330
 fn area_affect_stop_looking_at_squares(
     i: i32,
     dir: i32,
@@ -312,7 +311,7 @@ fn area_affect_stop_looking_at_squares(
     false
 }
 
-/// C++ `player_run.cpp` lines 333–411.
+/// 411
 pub fn player_area_affect(direction: i32, coord: Coord_t) {
     let _ = direction;
     if with_state(|state| state.py.flags.blind >= 1) {
@@ -326,7 +325,7 @@ pub fn player_area_affect(direction: i32, coord: Coord_t) {
     let direction = find_prevdir();
     let max = (direction & 1) + 1;
 
-    // C++ player_run.cpp lines 349–358: call areaAffectStopLookingAtSquares but
+    // call areaAffectStopLookingAtSquares but
     // ignore its bool return — keep scanning remaining adjacent squares so
     // dir_a/dir_b/find_break* may still update after a mid-scan stop.
     for i in -max..=max {

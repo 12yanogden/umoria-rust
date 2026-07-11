@@ -61,9 +61,9 @@ fn run(args: &[&str]) -> u8 {
     run_with_args(&owned)
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 1 — parseGameSeed
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn step1_parse_game_seed_accepts_valid_range() {
@@ -99,9 +99,9 @@ fn step1_parse_game_seed_truncates_large_decimal_like_c_strtol() {
     assert_eq!(seed, 1_316_134_911);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 2 — startup guards + version/usage/error output
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn step2_version_flag_prints_exact_version() {
@@ -193,9 +193,9 @@ fn step2_terminal_init_failure_exits_1_without_message() {
     test_reset_entry_hooks();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Step 3 — arg loop + flag state + save-file/startMoria hand-off
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn step3_flags_set_new_game_roguelike_and_wizard() {
@@ -259,7 +259,7 @@ fn step3_d_calls_show_scores_then_exit_program() {
 }
 
 #[test]
-fn step3_usage_instructions_literal_matches_cpp() {
+fn step3_usage_instructions_literal_matches_expected() {
     assert!(USAGE_INSTRUCTIONS.starts_with('\n'));
     assert!(USAGE_INSTRUCTIONS.contains("-n           Force start of new game"));
     assert!(!USAGE_INSTRUCTIONS.contains("-w"));

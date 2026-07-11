@@ -1,10 +1,9 @@
-//! Umoria library crate — 1:1 mirror of `src/*.cpp` translation units.
+//! Umoria library crate.
 #![allow(
     dead_code,
-    reason = "translation units retain C++ symbols not yet referenced from Rust call sites"
+    reason = "public API surface includes symbols not yet referenced from all call sites"
 )]
 
-// --- phase 2: foundation (config, helpers, rng, data tables, types) ---
 pub mod config;
 pub mod data_creatures;
 pub mod data_player;
@@ -21,12 +20,10 @@ pub mod rng;
 pub mod types;
 pub mod version;
 
-// --- phase 3: UI layer ---
 pub mod ui;
 pub mod ui_inventory;
 pub mod ui_io;
 
-// --- phase 4: gameplay systems ---
 pub mod character;
 pub mod dungeon;
 pub mod dungeon_generate;
@@ -58,7 +55,6 @@ pub mod store_inventory;
 pub mod treasure;
 pub mod wizard;
 
-// --- phase 5: game loop, save/load, scores ---
 pub mod entry;
 pub mod game_death;
 pub mod game_files;

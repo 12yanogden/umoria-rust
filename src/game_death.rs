@@ -1,4 +1,4 @@
-//! Port of `src/game_death.cpp` — see `phase_5.4`.
+//! Character death, tombstone, and end-of-game flow.
 
 use std::cell::{Cell, RefCell};
 
@@ -76,7 +76,7 @@ pub fn test_print_crown_called() -> bool {
     TEST_PRINT_CROWN_CALLED.with(std::cell::Cell::get)
 }
 
-/// C++ `(int)(26 - text.length() / 2)` with unsigned `length()` arithmetic.
+/// Center offset: `26 - text_len / 2` using unsigned division.
 #[must_use]
 pub fn tomb_center_col(text_len: usize) -> i32 {
     (26usize.wrapping_sub(text_len / 2)) as i32
@@ -287,7 +287,6 @@ fn c_string(bytes: &[u8]) -> String {
     String::from_utf8_lossy(&bytes[..end]).into_owned()
 }
 
-/// Port of `endGame` in `game_death.cpp` lines 122–154.
 pub fn end_game() {
     terminal::print_message(CNIL);
     terminal::flush_input_buffer();

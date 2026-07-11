@@ -1,7 +1,7 @@
-//! `player_eat` parity.
+//! `player_eat` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -135,9 +135,9 @@ fn mushroom_ident_index(sub_category_id: u8) -> usize {
     id + usize::from(sub_category_id & 63)
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. playerIngestFood — nourishment math (no RNG)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_ingest_food_clamps_negative_food_to_zero_before_add() {
@@ -191,9 +191,9 @@ fn player_ingest_food_bloat_penalty_when_partial_amount_causes_overflow() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Selection / cancel — zero effect RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_eat_empty_pack_message_and_no_rng() {
@@ -238,9 +238,9 @@ fn player_eat_escape_before_selection_consumes_no_rng() {
     assert_eq!(with_state(|s| s.py.pack.unique_items), 1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. RNG-order golden — one roll per effect branch
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_eat_poison_mushroom_rng_order_seed42() {
@@ -389,9 +389,9 @@ fn player_eat_plain_ration_consumes_no_effect_rng() {
     assert_eq!(next_random_pair(100), (100, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. int16 status counter += semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_eat_poison_i16_wrap_on_large_counter() {
@@ -407,9 +407,9 @@ fn player_eat_poison_i16_wrap_on_large_counter() {
     with_state(|s| assert_eq!(s.py.flags.poisoned, 32_000i16 + 2 + depth as i16));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Identification flow
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_eat_identifying_mushroom_sets_known_flag() {
@@ -455,9 +455,9 @@ fn player_eat_already_known_mushroom_skips_identify_exp() {
     with_state(|s| assert_eq!(s.py.misc.exp, exp_before));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. playerEat post-ingest status clearing
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_eat_clears_hungry_and_weak_status_bits() {

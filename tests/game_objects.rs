@@ -1,7 +1,7 @@
-//! `game_objects` parity.
+//! `game_objects` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -87,9 +87,9 @@ fn obj(category_id: u8, weight: u16) -> DungeonObject {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. itemGetRandomObjectId RNG-order golden capture
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn item_get_random_object_id_level_zero_seed42() {
     reset_for_new_game(Some(42));
@@ -157,9 +157,9 @@ fn item_get_random_object_id_must_be_small_retries_seed2_level30() {
     assert_eq!(next_random_pair(100), (100, 76));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. popt parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn popt_returns_current_id_and_increments() {
     reset_for_new_game(Some(42));
@@ -191,9 +191,9 @@ fn popt_triggers_compact_at_capacity_seed42() {
     assert_eq!(next_random_pair(100), (100, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. pusht parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn pusht_moves_last_slot_and_updates_grid_seed42() {
     reset_for_new_game(Some(42));
@@ -230,9 +230,9 @@ fn pusht_top_slot_skips_grid_move() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. itemBiggerThanChest boundary checks
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn item_bigger_than_chest_always_large_categories() {
     for category in [
@@ -265,9 +265,9 @@ fn item_bigger_than_chest_default_false() {
     assert!(!item_bigger_than_chest(&obj(TV_MISC, 500)));
 }
 
-// ---------------------------------------------------------------------------
-// 5. C++ integer semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 5. Integer semantics
+// --------------------------------------------------------------------------
 #[test]
 fn pusht_u8_equality_skips_move_when_top_slot() {
     reset_for_new_game(Some(42));

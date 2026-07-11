@@ -1,7 +1,7 @@
-//! RNG, seed lifecycle, normal distribution, and dice parity.
+//! RNG, seed lifecycle, normal distribution, and dice tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -95,7 +95,7 @@ fn load_random_number_golden(path: &std::path::Path) -> std::io::Result<Vec<(u32
 }
 
 #[test]
-fn random_number_golden_sequences_match_cpp_capture() {
+fn random_number_golden_sequences_match_expected_capture() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let root = golden_root();
 
@@ -124,7 +124,7 @@ fn random_number_golden_sequences_match_cpp_capture() {
 }
 
 #[test]
-fn normal_dist_golden_sequences_match_cpp_capture() {
+fn normal_dist_golden_sequences_match_expected_capture() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let root = golden_root();
 
@@ -168,7 +168,7 @@ fn normal_dist_golden_sequences_match_cpp_capture() {
 }
 
 #[test]
-fn normal_table_matches_cpp_capture() {
+fn normal_table_matches_expected_capture() {
     reset_for_new_game(None);
     let golden = load_rng_sequence(&golden_root().join("rng/normal_table.txt")).expect("load");
     assert_eq!(golden.len(), NORMAL_TABLE_SIZE);
@@ -182,7 +182,7 @@ fn normal_table_matches_cpp_capture() {
 }
 
 #[test]
-fn dice_roll_advances_rng_like_cpp() {
+fn dice_roll_advances_rng_like_expected() {
     let samples = [
         Dice { dice: 2, sides: 6 },
         Dice { dice: 1, sides: 4 },
@@ -213,7 +213,7 @@ fn seeds_initialize_fixed_seed_sets_magic_town_and_rng_state() {
     assert_eq!(magic, input);
     assert_eq!(town, input.wrapping_add(8762));
 
-    // Post-init generator seed after setRandomSeed(seed+8762+113452) and warmup loop.
+ // Post-init generator seed after setRandomSeed(seed+8762+113452) and warmup loop.
     let expected_init_seed = input.wrapping_add(8762).wrapping_add(113_452);
     reset_for_new_game(None);
     set_seed(expected_init_seed);
@@ -229,14 +229,14 @@ fn seeds_initialize_fixed_seed_sets_magic_town_and_rng_state() {
 }
 
 #[test]
-fn seed_set_and_reset_match_cpp_mapping() {
+fn seed_set_and_reset_match_expected_mapping() {
     reset_for_new_game(Some(99));
     let before = get_seed();
     seed_set(12345);
     assert_eq!(get_seed(), (12345 % (RNG_M as u32 - 1)) + 1);
     umoria::game::with_state(|s| assert_eq!(s.rng.old_seed, before));
     seed_reset_to_old_seed();
-    // C++ `seedResetToOldSeed` calls `setRandomSeed(old_seed)`, re-applying the modulus map.
+ // `seedResetToOldSeed` calls `setRandomSeed(old_seed)`, re-applying the modulus map.
     assert_eq!(get_seed(), (before % (RNG_M as u32 - 1)) + 1);
 }
 

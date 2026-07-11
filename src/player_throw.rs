@@ -1,4 +1,4 @@
-//! Port of `src/player_throw.cpp` — see `phase_4.4.6`.
+//! Throwing and missile attacks.
 
 use crate::config::player::status::PY_STR_WGT;
 use crate::data_creatures::CREATURES_LIST;
@@ -26,7 +26,7 @@ use crate::ui_io::{
     terminal::{self, panel_put_tile, put_qio, Coord},
 };
 
-/// C++ `player_throw.cpp` lines 10–23.
+/// 23
 fn inventory_throw(item_id: i32, treasure: &mut Inventory) {
     let item = with_state(|state| state.py.inventory[item_id as usize]);
     *treasure = item;
@@ -43,7 +43,7 @@ fn inventory_throw(item_id: i32, treasure: &mut Inventory) {
     }
 }
 
-/// C++ player_throw.cpp lines 26–114.
+/// 114
 #[doc(hidden)]
 pub fn weapon_missile_facts(
     item: Inventory,
@@ -155,7 +155,7 @@ pub fn weapon_missile_facts(
     }
 }
 
-/// C++ player_throw.cpp lines 116–150.
+/// 150
 #[doc(hidden)]
 pub fn inventory_drop_or_throw_item(coord: Coord_t, item: Inventory) {
     let mut position = Coord_t {
@@ -216,7 +216,7 @@ fn copy_str_into_obj_desc(out: &mut Obj_desc_t, s: &str) {
     out[n] = 0;
 }
 
-/// C++ `player_throw.cpp` lines 156–276.
+/// 276
 pub fn player_throw_item() {
     if with_state(|state| state.py.pack.unique_items) == 0 {
         terminal::print_message(Some("But you are not carrying anything."));

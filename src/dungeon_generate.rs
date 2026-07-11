@@ -1,4 +1,4 @@
-//! Port of `src/dungeon_generate.cpp` — transient level-generation scratch (not saved).
+//! Transient level-generation scratch (not saved)
 
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
@@ -66,7 +66,7 @@ fn push_door_candidate(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 14–18.
+/// 18
 pub fn dungeon_floor_tile_for_level() -> u8 {
     let level = with_state(|state| state.dg.current_level);
     if i32::from(level) <= random_number(25) {
@@ -76,7 +76,7 @@ pub fn dungeon_floor_tile_for_level() -> u8 {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 22–46.
+/// 46
 pub fn pick_correct_direction(start: Coord_t, end: Coord_t) -> (i32, i32) {
     let mut vertical = match start.y.cmp(&end.y) {
         Ordering::Less => 1,
@@ -101,7 +101,7 @@ pub fn pick_correct_direction(start: Coord_t, end: Coord_t) -> (i32, i32) {
     (vertical, horizontal)
 }
 
-/// C++ `dungeon_generate.cpp` lines 49–58.
+/// 58
 pub fn chance_of_random_direction() -> (i32, i32) {
     let direction = random_number(4);
 
@@ -112,17 +112,17 @@ pub fn chance_of_random_direction() -> (i32, i32) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 62–64.
+/// 64
 pub fn dungeon_blank_entire_cave() {
     with_state_mut(|state| {
         state.dg.floor = [[Tile::default(); MAX_WIDTH as usize]; MAX_HEIGHT as usize];
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 68–79.
+/// 79
 #[allow(
     clippy::explicit_counter_loop,
-    reason = "manual index mirrors C++ loop structure"
+    reason = "manual index matches existing loop structure"
 )]
 pub fn dungeon_fill_empty_tiles_with(rock_type: u8) {
     with_state_mut(|state| {
@@ -142,7 +142,7 @@ pub fn dungeon_fill_empty_tiles_with(rock_type: u8) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 87–122.
+/// 122
 pub fn dungeon_place_boundary_walls() {
     with_state_mut(|state| {
         let height = state.dg.height as usize;
@@ -160,7 +160,7 @@ pub fn dungeon_place_boundary_walls() {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 126–161.
+/// 161
 pub fn dungeon_place_streamer_rock(rock_type: u8, chance_of_treasure: i32) {
     let (height, width) = with_state(|state| (state.dg.height, state.dg.width));
     let mut coord = Coord_t {
@@ -204,7 +204,7 @@ pub fn dungeon_place_streamer_rock(rock_type: u8, chance_of_treasure: i32) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 163–168.
+/// 168
 pub fn dungeon_place_open_door(coord: Coord_t) {
     let cur_pos = popt();
     with_state_mut(|state| {
@@ -217,7 +217,7 @@ pub fn dungeon_place_open_door(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 170–176.
+/// 176
 pub fn dungeon_place_broken_door(coord: Coord_t) {
     let cur_pos = popt();
     with_state_mut(|state| {
@@ -231,7 +231,7 @@ pub fn dungeon_place_broken_door(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 178–183.
+/// 183
 pub fn dungeon_place_closed_door(coord: Coord_t) {
     let cur_pos = popt();
     with_state_mut(|state| {
@@ -244,7 +244,7 @@ pub fn dungeon_place_closed_door(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 185–191.
+/// 191
 pub fn dungeon_place_locked_door(coord: Coord_t) {
     let cur_pos = popt();
     let misc_use = (random_number(10) + 10) as i16;
@@ -259,7 +259,7 @@ pub fn dungeon_place_locked_door(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 193–199.
+/// 199
 pub fn dungeon_place_stuck_door(coord: Coord_t) {
     let cur_pos = popt();
     let misc_use = (-random_number(10) - 10) as i16;
@@ -274,7 +274,7 @@ pub fn dungeon_place_stuck_door(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 201–206.
+/// 206
 pub fn dungeon_place_secret_door(coord: Coord_t) {
     let cur_pos = popt();
     with_state_mut(|state| {
@@ -287,7 +287,7 @@ pub fn dungeon_place_secret_door(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 208–230.
+/// 230
 pub fn dungeon_place_door(coord: Coord_t) {
     let door_type = random_number(3);
 
@@ -310,7 +310,7 @@ pub fn dungeon_place_door(coord: Coord_t) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 233–241.
+/// 241
 pub fn dungeon_place_up_stairs(coord: Coord_t) {
     if with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id != 0) {
         let _ = dungeon_delete_object(coord);
@@ -326,7 +326,7 @@ pub fn dungeon_place_up_stairs(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 244–252.
+/// 252
 pub fn dungeon_place_down_stairs(coord: Coord_t) {
     if with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id != 0) {
         let _ = dungeon_delete_object(coord);
@@ -342,7 +342,7 @@ pub fn dungeon_place_down_stairs(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 255–298.
+/// 298
 pub fn dungeon_place_stairs(stair_type: i32, number: i32, mut walls: i32) {
     for _ in 0..number {
         let mut placed = false;
@@ -394,7 +394,7 @@ pub fn dungeon_place_stairs(stair_type: i32, number: i32, mut walls: i32) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 301–317.
+/// 317
 pub fn dungeon_place_vault_trap(coord: Coord_t, displacement: Coord_t, number: i32) {
     for _ in 0..number {
         let mut placed = false;
@@ -426,7 +426,7 @@ pub fn dungeon_place_vault_trap(coord: Coord_t, displacement: Coord_t, number: i
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 320–328.
+/// 328
 pub fn dungeon_place_vault_monster(coord: Coord_t, number: i32) {
     for _ in 0..number {
         let mut spot = Coord_t {
@@ -437,7 +437,7 @@ pub fn dungeon_place_vault_monster(coord: Coord_t, number: i32) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 331–366.
+/// 366
 pub fn dungeon_build_room(coord: Coord_t) {
     let floor = dungeon_floor_tile_for_level();
     let height = coord.y - random_number(4);
@@ -470,7 +470,7 @@ pub fn dungeon_build_room(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 370–416.
+/// 416
 pub fn dungeon_build_room_overlapping_rectangles(coord: Coord_t) {
     let floor = dungeon_floor_tile_for_level();
     let limit = 1 + random_number(2);
@@ -516,7 +516,7 @@ pub fn dungeon_build_room_overlapping_rectangles(coord: Coord_t) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 418–433.
+/// 433
 pub fn dungeon_place_random_secret_door(
     coord: Coord_t,
     depth: i32,
@@ -544,7 +544,7 @@ pub fn dungeon_place_random_secret_door(
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 435–443.
+/// 443
 pub fn dungeon_place_vault(coord: Coord_t) {
     with_state_mut(|state| {
         for y in (coord.y - 1)..=(coord.y + 1) {
@@ -556,7 +556,7 @@ pub fn dungeon_place_vault(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 445–457.
+/// 457
 pub fn dungeon_place_treasure_vault(
     coord: Coord_t,
     depth: i32,
@@ -581,7 +581,7 @@ pub fn dungeon_place_treasure_vault(
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 459–485.
+/// 485
 pub fn dungeon_place_inner_pillars(coord: Coord_t) {
     with_state_mut(|state| {
         for y in (coord.y - 1)..=(coord.y + 1) {
@@ -612,7 +612,7 @@ pub fn dungeon_place_inner_pillars(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 487–495.
+/// 495
 pub fn dungeon_place_maze_inside_room(depth: i32, height: i32, left: i32, right: i32) {
     with_state_mut(|state| {
         for y in height..=depth {
@@ -625,7 +625,7 @@ pub fn dungeon_place_maze_inside_room(depth: i32, height: i32, left: i32, right:
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 497–520.
+/// 520
 pub fn dungeon_place_four_small_rooms(
     coord: Coord_t,
     depth: i32,
@@ -682,7 +682,7 @@ pub fn dungeon_place_four_small_rooms(
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 537–667.
+/// 667
 pub fn dungeon_build_room_with_inner_rooms(coord: Coord_t) {
     let floor = dungeon_floor_tile_for_level();
 
@@ -873,7 +873,7 @@ pub fn dungeon_build_room_with_inner_rooms(coord: Coord_t) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 669–675.
+/// 675
 pub fn dungeon_place_large_middle_pillar(coord: Coord_t) {
     with_state_mut(|state| {
         for y in (coord.y - 1)..=(coord.y + 1) {
@@ -884,7 +884,7 @@ pub fn dungeon_place_large_middle_pillar(coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 679–808.
+/// 808
 pub fn dungeon_build_room_cross_shaped(coord: Coord_t) {
     let floor = dungeon_floor_tile_for_level();
 
@@ -1046,7 +1046,7 @@ pub fn dungeon_build_room_cross_shaped(coord: Coord_t) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 811–946.
+/// 946
 pub fn dungeon_build_tunnel(start: Coord_t, end: Coord_t) {
     let mut tunnels_tk = [Coord_t { y: 0, x: 0 }; 1000];
     let mut walls_tk = [Coord_t { y: 0, x: 0 }; 1000];
@@ -1188,7 +1188,7 @@ pub fn dungeon_build_tunnel(start: Coord_t, end: Coord_t) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 948–957.
+/// 957
 #[must_use]
 pub fn dungeon_is_next_to(coord: Coord_t) -> bool {
     if coord_corridor_walls_next_to(coord) > 2 {
@@ -1208,7 +1208,7 @@ pub fn dungeon_is_next_to(coord: Coord_t) -> bool {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 960–964.
+/// 964
 pub fn dungeon_place_door_if_next_to_two_walls(coord: Coord_t) {
     let is_corr = with_state(|state| {
         state.dg.floor[coord.y as usize][coord.x as usize].feature_id == TILE_CORR_FLOOR
@@ -1218,7 +1218,7 @@ pub fn dungeon_place_door_if_next_to_two_walls(coord: Coord_t) {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 967–979.
+/// 979
 pub fn dungeon_new_spot() -> Coord_t {
     loop {
         let (height, width) = with_state(|state| (state.dg.height, state.dg.width));
@@ -1240,22 +1240,22 @@ pub fn dungeon_new_spot() -> Coord_t {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 982–984.
+/// 984
 pub fn set_rooms(tile_id: i32) -> bool {
     tile_id == i32::from(TILE_DARK_FLOOR) || tile_id == i32::from(TILE_LIGHT_FLOOR)
 }
 
-/// C++ `dungeon_generate.cpp` lines 986–988.
+/// 988
 pub fn set_corridors(tile_id: i32) -> bool {
     tile_id == i32::from(TILE_CORR_FLOOR) || tile_id == i32::from(TILE_BLOCKED_FLOOR)
 }
 
-/// C++ `dungeon_generate.cpp` lines 990–992.
+/// 992
 pub fn set_floors(tile_id: i32) -> bool {
     tile_id <= i32::from(MAX_CAVE_FLOOR)
 }
 
-/// C++ `dungeon_generate.cpp` lines 995–1105.
+/// 1105
 pub fn dungeon_generate() {
     let (height, width, current_level) =
         with_state(|state| (state.dg.height, state.dg.width, state.dg.current_level));
@@ -1355,7 +1355,7 @@ pub fn dungeon_generate() {
     let mut alloc_level = i32::from(current_level) / 3;
     #[allow(
         clippy::manual_clamp,
-        reason = "if/else clamp mirrors C++ dungeon_generate.cpp lines 1079–1084"
+        reason = "if/else clamp matches existing branching"
     )]
     if alloc_level < 2 {
         alloc_level = 2;
@@ -1400,7 +1400,7 @@ pub fn dungeon_generate() {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 1108–1149.
+/// 1149
 pub fn dungeon_build_store(store_id: i32, coord: Coord_t) {
     let yval = coord.y * 10 + 5;
     let xval = coord.x * 16 + 16;
@@ -1442,7 +1442,7 @@ pub fn dungeon_build_store(store_id: i32, coord: Coord_t) {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 1152–1157.
+/// 1157
 pub fn treasure_linker() {
     with_state_mut(|state| {
         for item in &mut state.game.treasure.list {
@@ -1452,7 +1452,7 @@ pub fn treasure_linker() {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 1160–1165.
+/// 1165
 pub fn monster_linker() {
     with_state_mut(|state| {
         for monster in &mut state.monsters {
@@ -1462,7 +1462,7 @@ pub fn monster_linker() {
     });
 }
 
-/// C++ `dungeon_generate.cpp` lines 1167–1187.
+/// 1187
 pub fn dungeon_place_town_stores() {
     let mut rooms = [0i32; 6];
     for i in 0..6i32 {
@@ -1485,13 +1485,13 @@ pub fn dungeon_place_town_stores() {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 1189–1191.
+/// 1191
 #[must_use]
 pub fn is_nigh_time() -> bool {
     with_state(|state| (0x1 & (state.dg.game_turn / 5000)) != 0)
 }
 
-/// C++ `dungeon_generate.cpp` lines 1194–1213.
+/// 1213
 pub fn light_town() {
     if is_nigh_time() {
         with_state_mut(|state| {
@@ -1516,7 +1516,7 @@ pub fn light_town() {
     }
 }
 
-/// C++ `dungeon_generate.cpp` lines 1220–1242.
+/// 1242
 pub fn town_generation() {
     let town_seed = with_state(|state| state.game.town_seed);
     seed_set(town_seed);
@@ -1538,7 +1538,7 @@ pub fn town_generation() {
     store_maintenance();
 }
 
-/// C++ `dungeon_generate.cpp` lines 1245–1278.
+/// 1278
 pub fn generate_cave() {
     with_state_mut(|state| {
         state.dg.panel.top = 0;

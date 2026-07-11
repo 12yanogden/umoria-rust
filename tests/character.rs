@@ -1,4 +1,4 @@
-//! `character` character creation parity.
+//! `character` character creation tests.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -23,11 +23,11 @@ use umoria::player::{PlayerAttr, PLAYER_MAX_LEVEL};
 use umoria::rng::get_seed;
 use umoria::ui_io;
 
-// ---------------------------------------------------------------------------
-// C++ oracle helpers (character.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// Oracle helpers
+// --------------------------------------------------------------------------
 
-fn cpp_decrement_stat(adjustment: i16, current_stat: u8) -> u8 {
+fn expected_decrement_stat(adjustment: i16, current_stat: u8) -> u8 {
     let mut stat = current_stat;
     let mut i = 0i16;
     while i > adjustment {
@@ -48,7 +48,7 @@ fn cpp_decrement_stat(adjustment: i16, current_stat: u8) -> u8 {
     stat
 }
 
-fn cpp_increment_stat(adjustment: i16, current_stat: u8) -> u8 {
+fn expected_increment_stat(adjustment: i16, current_stat: u8) -> u8 {
     let mut stat = current_stat;
     for _ in 0..adjustment {
         if stat < 18 {
@@ -64,15 +64,15 @@ fn cpp_increment_stat(adjustment: i16, current_stat: u8) -> u8 {
     stat
 }
 
-fn cpp_create_modify_player_stat(stat: u8, adjustment: i16) -> u8 {
+fn expected_create_modify_player_stat(stat: u8, adjustment: i16) -> u8 {
     if adjustment < 0 {
-        cpp_decrement_stat(adjustment, stat)
+        expected_decrement_stat(adjustment, stat)
     } else {
-        cpp_increment_stat(adjustment, stat)
+        expected_increment_stat(adjustment, stat)
     }
 }
 
-fn cpp_character_generate_stats() -> [u8; 6] {
+fn expected_character_generate_stats() -> [u8; 6] {
     let mut dice = [0i32; 18];
     loop {
         let mut total = 0;
@@ -91,21 +91,21 @@ fn cpp_character_generate_stats() -> [u8; 6] {
     stats
 }
 
-fn cpp_character_generate_stats_and_race(race_id: u8) {
+fn expected_character_generate_stats_and_race(race_id: u8) {
     let race = &CHARACTER_RACES[race_id as usize];
-    let mut stats = cpp_character_generate_stats();
+    let mut stats = expected_character_generate_stats();
     stats[PlayerAttr::A_STR as usize] =
-        cpp_create_modify_player_stat(stats[PlayerAttr::A_STR as usize], race.str_adjustment);
+        expected_create_modify_player_stat(stats[PlayerAttr::A_STR as usize], race.str_adjustment);
     stats[PlayerAttr::A_INT as usize] =
-        cpp_create_modify_player_stat(stats[PlayerAttr::A_INT as usize], race.int_adjustment);
+        expected_create_modify_player_stat(stats[PlayerAttr::A_INT as usize], race.int_adjustment);
     stats[PlayerAttr::A_WIS as usize] =
-        cpp_create_modify_player_stat(stats[PlayerAttr::A_WIS as usize], race.wis_adjustment);
+        expected_create_modify_player_stat(stats[PlayerAttr::A_WIS as usize], race.wis_adjustment);
     stats[PlayerAttr::A_DEX as usize] =
-        cpp_create_modify_player_stat(stats[PlayerAttr::A_DEX as usize], race.dex_adjustment);
+        expected_create_modify_player_stat(stats[PlayerAttr::A_DEX as usize], race.dex_adjustment);
     stats[PlayerAttr::A_CON as usize] =
-        cpp_create_modify_player_stat(stats[PlayerAttr::A_CON as usize], race.con_adjustment);
+        expected_create_modify_player_stat(stats[PlayerAttr::A_CON as usize], race.con_adjustment);
     stats[PlayerAttr::A_CHR as usize] =
-        cpp_create_modify_player_stat(stats[PlayerAttr::A_CHR as usize], race.chr_adjustment);
+        expected_create_modify_player_stat(stats[PlayerAttr::A_CHR as usize], race.chr_adjustment);
     with_state_mut(|s| {
         s.py.stats.max = stats;
         s.py.misc.level = 1;
@@ -115,7 +115,7 @@ fn cpp_character_generate_stats_and_race(race_id: u8) {
     });
 }
 
-fn cpp_character_get_history(race_id: u8) -> (i16, [[u8; 60]; 4]) {
+fn expected_character_get_history(race_id: u8) -> (i16, [[u8; 60]; 4]) {
     let mut history_id = i32::from(race_id) * 3 + 1;
     let mut social_class = random_number(4);
     let mut history_block = String::new();
@@ -188,7 +188,7 @@ fn cpp_character_get_history(race_id: u8) -> (i16, [[u8; 60]; 4]) {
     (social_class as i16, history)
 }
 
-fn cpp_character_set_age_height_weight(race_id: u8, is_male: bool) -> (u16, u16, u16) {
+fn expected_character_set_age_height_weight(race_id: u8, is_male: bool) -> (u16, u16, u16) {
     let race = &CHARACTER_RACES[race_id as usize];
     let age = (race.base_age as u16).wrapping_add(random_number(race.max_age as i32) as u16);
     let (height_base, height_mod, weight_base, weight_mod) = if is_male {
@@ -211,16 +211,22 @@ fn cpp_character_set_age_height_weight(race_id: u8, is_male: bool) -> (u16, u16,
     (age, height, weight)
 }
 
-fn cpp_generate_character_class(class_id: u8) {
+fn expected_generate_character_class(class_id: u8) {
     let klass = &CLASSES[class_id as usize];
     let stats_max = with_state(|s| s.py.stats.max);
     let stats_max = [
-        cpp_create_modify_player_stat(stats_max[PlayerAttr::A_STR as usize], klass.strength),
-        cpp_create_modify_player_stat(stats_max[PlayerAttr::A_INT as usize], klass.intelligence),
-        cpp_create_modify_player_stat(stats_max[PlayerAttr::A_WIS as usize], klass.wisdom),
-        cpp_create_modify_player_stat(stats_max[PlayerAttr::A_DEX as usize], klass.dexterity),
-        cpp_create_modify_player_stat(stats_max[PlayerAttr::A_CON as usize], klass.constitution),
-        cpp_create_modify_player_stat(stats_max[PlayerAttr::A_CHR as usize], klass.charisma),
+        expected_create_modify_player_stat(stats_max[PlayerAttr::A_STR as usize], klass.strength),
+        expected_create_modify_player_stat(
+            stats_max[PlayerAttr::A_INT as usize],
+            klass.intelligence,
+        ),
+        expected_create_modify_player_stat(stats_max[PlayerAttr::A_WIS as usize], klass.wisdom),
+        expected_create_modify_player_stat(stats_max[PlayerAttr::A_DEX as usize], klass.dexterity),
+        expected_create_modify_player_stat(
+            stats_max[PlayerAttr::A_CON as usize],
+            klass.constitution,
+        ),
+        expected_create_modify_player_stat(stats_max[PlayerAttr::A_CHR as usize], klass.charisma),
     ];
     with_state_mut(|s| {
         s.py.stats.max = stats_max;
@@ -252,7 +258,7 @@ fn cpp_generate_character_class(class_id: u8) {
     });
 }
 
-fn cpp_player_calculate_start_gold(is_male: bool) -> i32 {
+fn expected_player_calculate_start_gold(is_male: bool) -> i32 {
     let stats = with_state(|s| s.py.stats.max);
     let social_class = with_state(|s| s.py.misc.social_class);
     let mut value = monetary_value_calculated_from_stat(stats[PlayerAttr::A_STR as usize]);
@@ -282,9 +288,9 @@ fn history_to_strings(history: &[[u8; 60]; 4]) -> [String; 4] {
     })
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Tests
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn create_modify_player_stat_band_parity_exhaustive() {
@@ -293,8 +299,8 @@ fn create_modify_player_stat_band_parity_exhaustive() {
             reset_for_new_game(Some(42));
             let rust = create_modify_player_stat(stat, adjustment);
             reset_for_new_game(Some(42));
-            let cpp = cpp_create_modify_player_stat(stat, adjustment);
-            assert_eq!(rust, cpp, "stat={stat} adjustment={adjustment}");
+            let expected = expected_create_modify_player_stat(stat, adjustment);
+            assert_eq!(rust, expected, "stat={stat} adjustment={adjustment}");
         }
     }
 }
@@ -304,8 +310,8 @@ fn decrement_stat_clamps_at_18_and_increment_stat_caps_at_118() {
     reset_for_new_game(Some(42));
     let rust = decrement_stat(-1, 25);
     reset_for_new_game(Some(42));
-    let cpp = cpp_decrement_stat(-1, 25);
-    assert_eq!(rust, cpp);
+    let expected = expected_decrement_stat(-1, 25);
+    assert_eq!(rust, expected);
     assert_eq!(rust, 18);
 
     reset_for_new_game(Some(1));
@@ -325,9 +331,9 @@ fn character_generate_stats_distribution_and_reroll_parity() {
         let rust_seed = get_seed();
 
         reset_for_new_game(Some(seed));
-        cpp_character_generate_stats_and_race(0);
-        let cpp_stats = with_state(|s| s.py.stats.max);
-        assert_eq!(rust_stats, cpp_stats, "seed={seed}");
+        expected_character_generate_stats_and_race(0);
+        let expected_stats = with_state(|s| s.py.stats.max);
+        assert_eq!(rust_stats, expected_stats, "seed={seed}");
         assert_eq!(rust_seed, get_seed(), "seed={seed}");
     }
 }
@@ -344,11 +350,11 @@ fn character_get_history_parity_all_races() {
             let rust_seed = get_seed();
 
             reset_for_new_game(Some(seed));
-            let (cpp_social, cpp_history) = cpp_character_get_history(race_id);
-            assert_eq!(rust_social, cpp_social, "race={race_id} seed={seed}");
+            let (expected_social, expected_history) = expected_character_get_history(race_id);
+            assert_eq!(rust_social, expected_social, "race={race_id} seed={seed}");
             assert_eq!(
                 history_to_strings(&rust_history),
-                history_to_strings(&cpp_history),
+                history_to_strings(&expected_history),
                 "race={race_id} seed={seed}"
             );
             assert_eq!(rust_seed, get_seed(), "race={race_id} seed={seed}");
@@ -371,9 +377,12 @@ fn character_set_age_height_weight_parity() {
             let rust_seed = get_seed();
 
             reset_for_new_game(Some(seed));
-            let (cpp_age, cpp_height, cpp_weight) =
-                cpp_character_set_age_height_weight(race_id, is_male);
-            assert_eq!((age, height, weight), (cpp_age, cpp_height, cpp_weight));
+            let (expected_age, expected_height, expected_weight) =
+                expected_character_set_age_height_weight(race_id, is_male);
+            assert_eq!(
+                (age, height, weight),
+                (expected_age, expected_height, expected_weight)
+            );
             assert_eq!(rust_seed, get_seed());
         }
     }
@@ -407,9 +416,9 @@ fn generate_character_class_base_hp_parity() {
                 s.py.stats.current[i] = s.py.stats.max[i];
             }
         });
-        cpp_generate_character_class(0);
-        let cpp_hp = with_state(|s| s.py.base_hp_levels);
-        assert_eq!(rust_hp, cpp_hp, "seed={seed}");
+        expected_generate_character_class(0);
+        let expected_hp = with_state(|s| s.py.base_hp_levels);
+        assert_eq!(rust_hp, expected_hp, "seed={seed}");
         assert_eq!(rust_seed, get_seed(), "seed={seed}");
     }
     ui_io::test_set_ncurses_stub(false);
@@ -435,15 +444,15 @@ fn player_calculate_start_gold_parity() {
                 s.py.misc.social_class = 55;
                 s.py.misc.gender = is_male;
             });
-            let cpp_au = cpp_player_calculate_start_gold(is_male);
-            assert_eq!(rust_au, cpp_au, "seed={seed} male={is_male}");
+            let expected_au = expected_player_calculate_start_gold(is_male);
+            assert_eq!(rust_au, expected_au, "seed={seed} male={is_male}");
             assert_eq!(rust_seed, get_seed());
         }
     }
 }
 
 #[test]
-fn monetary_value_calculated_from_stat_matches_cpp() {
+fn monetary_value_calculated_from_stat_matches_expected() {
     assert_eq!(monetary_value_calculated_from_stat(10), 0);
     assert_eq!(monetary_value_calculated_from_stat(18), 40);
     assert_eq!(monetary_value_calculated_from_stat(8), -10);
@@ -459,7 +468,7 @@ fn player_clear_history_zeroes_lines() {
 
 #[test]
 fn character_get_history_nul_terminates_short_lines() {
-    // C++ character.cpp:250 writes '\0' after strncpy; shorter re-rolls must not leak.
+    // writes '\0' after strncpy; shorter re-rolls must not leak.
     reset_for_new_game(Some(42));
     with_state_mut(|s| {
         s.py.misc.race_id = 0;

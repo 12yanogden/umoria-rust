@@ -24,8 +24,7 @@ static HARNESS_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 fn write_temp_scores_file() -> PathBuf {
     let id = HARNESS_COUNTER.fetch_add(1, Ordering::Relaxed);
-    let path =
-        std::env::temp_dir().join(format!("umoria-phase58-{}-{}.dat", std::process::id(), id));
+    let path = std::env::temp_dir().join(format!("umoria-int-{}-{}.dat", std::process::id(), id));
     fs::write(&path, [1u8, 2, 3]).expect("temp scores file");
     path
 }
@@ -79,9 +78,9 @@ fn test_data_dir_resolved() {
     for name in [
         "help.txt",
         "welcome.txt",
-        "splash.txt.in",
+        "splash.txt",
+        "versions.txt",
         "scores.dat",
-        "versions.txt.in",
     ] {
         let path = data_dir.join(name);
         assert!(

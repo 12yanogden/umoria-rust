@@ -1,4 +1,4 @@
-//! Port of src/identification.cpp — flavor state, identification flags, identify logic.
+//! Flavor state, identification flags, identify logic
 
 pub const MAX_COLORS: u8 = 49;
 pub const MAX_MUSHROOMS: u8 = 22;
@@ -9,12 +9,11 @@ pub const MAX_AMULETS: u8 = 11;
 pub const MAX_TITLES: u8 = 45;
 pub const MAX_SYLLABLES: u8 = 153;
 
-/// Port of `SpecialNameIds` in identification.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 #[allow(
     non_camel_case_types,
-    reason = "C++ typedef / enum member names preserved for fidelity"
+    reason = "historical typedef / enum member names retained"
 )]
 pub enum SpecialNameIds {
     SN_NULL = 0,
@@ -96,7 +95,7 @@ use crate::treasure::{
 };
 use crate::ui_io::terminal::{self, Coord};
 
-/// Shuffled flavor-array order + scroll titles (identification.cpp global state).
+/// Shuffled flavor-array order + scroll titles (global state)
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FlavorTables {
     pub color_order: [u8; MAX_COLORS as usize],
@@ -196,7 +195,7 @@ fn item_store_bought(identification: u8) -> bool {
     (identification & ID_STORE_BOUGHT) != 0
 }
 
-/// C++ identification.cpp lines 16–216.
+/// 216
 pub fn object_description(command: u8) -> String {
     with_state(|state| object_description_for_state(state, command))
 }
@@ -301,7 +300,7 @@ fn object_description_for_state(state: &State, command: u8) -> String {
     }
 }
 
-/// C++ identification.cpp lines 218–227.
+/// 227
 pub fn identify_game_object() {
     let mut item_id = 0u8;
     if !terminal::get_tile_character("Enter character to be identified :", &mut item_id) {
@@ -313,7 +312,7 @@ pub fn identify_game_object() {
     recall_monster_attributes(item_id);
 }
 
-/// C++ identification.cpp lines 230–304.
+/// 304
 pub fn magic_initialize_item_names() {
     with_state_mut(magic_initialize_item_names_state);
 }
@@ -378,7 +377,7 @@ pub(crate) fn magic_initialize_item_names_state(state: &mut State) {
     seed_reset_to_old_seed_state(state);
 }
 
-/// C++ identification.cpp lines 306–330.
+/// 330
 pub fn object_position_offset(category_id: u8, sub_category_id: u8) -> i16 {
     match category_id {
         TV_AMULET => 0,
@@ -412,7 +411,7 @@ pub(crate) fn identify_player_inventory_slot(state: &mut State, index: usize) {
     state.py.inventory[index].identification |= ID_KNOWN2;
 }
 
-/// C++ identification.cpp lines 345–359.
+/// 359
 pub fn item_set_as_identified(category_id: u8, sub_category_id: u8) {
     with_state_mut(|state| {
         let Some(id) = object_ident_index(category_id, sub_category_id) else {
@@ -423,7 +422,7 @@ pub fn item_set_as_identified(category_id: u8, sub_category_id: u8) {
     });
 }
 
-/// C++ identification.cpp lines 362–377.
+/// 377
 fn unsample(state: &mut State, item: &mut Inventory) {
     item.identification &= !(ID_MAGIK | ID_EMPTY);
 
@@ -433,7 +432,7 @@ fn unsample(state: &mut State, item: &mut Inventory) {
     clear_object_tried_flag(state, id);
 }
 
-/// C++ identification.cpp lines 380–383.
+/// 383
 pub fn spell_item_identify_and_remove_random_inscription(item: &mut Inventory) {
     with_state_mut(|state| {
         unsample(state, item);
@@ -456,28 +455,28 @@ pub(crate) fn spell_item_identify_and_remove_random_inscription_for_state(
     state.game.treasure.list[treasure_id].identification |= ID_KNOWN2;
 }
 
-/// C++ identification.cpp lines 385–387.
+/// 387
 pub fn spell_item_identified(item: Inventory) -> bool {
     (item.identification & ID_KNOWN2) != 0
 }
 
-/// C++ identification.cpp lines 389–391.
+/// 391
 pub fn spell_item_remove_identification(item: &mut Inventory) {
     item.identification &= !ID_KNOWN2;
 }
 
-/// C++ identification.cpp lines 393–395.
+/// 395
 pub fn item_identification_clear_empty(item: &mut Inventory) {
     item.identification &= !ID_EMPTY;
 }
 
-/// C++ identification.cpp lines 397–400.
+/// 400
 pub fn item_identify_as_store_bought(item: &mut Inventory) {
     item.identification |= ID_STORE_BOUGHT;
     spell_item_identify_and_remove_random_inscription(item);
 }
 
-/// C++ identification.cpp lines 408–422.
+/// 422
 pub fn item_set_colorless_as_identified_for_state(
     state: &State,
     category_id: u8,
@@ -512,7 +511,7 @@ pub fn item_set_colorless_as_identified(
     })
 }
 
-/// C++ identification.cpp lines 425–436.
+/// 436
 pub fn item_set_as_tried(item: Inventory) {
     with_state_mut(|state| {
         let Some(id) = object_ident_index(item.category_id, item.sub_category_id) else {
@@ -529,7 +528,7 @@ pub enum ItemIdentifySlot {
     Treasure,
 }
 
-/// C++ identification.cpp lines 440–485 — explicit item reference (inventory or treasure).
+/// explicit item reference (inventory or treasure)
 pub fn item_identify_for_slot(
     state: &mut State,
     slot: ItemIdentifySlot,
@@ -602,7 +601,7 @@ pub fn item_identify_for_slot(
     merged
 }
 
-/// C++ identification.cpp lines 440–485.
+/// 485
 pub fn item_identify(item_id: &mut i32) {
     let merged = with_state_mut(|state| {
         item_identify_for_slot(state, ItemIdentifySlot::Inventory, *item_id, item_id)
@@ -615,7 +614,7 @@ pub fn item_identify(item_id: &mut i32) {
     }
 }
 
-/// C++ identification.cpp lines 489–491.
+/// 491
 pub fn item_remove_magic_naming(item: &mut Inventory) {
     item.special_name_id = SpecialNameIds::SN_NULL as u8;
 }
@@ -628,7 +627,7 @@ pub use identification_desc::{
     item_type_remaining_count_description,
 };
 
-/// C++ identification.cpp lines 941–956.
+/// 956
 pub fn object_blocked_by_monster(monster_id: i32) {
     let (lit, creature_id) = with_state(|state| {
         let monster = &state.monsters[monster_id as usize];
@@ -642,7 +641,7 @@ pub fn object_blocked_by_monster(monster_id: i32) {
     terminal::print_message(Some(&format!("{description} is in your way!")));
 }
 
-/// C++ identification.cpp lines 932–934.
+/// 934
 pub fn item_append_to_inscription(item: &mut Inventory, item_ident_type: u8) {
     item.identification |= item_ident_type;
 }

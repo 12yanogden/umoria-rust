@@ -1,4 +1,4 @@
-//! Port of `src/player_quaff.cpp` — potion quaffing.
+//! Potion quaffing
 
 use crate::config::player::PLAYER_MAX_EXP;
 use crate::dice::{dice_roll, Dice};
@@ -27,7 +27,7 @@ use crate::ui_io::terminal;
 
 const SHRT_MAX: i32 = 32_767;
 
-/// C++ `player_quaff.cpp` lines 60–334.
+/// 334
 pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
     let mut identified = false;
     let mut flags = flags;
@@ -401,7 +401,7 @@ pub fn player_drink_potion(flags: u32, item_type: u8) -> bool {
     identified
 }
 
-/// C++ `player_quaff.cpp` lines 337–384.
+/// 384
 pub fn quaff() {
     with_state_mut(|state| state.game.player_free_turn = true);
 

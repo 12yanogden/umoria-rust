@@ -1,4 +1,4 @@
-//! Port of src/dungeon.h / dungeon.cpp — dungeon grid, tile helpers, object placement.
+//! Dungeon grid, tile helpers, object placement
 
 use crate::config::dungeon::objects::{
     MAX_GOLD_TYPES, MAX_TRAPS, OBJ_CLOSED_DOOR, OBJ_GOLD_LIST, OBJ_RUBBLE, OBJ_TRAP_LIST,
@@ -43,7 +43,6 @@ pub const SCREEN_WIDTH: u8 = 66;
 pub const QUART_HEIGHT: u8 = SCREEN_HEIGHT / 4;
 pub const QUART_WIDTH: u8 = SCREEN_WIDTH / 4;
 
-/// Port of `DungeonObject_t` in dungeon.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct DungeonObject {
     pub name: &'static str,
@@ -63,7 +62,6 @@ pub struct DungeonObject {
     pub depth_first_found: u8,
 }
 
-/// Port of `Dungeon_t` in dungeon.h.
 #[derive(Clone, Debug)]
 pub struct Dungeon {
     pub height: i16,
@@ -81,7 +79,7 @@ impl Default for Dungeon {
             height: 0,
             width: 0,
             panel: Panel::default(),
-            // C++: Dungeon_t{0, 0, {}, -1, 0, true, {}} — positional init puts
+            // Dungeon_t{0, 0, {}, -1, 0, true, {}} — positional init puts
             // -1 in game_turn (4th field) and 0 in current_level (5th field).
             game_turn: -1,
             current_level: 0,
@@ -91,7 +89,7 @@ impl Default for Dungeon {
     }
 }
 
-/// C++ dungeon.cpp lines 15–96.
+/// 96
 pub fn dungeon_display_map() {
     terminal::terminal_save_screen();
     terminal::clear_screen();
@@ -209,7 +207,7 @@ pub fn dungeon_display_map() {
     terminal::terminal_restore_screen();
 }
 
-/// C++ dungeon.cpp lines 99–104.
+/// 104
 #[must_use]
 pub fn coord_in_bounds(coord: Coord_t) -> bool {
     with_state(|state| {
@@ -219,7 +217,7 @@ pub fn coord_in_bounds(coord: Coord_t) -> bool {
     })
 }
 
-/// C++ dungeon.cpp lines 107–122.
+/// 122
 #[must_use]
 pub fn coord_distance_between(from: Coord_t, to: Coord_t) -> i32 {
     let mut dy = from.y - to.y;
@@ -235,7 +233,7 @@ pub fn coord_distance_between(from: Coord_t, to: Coord_t) -> i32 {
     (a - b) >> 1
 }
 
-/// C++ dungeon.cpp lines 127–147.
+/// 147
 #[must_use]
 pub fn coord_walls_next_to(coord: Coord_t) -> i32 {
     with_state(|state| {
@@ -258,7 +256,7 @@ pub fn coord_walls_next_to(coord: Coord_t) -> i32 {
     })
 }
 
-/// C++ dungeon.cpp lines 152–168.
+/// 168
 #[must_use]
 pub fn coord_corridor_walls_next_to(coord: Coord_t) -> i32 {
     with_state(|state| {
@@ -281,7 +279,7 @@ pub fn coord_corridor_walls_next_to(coord: Coord_t) -> i32 {
     })
 }
 
-/// C++ dungeon.cpp lines 171–209.
+/// 209
 #[must_use]
 pub fn cave_get_tile_symbol(coord: Coord_t) -> u8 {
     with_state_mut(|state| {
@@ -333,7 +331,7 @@ pub fn cave_get_tile_symbol(coord: Coord_t) -> u8 {
     })
 }
 
-/// C++ dungeon.cpp lines 212–214.
+/// 214
 #[must_use]
 pub fn cave_tile_visible(coord: Coord_t) -> bool {
     with_state(|state| {
@@ -342,7 +340,7 @@ pub fn cave_tile_visible(coord: Coord_t) -> bool {
     })
 }
 
-/// C++ dungeon.cpp lines 217–221.
+/// 221
 pub fn dungeon_set_trap(coord: Coord_t, sub_type_id: i32) {
     let free_treasure_id = popt();
     with_state_mut(|state| {
@@ -354,7 +352,7 @@ pub fn dungeon_set_trap(coord: Coord_t, sub_type_id: i32) {
     });
 }
 
-/// C++ dungeon.cpp lines 225–243.
+/// 243
 pub fn trap_change_visibility(coord: Coord_t) {
     let lite = with_state_mut(|state| {
         let treasure_id = state.dg.floor[coord.y as usize][coord.x as usize].treasure_id;
@@ -378,7 +376,7 @@ pub fn trap_change_visibility(coord: Coord_t) {
     }
 }
 
-/// C++ dungeon.cpp lines 246–251.
+/// 251
 pub fn dungeon_place_rubble(coord: Coord_t) {
     let free_treasure_id = popt();
     with_state_mut(|state| {
@@ -391,7 +389,7 @@ pub fn dungeon_place_rubble(coord: Coord_t) {
     });
 }
 
-/// C++ dungeon.cpp lines 254–274.
+/// 274
 pub fn dungeon_place_gold(coord: Coord_t) {
     let free_treasure_id = popt();
     let creature_id = with_state_mut(|state| {
@@ -412,7 +410,7 @@ pub fn dungeon_place_gold(coord: Coord_t) {
             &mut state.game.treasure.list[free_treasure_id as usize],
         );
         let base_cost = state.game.treasure.list[free_treasure_id as usize].cost;
-        // C++ dungeon.cpp line 269: (int32_t) randomNumber((int) cost) cast.
+        // (int32_t) randomNumber((int) cost) cast
         let bonus = 8 * random_number_state(state, base_cost) + random_number_state(state, 8);
         state.game.treasure.list[free_treasure_id as usize].cost += bonus;
         state.dg.floor[coord.y as usize][coord.x as usize].creature_id
@@ -423,7 +421,7 @@ pub fn dungeon_place_gold(coord: Coord_t) {
     }
 }
 
-/// C++ dungeon.cpp lines 277–290.
+/// 290
 pub fn dungeon_place_random_object_at(coord: Coord_t, must_be_small: bool) {
     let free_treasure_id = popt();
     let (creature_id, level) = with_state(|state| {
@@ -448,7 +446,7 @@ pub fn dungeon_place_random_object_at(coord: Coord_t, must_be_small: bool) {
     }
 }
 
-/// C++ dungeon.cpp lines 293–324.
+/// 324
 pub fn dungeon_allocate_and_place_object(
     set_function: impl Fn(i32) -> bool,
     object_type: i32,
@@ -483,10 +481,10 @@ pub fn dungeon_allocate_and_place_object(
     }
 }
 
-/// C++ dungeon.cpp lines 327–347.
+/// 347
 pub fn dungeon_place_random_object_near(coord: Coord_t, mut tries: i32) {
     loop {
-        // C++ `for (i = 0; i <= 10; i++)` with `i = 9` on success: the for-increment
+        // `for (i = 0; i <= 10; i++)` with `i = 9` on success: the for-increment
         // then yields `i == 10`, so the body runs one more time after a placement.
         let mut i = 0;
         while i <= 10 {
@@ -518,7 +516,7 @@ pub fn dungeon_place_random_object_near(coord: Coord_t, mut tries: i32) {
     }
 }
 
-/// C++ dungeon.cpp lines 351–355.
+/// 355
 pub fn dungeon_move_creature_record(from: Coord_t, to: Coord_t) {
     with_state_mut(|state| {
         let id = state.dg.floor[from.y as usize][from.x as usize].creature_id;
@@ -527,7 +525,7 @@ pub fn dungeon_move_creature_record(from: Coord_t, to: Coord_t) {
     });
 }
 
-/// C++ dungeon.cpp lines 358–389.
+/// 389
 pub fn dungeon_light_room(coord: Coord_t) {
     let height_middle = i32::from(SCREEN_HEIGHT / 2);
     let width_middle = i32::from(SCREEN_WIDTH / 2);
@@ -568,7 +566,7 @@ pub fn dungeon_light_room(coord: Coord_t) {
     }
 }
 
-/// C++ dungeon.cpp lines 392–399.
+/// 399
 pub fn dungeon_lite_spot(coord: Coord_t) {
     if !coord_inside_panel(coord) {
         return;
@@ -577,7 +575,7 @@ pub fn dungeon_lite_spot(coord: Coord_t) {
     panel_put_dungeon_tile(symbol, coord);
 }
 
-/// C++ dungeon.cpp lines 403–464.
+/// 464
 fn sub1_move_light(from: Coord_t, to: Coord_t) {
     with_state_mut(|state| {
         if state.py.temporary_light_only {
@@ -638,7 +636,7 @@ fn sub1_move_light(from: Coord_t, to: Coord_t) {
     }
 }
 
-/// C++ dungeon.cpp lines 468–487.
+/// 487
 fn sub3_move_light(from: Coord_t, to: Coord_t) {
     let (temporary_light_only, running_tracker, run_print_self) = with_state(|state| {
         (
@@ -673,7 +671,7 @@ fn sub3_move_light(from: Coord_t, to: Coord_t) {
     }
 }
 
-/// C++ dungeon.cpp lines 491–497.
+/// 497
 pub fn dungeon_move_character_light(from: Coord_t, to: Coord_t) {
     let use_sub3 = with_state(|state| state.py.flags.blind > 0 || !state.py.carrying_light);
     if use_sub3 {
@@ -683,13 +681,13 @@ pub fn dungeon_move_character_light(from: Coord_t, to: Coord_t) {
     }
 }
 
-/// C++ dungeon.cpp lines 506–509.
+/// 509
 pub fn dungeon_delete_monster(id: i32) {
     dungeon_remove_monster_from_level(id);
     dungeon_delete_monster_record(id);
 }
 
-/// C++ dungeon.cpp lines 514–530.
+/// 530
 pub fn dungeon_remove_monster_from_level(id: i32) {
     let lite_pos = with_state_mut(|state| {
         let monster = &mut state.monsters[id as usize];
@@ -711,7 +709,7 @@ pub fn dungeon_remove_monster_from_level(id: i32) {
     }
 }
 
-/// C++ dungeon.cpp lines 534–545.
+/// 545
 pub fn dungeon_delete_monster_record(id: i32) {
     with_state_mut(|state| {
         let last_id = i32::from(state.next_free_monster_id - 1);
@@ -725,7 +723,7 @@ pub fn dungeon_delete_monster_record(id: i32) {
     });
 }
 
-/// C++ dungeon.cpp lines 548–598.
+/// 598
 pub fn dungeon_summon_object(coord: Coord_t, mut amount: i32, object_type: i32) -> i32 {
     let mut real_type = if object_type == 1 || object_type == 5 {
         1
@@ -782,7 +780,7 @@ pub fn dungeon_summon_object(coord: Coord_t, mut amount: i32, object_type: i32) 
     result
 }
 
-/// C++ dungeon.cpp lines 601–616.
+/// 616
 #[must_use]
 pub fn dungeon_delete_object(coord: Coord_t) -> bool {
     with_state_mut(|state| {
@@ -799,6 +797,6 @@ pub fn dungeon_delete_object(coord: Coord_t) -> bool {
         pusht_state(state, treasure_id);
     });
     dungeon_lite_spot(coord);
-    // C++ returns caveTileVisible after clearing field_mark.
+    // returns caveTileVisible after clearing field_mark
     cave_tile_visible(coord)
 }

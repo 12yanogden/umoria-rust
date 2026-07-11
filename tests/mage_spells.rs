@@ -1,7 +1,7 @@
-//! `mage_spells` driver parity.
+//! `mage_spells` driver tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -110,9 +110,9 @@ fn cast_detect_monsters_from_book() {
     get_and_cast_magic_spell();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. canReadSpells gating — no RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn can_read_spells_blind_blocks_without_rng() {
@@ -168,12 +168,12 @@ fn can_read_spells_non_mage_blocks_without_rng() {
     assert_rng_unchanged_after(|| {}, || assert!(!can_read_spells()));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. spellChanceOfSuccess — formula + clamp (no RNG)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn spell_chance_formula_and_clamp_match_cpp() {
+fn spell_chance_formula_and_clamp_match_expected() {
     reset_for_new_game(Some(1));
     with_state_mut(|s| {
         s.py.misc.class_id = MAGE_CLASS_ID;
@@ -250,9 +250,9 @@ fn assert_cast_rng_unchanged_after(seed: u32, keys: &[i32], setup: impl Fn()) {
     assert_eq!(random_number(100), baseline);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. RNG-order golden — getAndCastMagicSpell driver
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn get_and_cast_success_rng_order_detect_monsters() {
@@ -306,9 +306,9 @@ fn get_and_cast_faint_rng_order() {
     assert_eq!(with_state(|s| s.py.misc.current_mana), 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. EXP-learn bookkeeping
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn first_successful_cast_awards_exp_once() {
@@ -331,9 +331,9 @@ fn first_successful_cast_awards_exp_once() {
     assert_eq!(with_state(|s| s.py.misc.exp), exp_after_first);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. castSpell dispatch
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn cast_spell_haste_self_rng_order_seed42() {
@@ -365,12 +365,12 @@ fn cast_spell_detect_monsters_consumes_no_rng() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Integer semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn spells_worked_bit_and_exp_add_match_cpp() {
+fn spells_worked_bit_and_exp_add_match_expected() {
     reset_for_new_game(Some(1));
     let choice = 4u32;
     with_state_mut(|s| {
@@ -402,9 +402,9 @@ fn faint_paralysis_truncates_to_i16() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Early exits
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn get_and_cast_no_spell_book_consumes_no_rng() {

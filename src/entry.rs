@@ -1,4 +1,4 @@
-//! Port of `src/main.cpp` — CLI entry point, argument parsing, and startup guards.
+//! Process entry: argument parsing and game startup.
 
 use std::cell::{Cell, RefCell};
 use std::io::{self, Write};
@@ -15,7 +15,7 @@ use crate::scores::show_scores_screen;
 use crate::ui_io::{self, terminal};
 use crate::version::{CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH};
 
-/// C++ `usage_instructions` raw string in main.cpp lines 13–27 (byte-for-byte).
+/// 27 (byte-for-byte)
 pub const USAGE_INSTRUCTIONS: &str = "\
 \nUsage:\n    umoria [OPTIONS] SAVEGAME\n\nSAVEGAME is an optional save game filename (default: game.sav)\n\nOptions:\n    -n           Force start of new game\n    -r           Enable classic roguelike keys on startup (default: disabled, or save game settings)\n    -d           Display high scores and exit\n    -s NUMBER    Game Seed, as a decimal number (max: 2147483647)\n\n    -v           Print version info and exit\n    -h           Display this message\n";
 
@@ -68,7 +68,7 @@ fn print_help_and_license() {
     stdout_print(USAGE_INSTRUCTIONS);
 }
 
-/// C++ `parseGameSeed` in main.cpp lines 109–122.
+/// 122
 pub fn parse_game_seed(arg: &str, seed: &mut u32) -> bool {
     let mut value = 0i32;
     if !string_to_number(arg, &mut value) {
@@ -81,7 +81,7 @@ pub fn parse_game_seed(arg: &str, seed: &mut u32) -> bool {
     true
 }
 
-/// C++ `main` body — returns the process exit status (0, 1, or 255).
+/// 0, 1, or 255
 pub fn run_with_args(args: &[String]) -> u8 {
     let mut seed = 0u32;
     let mut new_game = false;

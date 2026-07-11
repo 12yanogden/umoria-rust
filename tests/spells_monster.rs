@@ -1,7 +1,7 @@
-//! Monster-affecting spells (`spells`) parity.
+//! Monster-affecting spells (`spells`) tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -125,9 +125,9 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Early-out: blocked direction consumes zero RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn early_out_wall_consumes_no_rng_seed42() {
     reset_for_new_game(Some(42));
@@ -162,9 +162,9 @@ fn early_out_empty_ray_consumes_no_rng_seed42() {
     assert_eq!(before, after);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Directed HP / drain life
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn change_monster_hp_damages_and_returns_true_seed42() {
     reset_for_new_game(Some(42));
@@ -222,9 +222,9 @@ fn drain_life_hits_living_seed777() {
     with_state(|s| assert_eq!(s.monsters[2].hp, 25));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Speed / confuse / sleep resist rolls (RNG order)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn speed_monster_haste_no_resist_roll_seed42() {
     reset_for_new_game(Some(42));
@@ -309,9 +309,9 @@ fn sleep_monster_success_seed42() {
     with_state(|s| assert_eq!(s.monsters[2].sleep_count, 500));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Polymorph / clone
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn polymorph_monster_replaces_creature_seed42() {
     reset_for_new_game(Some(42));
@@ -341,9 +341,9 @@ fn clone_monster_attempts_multiply_seed42() {
     with_state(|s| assert_eq!(s.monsters[2].sleep_count, 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Teleport away
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn teleport_away_monster_moves_off_tile_seed42() {
     reset_for_new_game(Some(42));
@@ -378,9 +378,9 @@ fn teleport_away_in_direction_wakes_and_moves_seed42() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Genocide / mass genocide — zero RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn mass_genocide_removes_in_sight_non_winners_seed42() {
     reset_for_new_game(Some(42));
@@ -433,9 +433,9 @@ fn genocide_kills_matching_sprite_seed42() {
 
 const ESCAPE_KEY: i32 = 27;
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Area spells — speed/sleep all, mass polymorph, dispel, turn undead
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn speed_all_monsters_haste_lit_only_seed42() {
     reset_for_new_game(Some(42));

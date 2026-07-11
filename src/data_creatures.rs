@@ -1,4 +1,4 @@
-//! Port of `src/data_creatures.cpp` — immutable creature tables.
+//! Immutable creature tables
 
 use std::sync::LazyLock;
 

@@ -1,4 +1,4 @@
-//! Port of `src/game_files.cpp` — see `phase_5.3`.
+//! Splash, help, death files, and character dump output.
 
 use std::cell::{Cell, RefCell};
 use std::fs::File;
@@ -203,12 +203,10 @@ fn copy_cstr(dest: &mut [u8], src: &str) {
     dest[n] = 0;
 }
 
-/// Port of `initializeScoreFile` in `game_files.cpp`.
 pub fn initialize_score_file() -> bool {
     scores::initialize_score_file()
 }
 
-/// Port of `displaySplashScreen` in `game_files.cpp`.
 pub fn display_splash_screen() {
     let Ok(mut screen_file) = File::open(files::splash_screen) else {
         return;
@@ -224,7 +222,6 @@ pub fn display_splash_screen() {
     terminal::wait_for_continue_key(23);
 }
 
-/// Port of `displayTextHelpFile` in `game_files.cpp`.
 pub fn display_text_help_file(filename: &str) {
     let Ok(mut file) = File::open(filename) else {
         terminal::put_string_clear_to_eol(
@@ -259,7 +256,6 @@ pub fn display_text_help_file(filename: &str) {
     terminal::terminal_restore_screen();
 }
 
-/// Port of `displayDeathFile` in `game_files.cpp`.
 pub fn display_death_file(filename: &str) {
     let Ok(mut file) = File::open(filename) else {
         terminal::put_string_clear_to_eol(
@@ -286,7 +282,6 @@ pub fn display_death_file(filename: &str) {
     drop(file);
 }
 
-/// Port of `equipmentPlacementDescription` in `game_files.cpp`.
 #[must_use]
 pub fn equipment_placement_description(item_id: i32) -> &'static str {
     match item_id {
@@ -600,7 +595,6 @@ fn write_inventory_to_file(inv_file: &mut impl Write) -> io::Result<()> {
     })
 }
 
-/// Port of `outputRandomLevelObjectsToFile` in `game_files.cpp`.
 pub fn output_random_level_objects_to_file() {
     let mut input = [0u8; MORIA_OBJ_DESC_SIZE_LEN];
 
@@ -699,7 +693,6 @@ pub fn output_random_level_objects_to_file() {
     terminal::put_string_clear_to_eol("Completed.", Coord { y: 0, x: 0 });
 }
 
-/// Port of `outputPlayerCharacterToFile` in `game_files.cpp`.
 pub fn output_player_character_to_file(filename: &str) -> bool {
     TEST_OUTPUT_CALL_COUNT.with(|c| c.set(c.get().wrapping_add(1)));
     TEST_OUTPUT_LAST_PATH.with(|p| *p.borrow_mut() = filename.to_string());
@@ -715,7 +708,6 @@ pub fn output_player_character_to_file(filename: &str) -> bool {
 }
 
 fn output_player_character_to_file_impl(filename: &str) -> bool {
-    // C++ game_files.cpp:360-397 — open O_EXCL, optional replace, then write.
     // Use the same create-exclusive / replace flow on all platforms.
     let path = std::path::Path::new(filename);
     let mut created_exclusive = false;
@@ -747,7 +739,7 @@ fn output_player_character_to_file_impl(filename: &str) -> bool {
         return false;
     }
 
-    // C++ closes the fd then fopen("w") — recreate/truncate for the write path.
+    // closes the fd then fopen("w") — recreate/truncate for the write path
     let Ok(mut file) = File::create(filename) else {
         if created_exclusive {
             let _ = std::fs::remove_file(path);

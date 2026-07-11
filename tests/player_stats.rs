@@ -1,7 +1,7 @@
-//! `player_stats` parity.
+//! `player_stats` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -44,11 +44,11 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-// ---------------------------------------------------------------------------
-// C++ oracle helpers (player_stats.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// Oracle helpers
+// --------------------------------------------------------------------------
 
-fn cpp_wis_int_adj(value: i32) -> i32 {
+fn expected_wis_int_adj(value: i32) -> i32 {
     if value > 117 {
         7
     } else if value > 107 {
@@ -66,7 +66,7 @@ fn cpp_wis_int_adj(value: i32) -> i32 {
     }
 }
 
-fn cpp_charisma_adj(charisma: i32) -> i32 {
+fn expected_charisma_adj(charisma: i32) -> i32 {
     if charisma > 117 {
         90
     } else if charisma > 107 {
@@ -100,7 +100,7 @@ fn cpp_charisma_adj(charisma: i32) -> i32 {
     }
 }
 
-fn cpp_con_adj(con: i32) -> i32 {
+fn expected_con_adj(con: i32) -> i32 {
     if con < 7 {
         con - 7
     } else if con < 17 {
@@ -116,7 +116,7 @@ fn cpp_con_adj(con: i32) -> i32 {
     }
 }
 
-fn cpp_to_hit_adj(dexterity: i32, strength: i32) -> i16 {
+fn expected_to_hit_adj(dexterity: i32, strength: i32) -> i16 {
     let mut total = if dexterity < 4 {
         -3
     } else if dexterity < 6 {
@@ -144,7 +144,7 @@ fn cpp_to_hit_adj(dexterity: i32, strength: i32) -> i16 {
     } else if strength < 7 {
         total -= 1;
     } else if strength < 18 {
-        // no change
+ // no change
     } else if strength < 94 {
         total += 1;
     } else if strength < 109 {
@@ -158,7 +158,7 @@ fn cpp_to_hit_adj(dexterity: i32, strength: i32) -> i16 {
     total
 }
 
-fn cpp_ac_adj(stat: i32) -> i16 {
+fn expected_ac_adj(stat: i32) -> i16 {
     if stat < 4 {
         -4
     } else if stat == 4 {
@@ -182,7 +182,7 @@ fn cpp_ac_adj(stat: i32) -> i16 {
     }
 }
 
-fn cpp_disarm_adj(stat: i32) -> i16 {
+fn expected_disarm_adj(stat: i32) -> i16 {
     if stat < 4 {
         -8
     } else if stat == 4 {
@@ -210,7 +210,7 @@ fn cpp_disarm_adj(stat: i32) -> i16 {
     }
 }
 
-fn cpp_damage_adj(stat: i32) -> i16 {
+fn expected_damage_adj(stat: i32) -> i16 {
     if stat < 4 {
         -2
     } else if stat < 5 {
@@ -232,7 +232,7 @@ fn cpp_damage_adj(stat: i32) -> i16 {
     }
 }
 
-fn cpp_attack_blows_dexterity(dexterity: i32) -> i32 {
+fn expected_attack_blows_dexterity(dexterity: i32) -> i32 {
     if dexterity < 10 {
         0
     } else if dexterity < 19 {
@@ -248,7 +248,7 @@ fn cpp_attack_blows_dexterity(dexterity: i32) -> i32 {
     }
 }
 
-fn cpp_attack_blows_strength(strength: i32, weight: i32) -> i32 {
+fn expected_attack_blows_strength(strength: i32, weight: i32) -> i32 {
     let adj_weight = strength * 10 / weight;
     if adj_weight < 2 {
         0
@@ -267,16 +267,16 @@ fn cpp_attack_blows_strength(strength: i32, weight: i32) -> i32 {
     }
 }
 
-fn cpp_attack_blows(strength: i32, dexterity: i32, weight: i32) -> (i32, i32) {
+fn expected_attack_blows(strength: i32, dexterity: i32, weight: i32) -> (i32, i32) {
     if strength * 15 < weight {
         return (1, strength * 15 - weight);
     }
-    let dex = cpp_attack_blows_dexterity(dexterity);
-    let str_idx = cpp_attack_blows_strength(strength, weight);
+    let dex = expected_attack_blows_dexterity(dexterity);
+    let str_idx = expected_attack_blows_strength(strength, weight);
     (i32::from(BLOWS_TABLE[str_idx as usize][dex as usize]), 0)
 }
 
-fn cpp_modify_stat(current: u8, amount: i16) -> u8 {
+fn expected_modify_stat(current: u8, amount: i16) -> u8 {
     let mut new_stat = current;
     let loop_count = if amount < 0 {
         i32::from(-amount)
@@ -305,7 +305,7 @@ fn cpp_modify_stat(current: u8, amount: i16) -> u8 {
     new_stat
 }
 
-fn cpp_calculate_hit_points(
+fn expected_calculate_hit_points(
     level: u16,
     base_hp: u16,
     con: u8,
@@ -314,7 +314,7 @@ fn cpp_calculate_hit_points(
     current_hp_fraction: u16,
     max_hp: i16,
 ) -> (i16, u16, i16, u32) {
-    let con_adj = cpp_con_adj(i32::from(con));
+    let con_adj = expected_con_adj(i32::from(con));
     let mut hp = i32::from(base_hp) + con_adj * i32::from(level);
     if hp < i32::from(level) + 1 {
         hp = i32::from(level) + 1;
@@ -344,9 +344,9 @@ fn cpp_calculate_hit_points(
     (new_current_hp, new_fraction, new_max_hp, new_status)
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Stat-adjustment tables (exhaustive golden)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn stat_adjustment_wisdom_intelligence_exhaustive() {
@@ -354,7 +354,7 @@ fn stat_adjustment_wisdom_intelligence_exhaustive() {
     for value in 3..=118u8 {
         for stat in [PlayerAttr::A_INT, PlayerAttr::A_WIS] {
             set_used_stat(stat, value);
-            let expected = cpp_wis_int_adj(i32::from(value));
+            let expected = expected_wis_int_adj(i32::from(value));
             assert_eq!(
                 player_stat_adjustment_wisdom_intelligence(stat),
                 expected,
@@ -369,7 +369,7 @@ fn stat_adjustment_charisma_exhaustive() {
     reset_for_new_game(None);
     for value in 0..=118u8 {
         set_used_stat(PlayerAttr::A_CHR, value);
-        let expected = cpp_charisma_adj(i32::from(value));
+        let expected = expected_charisma_adj(i32::from(value));
         assert_eq!(
             player_stat_adjustment_charisma(),
             expected,
@@ -383,7 +383,7 @@ fn stat_adjustment_constitution_exhaustive() {
     reset_for_new_game(None);
     for value in 3..=118u8 {
         set_used_stat(PlayerAttr::A_CON, value);
-        let expected = cpp_con_adj(i32::from(value));
+        let expected = expected_con_adj(i32::from(value));
         assert_eq!(
             player_stat_adjustment_constitution(),
             expected,
@@ -401,7 +401,7 @@ fn to_hit_adjustment_exhaustive() {
                 s.py.stats.used[PlayerAttr::A_DEX as usize] = dex;
                 s.py.stats.used[PlayerAttr::A_STR as usize] = str;
             });
-            let expected = cpp_to_hit_adj(i32::from(dex), i32::from(str));
+            let expected = expected_to_hit_adj(i32::from(dex), i32::from(str));
             assert_eq!(
                 player_to_hit_adjustment(),
                 i32::from(expected),
@@ -416,7 +416,7 @@ fn armor_class_adjustment_exhaustive() {
     reset_for_new_game(None);
     for dex in 3..=118u8 {
         set_used_stat(PlayerAttr::A_DEX, dex);
-        let expected = cpp_ac_adj(i32::from(dex));
+        let expected = expected_ac_adj(i32::from(dex));
         assert_eq!(
             player_armor_class_adjustment(),
             i32::from(expected),
@@ -430,7 +430,7 @@ fn disarm_adjustment_exhaustive() {
     reset_for_new_game(None);
     for dex in 3..=118u8 {
         set_used_stat(PlayerAttr::A_DEX, dex);
-        let expected = cpp_disarm_adj(i32::from(dex));
+        let expected = expected_disarm_adj(i32::from(dex));
         assert_eq!(player_disarm_adjustment(), i32::from(expected), "dex={dex}");
     }
 }
@@ -440,14 +440,14 @@ fn damage_adjustment_exhaustive() {
     reset_for_new_game(None);
     for str in 3..=118u8 {
         set_used_stat(PlayerAttr::A_STR, str);
-        let expected = cpp_damage_adj(i32::from(str));
+        let expected = expected_damage_adj(i32::from(str));
         assert_eq!(player_damage_adjustment(), i32::from(expected), "str={str}");
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. playerAttackBlows parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn attack_blows_weight_str_dex_matrix() {
@@ -460,7 +460,7 @@ fn attack_blows_weight_str_dex_matrix() {
                     s.py.stats.used[PlayerAttr::A_DEX as usize] = dexterity;
                 });
                 let (expected_blows, expected_wth) =
-                    cpp_attack_blows(i32::from(strength), i32::from(dexterity), weight);
+                    expected_attack_blows(i32::from(strength), i32::from(dexterity), weight);
                 let mut weight_to_hit = 0;
                 let blows = player_attack_blows(weight, &mut weight_to_hit);
                 assert_eq!(
@@ -473,9 +473,9 @@ fn attack_blows_weight_str_dex_matrix() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. playerCalculateHitPoints parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn calculate_hit_points_basic_levels() {
@@ -494,7 +494,7 @@ fn calculate_hit_points_basic_levels() {
             });
             player_calculate_hit_points();
             let (expected_cur, expected_frac, expected_max, expected_status) =
-                cpp_calculate_hit_points(level, base_hp, con, 0, 50, 0, 100);
+                expected_calculate_hit_points(level, base_hp, con, 0, 50, 0, 100);
             with_state(|s| {
                 assert_eq!(s.py.misc.max_hp, expected_max, "level={level} con={con}");
                 assert_eq!(s.py.misc.current_hp, expected_cur);
@@ -552,9 +552,9 @@ fn calculate_hit_points_minimum_per_level() {
     with_state(|s| assert_eq!(s.py.misc.max_hp, 11));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. RNG-order/count parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn stat_random_increase_below_18_no_rng_seed42() {
@@ -633,16 +633,16 @@ fn stat_random_decrease_at_min_returns_false_no_rng() {
     assert_eq!(next_random_pair(100), (100, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. playerModifyStat / set / restore / boost (no RNG)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn modify_stat_increment_decrement_boundaries() {
     reset_for_new_game(None);
     for current in [17u8, 18, 28, 108, 117] {
         for amount in [-1i16, 1, 2, 5, -5] {
-            let expected = cpp_modify_stat(current, amount);
+            let expected = expected_modify_stat(current, amount);
             with_state_mut(|s| {
                 s.py.stats.current[PlayerAttr::A_STR as usize] = current;
             });
@@ -723,9 +723,9 @@ fn stat_boost_sets_modified_and_status_flag() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. playerInitializeBaseExperienceLevels
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn initialize_base_experience_levels_table() {
@@ -742,9 +742,9 @@ fn initialize_base_experience_levels_table() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Integer semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn to_hit_adjustment_i16_wrap_on_overflow_sum() {

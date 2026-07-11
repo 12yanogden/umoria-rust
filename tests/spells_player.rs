@@ -1,7 +1,7 @@
 //! Player-effect & item-utility spells (`spells`).
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -121,9 +121,9 @@ fn assert_rng_unchanged_after(setup: impl Fn(), action: impl FnOnce()) {
     assert_eq!(random_number(100), baseline);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. RNG-order golden — enchant
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 fn assert_enchant_dual_run_parity(plusses: i16, limit: i16, seed: u32) {
     reset_for_new_game(Some(seed));
@@ -179,9 +179,9 @@ fn spell_enchant_item_critical_branch_seed1() {
     assert_enchant_dual_run_parity(5, 10, 1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. RNG-order golden — recharge
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_recharge_item_fail_chance_guard_skips_random_number_zero() {
@@ -223,9 +223,9 @@ fn spell_recharge_item_no_wand_returns_false_no_rng() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Teleport player
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_teleport_player_to_seed42_lands_and_rng_order() {
@@ -279,9 +279,9 @@ fn spell_teleport_player_to_retries_on_wall_seed7() {
     assert_eq!(pairs.len(), 4);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Stat / EXP loss math
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_lose_str_decreases_stat_seed42() {
@@ -406,9 +406,9 @@ fn spell_restore_player_levels_no_op_when_exp_at_max() {
     assert!(!spell_restore_player_levels());
 }
 
-// ---------------------------------------------------------------------------
-// 5. HP / food / cure — zero RNG where C++ uses none
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 5. HP / food / cure — zero RNG where uses none
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_change_player_hit_points_at_max_returns_false_no_rng() {
@@ -516,9 +516,9 @@ fn spell_remove_curse_false_when_none_cursed_no_rng() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Integer semantics — i16 misc_use / plusses wrapping
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_recharge_item_misc_use_i16_addition_parity() {

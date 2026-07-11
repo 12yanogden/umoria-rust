@@ -1,4 +1,4 @@
-//! Port of `src/player_bash.cpp` — see `phase_4.4.5`.
+//! Player bashing of doors, chests, and creatures.
 
 use crate::config::dungeon::objects::{OBJ_OPEN_DOOR, OBJ_RUINED_CHEST};
 use crate::config::monsters::defense::CD_MAX_HP;
@@ -21,7 +21,7 @@ use crate::types::Coord_t;
 use crate::ui::display_character_experience;
 use crate::ui_io::{get_direction_with_memory, terminal};
 
-/// C++ `player_bash.cpp` lines 35–78.
+/// 78
 pub fn player_bash() {
     let mut dir = 0i32;
     if !get_direction_with_memory(None, &mut dir) {
@@ -75,7 +75,7 @@ pub fn player_bash() {
     terminal::print_message(Some("You bash it, but nothing interesting happens."));
 }
 
-/// C++ player_bash.cpp lines 82–161.
+/// 161
 #[doc(hidden)]
 pub fn player_bash_attack(coord: Coord_t) {
     let monster_id =
@@ -198,7 +198,7 @@ fn player_bash_position(coord: Coord_t) {
     player_bash_attack(coord);
 }
 
-/// C++ player_bash.cpp lines 173–208.
+/// 208
 #[doc(hidden)]
 pub fn player_bash_closed_door(coord: Coord_t, dir: i32) {
     terminal::print_message_no_command_interrupt("You smash into the door!");
@@ -256,7 +256,7 @@ pub fn player_bash_closed_door(coord: Coord_t, dir: i32) {
     }
 }
 
-/// C++ player_bash.cpp lines 210–230.
+/// 230
 #[doc(hidden)]
 pub fn player_bash_closed_chest(treasure_id: u8) {
     if random_number(10) == 1 {

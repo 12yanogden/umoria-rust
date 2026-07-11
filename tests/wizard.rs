@@ -1,7 +1,7 @@
-//! `wizard` parity.
+//! `wizard` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -165,9 +165,9 @@ fn tile_at(coord: Coord_t) -> Tile {
     with_state(|s| s.dg.floor[coord.y as usize][coord.x as usize])
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. enterWizardMode
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn enter_wizard_mode_denied_when_noscore_zero_and_not_confirmed() {
     reset_for_new_game(None);
@@ -190,7 +190,7 @@ fn enter_wizard_mode_succeeds_on_confirm() {
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
-    // print_message may require a -more- ack when a prior line is pending.
+ // print_message may require a -more- ack when a prior line is pending.
     with_state_mut(|s| s.message_ready_to_print = true);
     push_keys_in_consume_order(&[i32::from(b' '), i32::from(b'y')]);
 
@@ -220,9 +220,9 @@ fn enter_wizard_mode_auto_when_noscore_nonzero() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. wizardCureAll
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_cure_all_clamps_slow_image_and_cures_conditions() {
     reset_for_new_game(None);
@@ -254,9 +254,9 @@ fn wizard_cure_all_clamps_slow_image_and_cures_conditions() {
     test_clear_getch_keys();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. wizardDropRandomItems
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_drop_random_items_uses_command_count_then_resets() {
     reset_for_new_game(Some(1));
@@ -288,11 +288,11 @@ fn wizard_drop_random_items_defaults_to_one_when_no_command_count() {
 
     wizard_drop_random_items();
 
-    // `tries` defaults to 1 when command_count is 0, but C++
-    // `dungeonPlaceRandomObjectNear` sets `i = 9` on each successful placement
-    // inside `for (i = 0; i <= 10; i++)`, so the post-increment re-enters at
-    // `i == 10` and can chain further placements until an attempt fails.
-    // Seed 1 on this open floor places 8 objects for that single try.
+ // `tries` defaults to 1 when command_count is 0, but
+ // `dungeonPlaceRandomObjectNear` sets `i = 9` on each successful placement
+ // inside `for (i = 0; i <= 10; i++)`, so the post-increment re-enters at
+ // `i == 10` and can chain further placements until an attempt fails.
+ // Seed 1 on this open floor places 8 objects for that single try.
     let count = with_state(|s| {
         s.dg.floor
             .iter()
@@ -303,9 +303,9 @@ fn wizard_drop_random_items_defaults_to_one_when_no_command_count() {
     assert_eq!(count, 8);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. wizardJumpLevel
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_jump_level_from_command_count_clamps_and_resets() {
     reset_for_new_game(None);
@@ -370,9 +370,9 @@ fn wizard_jump_level_prompt_cancel_clears_message_line() {
     test_clear_getch_keys();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. wizardGainExperience
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_gain_experience_from_command_count() {
     reset_for_new_game(None);
@@ -427,9 +427,9 @@ fn wizard_gain_experience_doubles_with_wrap() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. wizardSummonMonster
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_summon_monster_rng_order_seed42() {
     reset_for_new_game(Some(42));
@@ -451,9 +451,9 @@ fn wizard_summon_monster_rng_order_seed42() {
     with_state(|s| assert!(s.next_free_monster_id > i16::from(monsters::MON_MIN_INDEX_ID)));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. wizardLightUpDungeon
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_light_up_dungeon_sets_three_by_three_neighborhood() {
     reset_for_new_game(None);
@@ -515,7 +515,7 @@ fn wizard_light_up_dungeon_skips_non_floor_tiles() {
 
 #[test]
 fn wizard_light_up_dungeon_edge_floor_lights_in_bounds_neighbors() {
-    // C++ writes yy/xx without bounds checks; Rust lights all in-array neighbors.
+ // writes yy/xx without bounds checks; Rust lights all in-array neighbors.
     reset_for_new_game(None);
     setup_dungeon(10, 10);
     setup_panel(Coord_t { y: 0, x: 0 });
@@ -533,9 +533,9 @@ fn wizard_light_up_dungeon_edge_floor_lights_in_bounds_neighbors() {
     assert!(tile_at(Coord_t { y: 1, x: 1 }).permanent_light);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. wizardCharacterAdjustment
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_character_adjustment_searching_uses_prompt_length_bug() {
     reset_for_new_game(None);
@@ -580,9 +580,9 @@ fn wizard_character_adjustment_early_return_on_cancel() {
     test_clear_getch_keys();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 9. wizardRequestObjectId
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_request_object_id_valid() {
     reset_for_new_game(None);
@@ -638,9 +638,9 @@ fn wizard_request_object_id_cancelled() {
     test_clear_getch_keys();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 10. wizardGenerateObject — RNG order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn wizard_generate_object_rng_order_all_fail_seed42() {
     reset_for_new_game(Some(42));
@@ -754,9 +754,9 @@ fn wizard_generate_object_places_item_on_success_seed1() {
     test_clear_getch_keys();
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 11. wizardCreateObjects
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 fn push_create_object_prompts(values: &[&str], confirm_yes: bool) {
     let mut keys = Vec::new();
     keys.push(i32::from(b' '));

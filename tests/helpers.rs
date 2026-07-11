@@ -1,7 +1,7 @@
 //! String/number helpers (`helpers`).
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -32,9 +32,9 @@ fn vtype_str(buf: &Vtype_t) -> String {
         .unwrap_or_default()
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. getAndClearFirstBit
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn get_and_clear_first_bit_cases() {
     let mut flag = 0x1u32;
@@ -65,9 +65,9 @@ fn get_and_clear_first_bit_cases() {
     assert_eq!(flag, 0xFFFF_FFFE);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. insertNumberIntoString
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn insert_number_into_string_show_sign_positive() {
     let mut to = vtype_from("Deal %d damage");
@@ -112,7 +112,7 @@ fn insert_number_into_string_skips_false_percent_match() {
 
 #[test]
 fn insert_number_into_string_truncates_at_moria_message_size() {
-    // Prefix + 5-digit number exceeds 79 chars; snprintf(to, 80, …) clips tail.
+ // Prefix + 5-digit number exceeds 79 chars; snprintf(to, 80, …) clips tail.
     let prefix = "x".repeat(75);
     let mut to = vtype_from(&format!("{prefix}%d"));
     insert_number_into_string(&mut to, b"%d", 12345, false);
@@ -139,9 +139,9 @@ fn insert_number_into_string_truncates_near_end_marker() {
     assert!(!got.ends_with("XY") || got.len() == MORIA_MESSAGE_SIZE_LEN - 1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. insertStringIntoString
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn insert_string_into_string_match() {
     let mut to = vtype_from("hit the @ hard");
@@ -167,7 +167,7 @@ fn insert_string_into_string_null_insert_deletes() {
 fn insert_string_into_string_overlap_sliding_compare() {
     let mut to = vtype_from("aaab");
     insert_string_into_string(&mut to, b"aab", Some(b"Z"));
-    assert_eq!(vtype_str(&to), "aZ"); // C++ match at index 1: suffix after pc+from_len is empty
+    assert_eq!(vtype_str(&to), "aZ"); // match at index 1: suffix after pc+from_len is empty
 }
 
 #[test]
@@ -191,9 +191,9 @@ fn insert_string_into_string_match_at_end() {
     assert_eq!(vtype_str(&to), "beginfinish");
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. isVowel
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn is_vowel_lowercase() {
     for ch in [b'a', b'e', b'i', b'o', b'u'] {
@@ -222,9 +222,9 @@ fn is_vowel_non_letters() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. stringToNumber (strtol semantics)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn string_to_number_basic() {
     let mut n = 0;
@@ -252,7 +252,7 @@ fn string_to_number_trailing_garbage() {
 
 #[test]
 fn string_to_number_empty() {
-    // macOS strtol("") sets errno=EINVAL; C++ `stringToNumber` returns false (see helpers.cpp).
+ // macOS strtol("") sets errno=EINVAL; `stringToNumber` returns false.
     let mut n = 99;
     assert!(!string_to_number("", &mut n));
     assert_eq!(n, 99);
@@ -279,7 +279,7 @@ fn string_to_number_erange_underflow() {
 
 #[test]
 fn string_to_number_int_truncation_on_64bit_long() {
-    // macOS/Linux reference build: long is 64-bit; value fits in long but not i32.
+ // macOS/Linux reference build: long is 64-bit; value fits in long but not i32.
     if std::mem::size_of::<libc::c_long>() == 8 {
         let mut n = 0;
         assert!(string_to_number("3000000000", &mut n));
@@ -287,9 +287,9 @@ fn string_to_number_int_truncation_on_64bit_long() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. humanDateString
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn human_date_string_shape() {
     let mut day = [0u8; 11];
@@ -304,7 +304,7 @@ fn human_date_string_shape() {
     let s = CStr::from_bytes_until_nul(&day).unwrap().to_str().unwrap();
     assert!(s.len() <= 10);
 
-    // Shape: "Mon Jul  5" — `%a %b %e` (space-padded day 1–9 on Unix).
+ // Shape: "Mon Jul  5" — `%a %b %e` (space-padded day 1–9 on Unix).
     let bytes = s.as_bytes();
     assert!((8..=10).contains(&bytes.len()));
     assert!(bytes[0..3].iter().all(u8::is_ascii_alphabetic));
@@ -315,9 +315,9 @@ fn human_date_string_shape() {
     assert!(bytes[9].is_ascii_digit());
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. getCurrentUnixTime
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn get_current_unix_time_plausible_and_non_decreasing() {
     let t1 = get_current_unix_time();

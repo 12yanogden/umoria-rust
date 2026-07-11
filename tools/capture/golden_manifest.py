@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 1.4.5 - Generate/verify tests/golden/manifest.json.
+"""Generate/verify tests/golden/manifest.json.
 
 Enumerates every golden under tests/golden/{rng,save,scores,transcripts}
 (excluding checks/, the manifest itself, and volatile *.raw intermediates),
@@ -14,8 +14,8 @@ which is stable across regen; deterministic goldens use ``hash_method: sha256``
 over the raw bytes.
 
 Usage:
-    golden_manifest.py write    # (re)write tests/golden/manifest.json
-    golden_manifest.py verify   # exit 0 iff on-disk manifest matches reality
+    golden_manifest.py write # (re)write tests/golden/manifest.json
+    golden_manifest.py verify # exit 0 iff on-disk manifest matches reality
 """
 import hashlib
 import json
@@ -42,8 +42,8 @@ OVERRIDES = {
         "env": ENV_2480,
         "scheme": "save",
         "volatile_byte_ranges": [
-            {"offset": 3894, "length": 4, "why": "save timestamp l = getCurrentUnixTime() (game_save.cpp:299)"},
-            {"offset": 3910, "length": 4, "why": "py.misc.date_of_birth (game_save.cpp:309)"},
+            {"offset": 3894, "length": 4, "why": "save timestamp l = get_current_unix_time()"},
+            {"offset": 3910, "length": 4, "why": "py.misc.date_of_birth"},
         ],
     },
     "scores/scores_initial.dat": {
@@ -51,7 +51,7 @@ OVERRIDES = {
         "note": "pristine committed high-score file (copy of data/scores.dat)",
         "scheme": "score",
         "volatile_byte_ranges": [
-            {"offset": 8, "length": 4, "why": "HighScore_t.birth_date record 0 = 8 + 64*N (game_save.cpp:1189)"},
+            {"offset": 8, "length": 4, "why": "HighScore.birth_date record 0 = 8 + 64*N"},
         ],
     },
     "scores/scores_screen.txt": {
@@ -82,9 +82,9 @@ def iter_golden_files():
             continue
         for name in sorted(os.listdir(d)):
             if name.startswith("."):
-                continue  # dot/intermediate files (e.g. .scores_screen.raw)
+                continue # dot/intermediate files (e.g. .scores_screen.raw)
             if name.endswith(".raw"):
-                continue  # raw pty output is a volatile intermediate, not a golden
+                continue # raw pty output is a volatile intermediate, not a golden
             yield sub, name, os.path.join(d, name)
 
 
@@ -151,21 +151,15 @@ def ncurses_version():
 
 
 def generated_with():
-    meta = {"cmake": None, "compiler": None, "os": None}
-    meta_path = os.path.join(ROOT, "build", "ref", "build_meta.txt")
-    if os.path.isfile(meta_path):
-        for line in open(meta_path):
-            if ":" in line:
-                k, v = line.split(":", 1)
-                if k.strip() in meta:
-                    meta[k.strip()] = v.strip()
-    meta["cmake"] = meta["cmake"] or _cmd(["cmake", "--version"])
-    meta["compiler"] = meta["compiler"] or _cmd(["c++", "--version"])
-    meta["os"] = meta["os"] or _cmd(["uname", "-a"])
-    meta["ncurses"] = ncurses_version()
-    meta["faketime"] = None  # macOS SIP blocks libfaketime; masked comparison used instead
-    meta["regen_command"] = "tools/capture/regen.sh"
-    return meta
+    return {
+        "cargo": _cmd(["cargo", "--version"]),
+        "rustc": _cmd(["rustc", "--version"]),
+        "os": _cmd(["uname", "-a"]),
+        "ncurses": ncurses_version(),
+        # macOS SIP blocks libfaketime; masked comparison used instead
+        "faketime": None,
+        "regen_command": "tools/capture/regen.sh",
+    }
 
 
 def build_manifest():

@@ -74,7 +74,7 @@ fn append_options_and_empty_body(l: u32) {
 }
 
 #[test]
-fn test_load_cpp_living_save() {
+fn test_load_expected_living_save() {
     let manifest = load_manifest().expect("manifest");
     let entry = manifest
         .goldens
@@ -401,7 +401,7 @@ fn test_rle_cave_decode() {
         state.dg.game_turn = 1;
         copy_cstr_into(&mut state.py.misc.name, "Tester");
     });
-    // Force a truncated RLE by loading valid golden then corrupting is easier:
+ // Force a truncated RLE by loading valid golden then corrupting is easier:
     let mut corrupt = golden.clone();
     let tail = corrupt.len().saturating_sub(4);
     corrupt[tail] = 0xFF;

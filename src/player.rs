@@ -1,4 +1,4 @@
-//! Port of src/player.h — player type, enums, and constants.
+//! Player type, enums, and constants
 
 use crate::inventory::{Inventory, PlayerEquipment, PLAYER_INVENTORY_SIZE};
 use crate::types::Coord_t;
@@ -13,16 +13,14 @@ pub const CLASS_MISC_HIT: u8 = 4;
 pub const BTH_PER_PLUS_TO_HIT_ADJUST: u8 = 3;
 pub const PLAYER_NAME_SIZE: u8 = 27;
 
-/// Port of `ClassRankTitle_t` in player.h.
 pub type ClassRankTitle = &'static str;
 
-/// Port of `PlayerClassLevelAdj` in player.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 #[allow(
     non_camel_case_types,
     clippy::upper_case_acronyms,
-    reason = "C++ typedef / enum member names preserved for fidelity; C++ enum acronyms preserved for fidelity"
+    reason = "historical typedef / enum member names retained"
 )]
 pub enum PlayerClassLevelAdj {
     BTH = 0,
@@ -32,12 +30,11 @@ pub enum PlayerClassLevelAdj {
     SAVE,
 }
 
-/// Port of `PlayerAttr` in player.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 #[allow(
     non_camel_case_types,
-    reason = "C++ typedef / enum member names preserved for fidelity"
+    reason = "historical typedef / enum member names retained"
 )]
 pub enum PlayerAttr {
     A_STR = 0,
@@ -208,7 +205,6 @@ pub struct PlayerPack {
     pub heaviness: i16,
 }
 
-/// Port of `Player_t` in player.h.
 #[derive(Clone, Debug)]
 pub struct Player {
     pub misc: PlayerMisc,
@@ -296,7 +292,7 @@ use crate::ui::{display_character_experience, print_character_current_hit_points
 use crate::ui_io::get_direction_with_memory;
 use crate::ui_io::terminal::print_message;
 
-/// C++ player.cpp lines 1076–1094.
+/// 1094
 pub fn player_gain_kill_experience(creature: &Creature) {
     with_state_mut(|state| {
         let exp = i32::from(creature.kill_exp_value) * i32::from(creature.level);
@@ -316,7 +312,7 @@ pub fn player_gain_kill_experience(creature: &Creature) {
     });
 }
 
-/// C++ player.cpp lines 1652–1666.
+/// 1666
 pub fn player_rank_title() -> &'static str {
     with_state(|state| {
         if state.py.misc.level < 1 {
@@ -336,19 +332,19 @@ pub use crate::player_move::player_move_position;
 pub use crate::player_traps::chest_trap;
 pub use crate::player_tunnel::player_tunnel_wall;
 
-/// C++ player.cpp lines 33–34.
+/// 34
 pub fn player_is_male() -> bool {
     with_state(|state| state.py.misc.gender)
 }
 
-/// C++ player.cpp lines 37–38.
+/// 38
 pub fn player_set_gender(is_male: bool) {
     with_state_mut(|state| {
         state.py.misc.gender = is_male;
     });
 }
 
-/// C++ player.cpp lines 41–45.
+/// 45
 pub fn player_get_gender_label() -> &'static str {
     if player_is_male() {
         "Male"
@@ -359,7 +355,7 @@ pub fn player_get_gender_label() -> &'static str {
 
 #[allow(
     unused_imports,
-    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+    reason = "re-exports kept for call-site convenience"
 )]
 pub use crate::player_stats::{
     player_armor_class_adjustment, player_attack_blows, player_calculate_hit_points,
@@ -378,7 +374,7 @@ use crate::treasure::TV_MAGIC_BOOK;
 use crate::ui::display_spells_list;
 use crate::ui_io::terminal::{self, Coord};
 
-/// C++ player.cpp lines 141–143.
+/// 143
 pub fn player_no_light() -> bool {
     with_state(|state| {
         let y = state.py.pos.y as usize;
@@ -390,7 +386,7 @@ pub fn player_no_light() -> bool {
 
 pub use crate::player_magic::{player_bless, player_protect_evil};
 
-/// C++ player.cpp lines 803–815.
+/// 815
 pub fn player_can_read() -> bool {
     if with_state(|state| state.py.flags.blind > 0) {
         terminal::print_message(Some("You can't see to read your spell book!"));
@@ -405,7 +401,7 @@ pub fn player_can_read() -> bool {
     true
 }
 
-/// C++ player.cpp lines 817–826.
+/// 826
 pub fn last_known_spell() -> i32 {
     for last_known in 0..32 {
         if with_state(|state| state.py.flags.spells_learned_order[last_known]) == 99 {
@@ -415,7 +411,7 @@ pub fn last_known_spell() -> i32 {
     0
 }
 
-/// C++ player.cpp lines 828–838.
+/// 838
 pub fn player_determine_learnable_spells() -> u32 {
     with_state(|state| {
         let mut spell_flag = 0u32;
@@ -428,7 +424,7 @@ pub fn player_determine_learnable_spells() -> u32 {
     })
 }
 
-/// C++ player.cpp lines 981–1001.
+/// 1001
 pub fn new_mana(stat: PlayerAttr) -> i32 {
     with_state(|state| {
         let levels = i32::from(state.py.misc.level)
@@ -447,7 +443,7 @@ pub fn new_mana(stat: PlayerAttr) -> i32 {
     })
 }
 
-/// C++ player.cpp lines 1004–1038.
+/// 1038
 pub fn player_gain_mana(stat: PlayerAttr) {
     let mut new_mana_value = new_mana(stat);
     if new_mana_value > 0 {
@@ -480,7 +476,7 @@ pub fn player_gain_mana(stat: PlayerAttr) {
     });
 }
 
-/// C++ player.cpp lines 1455–1472.
+/// 1472
 fn eliminate_known_spells_greater_than_level(magic_type_str: &str, offset: i32) {
     let messages = with_state_mut(|state| {
         let class_id = state.py.misc.class_id as usize - 1;
@@ -512,7 +508,7 @@ fn eliminate_known_spells_greater_than_level(magic_type_str: &str, offset: i32) 
     }
 }
 
-/// C++ player.cpp lines 1474–1501.
+/// 1501
 pub fn number_of_spells_allowed(stat: PlayerAttr) -> i32 {
     with_state(|state| {
         let levels = i32::from(state.py.misc.level)
@@ -529,7 +525,7 @@ pub fn number_of_spells_allowed(stat: PlayerAttr) -> i32 {
     })
 }
 
-/// C++ player.cpp lines 1503–1513.
+/// 1513
 pub fn number_of_spells_known() -> i32 {
     with_state(|state| {
         let mut known = 0;
@@ -544,7 +540,7 @@ pub fn number_of_spells_known() -> i32 {
     })
 }
 
-/// C++ player.cpp lines 1517–1548.
+/// 1548
 fn remember_forgotten_spells(
     allowed_spells: i32,
     mut new_spells: i32,
@@ -594,7 +590,7 @@ fn remember_forgotten_spells(
     new_spells
 }
 
-/// C++ player.cpp lines 1552–1572.
+/// 1572
 fn learnable_spells(spells: &[Spell; 31], mut new_spells: i32) -> i32 {
     with_state(|state| {
         let mut spell_flag = 0x7FFF_FFFFu32 & !state.py.flags.spells_learnt;
@@ -621,7 +617,7 @@ fn learnable_spells(spells: &[Spell; 31], mut new_spells: i32) -> i32 {
     })
 }
 
-/// C++ player.cpp lines 1577–1602.
+/// 1602
 fn forget_spells(mut new_spells: i32, magic_type_str: &str, offset: i32) {
     let messages = with_state_mut(|state| {
         let mut messages = Vec::new();
@@ -653,7 +649,7 @@ fn forget_spells(mut new_spells: i32, magic_type_str: &str, offset: i32) {
     }
 }
 
-/// C++ player.cpp lines 1606–1650.
+/// 1650
 pub fn player_calculate_allowed_spells_count(stat: PlayerAttr) {
     let (magic_type_str, offset) = if stat == PlayerAttr::A_INT {
         ("spell", i32::from(NAME_OFFSET_SPELLS))
@@ -693,7 +689,7 @@ pub fn player_calculate_allowed_spells_count(stat: PlayerAttr) {
     }
 }
 
-/// C++ player.cpp lines 841–979.
+/// 979
 pub fn player_gain_spells() {
     if with_state(|state| state.py.flags.confused > 0) {
         terminal::print_message(Some("You are too confused."));
@@ -833,7 +829,7 @@ pub fn player_gain_spells() {
     }
 }
 
-/// C++ player.cpp lines 106–138.
+/// 138
 pub fn player_teleport(new_distance: i32) {
     let location = with_state_mut(|state| {
         let mut location = Coord_t { y: 0, x: 0 };
@@ -882,7 +878,7 @@ pub fn player_teleport(new_distance: i32) {
     update_monsters(false);
 }
 
-/// C++ player.cpp lines 148–165.
+/// 165
 pub fn player_disturb(major_disturbance: i32, light_disturbance: i32) {
     with_state_mut(|state| {
         state.game.command_count = 0;
@@ -911,7 +907,7 @@ pub fn player_disturb(major_disturbance: i32, light_disturbance: i32) {
     terminal::flush_input_buffer();
 }
 
-/// C++ player.cpp lines 168–177.
+/// 177
 pub fn player_search_on() {
     player_change_speed(1);
     with_state_mut(|state| {
@@ -924,7 +920,7 @@ pub fn player_search_on() {
     });
 }
 
-/// C++ player.cpp lines 179–188.
+/// 188
 pub fn player_search_off() {
     dungeon_reset_view();
     player_change_speed(-1);
@@ -938,7 +934,7 @@ pub fn player_search_off() {
     });
 }
 
-/// C++ player.cpp lines 191–237.
+/// 237
 pub fn player_rest_on() {
     let rest_num = with_state_mut(|state| {
         if state.game.command_count > 0 {
@@ -1004,7 +1000,7 @@ pub fn player_rest_on() {
     });
 }
 
-/// C++ player.cpp lines 239–249.
+/// 249
 pub fn player_rest_off() {
     with_state_mut(|state| {
         state.py.flags.rest = 0;
@@ -1017,7 +1013,7 @@ pub fn player_rest_off() {
     });
 }
 
-/// C++ player.cpp lines 665–728.
+/// 728
 pub fn player_search(coord: Coord_t, chance: i32) {
     let mut chance = chance;
     let (confused, blind, image) = with_state(|state| {
@@ -1096,7 +1092,7 @@ pub fn player_search(coord: Coord_t, chance: i32) {
     }
 }
 
-/// C++ player.cpp lines 252–260.
+/// 260
 pub fn player_died_from_string(description: &mut Vtype_t, monster_name: &str, movement: u32) {
     let formatted = if (movement & CM_WIN) != 0 {
         format!("The {monster_name}")
@@ -1114,7 +1110,7 @@ pub fn player_died_from_string(description: &mut Vtype_t, monster_name: &str, mo
     description[n] = 0;
 }
 
-/// C++ player.cpp lines 628–639.
+/// 639
 pub fn player_test_being_hit(
     base_to_hit: i32,
     level: i32,
@@ -1139,7 +1135,7 @@ pub fn player_test_being_hit(
     })
 }
 
-/// C++ player.cpp lines 262–365.
+/// 365
 pub fn player_test_attack_hits(attack_id: i32, level: u8) -> bool {
     let (ac, player_level, unique_items, au) = with_state(|state| {
         (
@@ -1177,7 +1173,7 @@ pub fn player_test_attack_hits(attack_id: i32, level: u8) -> bool {
     }
 }
 
-/// C++ player.cpp lines 642–662.
+/// 662
 pub fn player_takes_hit(damage: i32, creature_name_label: &Vtype_t) {
     let survived = with_state_mut(|state| {
         let mut damage = damage;
@@ -1208,7 +1204,7 @@ pub fn player_takes_hit(damage: i32, creature_name_label: &Vtype_t) {
     }
 }
 
-/// C++ player.cpp lines 1068–1074.
+/// 1074
 pub fn player_saving_throw() -> bool {
     let (class_id, level, saving_throw, wis) = with_state(|state| {
         (
@@ -1244,7 +1240,7 @@ pub fn player_saving_throw() -> bool {
     random_number(100) <= saving
 }
 
-/// C++ player.cpp lines 742–778.
+/// 778
 pub fn player_strength() {
     let wield = with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize]);
     let used_str = with_state(|state| state.py.stats.used[PlayerAttr::A_STR as usize]);
@@ -1293,7 +1289,7 @@ pub fn player_strength() {
     });
 }
 
-/// C++ player.cpp lines 13–31.
+/// 31
 fn player_reset_flags() {
     with_state_mut(|state| {
         state.py.flags.see_invisible = false;
@@ -1316,7 +1312,7 @@ fn player_reset_flags() {
     });
 }
 
-/// C++ player.cpp lines 370–377.
+/// 377
 pub fn player_change_speed(speed: i32) {
     with_state_mut(|state| {
         state.py.flags.speed += speed as i16;
@@ -1330,7 +1326,7 @@ pub fn player_change_speed(speed: i32) {
     });
 }
 
-/// C++ player.cpp lines 387–422.
+/// 422
 pub fn player_adjust_bonuses_for_item(item: Inventory, factor: i32) {
     let amount = item.misc_use * factor as i16;
 
@@ -1378,7 +1374,7 @@ pub fn player_adjust_bonuses_for_item(item: Inventory, factor: i32) {
     });
 }
 
-/// C++ player.cpp lines 424–456.
+/// 456
 fn player_recalculate_bonuses_from_inventory() {
     with_state_mut(|state| {
         for i in PlayerEquipment::Wield as usize..PlayerEquipment::Light as usize {
@@ -1413,7 +1409,7 @@ fn player_recalculate_bonuses_from_inventory() {
     });
 }
 
-/// C++ player.cpp lines 458–487.
+/// 487
 fn player_recalculate_sustain_stats_from_inventory() {
     with_state_mut(|state| {
         for i in PlayerEquipment::Wield as usize..PlayerEquipment::Light as usize {
@@ -1434,7 +1430,7 @@ fn player_recalculate_sustain_stats_from_inventory() {
     });
 }
 
-/// C++ player.cpp lines 490–588.
+/// 588
 pub fn player_recalculate_bonuses() {
     let saved_display_ac = with_state(|state| state.py.misc.display_ac);
 
@@ -1544,7 +1540,7 @@ pub fn player_recalculate_bonuses() {
     });
 }
 
-/// C++ player.cpp lines 591–625.
+/// 625
 pub fn player_take_off(item_id: i32, pack_position_id: i32) {
     // Snapshot the item and mutate pack/equipment outside of item_description —
     // item_description calls with_state and must not nest under with_state_mut.
@@ -1599,19 +1595,19 @@ pub fn player_take_off(item_id: i32, pack_position_id: i32) {
     });
 }
 
-/// C++ player.cpp lines 780–782.
+/// 782
 pub fn player_left_hand_ring_empty() -> bool {
     with_state(|state| state.py.inventory[PlayerEquipment::Left as usize].category_id == TV_NOTHING)
 }
 
-/// C++ player.cpp lines 784–786.
+/// 786
 pub fn player_right_hand_ring_empty() -> bool {
     with_state(|state| {
         state.py.inventory[PlayerEquipment::Right as usize].category_id == TV_NOTHING
     })
 }
 
-/// C++ player.cpp lines 788–793.
+/// 793
 pub fn player_is_wielding_item() -> bool {
     with_state(|state| {
         state.py.inventory[PlayerEquipment::Wield as usize].category_id != TV_NOTHING
@@ -1619,19 +1615,19 @@ pub fn player_is_wielding_item() -> bool {
     })
 }
 
-/// C++ player.cpp lines 795–797.
+/// 797
 pub fn player_worn_item_is_cursed(id: PlayerEquipment) -> bool {
     with_state(|state| inventory_item_is_cursed(state.py.inventory[id as usize]))
 }
 
-/// C++ player.cpp lines 799–801.
+/// 801
 pub fn player_worn_item_remove_curse(id: PlayerEquipment) {
     with_state_mut(|state| {
         inventory_item_remove_curse(&mut state.py.inventory[id as usize]);
     });
 }
 
-/// C++ player.cpp lines 1041–1065.
+/// 1065
 pub fn player_weapon_critical_blow(
     weapon_weight: i32,
     plus_to_hit: i32,
@@ -1665,7 +1661,7 @@ pub fn player_weapon_critical_blow(
     critical
 }
 
-/// C++ player.cpp lines 1096–1112.
+/// 1112
 pub fn player_calculate_to_hit_blows(weapon_id: u8, weapon_weight: i32) -> (i32, i32) {
     let mut total_to_hit = 0;
     let mut blows = if weapon_id == TV_NOTHING {
@@ -1683,7 +1679,7 @@ pub fn player_calculate_to_hit_blows(weapon_id: u8, weapon_weight: i32) -> (i32,
     (blows, total_to_hit)
 }
 
-/// C++ player.cpp lines 1114–1127.
+/// 1127
 pub fn player_calculate_base_to_hit(creature_lit: bool, tot_tohit: i32) -> i32 {
     if creature_lit {
         return with_state(|state| i32::from(state.py.misc.bth));
@@ -1701,7 +1697,7 @@ pub fn player_calculate_base_to_hit(creature_lit: bool, tot_tohit: i32) -> i32 {
     })
 }
 
-/// C++ player.cpp lines 1130–1227.
+/// 1227
 pub fn player_attack_monster(coord: Coord_t) {
     let creature_id =
         with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].creature_id as i32);
@@ -1834,7 +1830,7 @@ pub fn player_attack_monster(coord: Coord_t) {
     }
 }
 
-/// C++ player.cpp lines 1444–1452.
+/// 1452
 pub fn player_attack_position(coord: Coord_t) {
     if with_state(|state| state.py.flags.afraid > 0) {
         print_message(Some("You are too afraid!"));
@@ -1844,7 +1840,7 @@ pub fn player_attack_position(coord: Coord_t) {
     player_attack_monster(coord);
 }
 
-/// C++ player.cpp lines 731–739.
+/// 739
 pub fn player_carrying_load_limit() -> i32 {
     with_state(|state| {
         let mut weight_cap = i32::from(state.py.stats.used[PlayerAttr::A_STR as usize])
@@ -1857,7 +1853,7 @@ pub fn player_carrying_load_limit() -> i32 {
     })
 }
 
-/// C++ player.cpp lines 1229–1237.
+/// 1237
 fn player_lock_picking_skill_in(state: &crate::game::State) -> i16 {
     let dex = i32::from(state.py.stats.used[PlayerAttr::A_DEX as usize]);
     let dex_adj: i16 = if dex < 4 {
@@ -1913,12 +1909,12 @@ fn player_lock_picking_skill_in(state: &crate::game::State) -> i16 {
     skill
 }
 
-/// C++ player.cpp lines 1229–1237.
+/// 1237
 pub fn player_lock_picking_skill() -> i16 {
     with_state(player_lock_picking_skill_in)
 }
 
-/// C++ player.cpp lines 1239–1268.
+/// 1268
 pub fn open_closed_door(coord: Coord_t) {
     let treasure_id =
         with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id);
@@ -1975,7 +1971,7 @@ pub fn open_closed_door(coord: Coord_t) {
     }
 }
 
-/// C++ player.cpp lines 1270–1318.
+/// 1318
 pub fn open_closed_chest(coord: Coord_t) {
     let treasure_id =
         with_state(|state| state.dg.floor[coord.y as usize][coord.x as usize].treasure_id);
@@ -2053,7 +2049,7 @@ pub fn open_closed_chest(coord: Coord_t) {
     }
 }
 
-/// C++ player.cpp lines 1321–1353.
+/// 1353
 pub fn player_open_closed_object() {
     let mut dir = 0i32;
     if !get_direction_with_memory(None, &mut dir) {
@@ -2099,7 +2095,7 @@ pub fn player_open_closed_object() {
     }
 }
 
-/// C++ player.cpp lines 1356–1395.
+/// 1395
 pub fn player_close_door() {
     let mut dir = 0i32;
     if !get_direction_with_memory(None, &mut dir) {

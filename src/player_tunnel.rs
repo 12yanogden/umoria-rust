@@ -1,4 +1,4 @@
-//! Port of `src/player_tunnel.cpp` — see `phase_4.4`.
+//! Tunneling through walls and rubble.
 
 use crate::config::treasure::flags::TR_TUNNEL;
 use crate::dice::max_dice_roll;
@@ -20,7 +20,7 @@ use crate::types::Coord_t;
 use crate::ui::coord_inside_panel_bounds;
 use crate::ui_io::terminal::{self, print_message, print_message_no_command_interrupt};
 
-/// C++ player.cpp lines 1399–1441.
+/// 1441
 pub fn player_tunnel_wall(coord: Coord_t, digging_ability: i32, digging_chance: i32) -> bool {
     if digging_ability <= digging_chance {
         return false;
@@ -31,7 +31,6 @@ pub fn player_tunnel_wall(coord: Coord_t, digging_ability: i32, digging_chance: 
         let x = coord.x as usize;
         let perma_lit_room = state.dg.floor[y][x].perma_lit_room;
 
-        // C++ player.cpp: inner `break` only exits the x-loop; the y-loop continues,
         // so the last qualifying row's first room neighbor wins.
         let (feature_id, permanent_light) = if perma_lit_room {
             let mut found_neighbor = None;
@@ -73,7 +72,7 @@ pub fn player_tunnel_wall(coord: Coord_t, digging_ability: i32, digging_chance: 
     true
 }
 
-/// C++ `player_tunnel.cpp` lines 30–54.
+/// 54
 pub fn player_digging_ability(weapon: Inventory) -> i32 {
     let (used_str, weapon_is_heavy) = with_state(|state| {
         (
@@ -189,7 +188,7 @@ fn dungeon_dig_at_location(coord: Coord_t, wall_type: u8, digging_ability: i32) 
     }
 }
 
-/// C++ `player_tunnel.cpp` lines 130–176.
+/// 176
 pub fn player_tunnel(direction: i32) {
     let mut direction = direction;
 

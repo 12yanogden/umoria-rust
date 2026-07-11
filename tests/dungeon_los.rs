@@ -2,7 +2,7 @@
 #![allow(
     clippy::int_plus_one,
     clippy::too_many_lines,
-    reason = "test assertions mirror C++ inclusive bound comparisons; integration test covers a large C++ scenario in one function"
+    reason = "test assertions use inclusive bound comparisons; integration test covers a large scenario in one function"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -65,7 +65,7 @@ fn setup_player_panel(row: i32, col: i32, pos: Coord_t) {
     });
 }
 
-/// Independent C++-literal reference for los parity (dungeon_los.cpp lines 25–176).
+/// Independent literal reference for los parity.
 fn reference_los(from: Coord_t, to: Coord_t) -> bool {
     let mut from = from;
     let mut to = to;
@@ -197,9 +197,9 @@ fn reference_los(from: Coord_t, to: Coord_t) -> bool {
     true
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. los exhaustive parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn los_adjacent_always_true_even_through_walls() {
@@ -261,7 +261,7 @@ fn los_diagonal_corner_slope_equality() {
     reset_for_new_game(None);
     setup_dungeon(30, 30);
     fill_feature(TILE_LIGHT_FLOOR);
-    // dy == scale_half: delta (2,2) → first stepped cell is (11,11)
+ // dy == scale_half: delta (2,2) → first stepped cell is (11,11)
     set_tile(
         Coord_t { y: 11, x: 11 },
         Tile {
@@ -309,12 +309,12 @@ fn los_dense_grid_matches_reference() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Integer-semantics probe at boundaries
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn los_large_delta_within_cpp_comment_limit() {
+fn los_large_delta_within_expected_comment_limit() {
     reset_for_new_game(None);
     setup_dungeon(MAX_HEIGHT as i16, MAX_WIDTH as i16);
     fill_feature(TILE_LIGHT_FLOOR);
@@ -348,9 +348,9 @@ fn los_near_max_width_horizontal() {
     assert!(!los(from, to));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. lookSee / lookRay unit parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn look_see_open_floor_is_transparent() {
@@ -447,9 +447,9 @@ fn look_ray_open_floor_scan_no_abort_with_hack() {
     assert!(!look_ray(0, 10_000, 1));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. look behavioral / early exits
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn look_blind_returns_early() {
@@ -486,7 +486,7 @@ fn look_see_floor_object_does_not_panic() {
     los_look_set_rocks_and_objects(0);
 
     let mut transparent = false;
-    // Looking at the player's own tile (0,0) describes the floor object.
+ // Looking at the player's own tile (0,0) describes the floor object.
     let _abort = look_see(Coord_t { y: 0, x: 0 }, &mut transparent);
     assert!(transparent);
 
@@ -513,7 +513,7 @@ fn look_directional_scan_order() {
     los_look_set_rocks_and_objects(0);
     umoria::ui_io::test_set_ncurses_stub(true);
     umoria::ui_io::test_clear_getch_keys();
-    // Direction 5 = look in all directions (get_all_directions).
+ // Direction 5 = look in all directions (get_all_directions).
     umoria::ui_io::test_push_getch_keys(&[i32::from(b'5')]);
     look();
     umoria::ui_io::test_set_ncurses_stub(false);

@@ -1,7 +1,7 @@
-//! `itemDescription`, inscriptions & description helpers parity.
+//! `itemDescription`, inscriptions & description helpers tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -71,7 +71,7 @@ fn message_text(id: i16) -> String {
     })
 }
 
-fn load_cpp_golden() -> Vec<(String, bool, String)> {
+fn load_expected_golden() -> Vec<(String, bool, String)> {
     let path = repo_root().join("tests/golden/item_desc_capture.txt");
     let content = fs::read_to_string(path).expect("golden capture");
     content
@@ -222,7 +222,7 @@ fn case_item(name: &str) -> Inventory {
 }
 
 #[test]
-fn capture_sequence_wood0_matches_cpp() {
+fn capture_sequence_wood0_matches_expected() {
     reset_for_new_game(None);
     with_state_mut(|s| {
         s.game.magic_seed = 42;
@@ -234,11 +234,11 @@ fn capture_sequence_wood0_matches_cpp() {
     with_state(|s| assert_eq!(s.flavor.wood_name(0), "Ironwood"));
 }
 
-// ---------------------------------------------------------------------------
-// 1. itemDescription golden capture (C++ reference output)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 1. itemDescription golden capture (reference output)
+// --------------------------------------------------------------------------
 #[test]
-fn item_description_golden_capture_matches_cpp() {
+fn item_description_golden_capture_matches_expected() {
     reset_for_new_game(None);
     with_state_mut(|s| {
         s.game.magic_seed = 42;
@@ -247,7 +247,7 @@ fn item_description_golden_capture_matches_cpp() {
     });
     magic_initialize_item_names();
 
-    for (name, add_prefix, expected) in load_cpp_golden() {
+    for (name, add_prefix, expected) in load_expected_golden() {
         match name.as_str() {
             "potion_known" => item_set_as_identified(TV_POTION1, 64),
             "scroll_unknown" => {
@@ -268,11 +268,11 @@ fn item_description_golden_capture_matches_cpp() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. bowDamageValue exhaustive
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
-fn bow_damage_value_matches_cpp() {
+fn bow_damage_value_matches_expected() {
     for misc in -5..=10 {
         let expected = match misc {
             1 | 2 => 2,
@@ -284,9 +284,9 @@ fn bow_damage_value_matches_cpp() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. charge / count remaining messages
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn item_charges_remaining_description_message() {
     setup_flavor_seed42();
@@ -337,9 +337,9 @@ fn item_type_remaining_count_description_message() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. inscription editing
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn item_append_to_inscription_sets_ident_flags() {
     let mut item = Inventory::default();
@@ -379,9 +379,9 @@ fn item_inscribe_empty_pack_message() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. objectBlockedByMonster
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn object_blocked_by_monster_lit() {
     test_set_ncurses_stub(true);
@@ -418,9 +418,9 @@ fn object_blocked_by_monster_unlit() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. buffer / prefix behavior
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn item_description_no_prefix_strips_article() {
     setup_flavor_seed42();

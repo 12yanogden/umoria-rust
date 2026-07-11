@@ -1,7 +1,7 @@
-//! Monster movement & AI core parity.
+//! Monster movement & AI core tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -104,9 +104,9 @@ fn place_closed_door(coord: Coord_t, misc_use: i16) -> u8 {
     tid
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Direction generation parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_get_move_direction_same_tile_case0() {
     reset_for_new_game(Some(42));
@@ -186,9 +186,9 @@ fn monster_move_normally_random_branch_seed199() {
     assert_eq!(next_random_pair(9), (9, 4));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. monster_move dispatch + random-move gates
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_move_75_random_short_circuits_seed42() {
     reset_for_new_game(Some(42));
@@ -247,9 +247,9 @@ fn monster_attack_without_moving_sets_attack_only_when_far() {
     assert!((rcmove & CM_ATTACK_ONLY) != 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. make_move / allowed / moves_on_player
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn make_move_updates_grid_and_distance_seed42() {
     reset_for_new_game(Some(42));
@@ -336,9 +336,9 @@ fn monster_moves_on_player_attacks_and_sets_turn() {
     assert!(do_turn);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. monster_open_door parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_open_door_closed_with_open_flag_seed42() {
     reset_for_new_game(Some(42));
@@ -397,9 +397,9 @@ fn monster_open_door_locked_force_math_int16_hp() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. glyph_of_warding_protection parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn glyph_of_warding_blocks_when_roll_fails_seed42() {
     reset_for_new_game(Some(42));
@@ -463,9 +463,9 @@ fn glyph_of_warding_breaks_when_roll_passes() {
     with_state(|s| assert_eq!(s.dg.floor[8][10].treasure_id, 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. monster_move_out_of_wall / undead
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_move_out_of_wall_exits_adjacent_open_space_seed42() {
     reset_for_new_game(Some(42));
@@ -506,9 +506,9 @@ fn monster_move_undead_reverses_direction_and_rolls_tail_seed42() {
     assert_eq!(next_random_pair(9), (9, 4));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. monster_multiply / monster_multiply_critter
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_multiply_places_adjacent_and_increments_total_seed777() {
     reset_for_new_game(Some(777));
@@ -550,9 +550,9 @@ fn monster_multiply_critter_places_neighbor_seed777() {
     assert_eq!(next_random_pair(i32::from(MON_MULTIPLY_ADJUST)), (7, 5));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. Integer semantics / confused undead routing
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_do_move_confused_undead_routes_to_undead_seed42() {
     reset_for_new_game(Some(42));

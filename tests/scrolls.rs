@@ -1,7 +1,7 @@
-//! Scroll reading (`scrolls`) parity.
+//! Scroll reading (`scrolls`) tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -145,9 +145,9 @@ fn wear_armor(slot: PlayerEquipment) {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. playerCanReadScroll gating — zero RNG on failure
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_can_read_scroll_false_when_blind_no_rng() {
@@ -218,9 +218,9 @@ fn player_can_read_scroll_finds_scroll_range() {
     assert_eq!(end, 1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Zero-RNG scroll paths
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn scroll_remove_curse_no_rng_when_nothing_cursed() {
@@ -283,9 +283,9 @@ fn scroll_word_of_recall_second_use_no_extra_rng() {
     assert_eq!(random_number(100), baseline);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. RNG-order golden — enchant / curse / summon / teleport
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn scroll_enchant_weapon_to_hit_rng_order_seed42() {
@@ -414,9 +414,9 @@ fn scroll_summon_undead_rng_count_seed42() {
     assert_eq!((m, r), (3, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Enchant/curse math — worn items, plusses clamping
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn scroll_enchant_item_to_ac_targets_worn_armor_seed42() {
@@ -519,9 +519,9 @@ fn spell_enchant_item_zero_limit_never_calls_rng() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. scrollRead dispatch — consumption, free turn, routing
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn scroll_read_consumes_scroll_and_identifies_seed42() {

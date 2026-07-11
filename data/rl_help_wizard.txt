@@ -1,6 +1,6 @@
-\  - Wizard Help
-:  - Map area (panel)
-*  - Wizard light
+\ - Wizard Help
+: - Map area (panel)
+* - Wizard light
 ^A - Cure all maladies and remove curses
 ^D - Jump to depth # (level)
 ^E - Edit character stats
@@ -10,7 +10,7 @@
 ^O - Print random objects sample to file
 ^T - Teleport player randomly
 ^W - Wizard mode on/off
-+  - Gain experience
-&  - Summon random monster
-%  - Generate a dungeon item
-@  - Create an object *CAN CAUSE FATAL ERROR*
++ - Gain experience
+& - Summon random monster
+% - Generate a dungeon item
+@ - Create an object *CAN CAUSE FATAL ERROR*

@@ -1,4 +1,4 @@
-//! Port of src/staves.cpp — staff and wand use.
+//! Staff and wand use
 
 use crate::config::identification::ID_EMPTY;
 use crate::config::monsters::defense::CD_EVIL;
@@ -186,7 +186,7 @@ fn staff_discharge(item_id: i32) -> bool {
     identified
 }
 
-/// C++ staves.cpp lines 200–238.
+/// 238
 pub fn staff_use() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -356,7 +356,7 @@ fn wand_discharge(item_id: i32, direction: i32) -> bool {
     identified
 }
 
-/// C++ staves.cpp lines 376–452.
+/// 452
 pub fn wand_aim() {
     with_state_mut(|state| state.game.player_free_turn = true);
 

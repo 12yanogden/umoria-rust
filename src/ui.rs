@@ -1,4 +1,4 @@
-//! Port of src/ui.cpp / ui.h UI section — viewport, status line, character screens.
+//! Viewport, status line, character screens
 
 use crate::config::player::status::{
     PY_BLIND, PY_CONFUSED, PY_FEAR, PY_HUNGRY, PY_POISONED, PY_REPEAT, PY_REST, PY_SEARCH,
@@ -22,7 +22,6 @@ use crate::spells::spell_chance_of_success_for_state;
 use crate::types::Coord_t;
 use crate::ui_io::terminal::{self, Coord};
 
-/// Port of `Panel_t` in ui.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Panel {
     pub row: i32,
@@ -37,28 +36,24 @@ pub struct Panel {
     pub max_cols: i16,
 }
 
-/// C++ `dungeon.h` `SCREEN_HEIGHT`.
 const SCREEN_HEIGHT: i32 = 22;
-/// C++ `dungeon.h` `SCREEN_WIDTH`.
 const SCREEN_WIDTH: i32 = 66;
-/// C++ `ui.h` `STAT_COLUMN`.
 const STAT_COLUMN: i32 = 0;
 
-/// C++ ui.cpp line 11.
 pub const BLANK_LENGTH: usize = 24;
-/// C++ ui.cpp line 12 — fixed 24-space source for tail-slice padding.
+/// fixed 24-space source for tail-slice padding
 const BLANK_STRING: &str = "                        ";
 
-/// C++ ui.cpp lines 8–10.
+/// 10
 const STAT_NAMES: [&str; 6] = ["STR : ", "INT : ", "WIS : ", "DEX : ", "CON : ", "CHR : "];
 
-/// C++ ui.cpp line 12 — `&blank_string[BLANK_LENGTH - N]` pointer-into-array semantics.
+/// `&blank_string[BLANK_LENGTH - N]` pointer-into-array semantics
 #[must_use]
 pub fn blank_string_tail(n: usize) -> &'static str {
     &BLANK_STRING[BLANK_LENGTH - n..]
 }
 
-/// Derived panel boundary fields for a row/col pair (ui.cpp lines 22–28).
+/// Derived panel boundary fields for a row/col pair
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct PanelBoundsFields {
     pub top: i32,
@@ -84,7 +79,7 @@ pub fn panel_bounds_fields(row: i32, col: i32) -> PanelBoundsFields {
     }
 }
 
-/// C++ ui.cpp lines 22–28 — writes `dg.panel` bounds from current row/col.
+/// writes `dg.panel` bounds from current row/col
 pub fn panel_bounds() {
     with_state_mut(|state| {
         let fields = panel_bounds_fields(state.dg.panel.row, state.dg.panel.col);
@@ -97,7 +92,7 @@ pub fn panel_bounds() {
     });
 }
 
-/// Pure panel-change math from ui.cpp lines 34–54.
+/// Pure panel-change math
 #[must_use]
 pub fn compute_panel_change(current: &Panel, coord: Coord_t, force: bool) -> Option<(i32, i32)> {
     let half_h = SCREEN_HEIGHT / 2;
@@ -133,7 +128,7 @@ pub fn compute_panel_change(current: &Panel, coord: Coord_t, force: bool) -> Opt
     }
 }
 
-/// C++ ui.cpp lines 34–71.
+/// 71
 #[must_use]
 pub fn coord_outside_panel(coord: Coord_t, force: bool) -> bool {
     let changed = with_state_mut(|state| {
@@ -164,7 +159,7 @@ pub fn coord_outside_panel(coord: Coord_t, force: bool) -> bool {
     false
 }
 
-/// Pure inside-panel check (ui.cpp lines 74–79).
+/// Pure inside-panel check
 #[must_use]
 pub fn coord_inside_panel_bounds(panel: &Panel, coord: Coord_t) -> bool {
     coord.y >= panel.top
@@ -173,13 +168,13 @@ pub fn coord_inside_panel_bounds(panel: &Panel, coord: Coord_t) -> bool {
         && coord.x <= panel.right
 }
 
-/// C++ ui.cpp lines 74–79.
+/// 79
 #[must_use]
 pub fn coord_inside_panel(coord: Coord_t) -> bool {
     crate::game::with_state(|state| coord_inside_panel_bounds(&state.dg.panel, coord))
 }
 
-/// C++ ui.cpp lines 82–100.
+/// 100
 pub fn draw_dungeon_panel() {
     let (top, bottom, left, right) = with_state(|state| {
         (
@@ -212,7 +207,7 @@ pub fn draw_dungeon_panel() {
     }
 }
 
-/// C++ ui.cpp lines 103–108.
+/// 108
 pub fn draw_cave_panel() {
     terminal::clear_screen();
     print_character_stats_block();
@@ -220,7 +215,7 @@ pub fn draw_cave_panel() {
     print_character_current_depth();
 }
 
-/// C++ ui.cpp lines 111–140.
+/// 140
 pub fn dungeon_reset_view() {
     let (pos, tile, blind) = with_state_mut(|state| {
         let pos = state.py.pos;
@@ -256,22 +251,20 @@ pub fn dungeon_reset_view() {
     }
 }
 
-/// C++ ui.cpp lines 144–154 — `%6d`, `"18/100"`, `" 18/%02d"`.
+/// `%6d`, `"18/100"`, `" 18/%02d"`
 #[must_use]
 pub fn stats_as_string(stat: u8) -> String {
     let percentile = i32::from(stat) - 18;
     if stat <= 18 {
-        // ui.cpp line 148: snprintf(..., "%6d", stat)
         format!("{stat:6}")
     } else if percentile == 100 {
         "18/100".to_string()
     } else {
-        // ui.cpp line 152: snprintf(..., " 18/%02d", percentile)
         format!(" 18/{percentile:02}")
     }
 }
 
-/// C++ ui.cpp lines 157–162.
+/// 162
 pub fn display_character_stats(stat: i32) {
     let stat_idx = stat as usize;
     let used = with_state_mut(|state| state.py.stats.used[stat_idx]);
@@ -292,37 +285,37 @@ pub fn display_character_stats(stat: i32) {
     );
 }
 
-/// C++ ui.cpp lines 166–171.
+/// 171
 fn print_character_info_in_field(info: &str, coord: Coord) {
     terminal::put_string(blank_string_tail(13), coord);
     terminal::put_string(info, coord);
 }
 
-/// C++ ui.cpp lines 174–178 — `"%s: %6d"`.
+/// `"%s: %6d"`
 #[must_use]
 pub fn format_header_long_number(header: &str, num: i32) -> String {
     format!("{header}: {num:6}")
 }
 
-/// C++ ui.cpp lines 181–185 — `"%s: %7d"`.
+/// `"%s: %7d"`
 #[must_use]
 pub fn format_header_long_number7_spaces(header: &str, num: i32) -> String {
     format!("{header}: {num:7}")
 }
 
-/// C++ ui.cpp lines 188–192 — `"%s: %6d"`.
+/// `"%s: %6d"`
 #[must_use]
 pub fn format_header_number(header: &str, num: i32) -> String {
     format!("{header}: {num:6}")
 }
 
-/// C++ ui.cpp lines 195–199 — `"%6d"`.
+/// `"%6d"`
 #[must_use]
 pub fn format_long_number(num: i32) -> String {
     format!("{num:6}")
 }
 
-/// C++ ui.cpp lines 202–206 — `"%6d"`.
+/// `"%6d"`
 #[must_use]
 pub fn format_number(num: i32) -> String {
     format!("{num:6}")
@@ -348,7 +341,7 @@ fn print_number(num: i32, coord: Coord) {
     terminal::put_string(&format_number(num), coord);
 }
 
-/// C++ ui.cpp lines 209–211.
+/// 211
 pub fn print_character_title() {
     print_character_info_in_field(
         player_rank_title(),
@@ -359,7 +352,7 @@ pub fn print_character_title() {
     );
 }
 
-/// C++ ui.cpp lines 214–216.
+/// 216
 pub fn print_character_level() {
     with_state_mut(|state| {
         print_number(
@@ -372,7 +365,7 @@ pub fn print_character_level() {
     });
 }
 
-/// C++ ui.cpp lines 219–221.
+/// 221
 pub fn print_character_current_mana() {
     with_state_mut(|state| {
         print_number(
@@ -385,7 +378,7 @@ pub fn print_character_current_mana() {
     });
 }
 
-/// C++ ui.cpp lines 224–226.
+/// 226
 pub fn print_character_max_hit_points() {
     with_state_mut(|state| {
         print_number(
@@ -398,7 +391,7 @@ pub fn print_character_max_hit_points() {
     });
 }
 
-/// C++ ui.cpp lines 229–231.
+/// 231
 pub fn print_character_current_hit_points() {
     with_state_mut(|state| {
         print_number(
@@ -411,7 +404,7 @@ pub fn print_character_current_hit_points() {
     });
 }
 
-/// C++ ui.cpp lines 234–236.
+/// 236
 pub fn print_character_current_armor_class() {
     with_state_mut(|state| {
         print_number(
@@ -424,7 +417,7 @@ pub fn print_character_current_armor_class() {
     });
 }
 
-/// C++ ui.cpp lines 239–241.
+/// 241
 pub fn print_character_gold_value() {
     with_state_mut(|state| {
         print_long_number(
@@ -437,7 +430,7 @@ pub fn print_character_gold_value() {
     });
 }
 
-/// C++ ui.cpp lines 244–256 depth string (without terminal write).
+/// 256 depth string (without terminal write)
 #[must_use]
 pub fn format_character_current_depth(current_level: i16) -> String {
     let depth = i32::from(current_level) * 50;
@@ -448,13 +441,13 @@ pub fn format_character_current_depth(current_level: i16) -> String {
     }
 }
 
-/// C++ ui.cpp lines 244–256.
+/// 256
 pub fn print_character_current_depth() {
     let depths = with_state_mut(|state| format_character_current_depth(state.dg.current_level));
     terminal::put_string_clear_to_eol(&depths, Coord { y: 23, x: 65 });
 }
 
-/// C++ ui.cpp lines 259–267.
+/// 267
 pub fn print_character_hunger_status() {
     let text = with_state(|state| {
         if (state.py.flags.status & PY_WEAK) != 0 {
@@ -468,7 +461,7 @@ pub fn print_character_hunger_status() {
     terminal::put_string(text, Coord { y: 23, x: 0 });
 }
 
-/// C++ ui.cpp lines 270–276.
+/// 276
 pub fn print_character_blind_status() {
     with_state_mut(|state| {
         if (state.py.flags.status & PY_BLIND) != 0 {
@@ -479,7 +472,7 @@ pub fn print_character_blind_status() {
     });
 }
 
-/// C++ ui.cpp lines 279–285.
+/// 285
 pub fn print_character_confused_state() {
     with_state_mut(|state| {
         if (state.py.flags.status & PY_CONFUSED) != 0 {
@@ -490,7 +483,7 @@ pub fn print_character_confused_state() {
     });
 }
 
-/// C++ ui.cpp lines 288–294.
+/// 294
 pub fn print_character_fear_state() {
     with_state_mut(|state| {
         if (state.py.flags.status & PY_FEAR) != 0 {
@@ -501,7 +494,7 @@ pub fn print_character_fear_state() {
     });
 }
 
-/// C++ ui.cpp lines 297–303.
+/// 303
 pub fn print_character_poisoned_state() {
     with_state_mut(|state| {
         if (state.py.flags.status & PY_POISONED) != 0 {
@@ -512,7 +505,7 @@ pub fn print_character_poisoned_state() {
     });
 }
 
-/// Pure movement-state builder (ui.cpp lines 306–357).
+/// Pure movement-state builder
 #[must_use]
 pub fn movement_state_string(
     paralysis: i16,
@@ -531,7 +524,7 @@ pub fn movement_state_string(
         let rest_string = if rest < 0 {
             "Rest *".to_string()
         } else if display_counts {
-            // ui.cpp line 320: "Rest %-5d"
+            // "Rest %-5d"
             format!("Rest {rest:<5}")
         } else {
             "Rest".to_string()
@@ -541,7 +534,7 @@ pub fn movement_state_string(
 
     if command_count > 0 {
         let repeat_string = if display_counts {
-            // ui.cpp line 334: "Repeat %-.3d"
+            // "Repeat %-.3d"
             format!("Repeat {command_count:03}")
         } else {
             "Repeat".to_string()
@@ -561,7 +554,7 @@ pub fn movement_state_string(
     (blank_string_tail(10).to_string(), status)
 }
 
-/// C++ ui.cpp lines 306–357.
+/// 357
 pub fn print_character_movement_state() {
     with_state_mut(|state| {
         let display_counts = state.options.display_counts;
@@ -576,7 +569,7 @@ pub fn print_character_movement_state() {
     });
 }
 
-/// Pure speed string (ui.cpp lines 360–379).
+/// Pure speed string
 #[must_use]
 pub fn speed_display_string(speed: i16, searching: bool) -> String {
     let mut speed = speed;
@@ -596,7 +589,7 @@ pub fn speed_display_string(speed: i16, searching: bool) -> String {
     }
 }
 
-/// C++ ui.cpp lines 360–379.
+/// 379
 pub fn print_character_speed() {
     with_state_mut(|state| {
         let searching = (state.py.flags.status & PY_SEARCH) != 0;
@@ -605,7 +598,7 @@ pub fn print_character_speed() {
     });
 }
 
-/// C++ ui.cpp lines 381–389.
+/// 389
 pub fn print_character_study_instruction() {
     with_state_mut(|state| {
         state.py.flags.status &= !PY_STUDY;
@@ -617,7 +610,7 @@ pub fn print_character_study_instruction() {
     });
 }
 
-/// C++ ui.cpp lines 392–406.
+/// 406
 pub fn print_character_winner() {
     with_state_mut(|state| {
         if (state.game.noscore & 0x2) != 0 {
@@ -636,7 +629,7 @@ pub fn print_character_winner() {
     });
 }
 
-/// C++ ui.cpp lines 409–461.
+/// 461
 pub fn print_character_stats_block() {
     let rank_title = player_rank_title();
     with_state_mut(|state| {
@@ -763,7 +756,7 @@ pub fn print_character_stats_block() {
     print_character_study_instruction();
 }
 
-/// C++ ui.cpp lines 464–480.
+/// 480
 pub fn print_character_information() {
     terminal::clear_screen();
     terminal::put_string("Name        :", Coord { y: 2, x: 1 });
@@ -790,7 +783,7 @@ pub fn print_character_information() {
     });
 }
 
-/// C++ ui.cpp lines 483–501.
+/// 501
 pub fn print_character_stats() {
     with_state_mut(|state| {
         for (i, stat_name) in STAT_NAMES.iter().enumerate() {
@@ -845,7 +838,7 @@ pub fn print_character_stats() {
     });
 }
 
-/// C++ ui.cpp lines 504–528 — C++ integer division `coord.x / coord.y`.
+/// integer division `coord.x / coord.y`
 #[must_use]
 pub fn stat_rating(coord: Coord_t) -> &'static str {
     match coord.x / coord.y {
@@ -860,7 +853,7 @@ pub fn stat_rating(coord: Coord_t) -> &'static str {
     }
 }
 
-/// C++ ui.cpp lines 531–536.
+/// 536
 pub fn print_character_vital_statistics() {
     with_state_mut(|state| {
         print_header_number(
@@ -886,7 +879,7 @@ pub fn print_character_vital_statistics() {
     });
 }
 
-/// Exp-to-advance line for character sheet (ui.cpp lines 544–548).
+/// Exp-to-advance line for character sheet
 #[must_use]
 pub fn format_exp_to_advance_line(
     level: u8,
@@ -902,7 +895,7 @@ pub fn format_exp_to_advance_line(
     }
 }
 
-/// C++ ui.cpp lines 539–555.
+/// 555
 pub fn print_character_level_experience() {
     let (level, exp, max_exp, au, max_hp, current_hp, mana, current_mana, base_exp, exp_factor) =
         with_state(|state| {
@@ -947,7 +940,7 @@ pub fn print_character_level_experience() {
     );
 }
 
-/// Pure ability math from ui.cpp lines 561–582.
+/// Pure ability math
 #[must_use]
 pub fn compute_ability_values(
     misc: &PlayerMisc,
@@ -989,7 +982,7 @@ pub fn compute_ability_values(
     (xbth, xbthb, xfos, xsrh, xstl, xdis, xsave, xdev, xinfra)
 }
 
-/// C++ ui.cpp lines 558–605.
+/// 605
 pub fn print_character_abilities() {
     terminal::clear_to_bottom(14);
 
@@ -1052,7 +1045,7 @@ pub fn print_character_abilities() {
     terminal::put_string(&xinfra, Coord { y: 18, x: 69 });
 }
 
-/// C++ ui.cpp lines 608–614.
+/// 614
 pub fn print_character() {
     print_character_information();
     print_character_vital_statistics();
@@ -1061,7 +1054,7 @@ pub fn print_character() {
     print_character_abilities();
 }
 
-/// C++ ui.cpp lines 617–628.
+/// 628
 pub fn get_character_name() {
     terminal::put_string_clear_to_eol(
         "Enter your player's name  [press <RETURN> when finished]",
@@ -1083,7 +1076,7 @@ pub fn get_character_name() {
     terminal::clear_to_bottom(20);
 }
 
-/// C++ ui.cpp lines 631–665.
+/// 665
 pub fn change_character_name() {
     print_character();
 
@@ -1117,7 +1110,7 @@ pub fn change_character_name() {
     }
 }
 
-/// Spell comment suffix (ui.cpp lines 698–709).
+/// Spell comment suffix
 #[must_use]
 pub fn format_spell_comment(
     comment: bool,
@@ -1139,7 +1132,7 @@ pub fn format_spell_comment(
     }
 }
 
-/// Single spell row (ui.cpp line 721) with explicit fail chance for testing.
+/// Single spell row with explicit fail chance for testing
 #[must_use]
 pub fn format_spell_row(
     spell_char: char,
@@ -1154,7 +1147,7 @@ pub fn format_spell_row(
     )
 }
 
-/// C++ ui.cpp lines 670–724.
+/// 724
 pub fn display_spells_list(
     spell_ids: &[i32],
     mut number_of_choices: i32,
@@ -1229,7 +1222,7 @@ pub fn display_spells_list(
     }
 }
 
-/// Exp halving on level gain (ui.cpp lines 737–743).
+/// Exp halving on level gain
 #[must_use]
 pub fn experience_exp_halving(
     level: u16,
@@ -1249,7 +1242,7 @@ pub fn experience_exp_halving(
     (new_level, new_exp)
 }
 
-/// C++ ui.cpp lines 728–757.
+/// 757
 fn player_gain_level() {
     let msg = with_state_mut(|state| {
         state.py.misc.level += 1;
@@ -1281,13 +1274,13 @@ fn player_gain_level() {
     }
 }
 
-/// Clamp exp to `PLAYER_MAX_EXP` (ui.cpp line 761–763).
+/// Clamp exp to `PLAYER_MAX_EXP`
 #[must_use]
 pub fn simulate_exp_clamp(exp: i32) -> i32 {
     exp.min(PLAYER_MAX_EXP)
 }
 
-/// Level-up loop simulation (ui.cpp lines 765–771).
+/// Level-up loop simulation
 #[must_use]
 pub fn count_experience_level_ups(
     mut level: u16,
@@ -1319,7 +1312,7 @@ pub fn count_experience_level_ups(
     (level, exp, max_exp, gains)
 }
 
-/// C++ ui.cpp lines 760–773.
+/// 773
 pub fn display_character_experience() {
     with_state_mut(|state| {
         if state.py.misc.exp > PLAYER_MAX_EXP {

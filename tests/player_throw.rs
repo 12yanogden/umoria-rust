@@ -1,7 +1,7 @@
-//! `player_throw` parity.
+//! `player_throw` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -180,9 +180,9 @@ fn reference_flight_path(start: Coord_t, direction: i32, max_distance: i32) -> V
     path
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Selection / cancel — zero RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_throw_empty_pack_consumes_no_rng() {
@@ -226,9 +226,9 @@ fn player_throw_escape_direction_consumes_no_rng() {
     assert_eq!(with_state(|s| s.py.pack.unique_items), 1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. RNG-order golden — damage, break gate, scatter
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_throw_wall_hit_rng_order_seed42() {
@@ -261,7 +261,7 @@ fn player_throw_wall_hit_rng_order_seed42() {
         },
     );
     pack_item(0, throwable_item(10, Dice { dice: 1, sides: 6 }, 2));
-    // weaponMissileFacts: diceRoll(1d6); landing: randomNumber(10) break gate only (tile valid).
+ // weaponMissileFacts: diceRoll(1d6); landing: randomNumber(10) break gate only (tile valid).
     random_number(6);
     random_number(10);
     let expected_post = random_number(100);
@@ -284,7 +284,7 @@ fn inventory_drop_or_throw_item_break_gate_only_on_landing_branch() {
     let expected_post_fail_probe = random_number(100);
     assert_eq!(post_fail_probe, expected_post_fail_probe);
 
-    // Block the landing tile so scatter rolls fire after break gate passes.
+ // Block the landing tile so scatter rolls fire after break gate passes.
     reset_for_new_game(Some(43));
     setup_dungeon(40, 40);
     setup_player_panel(POS);
@@ -318,9 +318,9 @@ fn inventory_drop_or_throw_item_break_gate_only_on_landing_branch() {
     assert_eq!(post_scatter, expected_post_scatter);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Flight-path parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_throw_flight_path_matches_reference_corridor() {
@@ -384,9 +384,9 @@ fn player_throw_stops_at_max_range() {
     assert_eq!(tile_at(Coord_t { y: 10, x: 21 }).treasure_id, 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Hit + damage math
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 fn place_monster(id: i32, creature_id: u16, hp: i16, coord: Coord_t, lit: bool) {
     with_state_mut(|s| {
@@ -479,9 +479,9 @@ fn player_throw_miss_drops_item_without_extra_hit_rng() {
     assert_eq!(with_state(|s| s.monsters[MON_SLOT as usize].hp), 500);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Item disposition & inventory
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_throw_stack_decrements_one_and_updates_weight() {
@@ -536,9 +536,9 @@ fn player_throw_single_item_removed_from_pack() {
     assert_eq!(with_state(|s| s.py.pack.unique_items), 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. weaponMissileFacts — bow/arrow combos
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn weapon_missile_facts_short_bow_arrow_doubles_damage_and_extends_range() {
@@ -615,9 +615,9 @@ fn weapon_missile_facts_plain_throw_caps_distance_at_ten() {
     assert_eq!(dis, 10);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Hit formula integration — unlit monster penalty branch
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_throw_unlit_monster_applies_distance_and_bonus_penalties() {

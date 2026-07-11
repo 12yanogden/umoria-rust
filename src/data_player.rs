@@ -1,4 +1,4 @@
-//! Port of `src/data_player.cpp` — immutable player/class/spell tables.
+//! Immutable player/class/spell tables
 
 use std::sync::LazyLock;
 

@@ -44,9 +44,9 @@ fn recall_body(lines: &[String]) -> String {
     lines.join(" ")
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. memoryPrint word-wrap engine
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn memory_print_short_line_no_wrap() {
@@ -94,9 +94,9 @@ fn memory_print_multiple_newlines_increment_row() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Golden recall text per archetype
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn recall_town_monster_no_battles() {
@@ -352,9 +352,9 @@ fn recall_win_monster_tail_line() {
     assert_eq!(lines.last().map(String::as_str), Some("--pause--"));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. memoryMonsterKnown truth table
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn memory_monster_known_all_zero_false() {
@@ -396,9 +396,9 @@ fn memory_monster_known_wizard_mode_short_circuit() {
     assert!(memory_monster_known(&Recall::default()));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Wizard-mode init + save/restore
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn memory_wizard_mode_init_maximal_recall() {
@@ -427,9 +427,9 @@ fn memory_recall_wizard_mode_restores_memory() {
     assert_eq!(get_memory(QUYLTHULG_ID), before);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. recallMonsterAttributes control flow
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn recall_monster_attributes_prompt_abort_breaks() {
@@ -469,9 +469,9 @@ fn recall_monster_attributes_escape_after_recall_breaks() {
     assert_eq!(get_memory(STREET_URCHIN_ID).movement, 1);
 }
 
-// ---------------------------------------------------------------------------
-// 6. Integer/overflow fidelity — memoryKillPoints math
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 6. Integer/overflow — memory_kill_points math
+// --------------------------------------------------------------------------
 
 #[test]
 fn memory_kill_points_math_quotient_remainder() {
@@ -481,7 +481,7 @@ fn memory_kill_points_math_quotient_remainder() {
 }
 
 #[test]
-fn memory_kill_points_math_balrog_l1_matches_cpp_long_arithmetic() {
+fn memory_kill_points_math_balrog_l1_matches_expected_long_arithmetic() {
     let (q, r, p) = memory_kill_points_math(55000, 100, 1);
     assert_eq!(q, 5_500_000);
     assert_eq!(r, 0);

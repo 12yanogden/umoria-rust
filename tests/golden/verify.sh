@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 #
-# Phase 1.4 - run every golden-harness check (01..08) in order.
+# Run every golden-harness check (01..08) in order.
 #
-# Each check drives the reference binary and/or the pty capture tooling, so run
-# with the permissions required for building and pty sessions. Pass --regen to
-# have check 08 do a full rebuild + re-capture idempotence pass.
+# Each check drives the Rust umoria binary and/or the pty capture tooling.
+# Pass --regen to have check 08 do a full rebuild + re-capture idempotence pass.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CHECKS="$ROOT/tests/golden/checks"

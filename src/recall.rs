@@ -1,4 +1,4 @@
-//! Port of src/recall.cpp — monster memory recall text and knowledge store.
+//! Monster memory recall text and knowledge store
 
 use std::cell::{Cell, RefCell};
 
@@ -24,7 +24,6 @@ use crate::types::{Vtype_t, MORIA_MESSAGE_SIZE};
 use crate::ui_io::terminal;
 use crate::ui_io::{self, ESCAPE};
 
-/// Port of `Recall_t` in recall.h.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Recall {
     pub movement: u32,
@@ -87,7 +86,7 @@ fn emit_recall_line(line: i32, text: &str) {
     }
 }
 
-/// C++ recall.cpp lines 25–53.
+/// 53
 fn memory_print(p: &str) {
     for ch in p.chars() {
         ROFF_BUFFER.with(|buf_cell| {
@@ -132,7 +131,7 @@ fn reset_recall_print_state() {
     ROFF_PRINT_LINE.set(0);
 }
 
-/// C++ recall.cpp lines 56–72.
+/// 72
 #[must_use]
 pub fn memory_monster_known(memory: &Recall) -> bool {
     if with_state(|s| s.game.wizard_mode) {
@@ -151,7 +150,7 @@ pub fn memory_monster_known(memory: &Recall) -> bool {
     memory.attacks.iter().any(|&attack| attack != 0)
 }
 
-/// C++ recall.cpp lines 74–103.
+/// 103
 pub fn memory_wizard_mode_init(memory: &mut Recall, creature: &Creature) {
     memory.kills = SHRT_MAX;
     memory.wake = UCHAR_MAX;
@@ -184,7 +183,7 @@ pub fn memory_wizard_mode_init(memory: &mut Recall, creature: &Creature) {
     }
 }
 
-/// C++ recall.cpp lines 106–126.
+/// 126
 fn memory_conflict_history(deaths: u16, kills: u16) {
     let mut desc = [0u8; MORIA_MESSAGE_SIZE];
 
@@ -228,7 +227,7 @@ fn memory_conflict_history(deaths: u16, kills: u16) {
     }
 }
 
-/// C++ recall.cpp lines 129–149.
+/// 149
 fn memory_depth_found_at(level: u8, kills: u16) -> bool {
     let mut known = false;
 
@@ -255,7 +254,7 @@ fn memory_depth_found_at(level: u8, kills: u16) -> bool {
     known
 }
 
-/// C++ recall.cpp lines 151–218.
+/// 218
 fn memory_movement(rc_move: u32, monster_speed: u8, mut is_known: bool) -> bool {
     let monster_speed = i32::from(monster_speed) - 10;
 
@@ -323,7 +322,7 @@ fn memory_movement(rc_move: u32, monster_speed: u8, mut is_known: bool) -> bool 
     is_known
 }
 
-/// C++ recall.cpp lines 222–279 — returns (quotient, remainder, `plural_char`).
+/// returns (quotient, remainder, `plural_char`)
 #[must_use]
 pub fn memory_kill_points_math(
     monster_exp: u16,
@@ -344,7 +343,7 @@ pub fn memory_kill_points_math(
     (quotient, remainder, plural_ch)
 }
 
-/// C++ recall.cpp lines 222–279.
+/// 279
 fn memory_kill_points(creature_defense: u16, monster_exp: u16, level: u8) {
     memory_print(" A kill of this");
 
@@ -393,7 +392,7 @@ fn memory_kill_points(creature_defense: u16, monster_exp: u16, level: u8) {
     memory_print(&vtype_cstr(&desc));
 }
 
-/// C++ recall.cpp lines 283–340.
+/// 340
 fn memory_magic_skills(
     memory_spell_flags: u32,
     monster_spell_flags: u32,
@@ -457,7 +456,7 @@ fn memory_magic_skills(
     }
 }
 
-/// C++ recall.cpp lines 343–362.
+/// 362
 fn memory_kill_difficulty(creature: &Creature, monster_kills: u32) {
     if monster_kills <= 304 / (4 + u32::from(creature.level)) {
         return;
@@ -485,7 +484,7 @@ fn memory_kill_difficulty(creature: &Creature, monster_kills: u32) {
     memory_print(&vtype_cstr(&description));
 }
 
-/// C++ recall.cpp lines 365–387.
+/// 387
 fn memory_special_abilities(mut mv: u32) {
     let mut known = true;
     let mut i = 0;
@@ -512,7 +511,7 @@ fn memory_special_abilities(mut mv: u32) {
     }
 }
 
-/// C++ recall.cpp lines 390–411.
+/// 411
 fn memory_weaknesses(mut defense: u32) {
     let mut known = true;
     let mut i = 0;
@@ -539,7 +538,7 @@ fn memory_weaknesses(mut defense: u32) {
     }
 }
 
-/// C++ recall.cpp lines 414–446.
+/// 446
 fn memory_awareness(creature: &Creature, memory: &Recall) {
     if u32::from(memory.wake) * u32::from(memory.wake) > u32::from(creature.sleep_counter)
         || memory.ignore == UCHAR_MAX
@@ -573,7 +572,7 @@ fn memory_awareness(creature: &Creature, memory: &Recall) {
     }
 }
 
-/// C++ recall.cpp lines 449–506.
+/// 506
 fn memory_loot_carried(creature_move: u32, memory_move: u32) {
     if (memory_move & (CM_CARRY_OBJ | CM_CARRY_GOLD)) == 0 {
         return;
@@ -631,7 +630,7 @@ fn memory_loot_carried(creature_move: u32, memory_move: u32) {
     }
 }
 
-/// C++ recall.cpp lines 508–585.
+/// 585
 fn memory_attack_number_and_damage(memory: &Recall, creature: &Creature) {
     let known_attacks = memory.attacks.iter().filter(|&&a| a != 0).count();
 
@@ -700,7 +699,6 @@ fn memory_attack_number_and_damage(memory: &Recall, creature: &Creature) {
     }
 }
 
-/// Port of `memoryRecall` in recall.cpp line 588.
 pub fn memory_recall(monster_id: i32) -> u8 {
     reset_recall_print_state();
 
@@ -774,8 +772,6 @@ pub fn memory_recall(monster_id: i32) -> u8 {
 
     memory_print("\n");
 
-    let () = ();
-
     let pause_line = ROFF_PRINT_LINE.get();
     emit_recall_line(pause_line, "--pause--");
 
@@ -790,7 +786,7 @@ pub fn memory_recall(monster_id: i32) -> u8 {
     ui_io::terminal::get_key_input()
 }
 
-/// C++ recall.cpp lines 676–699.
+/// 699
 pub fn recall_monster_attributes(command: u8) {
     let mut n = 0i32;
 
@@ -827,7 +823,7 @@ pub fn recall_monster_attributes(command: u8) {
 }
 
 // ---------------------------------------------------------------------------
-// Test hooks (phase 4.8.1)
+// Test hooks
 // ---------------------------------------------------------------------------
 
 #[doc(hidden)]

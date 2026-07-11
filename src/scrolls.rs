@@ -1,4 +1,4 @@
-//! Port of src/scrolls.cpp — scroll reading and scroll-specific effects.
+//! Scroll reading and scroll-specific effects
 
 use crate::config::monsters::defense::CD_UNDEAD;
 use crate::config::treasure::flags::TR_CURSED;
@@ -35,7 +35,7 @@ use crate::ui::display_character_experience;
 use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_io::terminal;
 
-/// C++ scrolls.cpp lines 10–37.
+/// 37
 #[must_use]
 pub fn player_can_read_scroll(item_pos_start: &mut i32, item_pos_end: &mut i32) -> bool {
     if with_state(|state| state.py.flags.blind > 0) {
@@ -71,7 +71,7 @@ pub fn player_can_read_scroll(item_pos_start: &mut i32, item_pos_end: &mut i32) 
     true
 }
 
-/// C++ scrolls.cpp lines 39–90.
+/// 90
 pub fn inventory_item_id_of_cursed_equipment() -> i32 {
     let mut item_count = 0;
     let mut items = [0i32; 6];
@@ -140,7 +140,7 @@ fn slot_has_equipment(slot: PlayerEquipment) -> bool {
     with_state(|state| state.py.inventory[slot as usize].category_id != TV_NOTHING)
 }
 
-/// C++ scrolls.cpp lines 92–114.
+/// 114
 #[must_use]
 pub fn scroll_enchant_weapon_to_hit() -> bool {
     if with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].category_id)
@@ -166,7 +166,7 @@ pub fn scroll_enchant_weapon_to_hit() -> bool {
     true
 }
 
-/// C++ scrolls.cpp lines 116–148.
+/// 148
 #[must_use]
 pub fn scroll_enchant_weapon_to_damage() -> bool {
     if with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].category_id)
@@ -198,7 +198,7 @@ pub fn scroll_enchant_weapon_to_damage() -> bool {
     true
 }
 
-/// C++ scrolls.cpp lines 150–174.
+/// 174
 #[must_use]
 pub fn scroll_enchant_item_to_ac() -> bool {
     let item_id = inventory_item_id_of_cursed_equipment();
@@ -224,7 +224,7 @@ pub fn scroll_enchant_item_to_ac() -> bool {
     true
 }
 
-/// C++ scrolls.cpp lines 176–192.
+/// 192
 pub fn scroll_identify_item(item_id: i32, is_used_up: &mut bool) -> i32 {
     terminal::print_message(Some("This is an identify scroll."));
 
@@ -247,7 +247,7 @@ pub fn scroll_identify_item(item_id: i32, is_used_up: &mut bool) -> i32 {
     current_id
 }
 
-/// C++ scrolls.cpp lines 194–200.
+/// 200
 #[must_use]
 pub fn scroll_remove_curse() -> bool {
     if spell_remove_curse_from_all_worn_items() {
@@ -257,7 +257,7 @@ pub fn scroll_remove_curse() -> bool {
     false
 }
 
-/// C++ scrolls.cpp lines 202–213.
+/// 213
 #[must_use]
 pub fn scroll_summon_monster() -> bool {
     let mut identified = false;
@@ -271,7 +271,7 @@ pub fn scroll_summon_monster() -> bool {
     identified
 }
 
-/// C++ scrolls.cpp lines 215–221.
+/// 221
 pub fn scroll_teleport_level() {
     let roll = random_number(2);
     with_state_mut(|state| {
@@ -283,7 +283,7 @@ pub fn scroll_teleport_level() {
     });
 }
 
-/// C++ scrolls.cpp lines 223–230.
+/// 230
 #[must_use]
 pub fn scroll_confuse_monster() -> bool {
     if with_state(|state| !state.py.flags.confuse_monster) {
@@ -294,7 +294,7 @@ pub fn scroll_confuse_monster() -> bool {
     false
 }
 
-/// C++ scrolls.cpp lines 232–278.
+/// 278
 #[must_use]
 pub fn scroll_enchant_weapon() -> bool {
     if with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].category_id)
@@ -340,7 +340,7 @@ pub fn scroll_enchant_weapon() -> bool {
     true
 }
 
-/// C++ scrolls.cpp lines 280–308.
+/// 308
 #[must_use]
 pub fn scroll_curse_weapon() -> bool {
     if with_state(|state| state.py.inventory[PlayerEquipment::Wield as usize].category_id)
@@ -372,7 +372,7 @@ pub fn scroll_curse_weapon() -> bool {
     true
 }
 
-/// C++ scrolls.cpp lines 310–342.
+/// 342
 #[must_use]
 pub fn scroll_enchant_armor() -> bool {
     let item_id = inventory_item_id_of_cursed_equipment();
@@ -404,7 +404,7 @@ pub fn scroll_enchant_armor() -> bool {
     true
 }
 
-/// C++ scrolls.cpp lines 344–398.
+/// 398
 #[must_use]
 pub fn scroll_curse_armor() -> bool {
     let item_id = if slot_has_equipment(PlayerEquipment::Body) && random_number(4) == 1 {
@@ -456,7 +456,7 @@ pub fn scroll_curse_armor() -> bool {
     true
 }
 
-/// C++ scrolls.cpp lines 400–411.
+/// 411
 #[must_use]
 pub fn scroll_summon_undead() -> bool {
     let mut identified = false;
@@ -470,7 +470,7 @@ pub fn scroll_summon_undead() -> bool {
     identified
 }
 
-/// C++ scrolls.cpp lines 413–418.
+/// 418
 pub fn scroll_word_of_recall() {
     let recall_roll = random_number(30);
     with_state_mut(|state| {
@@ -505,7 +505,7 @@ fn armor_glow_message(item_id: i32, suffix: &str) -> String {
     )
 }
 
-/// C++ scrolls.cpp lines 421–615.
+/// 615
 pub fn scroll_read() {
     with_state_mut(|state| state.game.player_free_turn = true);
 

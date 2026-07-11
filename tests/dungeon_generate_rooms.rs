@@ -1,7 +1,7 @@
 //! Room & vault builders in `dungeon_generate`.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -58,9 +58,9 @@ fn count_feature(feature_id: u8) -> i32 {
     })
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Per-builder golden grid + RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_build_room_rng_and_grid_seed42() {
     reset_for_new_game(Some(42));
@@ -128,8 +128,8 @@ fn dungeon_build_room_cross_shaped_middle_pillar_seed1() {
 
 #[test]
 fn dungeon_build_room_cross_shaped_treasure_vault_seed42() {
-    // seed 42 / level 10: feature branch 2 (treasure vault). Vault paints 8
-    // TMP1 walls; the secret door converts one to TILE_BLOCKED_FLOOR → 7.
+ // seed 42 / level 10: feature branch 2 (treasure vault). Vault paints 8
+ // TMP1 walls; the secret door converts one to TILE_BLOCKED_FLOOR → 7.
     reset_for_new_game(Some(42));
     umoria::game_run::initialize_treasure_levels();
     umoria::game_run::initialize_monster_levels();
@@ -153,7 +153,7 @@ fn dungeon_build_room_cross_shaped_treasure_vault_seed42() {
 
 #[test]
 fn dungeon_build_room_with_inner_rooms_plain_seed4() {
-    // seed 4 / level 10: InnerRoomTypes::Plain (randomNumber(5) == 1).
+ // seed 4 / level 10: InnerRoomTypes::Plain (randomNumber(5) == 1).
     assert_eq!(peek_inner_room_type_roll(4, 10), 1);
 
     reset_for_new_game(Some(4));
@@ -169,7 +169,7 @@ fn dungeon_build_room_with_inner_rooms_plain_seed4() {
 
     dungeon_build_room_with_inner_rooms(Coord_t { y: 30, x: 50 });
 
-    // seed 4 floor-tile roll yields light floor; plain branch leaves center as floor.
+ // seed 4 floor-tile roll yields light floor; plain branch leaves center as floor.
     assert_eq!(
         tile_at(Coord_t { y: 30, x: 50 }).feature_id,
         TILE_LIGHT_FLOOR
@@ -180,9 +180,9 @@ fn dungeon_build_room_with_inner_rooms_plain_seed4() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Helper builders
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_vault_grid() {
     reset_for_new_game(None);
@@ -309,9 +309,9 @@ fn dungeon_place_four_small_rooms_horizontal_doors_seed42() {
     assert_eq!(next_random_pair(12), (12, 4));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Branch-coverage sweep — inner-room type (randomNumber(5))
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 /// Replay the floor-tile + type rolls used by `dungeon_build_room_with_inner_rooms`.
 fn peek_inner_room_type_roll(seed: u32, level: u8) -> i32 {
     reset_for_new_game(Some(seed));
@@ -323,7 +323,7 @@ fn peek_inner_room_type_roll(seed: u32, level: u8) -> i32 {
 
 #[test]
 fn inner_room_type_branch_sweep_seeds() {
-    // First seeds (level 10) where randomNumber(5) after floor-tile pick yields 1..=5.
+ // First seeds (level 10) where randomNumber(5) after floor-tile pick yields 1..=5.
     let expected: [(u32, i32); 5] = [(4, 1), (3, 2), (2, 3), (1, 4), (5, 5)];
 
     for (seed, want) in expected {
@@ -347,7 +347,7 @@ fn inner_room_type_branch_sweep_seeds() {
         let coord = Coord_t { y: 30, x: 50 };
         dungeon_build_room_with_inner_rooms(coord);
 
-        // Structural smoke per branch (grid heuristics are ambiguous for maze vs four-rooms).
+ // Structural smoke per branch (grid heuristics are ambiguous for maze vs four-rooms).
         match want {
             1 => {
                 assert_ne!(tile_at(coord).feature_id, TMP1_WALL);
@@ -357,7 +357,7 @@ fn inner_room_type_branch_sweep_seeds() {
                 );
             }
             2 => {
-                // Vault ring; one wall may become a locked door (TILE_BLOCKED_FLOOR).
+ // Vault ring; one wall may become a locked door (TILE_BLOCKED_FLOOR).
                 assert!(count_feature(TMP1_WALL) >= 6);
                 assert!(with_state(|s| s.game.treasure.current_id) > 1);
             }
@@ -381,7 +381,7 @@ fn inner_room_type_branch_sweep_seeds() {
 
 #[test]
 fn cross_shaped_feature_branch_sweep_seeds() {
-    // level 5: seeds where feature randomNumber(4) == 1 (large middle pillar).
+ // level 5: seeds where feature randomNumber(4) == 1 (large middle pillar).
     let seeds_pillar = [1u32, 17];
     for seed in seeds_pillar {
         reset_for_new_game(Some(seed));

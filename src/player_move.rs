@@ -1,4 +1,4 @@
-//! Port of `src/player_move.cpp` — see `phase_4.4`.
+//! Player movement and tile interaction.
 
 use crate::config::options::prompt_to_pickup;
 use crate::config::player::status::PY_SEARCH;
@@ -395,7 +395,7 @@ fn carry(coord: Coord_t, pickup: bool) {
 }
 
 fn player_random_movement(dir: i32) -> bool {
-    // Never random if sitting — C++ player_move.cpp lines 339–350.
+    // Never random if sitting
     // Always consume randomNumber(4) when dir != 5, even if not confused.
     if dir == 5 {
         return false;
@@ -405,7 +405,7 @@ fn player_random_movement(dir: i32) -> bool {
     player_is_confused && player_random_move
 }
 
-/// C++ player.cpp lines 49–103 — stepping helper used by streamer walk (4.1.2.1).
+/// stepping helper used by streamer walk (4.1.2.1)
 pub fn player_move_position(dir: i32, coord: &mut Coord_t) -> bool {
     let new_coord = match dir {
         1 => Coord_t {
@@ -461,7 +461,7 @@ pub fn player_move_position(dir: i32, coord: &mut Coord_t) -> bool {
     })
 }
 
-/// C++ `player_move.cpp` lines 426–548.
+/// 548
 pub fn player_move(direction: i32, do_pickup: bool) {
     let mut direction = direction;
     if player_random_movement(direction) {

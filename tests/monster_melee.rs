@@ -1,7 +1,7 @@
-//! Monster melee attacks on player parity.
+//! Monster melee attacks on player tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -123,9 +123,9 @@ fn death_description_for(creature_id: u16) -> Vtype_t {
     desc
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. monster_attack_player loop parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_attack_player_repel_protect_evil_seed42() {
     test_set_ncurses_stub(true);
@@ -163,7 +163,7 @@ fn monster_attack_player_miss_prints_message_seed777() {
         s.py.misc.ac = 200;
         s.py.misc.magical_ac = 200;
     });
-    // Kobold attack desc is in 1..=3, so the miss path prints "misses you."
+ // Kobold attack desc is in 1..=3, so the miss path prints "misses you."
     place_monster(2, KOBOLD_ID, 10, Coord_t { y: 10, x: 10 }, true);
 
     monster_attack_player(2);
@@ -178,9 +178,9 @@ fn monster_attack_player_miss_prints_message_seed777() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. execute_attack_on_player per-type parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn execute_attack_normal_ac_reduction_truncates() {
     reset_for_new_game(None);
@@ -291,7 +291,7 @@ fn execute_attack_acid_seed42() {
     let death = death_description_for(GREY_MUSHROOM_ID);
     execute_attack_on_player(10, &mut hp, 2, 6, 20, &death, true);
     with_state(|s| {
-        // No AC acid resist → full damage (flag+1 == 1).
+ // No AC acid resist → full damage (flag+1 == 1).
         assert_eq!(s.py.misc.current_hp, 480);
         assert_eq!(message_text(s.last_message_id), "You are covered in acid!");
     });
@@ -452,14 +452,14 @@ fn execute_attack_drain_xp_seed42() {
         s.py.misc.max_exp = 1000;
         s.py.misc.level = 5;
         s.py.misc.experience_factor = 100;
-        // Thresholds so level stays 5 after draining 30 exp (970 still above level-5 floor).
+ // Thresholds so level stays 5 after draining 30 exp (970 still above level-5 floor).
         for i in 0..s.py.base_exp_levels.len() {
             s.py.base_exp_levels[i] = if i < 4 { 0 } else { 10_000 };
         }
     });
     let mut hp = 0i16;
     let death = death_description_for(GREY_MUSHROOM_ID);
-    // damage 10 → drain = 10 + (1000/100)*2 = 30
+ // damage 10 → drain = 10 + (1000/100)*2 = 30
     execute_attack_on_player(10, &mut hp, 2, 19, 10, &death, true);
     with_state(|s| {
         assert_eq!(s.py.misc.exp, 970);
@@ -590,7 +590,7 @@ fn execute_attack_eat_light_seed42() {
     let noticed = execute_attack_on_player(10, &mut hp, 2, 23, 0, &death, true);
     assert!(noticed);
     with_state(|s| {
-        // C++: misc_use -= 250 + randomNumber(250); seed42 → 548 (same as inventory tests).
+ // misc_use -= 250 + randomNumber(250); seed42 → 548 (same as inventory tests).
         assert_eq!(
             s.py.inventory[PlayerEquipment::Light as usize].misc_use,
             548
@@ -619,7 +619,7 @@ fn execute_attack_drain_charges_seed42() {
     });
     let mut hp = 10i16;
     let death = death_description_for(GREY_MUSHROOM_ID);
-    // creature_level 3 → monster_hp += 3 * 5 = 15 → 25
+ // creature_level 3 → monster_hp += 3 * 5 = 15 → 25
     let noticed = execute_attack_on_player(3, &mut hp, 2, 24, 0, &death, true);
     assert!(noticed);
     assert_eq!(hp, 25);
@@ -643,9 +643,9 @@ fn execute_attack_repel_type_noticed_false() {
     with_state(|s| assert_eq!(s.py.misc.current_hp, 500));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. monster_confuse_on_attack parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_confuse_on_attack_confuses_seed42() {
     test_set_ncurses_stub(true);
@@ -695,9 +695,9 @@ fn monster_confuse_on_attack_skipped_for_repel_desc() {
     with_state(|s| assert!(s.py.flags.confuse_monster));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. monster_print_attack_description parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_print_attack_description_static_cases() {
     test_set_ncurses_stub(true);
@@ -734,9 +734,9 @@ fn monster_print_attack_description_slimed() {
     with_state(|s| assert_eq!(message_text(s.last_message_id), "You've been slimed!"));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Sustain/immunity branches
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn execute_attack_sustain_str_skips_decrease_seed42() {
     test_set_ncurses_stub(true);
@@ -789,9 +789,9 @@ fn execute_attack_fear_resisted_save_seed42() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Integer-semantics tests
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn execute_attack_monster_hp_reference_i16_mutated() {
     reset_for_new_game(None);

@@ -1,4 +1,4 @@
-//! Port of `src/player_eat.cpp` — see `phase_2`.
+//! Food consumption and hunger effects.
 
 use crate::config::player::status::{PY_HUNGRY, PY_WEAK};
 use crate::config::player::{PLAYER_FOOD_FULL, PLAYER_FOOD_MAX};
@@ -154,7 +154,7 @@ fn apply_food_effect(item: &Inventory, item_flags: &mut u32) -> bool {
     }
 }
 
-/// C++ `player_eat.cpp` lines 38–233.
+/// 233
 pub fn player_eat() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -236,7 +236,7 @@ pub fn player_eat() {
     inventory_destroy_item(item_id);
 }
 
-/// C++ `player_eat.cpp` lines 236–264.
+/// 264
 pub fn player_ingest_food(amount: i32) {
     let message = with_state_mut(|state| {
         if state.py.flags.food < 0 {

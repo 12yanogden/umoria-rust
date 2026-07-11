@@ -1,4 +1,4 @@
-//! Differential fidelity harness smoke + helper unit tests.
+//! Golden-harness smoke tests and helper unit tests.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,

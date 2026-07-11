@@ -1,4 +1,4 @@
-//! Save byte-exact round-trip vs C++ golden fixtures.
+//! Save byte-exact round-trip vs golden fixtures.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -56,7 +56,7 @@ fn setup_save_harness() {
 }
 
 #[test]
-fn save_byte_exact_roundtrip_matches_cpp_golden() {
+fn save_byte_exact_roundtrip_matches_expected_golden() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let entry = manifest
         .goldens
@@ -69,7 +69,7 @@ fn save_byte_exact_roundtrip_matches_cpp_golden() {
     assert!(!golden.is_empty(), "golden save artifact must be non-empty");
 
     setup_save_harness();
-    test_load_save_from_bytes(&golden).expect("load C++ golden save");
+    test_load_save_from_bytes(&golden).expect("load golden save");
     let seed = golden[3];
     test_set_forced_seed_byte(Some(seed));
     test_set_unix_time(None);
@@ -80,14 +80,21 @@ fn save_byte_exact_roundtrip_matches_cpp_golden() {
     assert!(save_char("game.sav"));
 
     let actual = test_buffer_bytes();
-    assert_eq!(actual.len(), golden.len(), "save length must match C++");
+    assert_eq!(
+        actual.len(),
+        golden.len(),
+        "save length must match expected"
+    );
     if let Some(diff) = masked_save_diff(entry, &golden, &actual) {
-        panic!("masked save bytes must match C++ golden: {}", diff.render());
+        panic!(
+            "masked save bytes must match expected golden: {}",
+            diff.render()
+        );
     }
 }
 
 #[test]
-fn save_cpp_golden_is_readable_by_rust() {
+fn save_expected_golden_is_readable_by_rust() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let entry = manifest
         .goldens
@@ -105,7 +112,7 @@ fn save_cpp_golden_is_readable_by_rust() {
     assert!(golden.len() > 4, "golden save must have header bytes");
 
     setup_save_harness();
-    test_load_save_from_bytes(&golden).expect("Rust must decode C++ golden save");
+    test_load_save_from_bytes(&golden).expect("Rust must decode golden save");
     assert!(umoria::game::with_state(|state| state.dg.game_turn >= 0));
     assert!(umoria::game::with_state(|state| state.game.magic_seed != 0));
 }

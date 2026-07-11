@@ -24,11 +24,11 @@ use umoria::store;
 use umoria::types::{Screen, MORIA_MESSAGE_SIZE};
 use umoria::ui_io;
 
-// ---------------------------------------------------------------------------
-// 1. GameState defaults match C++ Game_t member initializers (game.h)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 1. GameState defaults match expected Game_t member initializers (game.rs)
+// --------------------------------------------------------------------------
 #[test]
-fn state_default_matches_cpp_game_t() {
+fn state_default_matches_expected_game_t() {
     let state = game::State::default();
     let g = &state.game;
 
@@ -56,32 +56,32 @@ fn state_default_matches_cpp_game_t() {
     assert!(g.character_died_from.iter().all(|&b| b == 0));
 }
 
-// ---------------------------------------------------------------------------
-// 2. Dungeon defaults match C++ Dungeon_t{0,0,{},-1,0,true,{}}
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 2. Dungeon defaults match expected Dungeon_t{0,0,{},-1,0,true,{}}
+// --------------------------------------------------------------------------
 #[test]
-fn dungeon_default_matches_cpp() {
+fn dungeon_default_matches_expected() {
     let dg = game::State::default().dg;
 
     assert_eq!(dg.height, 0);
     assert_eq!(dg.width, 0);
-    // C++ Dungeon_t{0,0,{},-1,0,true,{}} positional init: game_turn(4th)=-1, current_level(5th)=0.
+ // Dungeon_t{0,0,{},-1,0,true,{}} positional init: game_turn(4th)=-1, current_level(5th)=0.
     assert_eq!(dg.current_level, 0);
     assert_eq!(dg.game_turn, -1);
     assert!(dg.generate_new_level);
 }
 
-// ---------------------------------------------------------------------------
-// 3. hack_monptr default is -1 (monster.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 3. hack_monptr default is -1
+// --------------------------------------------------------------------------
 #[test]
 fn hack_monptr_default_is_minus_one() {
     assert_eq!(game::State::default().hack_monptr, -1);
 }
 
-// ---------------------------------------------------------------------------
-// 4. Counter defaults match C++ zero-init globals
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 4. Counter defaults match expected zero-init globals
+// --------------------------------------------------------------------------
 #[test]
 fn counters_default_zero() {
     let s = game::State::default();
@@ -92,10 +92,10 @@ fn counters_default_zero() {
     assert_eq!(s.monster_multiply_total, 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. RNG seed lives in State.rng; z[10001] == 1043618065 for internal seed 1
-//    (C++ setRandomSeed(0) → stored seed 1, per rng.cpp TEST_RNG)
-// ---------------------------------------------------------------------------
+// (setRandomSeed(0) → stored seed 1, per TEST_RNG)
+// --------------------------------------------------------------------------
 #[test]
 fn rng_seed_lives_in_state_and_reseeds() {
     rng::set_seed(0);
@@ -108,9 +108,9 @@ fn rng_seed_lives_in_state_and_reseeds() {
     assert_eq!(z10001, 1_043_618_065);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. reset_for_new_game yields deterministic RNG sequence
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn reset_produces_deterministic_rng() {
     rng::set_seed(0);
@@ -130,9 +130,9 @@ fn reset_produces_deterministic_rng() {
     assert_eq!(game::with_state(|s| s.rng.seed), 1_043_618_065);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. reset_for_new_game clears mutable state (no leakage)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn reset_clears_mutable_state() {
     game::with_state_mut(|s| {
@@ -152,9 +152,9 @@ fn reset_clears_mutable_state() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. set_seed wrapping matches C setRandomSeed
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn set_random_seed_wrapping_matches_c() {
     rng::set_seed(0);
@@ -172,9 +172,9 @@ fn set_random_seed_wrapping_matches_c() {
     assert_eq!(game::with_state(|s| s.rng.seed), wrap);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 9. Read-only tables have immutable module homes (compile-checked symbols)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn readonly_tables_are_immutable_homes() {
     let _ = &*data_creatures::CREATURES_LIST;
@@ -189,12 +189,12 @@ fn readonly_tables_are_immutable_homes() {
     let _ = &*data_stores::STORES;
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 10. Every mapped global has a named Rust home (compile test)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn every_mapped_global_has_a_home() {
-    // --- mutable singletons (State fields) ---
+ // -- mutable singletons (State fields) ---
     game::with_state(|s| {
         let _ = &s.game;
         let _ = &s.py;
@@ -220,7 +220,7 @@ fn every_mapped_global_has_a_home() {
         let _ = &s.rng;
     });
 
-    // --- read-only tables ---
+ // -- read-only tables ---
     let _ = &*data_treasure::GAME_OBJECTS;
     let _ = &*data_creatures::CREATURES_LIST;
     let _ = &*data_creatures::MONSTER_ATTACKS;
@@ -264,7 +264,7 @@ fn every_mapped_global_has_a_home() {
     let _ = &data_treasure::AMULETS;
     let _ = &data_treasure::SYLLABLES;
 
-    // --- config namespace ---
+ // -- config namespace ---
     let _ = config::files::SPLASH_SCREEN;
     let _ = config::files::WELCOME_SCREEN;
     let _ = config::files::LICENSE;
@@ -284,7 +284,7 @@ fn every_mapped_global_has_a_home() {
     let _ = config::spells::SPELL_TYPE_NONE;
     let _ = config::stores::STORE_MAX_AUTO_BUY_ITEMS;
 
-    // --- module-private transient statics (not in State) ---
+ // -- module-private transient statics (not in State) ---
     let _ = ui_io::curses_on();
     let _ = ui_io::eof_flag();
     let _ = ui_io::panic_save();
@@ -294,16 +294,16 @@ fn every_mapped_global_has_a_home() {
     let _ = scores::highscore_fp_is_none();
     let _ = dungeon_generate::door_index();
 
-    // --- rng free-fn surface ---
+ // -- rng free-fn surface ---
     let _ = rng::get_seed();
 }
 
-// ---------------------------------------------------------------------------
-// 11. Transient module statics are excluded from State (save-file fidelity)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 11. Transient module statics are excluded from State
+// --------------------------------------------------------------------------
 #[test]
 fn module_statics_excluded_from_state() {
-    // Access transient homes directly — they must not live on State.
+ // Access transient homes directly — they must not live on State.
     assert!(!ui_io::curses_on());
     assert_eq!(ui_io::eof_flag(), 0);
     assert!(!ui_io::panic_save());
@@ -313,17 +313,17 @@ fn module_statics_excluded_from_state() {
     assert!(scores::highscore_fp_is_none());
     assert_eq!(dungeon_generate::door_index(), 0);
 
-    // State field inventory: no transient scratch fields.
+ // State field inventory: no transient scratch fields.
     let field_count = std::mem::size_of::<game::State>();
     assert!(field_count > 0);
     let _ = MORIA_MESSAGE_SIZE; // keep test module linked to types
 }
 
-// ---------------------------------------------------------------------------
-// 12. Options defaults match C++ config::options (config.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 12. Options defaults match expected config::options
+// --------------------------------------------------------------------------
 #[test]
-fn options_default_matches_cpp() {
+fn options_default_matches_expected() {
     let opts = game::State::default().options;
 
     assert!(opts.display_counts);

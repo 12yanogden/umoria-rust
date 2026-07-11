@@ -1,4 +1,4 @@
-//! Port of `src/ui_inventory.cpp` — see `phase_3.3`.
+//! Inventory and equipment UI screens.
 
 use std::os::raw::c_char;
 
@@ -24,7 +24,6 @@ use crate::ui_io::terminal::{self, Coord};
 use crate::ui_io::ESCAPE;
 use crate::{inventory::ITEM_GROUP_MIN, inventory::ITEM_SINGLE_STACK_MAX};
 
-/// C++ ui_inventory.cpp:8-14 — `inventoryItemWeightText`.
 #[must_use]
 pub fn inventory_item_weight_text(item_id: usize) -> String {
     with_state(|state| {
@@ -41,7 +40,6 @@ fn inventory_item_weight_text_buf(text: &mut Obj_desc_t, item_id: usize) {
     write_c_string(text, &s);
 }
 
-/// C++ ui_inventory.cpp:93-122 — `playerItemWearingDescription`.
 #[must_use]
 pub fn player_item_wearing_description(body_location: u8) -> &'static str {
     match body_location {
@@ -61,7 +59,6 @@ pub fn player_item_wearing_description(body_location: u8) -> &'static str {
     }
 }
 
-/// C++ ui_inventory.cpp:124-156 — `equipmentPositionDescription`.
 #[must_use]
 pub fn equipment_position_description(id: u8, weight: u16, str_used: u8) -> &'static str {
     match id {
@@ -104,7 +101,6 @@ fn mask_skipped(mask: Option<&[u8]>, index: usize) -> bool {
     mask.is_some_and(|m| index < m.len() && m[index] == 0)
 }
 
-/// C++ ui_inventory.cpp:22-90 — `displayInventoryItems`.
 pub fn display_inventory_items(
     item_id_start: i32,
     item_id_end: i32,
@@ -152,7 +148,7 @@ pub fn display_inventory_items(
 
     #[allow(
         clippy::explicit_counter_loop,
-        reason = "manual index mirrors C++ loop structure"
+        reason = "manual index matches existing loop structure"
     )]
     for &(iu, _, _) in &items {
         if column == 0 {
@@ -203,7 +199,6 @@ fn c_string_to_str(buf: &[u8]) -> &str {
     std::str::from_utf8(&buf[..end]).unwrap_or("")
 }
 
-/// C++ ui_inventory.cpp:160-234 — `displayEquipment`.
 pub fn display_equipment(show_weights: bool, mut column: i32) -> i32 {
     let mut descriptions: Vec<String> = Vec::new();
 
@@ -300,7 +295,6 @@ pub fn display_equipment(show_weights: bool, mut column: i32) -> i32 {
     column
 }
 
-/// C++ ui_inventory.cpp:236-250 — `showEquipmentHelpMenu`.
 fn show_equipment_help_menu(mut left_column: i32) -> i32 {
     if left_column > 52 {
         left_column = 52;
@@ -359,7 +353,7 @@ fn show_equipment_help_menu(mut left_column: i32) -> i32 {
     7
 }
 
-/// Pure helper — per-branch `currentLinePos` from ui_inventory.cpp:287-310.
+/// Per-branch current line position for inventory screen switching.
 #[must_use]
 pub fn switch_screen_line_pos(
     next_screen: Screen,
@@ -377,7 +371,7 @@ pub fn switch_screen_line_pos(
     }
 }
 
-/// Pure helper — trailing-clear branch from ui_inventory.cpp:312-322.
+/// Pure helper — trailing-clear branch
 /// Returns `(screen_bottom_pos, single_erase_at_bottom)`.
 #[must_use]
 pub fn apply_switch_screen_bottom_pos(
@@ -391,7 +385,6 @@ pub fn apply_switch_screen_bottom_pos(
     }
 }
 
-/// C++ ui_inventory.cpp:281-323 — `uiCommandSwitchScreen`.
 pub fn ui_command_switch_screen(next_screen: Screen) {
     let prep = with_state_mut(|state| {
         if next_screen == state.game.screen.current_screen_id {
@@ -451,7 +444,6 @@ pub fn ui_command_switch_screen(next_screen: Screen) {
     }
 }
 
-/// C++ ui_inventory.cpp:326-337 — `verifyAction`.
 fn verify_action(prompt: &str, item: i32) -> bool {
     // Snapshot first — item_description re-enters game state.
     let item_snap = with_state(|state| state.py.inventory[item as usize]);
@@ -470,7 +462,6 @@ fn verify_action(prompt: &str, item: i32) -> bool {
     terminal::get_input_confirmation(&msg)
 }
 
-/// C++ ui_inventory.cpp:339-364 — `requestAndShowInventoryScreen`.
 pub fn request_and_show_inventory_screen(recover_screen: bool) {
     enum ResumeAction {
         Done,
@@ -522,7 +513,6 @@ pub fn request_and_show_inventory_screen(recover_screen: bool) {
     }
 }
 
-/// C++ ui_inventory.cpp:366-383.
 pub fn ui_command_inventory_take_off_item(selecting: bool) -> bool {
     enum Outcome {
         KeepSelecting,
@@ -563,7 +553,6 @@ pub fn ui_command_inventory_take_off_item(selecting: bool) -> bool {
     }
 }
 
-/// C++ ui_inventory.cpp:385-406.
 pub fn ui_command_inventory_drop_item(command: &mut u8, selecting: bool) -> bool {
     enum Outcome {
         KeepSelecting,
@@ -627,7 +616,6 @@ pub fn ui_command_inventory_drop_item(command: &mut u8, selecting: bool) -> bool
     }
 }
 
-/// C++ ui_inventory.cpp:408-432.
 pub fn ui_command_inventory_wear_wield_item(selecting: bool) -> bool {
     enum Outcome {
         KeepSelecting,
@@ -746,7 +734,6 @@ fn ui_command_inventory_unwield_item() {
     player_strength();
 }
 
-/// C++ ui_inventory.cpp:484-506 — `inventoryGetItemMatchingInscription`.
 #[must_use]
 pub fn inventory_get_item_matching_inscription(which: u8, command: u8, from: i32, to: i32) -> i32 {
     with_state_mut(|state| {
@@ -772,7 +759,6 @@ pub fn inventory_get_item_matching_inscription(which: u8, command: u8, from: i32
     })
 }
 
-/// C++ ui_inventory.cpp:508-523 — `buildCommandHeading`.
 #[must_use]
 pub fn build_command_heading(
     from: i32,
@@ -878,7 +864,6 @@ fn request_put_ring_on_which_hand() -> i32 {
     hand
 }
 
-/// C++ ui_inventory.cpp:572-628 — `inventoryGetSlotToWearEquipment`.
 #[must_use]
 pub fn inventory_get_slot_to_wear_equipment(category_id: u8) -> i32 {
     let mut slot = -1i32;
@@ -1348,7 +1333,6 @@ fn ui_command_display_equipment() {
     }
 }
 
-/// C++ ui_inventory.cpp:1005-1096 — `inventoryExecuteCommand`.
 pub fn inventory_execute_command(mut command: u8) {
     with_state_mut(|state| {
         state.game.player_free_turn = true;
@@ -1433,7 +1417,6 @@ pub fn inventory_execute_command(mut command: u8) {
     player_recalculate_bonuses();
 }
 
-/// C++ ui_inventory.cpp:1098-1102 — `PackMenu`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PackMenu {
     CloseMenu,
@@ -1441,7 +1424,6 @@ enum PackMenu {
     Inventory,
 }
 
-/// C++ ui_inventory.cpp:1106-1149 — `inventorySwitchPackMenu`.
 fn inventory_switch_pack_menu(
     prompt: &mut str,
     menu: &mut PackMenu,
@@ -1499,12 +1481,9 @@ fn inventory_switch_pack_menu(
     true
 }
 
-/// C++ ui_inventory.cpp:1152-1304 — `inventoryGetInputForItemId`.
-// `done = true;` immediately preceding `break;` mirrors ui_inventory.cpp:1273-1277
-// verbatim; the assignment is dead but preserved for fidelity.
 #[allow(
     unused_assignments,
-    reason = "dead assignment preserved for C++ control-flow fidelity"
+    reason = "dead assignment retained to match existing control flow"
 )]
 pub fn inventory_get_input_for_item_id(
     command_key_id: &mut i32,
@@ -1618,8 +1597,8 @@ pub fn inventory_get_input_for_item_id(
                     menu_active = true;
                 }
                 _ => {
-                    // C++ declares `int commandKeyId;` uninitialized; every branch
-                    // below assigns it before use (ui_inventory.cpp:1229-1251).
+                    // declares `int commandKeyId;` uninitialized; every branch
+                    // below assigns it before use (:1229-1251)
                     let mut key_id: i32;
                     if which.is_ascii_digit() && menu != PackMenu::Equipment {
                         let mut m = item_id_start;

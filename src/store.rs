@@ -1,4 +1,4 @@
-//! Port of src/store.cpp — store interaction, haggling, and command loop.
+//! Store interaction, haggling, and command loop
 
 use std::cell::Cell;
 use std::ffi::CStr;
@@ -64,7 +64,6 @@ thread_local! {
     static STORE_LAST_INCREMENT: Cell<i16> = const { Cell::new(0) };
 }
 
-/// Port of `BidState` in store.cpp.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum BidState {
@@ -74,7 +73,6 @@ pub enum BidState {
     Insulted,
 }
 
-/// Port of `Owner_t` in store.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Owner {
     pub name: &'static str,
@@ -86,14 +84,12 @@ pub struct Owner {
     pub max_insults: u8,
 }
 
-/// Port of `InventoryRecord_t` in store.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct InventoryRecord {
     pub cost: i32,
     pub item: crate::inventory::Inventory,
 }
 
-/// Port of `Store_t` in store.h.
 #[derive(Clone, Copy, Debug)]
 pub struct Store {
     pub turns_left_before_closing: i32,
@@ -154,7 +150,7 @@ fn print_speech_from_table(table: &[&str], bound: i32) {
     terminal::print_message(Some(table[index]));
 }
 
-/// C++ store.cpp lines 17–35.
+/// 35
 pub fn store_initialize_owners() {
     let count = i32::from(MAX_OWNERS / MAX_STORES);
 
@@ -177,13 +173,13 @@ pub fn store_initialize_owners() {
     });
 }
 
-/// C++ store.cpp lines 39–41.
+/// 41
 #[doc(hidden)]
 pub fn print_speech_finished_haggling() {
     print_speech_from_table(&SPEECH_SALE_ACCEPTED_TABLE, 14);
 }
 
-/// C++ store.cpp lines 44–56.
+/// 56
 #[doc(hidden)]
 pub fn print_speech_selling_haggle(offer: i32, asking: i32, final_flag: i32) {
     let mut comment = if final_flag > 0 {
@@ -200,7 +196,7 @@ pub fn print_speech_selling_haggle(offer: i32, asking: i32, final_flag: i32) {
     terminal::print_message(Some(&msg));
 }
 
-/// C++ store.cpp lines 58–70.
+/// 70
 #[doc(hidden)]
 pub fn print_speech_buying_haggle(offer: i32, asking: i32, final_flag: i32) {
     let mut comment = if final_flag > 0 {
@@ -217,7 +213,7 @@ pub fn print_speech_buying_haggle(offer: i32, asking: i32, final_flag: i32) {
     terminal::print_message(Some(&msg));
 }
 
-/// C++ store.cpp lines 73–77.
+/// 77
 #[doc(hidden)]
 pub fn print_speech_get_out_of_my_store() {
     let comment = random_number(5) as usize - 1;
@@ -225,13 +221,13 @@ pub fn print_speech_get_out_of_my_store() {
     terminal::print_message(Some(SPEECH_GET_OUT_OF_MY_STORE_TABLE[comment]));
 }
 
-/// C++ store.cpp lines 79–81.
+/// 81
 #[doc(hidden)]
 pub fn print_speech_try_again() {
     print_speech_from_table(&SPEECH_HAGGLING_TRY_AGAIN_TABLE, 10);
 }
 
-/// C++ store.cpp lines 83–85.
+/// 85
 #[doc(hidden)]
 pub fn print_speech_sorry() {
     print_speech_from_table(&SPEECH_SORRY_TABLE, 5);
@@ -463,7 +459,7 @@ fn store_haggle_insults(store_id: i32) -> bool {
     false
 }
 
-/// C++ store.cpp lines 266–345.
+/// 345
 #[doc(hidden)]
 pub fn store_get_haggle(prompt: &str, new_offer: &mut i32, offer_count: i32) -> bool {
     let mut valid_offer = true;
@@ -511,7 +507,7 @@ pub fn store_get_haggle(prompt: &str, new_offer: &mut i32, offer_count: i32) -> 
             .map(|c| c.to_string_lossy().into_owned())
             .unwrap_or_default();
 
-        // C++ store.cpp lines 301–306: skip only ASCII space before +/- detection.
+        // skip only ASCII space before +/- detection
         let bytes = msg_str.as_bytes();
         let mut p = 0usize;
         while p < bytes.len() && bytes[p] == b' ' {
@@ -555,7 +551,7 @@ pub fn store_get_haggle(prompt: &str, new_offer: &mut i32, offer_count: i32) -> 
     valid_offer
 }
 
-/// C++ store.cpp lines 356–382.
+/// 382
 #[doc(hidden)]
 pub fn store_receive_offer(
     store_id: i32,
@@ -587,7 +583,7 @@ pub fn store_receive_offer(
     status
 }
 
-/// C++ store.cpp lines 384–396.
+/// 396
 #[doc(hidden)]
 pub fn store_purchase_customer_adjustment(min_sell: &mut i32, max_sell: &mut i32) {
     let charisma = player_stat_adjustment_charisma();
@@ -627,7 +623,7 @@ fn store_update_bargaining_skills(store: &mut Store, price: i32, min_price: i32)
     }
 }
 
-/// C++ store.cpp lines 399–559.
+/// 559
 #[doc(hidden)]
 pub fn store_purchase_haggle(
     store_id: i32,
@@ -806,7 +802,7 @@ pub fn store_purchase_haggle(
     status
 }
 
-/// C++ store.cpp lines 561–582.
+/// 582
 #[doc(hidden)]
 pub fn store_sell_customer_adjustment(
     owner: &Owner,
@@ -843,7 +839,7 @@ pub fn store_sell_customer_adjustment(
     }
 }
 
-/// C++ store.cpp lines 585–781.
+/// 781
 #[doc(hidden)]
 pub fn store_sell_haggle(
     store_id: i32,
@@ -1359,7 +1355,7 @@ fn store_sell_an_item(store_id: i32, current_top_item_id: &mut i32) -> bool {
     kick_customer
 }
 
-/// C++ store.cpp lines 1097–1174.
+/// 1174
 pub fn store_enter(store_id: i32) {
     let locked = with_state(|state| {
         state.stores[store_id as usize].turns_left_before_closing >= state.dg.game_turn
@@ -1434,7 +1430,6 @@ pub fn store_enter(store_id: i32) {
     draw_cave_panel();
 }
 
-/// C++ `store_inventory.cpp` lines 24+.
 pub fn store_maintenance() {
     crate::store_inventory::store_maintenance();
 }

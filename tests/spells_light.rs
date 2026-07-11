@@ -1,7 +1,7 @@
-//! Area/line light & darken spells parity.
+//! Area/line light & darken spells tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -116,7 +116,7 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-/// Independent C++ reference for spellLightLine tile count (spells.cpp lines 611–654).
+/// Independent reference for spellLightLine tile count.
 fn reference_light_line_tile_count(start: Coord_t, direction: i32) -> usize {
     let mut coord = start;
     let mut distance = 0;
@@ -133,7 +133,7 @@ fn reference_light_line_tile_count(start: Coord_t, direction: i32) -> usize {
     count
 }
 
-/// Independent C++ reference for spellLightLine lit-tile sequence before casting.
+/// Independent reference for spellLightLine lit-tile sequence before casting.
 fn reference_light_line_tiles(start: Coord_t, direction: i32) -> Vec<Coord_t> {
     let mut coord = start;
     let mut distance = 0;
@@ -152,9 +152,9 @@ fn reference_light_line_tiles(start: Coord_t, direction: i32) -> Vec<Coord_t> {
     lit
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. RNG-order golden — light line / starlite monster reaction
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_light_line_no_monster_consumes_zero_rng() {
@@ -214,14 +214,14 @@ fn spell_starlite_touches_one_monster_one_dice_roll_seed42() {
 
     spell_starlite(Coord_t { y: 20, x: 20 });
 
-    // South line (dir 2) reaches the eye; other directions do not.
+ // South line (dir 2) reaches the eye; other directions do not.
     assert_eq!(next_random_pair(8), (8, 4));
     assert_eq!(next_random_pair(8), (8, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Lighting extent parity — spellLightArea / spellDarkenArea
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_light_area_corridor_sets_three_by_three_permanent_light() {
@@ -378,12 +378,12 @@ fn spell_darken_area_room_integer_bounds_and_darkened_flag() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Line traversal — spellLightLine stops at wall
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn spell_light_line_stops_at_wall_same_as_cpp_reference() {
+fn spell_light_line_stops_at_wall_same_as_expected_reference() {
     reset_for_new_game(Some(1));
     setup_dungeon(40, 40);
     setup_player_panel(0, 0, Coord_t { y: 10, x: 10 });
@@ -425,9 +425,9 @@ fn spell_light_line_respects_bolt_max_range() {
     assert_eq!(expected, i32::from(OBJECT_BOLTS_MAX_RANGE) as usize + 1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. spellDisarmAllInDirection — traps/doors, zero RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_disarm_all_in_direction_trap_and_zero_rng() {
@@ -565,9 +565,9 @@ fn spell_disarm_all_in_direction_trapped_chest() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Light-sensitive defense bit on creature table
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn floating_eye_has_cd_light_defense() {

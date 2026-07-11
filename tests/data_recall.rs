@@ -13,9 +13,9 @@ use umoria::data_recall::{
     RECALL_DESCRIPTION_WEAKNESS,
 };
 
-// ---------------------------------------------------------------------------
-// 1. Length assertions (phase_2.4 / recall.h)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 1. Length assertions
+// --------------------------------------------------------------------------
 #[test]
 fn recall_description_array_lengths() {
     assert_eq!(RECALL_DESCRIPTION_ATTACK_TYPE.len(), 25);
@@ -27,9 +27,9 @@ fn recall_description_array_lengths() {
     assert_eq!(RECALL_DESCRIPTION_WEAKNESS.len(), 6);
 }
 
-// ---------------------------------------------------------------------------
-// 2. First/last spot-checks vs C++ source (src/data_recall.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 2. First/last spot-checks vs source tables
+// --------------------------------------------------------------------------
 #[test]
 fn recall_description_attack_type_spot_checks() {
     let table = &RECALL_DESCRIPTION_ATTACK_TYPE;

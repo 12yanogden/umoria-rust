@@ -1,7 +1,7 @@
-//! `player_quaff` parity.
+//! `player_quaff` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -118,9 +118,9 @@ fn drink(flags: u32, category_id: u8) -> bool {
     player_drink_potion(flags, category_id)
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. RNG-order golden traces — one roll site per subtype
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn cure_light_wounds_rng_order_seed42() {
@@ -270,9 +270,9 @@ fn infravision_potion_rng_order_seed42() {
     assert_eq!(next_random_pair(100), (100, 73));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Stat-potion branches
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn strength_potion_increases_stat_seed42() {
@@ -303,9 +303,9 @@ fn restore_strength_potion_restores_seed42() {
     with_state(|s| assert_eq!(s.py.stats.current[PlayerAttr::A_STR as usize], 18));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Experience-gain / lose math
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn gain_experience_potion_adds_half_plus_ten() {
@@ -337,7 +337,7 @@ fn lose_experience_small_exp_branch_seed42() {
         s.py.misc.exp = 500;
     });
     assert!(drink(potion2_flag(34), POTION2));
-    // exp/5 + randomNumber(500)/5 = 100 + 202/5 = 140 lost at seed 42
+ // exp/5 + randomNumber(500)/5 = 100 + 202/5 = 140 lost at seed 42
     with_state(|s| assert_eq!(s.py.misc.exp, 360));
 }
 
@@ -366,9 +366,9 @@ fn lose_experience_large_exp_scale_branch_seed42() {
     with_state(|s| assert_eq!(s.py.misc.exp, expected_remain));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. int16_t status += semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn status_counters_use_wrapping_add_semantics() {
@@ -382,9 +382,9 @@ fn status_counters_use_wrapping_add_semantics() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Identification + expend via quaff()
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn quaff_consumes_potion_and_identifies_seed42() {

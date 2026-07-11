@@ -22,13 +22,13 @@ echo "==> cargo doc --no-deps --all-features (-D warnings)"
 RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
 
 if command -v cargo-deny >/dev/null 2>&1; then
-    echo "==> cargo deny check"
-    cargo deny check
+ echo "==> cargo deny check"
+ cargo deny check
 elif [[ -x "${HOME}/.cargo/bin/cargo-deny" ]]; then
-    echo "==> cargo deny check"
-    "${HOME}/.cargo/bin/cargo-deny" check
+ echo "==> cargo deny check"
+ "${HOME}/.cargo/bin/cargo-deny" check
 else
-    echo "note: cargo-deny not installed; skipping (CI runs EmbarkStudios/cargo-deny-action)"
+ echo "note: cargo-deny not installed; skipping (CI runs EmbarkStudios/cargo-deny-action)"
 fi
 
 echo "All checks passed."

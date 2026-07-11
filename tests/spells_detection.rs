@@ -1,7 +1,7 @@
-//! Spells selection & detection parity.
+//! Spells selection & detection tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -127,9 +127,9 @@ fn tile_at(coord: Coord_t) -> umoria::dungeon_tile::Tile {
     with_state(|s| s.dg.floor[coord.y as usize][coord.x as usize])
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. RNG-order golden — spellMapCurrentArea
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_map_current_area_rng_order_seed42() {
@@ -152,9 +152,9 @@ fn spell_map_current_area_rng_order_seed42() {
     assert_eq!(next_random_pair(10), (10, fifth));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. RNG-order golden — spellSurroundPlayerWithTraps
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_surround_player_with_traps_rng_count_seed42() {
@@ -176,9 +176,9 @@ fn spell_surround_player_with_traps_rng_count_seed42() {
     assert_eq!(next_random_pair(10), (10, ninth));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. build_castable_spell_list / spellGetId filtering
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn build_castable_spell_list_filters_by_level_and_learnt() {
@@ -233,7 +233,7 @@ fn spell_get_id_selection_consumes_no_rng() {
 }
 
 #[test]
-fn spell_chance_clamps_match_cpp() {
+fn spell_chance_clamps_match_expected() {
     reset_for_new_game(Some(1));
     with_state_mut(|s| {
         s.py.misc.class_id = MAGE_CLASS_ID;
@@ -251,9 +251,9 @@ fn spell_chance_clamps_match_cpp() {
     assert_eq!(spell_chance_of_success(22), 95);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. castSpellGetId return contract
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn cast_spell_get_id_no_known_spells_returns_minus_one() {
@@ -319,9 +319,9 @@ fn cast_spell_get_id_low_mana_confirm_abort_returns_zero() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Detection extents/flags (zero RNG)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_detect_treasure_marks_hidden_gold_only() {
@@ -424,9 +424,9 @@ fn spell_detect_evil_lights_evil_on_panel() {
     assert!(spell_detect_evil());
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Utility spells
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_aggravate_monsters_speeds_nearby_sleepers() {

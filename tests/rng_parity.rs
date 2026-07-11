@@ -14,7 +14,7 @@ use umoria::rng::{rnd, set_seed};
 
 #[test]
 fn rng_z10001_invariant_after_ten_thousand_discards() {
-    // setRandomSeed(0) maps to internal seed 1; the 10000th rnd() is z[10001].
+ // setRandomSeed(0) maps to internal seed 1; the 10000th rnd() is z[10001].
     set_seed(0);
     let mut last = 0;
     for _ in 0..10_000 {
@@ -24,7 +24,7 @@ fn rng_z10001_invariant_after_ten_thousand_discards() {
 }
 
 #[test]
-fn rng_golden_sequences_match_cpp_capture() {
+fn rng_golden_sequences_match_expected_capture() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let root = golden_root();
 

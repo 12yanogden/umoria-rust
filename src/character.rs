@@ -1,7 +1,5 @@
-//! Port of src/character.h — race/class/background data types.
-//! Port of src/character.cpp — character creation flow.
+//! Race/class/background data types
 
-/// Port of `Race_t` in character.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Race {
     pub name: &'static str,
@@ -34,7 +32,6 @@ pub struct Race {
     pub classes_bit_field: u8,
 }
 
-/// Port of `Class_t` in character.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Class {
     pub title: &'static str,
@@ -57,7 +54,6 @@ pub struct Class {
     pub min_level_for_spell_casting: u8,
 }
 
-/// Port of `Background_t` in character.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Background {
     pub info: &'static str,
@@ -94,7 +90,7 @@ const ALL_STATS: [PlayerAttr; 6] = [
     PlayerAttr::A_CHR,
 ];
 
-/// C++ character.cpp lines 29–45.
+/// 45
 #[must_use]
 pub fn decrement_stat(adjustment: i16, current_stat: u8) -> u8 {
     let mut stat = current_stat;
@@ -117,7 +113,7 @@ pub fn decrement_stat(adjustment: i16, current_stat: u8) -> u8 {
     stat
 }
 
-/// C++ character.cpp lines 48–61.
+/// 61
 #[must_use]
 pub fn increment_stat(adjustment: i16, current_stat: u8) -> u8 {
     let mut stat = current_stat;
@@ -135,7 +131,7 @@ pub fn increment_stat(adjustment: i16, current_stat: u8) -> u8 {
     stat
 }
 
-/// C++ character.cpp lines 67–71.
+/// 71
 #[must_use]
 pub fn create_modify_player_stat(stat: u8, adjustment: i16) -> u8 {
     if adjustment < 0 {
@@ -145,7 +141,7 @@ pub fn create_modify_player_stat(stat: u8, adjustment: i16) -> u8 {
     }
 }
 
-/// C++ character.cpp lines 11–26.
+/// 26
 fn character_generate_stats() {
     let mut dice = [0i32; 18];
     loop {
@@ -166,7 +162,7 @@ fn character_generate_stats() {
     });
 }
 
-/// C++ character.cpp lines 76–107.
+/// 107
 pub fn character_generate_stats_and_race() {
     let race_id = with_state(|state| state.py.misc.race_id);
     let race = &CHARACTER_RACES[race_id as usize];
@@ -218,7 +214,7 @@ pub fn character_generate_stats_and_race() {
     });
 }
 
-/// C++ character.cpp lines 111–128.
+/// 128
 pub fn display_character_races() {
     terminal::clear_to_bottom(20);
     terminal::put_string("Choose a race (? for Help):", Coord { y: 20, x: 2 });
@@ -235,7 +231,7 @@ pub fn display_character_races() {
     }
 }
 
-/// C++ character.cpp lines 132–151.
+/// 151
 pub fn character_choose_race() {
     display_character_races();
 
@@ -256,7 +252,7 @@ pub fn character_choose_race() {
     }
 }
 
-/// C++ character.cpp lines 155–160.
+/// 160
 pub fn display_character_history() {
     terminal::put_string("Character Background", Coord { y: 14, x: 27 });
     let history = with_state(|state| state.py.misc.history);
@@ -272,7 +268,7 @@ pub fn display_character_history() {
     }
 }
 
-/// C++ character.cpp lines 164–167.
+/// 167
 pub fn player_clear_history() {
     with_state_mut(|state| {
         for entry in &mut state.py.misc.history {
@@ -286,7 +282,7 @@ fn c_str_from_history(buf: &[u8; 60]) -> String {
     String::from_utf8_lossy(&buf[..end]).into_owned()
 }
 
-/// C++ character.cpp lines 175–263.
+/// 263
 pub fn character_get_history() {
     let race_id = with_state(|state| state.py.misc.race_id);
     let mut history_id = i32::from(race_id) * 3 + 1;
@@ -357,8 +353,7 @@ pub fn character_get_history() {
             let end = cursor_start + current_cursor_position;
             let len = current_cursor_position.min(60);
             state.py.misc.history[line_number][..len].copy_from_slice(&bytes[cursor_start..end]);
-            // C++ character.cpp:250 — NUL-terminate when len < 60 (array is [60];
-            // writing at index 60 is UB in C++ and omitted here).
+            // writing at index 60 is UB in and omitted here)
             if len < 60 {
                 state.py.misc.history[line_number][len] = 0;
             }
@@ -374,7 +369,7 @@ pub fn character_get_history() {
     });
 }
 
-/// C++ character.cpp lines 267–289.
+/// 289
 pub fn character_set_gender() {
     terminal::clear_to_bottom(20);
     terminal::put_string("Choose a sex (? for Help):", Coord { y: 20, x: 2 });
@@ -400,7 +395,7 @@ pub fn character_set_gender() {
     }
 }
 
-/// C++ character.cpp lines 293–313.
+/// 313
 pub fn character_set_age_height_weight() {
     let race_id = with_state(|state| state.py.misc.race_id);
     let is_male = player_is_male();
@@ -435,7 +430,7 @@ pub fn character_set_age_height_weight() {
     });
 }
 
-/// C++ character.cpp lines 318–345.
+/// 345
 pub fn display_race_classes(race_id: u8, class_list: &mut [u8; PLAYER_MAX_CLASSES as usize]) -> u8 {
     let mut coord = Coord { y: 21, x: 2 };
     let mut class_id = 0u8;
@@ -463,7 +458,7 @@ pub fn display_race_classes(race_id: u8, class_list: &mut [u8; PLAYER_MAX_CLASSE
     class_id
 }
 
-/// C++ character.cpp lines 348–408.
+/// 408
 pub fn generate_character_class(class_id: u8) {
     with_state_mut(|state| {
         state.py.misc.class_id = class_id;
@@ -551,7 +546,7 @@ pub fn generate_character_class(class_id: u8) {
     });
 }
 
-/// C++ character.cpp lines 412–435.
+/// 435
 pub fn character_get_class() {
     let mut class_list = [0u8; PLAYER_MAX_CLASSES as usize];
     let race_id = with_state(|state| state.py.misc.race_id);
@@ -575,13 +570,13 @@ pub fn character_get_class() {
     }
 }
 
-/// C++ character.cpp lines 440–441.
+/// 441
 #[must_use]
 pub fn monetary_value_calculated_from_stat(stat: u8) -> i32 {
     5 * (i32::from(stat) - 10)
 }
 
-/// C++ character.cpp lines 444–470.
+/// 470
 pub fn player_calculate_start_gold() {
     let is_male = player_is_male();
     let (stats, social_class) =
@@ -611,7 +606,7 @@ pub fn player_calculate_start_gold() {
     });
 }
 
-/// C++ character.cpp lines 474–516.
+/// 516
 pub fn character_create() {
     print_character_information();
     character_choose_race();

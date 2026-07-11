@@ -1,4 +1,4 @@
-//! Port of `src/player_stats.cpp` — player stat calculations and adjustments.
+//! Player stat calculations and adjustments
 
 use crate::config::player::status::{PY_HP, PY_STR, PY_STR_WGT};
 use crate::config::spells::{SPELL_TYPE_MAGE, SPELL_TYPE_PRIEST};
@@ -54,7 +54,7 @@ fn modify_stat_value(current: u8, amount: i16) -> u8 {
     new_stat
 }
 
-/// C++ `player_stats.cpp` lines 11–21.
+/// 21
 pub fn player_initialize_base_experience_levels() {
     const LEVELS: [u32; 40] = [
         10, 25, 45, 70, 100, 140, 200, 280, 380, 500, 650, 850, 1100, 1400, 1800, 2300, 2900, 3600,
@@ -67,7 +67,7 @@ pub fn player_initialize_base_experience_levels() {
     });
 }
 
-/// C++ `player_stats.cpp` lines 24–52.
+/// 52
 pub fn player_calculate_hit_points() {
     with_state_mut(|state| {
         let level = i32::from(state.py.misc.level);
@@ -136,7 +136,7 @@ fn player_attack_blows_strength(strength: i32, weight: i32) -> i32 {
     }
 }
 
-/// C++ `player_stats.cpp` lines 99–113.
+/// 113
 pub fn player_attack_blows(weight: i32, weight_to_hit: &mut i32) -> i32 {
     *weight_to_hit = 0;
 
@@ -158,7 +158,7 @@ pub fn player_attack_blows(weight: i32, weight_to_hit: &mut i32) -> i32 {
     i32::from(BLOWS_TABLE[strength as usize][dex as usize])
 }
 
-/// C++ `player_stats.cpp` lines 116–140.
+/// 140
 pub fn player_stat_adjustment_wisdom_intelligence(stat: PlayerAttr) -> i32 {
     let value = i32::from(with_state(|state| state.py.stats.used[stat as usize]));
 
@@ -179,7 +179,7 @@ pub fn player_stat_adjustment_wisdom_intelligence(stat: PlayerAttr) -> i32 {
     }
 }
 
-/// C++ `player_stats.cpp` lines 144–203.
+/// 203
 pub fn player_stat_adjustment_charisma() -> i32 {
     let charisma = i32::from(with_state(|state| {
         state.py.stats.used[PlayerAttr::A_CHR as usize]
@@ -218,7 +218,7 @@ pub fn player_stat_adjustment_charisma() -> i32 {
     }
 }
 
-/// C++ `player_stats.cpp` lines 206–230.
+/// 230
 pub fn player_stat_adjustment_constitution() -> i32 {
     let con = i32::from(with_state(|state| {
         state.py.stats.used[PlayerAttr::A_CON as usize]
@@ -226,13 +226,13 @@ pub fn player_stat_adjustment_constitution() -> i32 {
     constitution_adj_from_value(con)
 }
 
-/// C++ `player_stats.cpp` lines 232–258.
+/// 258
 pub fn player_modify_stat(stat: PlayerAttr, amount: i16) -> u8 {
     let current = with_state(|state| state.py.stats.current[stat as usize]);
     modify_stat_value(current, amount)
 }
 
-/// C++ `player_stats.cpp` lines 261–278.
+/// 278
 pub fn player_set_and_use_stat(stat: PlayerAttr) {
     let class_id = with_state(|state| state.py.misc.class_id);
     with_state_mut(|state| {
@@ -263,7 +263,7 @@ pub fn player_set_and_use_stat(stat: PlayerAttr) {
     }
 }
 
-/// C++ `player_stats.cpp` lines 281–307.
+/// 307
 pub fn player_stat_random_increase(stat: PlayerAttr) -> bool {
     let current = with_state(|state| state.py.stats.current[stat as usize]);
     let mut new_stat = i32::from(current);
@@ -292,7 +292,7 @@ pub fn player_stat_random_increase(stat: PlayerAttr) -> bool {
     true
 }
 
-/// C++ `player_stats.cpp` lines 310–334.
+/// 334
 pub fn player_stat_random_decrease(stat: PlayerAttr) -> bool {
     let current = with_state(|state| state.py.stats.current[stat as usize]);
     let mut new_stat = i32::from(current);
@@ -321,7 +321,7 @@ pub fn player_stat_random_decrease(stat: PlayerAttr) -> bool {
     true
 }
 
-/// C++ `player_stats.cpp` lines 337–350.
+/// 350
 pub fn player_stat_restore(stat: PlayerAttr) -> bool {
     let (current, max) = with_state(|state| {
         (
@@ -345,7 +345,7 @@ pub fn player_stat_restore(stat: PlayerAttr) -> bool {
     true
 }
 
-/// C++ `player_stats.cpp` lines 354–363.
+/// 363
 pub fn player_stat_boost(stat: PlayerAttr, amount: i32) {
     with_state_mut(|state| {
         state.py.stats.modified[stat as usize] += amount as i16;
@@ -358,7 +358,7 @@ pub fn player_stat_boost(stat: PlayerAttr, amount: i32) {
     });
 }
 
-/// C++ `player_stats.cpp` lines 366–410.
+/// 410
 pub fn player_to_hit_adjustment() -> i32 {
     let (dexterity, strength) = with_state(|state| {
         (
@@ -408,7 +408,7 @@ pub fn player_to_hit_adjustment() -> i32 {
     i32::from(total)
 }
 
-/// C++ `player_stats.cpp` lines 413–441.
+/// 441
 pub fn player_armor_class_adjustment() -> i32 {
     let stat = i32::from(with_state(|state| {
         state.py.stats.used[PlayerAttr::A_DEX as usize]
@@ -439,7 +439,7 @@ pub fn player_armor_class_adjustment() -> i32 {
     i32::from(adjustment)
 }
 
-/// C++ `player_stats.cpp` lines 444–476.
+/// 476
 pub fn player_disarm_adjustment() -> i32 {
     let stat = i32::from(with_state(|state| {
         state.py.stats.used[PlayerAttr::A_DEX as usize]
@@ -474,7 +474,7 @@ pub fn player_disarm_adjustment() -> i32 {
     i32::from(adjustment)
 }
 
-/// C++ `player_stats.cpp` lines 479–505.
+/// 505
 pub fn player_damage_adjustment() -> i32 {
     let stat = i32::from(with_state(|state| {
         state.py.stats.used[PlayerAttr::A_STR as usize]

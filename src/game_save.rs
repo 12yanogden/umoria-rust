@@ -1,4 +1,4 @@
-//! Port of `src/game_save.cpp` — XOR save stream primitives and score record I/O.
+//! XOR save stream primitives and score record I/O
 
 use std::cell::{Cell, RefCell};
 use std::fs::{self, File, OpenOptions};
@@ -45,7 +45,7 @@ thread_local! {
     static TEST_STORE_MAINTENANCE_COUNT: Cell<u32> = const { Cell::new(0) };
 }
 
-/// Port of `HighScore_t` in scores.h (on-wire record is 73 ciphertext bytes).
+/// on-wire record is 73 ciphertext bytes
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct HighScore {
     pub points: i32,
@@ -155,13 +155,13 @@ fn flush_ok() -> bool {
     !TEST_SAVE_FAIL_FLUSH.with(std::cell::Cell::get)
 }
 
-/// Port of `setFileptr` in `game_save.cpp`.
+/// Set the active save/score file stream.
 pub fn set_fileptr(file: File) {
     FILEPTR.with(|fp| *fp.borrow_mut() = Some(file));
     TEST_BUFFER.with(|buf| *buf.borrow_mut() = None);
 }
 
-/// Take ownership of the active file stream (for `fclose` parity in scores).
+/// Take ownership of the active file stream.
 pub fn take_fileptr() -> Option<File> {
     FILEPTR.with(|fp| fp.borrow_mut().take())
 }
@@ -171,7 +171,7 @@ pub fn set_c_getc_eof_mode(on: bool) {
     C_GETC_EOF_MODE.with(|c| c.set(on));
 }
 
-/// Port of `fseek` / `ftell` on the active `fileptr`.
+/// Seek on the active file stream.
 pub fn fileptr_seek(pos: SeekFrom) -> io::Result<u64> {
     if let Some(mut file) = FILEPTR.with(|fp| fp.borrow_mut().take()) {
         let result = file.seek(pos);
@@ -194,12 +194,12 @@ pub fn fileptr_tell() -> io::Result<u64> {
     fileptr_seek(SeekFrom::Current(0))
 }
 
-/// Port of `putc` — raw byte write without XOR (score version header).
+/// raw byte write without XOR (score version header)
 pub fn putc_raw(byte: u8) -> io::Result<()> {
     put_byte(byte)
 }
 
-/// Port of `(uint8_t)getc(fileptr)` — used for score version header reads.
+/// used for score version header reads
 pub fn score_getc() -> u8 {
     match get_byte_raw() {
         Ok(byte) => byte,
@@ -322,19 +322,17 @@ fn get_byte_raw() -> io::Result<u8> {
     })
 }
 
-/// Port of `getByte` — raw file byte, no XOR, does not modify `xor_byte`.
+/// raw file byte, no XOR, does not modify `xor_byte`
 pub fn get_byte() -> io::Result<u8> {
     get_byte_raw()
 }
 
-/// Port of `wrByte`.
 pub fn wr_byte(value: u8) -> io::Result<()> {
     let next = xor_byte() ^ value;
     set_xor_byte(next);
     put_byte(next)
 }
 
-/// Port of `rdByte`.
 pub fn rd_byte() -> io::Result<u8> {
     let c = get_byte_raw()?;
     let decoded = c ^ xor_byte();
@@ -342,23 +340,19 @@ pub fn rd_byte() -> io::Result<u8> {
     Ok(decoded)
 }
 
-/// Port of `wrBool`.
 pub fn wr_bool(value: bool) -> io::Result<()> {
     wr_byte(u8::from(value))
 }
 
-/// Port of `rdBool`.
 pub fn rd_bool() -> io::Result<bool> {
     Ok(rd_byte()? != 0)
 }
 
-/// Port of `wrShort`.
 pub fn wr_short(value: u16) -> io::Result<()> {
     wr_byte((value & 0xFF) as u8)?;
     wr_byte(((value >> 8) & 0xFF) as u8)
 }
 
-/// Port of `rdShort`.
 pub fn rd_short() -> io::Result<u16> {
     let c = get_byte_raw()?;
     let mut decoded = u16::from(c ^ xor_byte());
@@ -367,7 +361,6 @@ pub fn rd_short() -> io::Result<u16> {
     Ok(decoded)
 }
 
-/// Port of `wrLong`.
 pub fn wr_long(value: u32) -> io::Result<()> {
     wr_byte((value & 0xFF) as u8)?;
     wr_byte(((value >> 8) & 0xFF) as u8)?;
@@ -375,7 +368,6 @@ pub fn wr_long(value: u32) -> io::Result<()> {
     wr_byte(((value >> 24) & 0xFF) as u8)
 }
 
-/// Port of `rdLong`.
 pub fn rd_long() -> io::Result<u32> {
     let c = get_byte_raw()?;
     let mut decoded = u32::from(c ^ xor_byte());
@@ -389,7 +381,6 @@ pub fn rd_long() -> io::Result<u32> {
     Ok(decoded)
 }
 
-/// Port of `wrBytes`.
 pub fn wr_bytes(value: &[u8]) -> io::Result<()> {
     for &byte in value {
         wr_byte(byte)?;
@@ -397,7 +388,6 @@ pub fn wr_bytes(value: &[u8]) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `rdBytes`.
 pub fn rd_bytes(out: &mut [u8]) -> io::Result<()> {
     for byte in out {
         *byte = rd_byte()?;
@@ -405,7 +395,7 @@ pub fn rd_bytes(out: &mut [u8]) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `wrString` — writes through and including the terminating NUL.
+/// writes through and including the terminating NUL
 pub fn wr_string(bytes: &[u8]) -> io::Result<()> {
     let mut index = 0;
     while index < bytes.len() && bytes[index] != 0 {
@@ -415,7 +405,7 @@ pub fn wr_string(bytes: &[u8]) -> io::Result<()> {
     wr_byte(0)
 }
 
-/// Port of `rdString` — reads through and including the terminating NUL into `out`.
+/// reads through and including the terminating NUL into `out`
 pub fn rd_string(out: &mut [u8]) -> io::Result<()> {
     let mut index = 0;
     loop {
@@ -444,7 +434,6 @@ fn rd_string_i8(out: &mut [i8]) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `wrShorts`.
 pub fn wr_shorts(values: &[u16]) -> io::Result<()> {
     for &value in values {
         wr_short(value)?;
@@ -452,7 +441,6 @@ pub fn wr_shorts(values: &[u16]) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `rdShorts`.
 pub fn rd_shorts(out: &mut [u16]) -> io::Result<()> {
     for slot in out {
         *slot = rd_short()?;
@@ -460,7 +448,6 @@ pub fn rd_shorts(out: &mut [u16]) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `wrItem`.
 pub fn wr_item(item: &Inventory) -> io::Result<()> {
     wr_short(item.id)?;
     wr_byte(item.special_name_id)?;
@@ -484,7 +471,6 @@ pub fn wr_item(item: &Inventory) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `rdItem`.
 pub fn rd_item(item: &mut Inventory) -> io::Result<()> {
     item.id = rd_short()?;
     item.special_name_id = rd_byte()?;
@@ -508,7 +494,6 @@ pub fn rd_item(item: &mut Inventory) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `wrMonster`.
 pub fn wr_monster(monster: &Monster) -> io::Result<()> {
     wr_short(monster.hp as u16)?;
     wr_short(monster.sleep_count as u16)?;
@@ -523,7 +508,6 @@ pub fn wr_monster(monster: &Monster) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `rdMonster`.
 pub fn rd_monster(monster: &mut Monster) -> io::Result<()> {
     monster.hp = rd_short()? as i16;
     monster.sleep_count = rd_short()? as i16;
@@ -538,7 +522,6 @@ pub fn rd_monster(monster: &mut Monster) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `saveHighScore`.
 pub fn save_high_score(score: &HighScore) -> io::Result<()> {
     wr_byte(xor_byte())?;
     wr_long(score.points as u32)?;
@@ -557,7 +540,6 @@ pub fn save_high_score(score: &HighScore) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `readHighScore`.
 pub fn read_high_score(score: &mut HighScore) -> io::Result<()> {
     set_xor_byte(get_byte()?);
     score.points = rd_long()? as i32;
@@ -586,7 +568,7 @@ pub fn test_build_options_l() -> u32 {
     with_state(build_options_bitfield)
 }
 
-/// Test hook for timestamp clamp logic in `svWrite`.
+/// Test hook for save-write timestamp clamp logic.
 #[doc(hidden)]
 pub fn test_compute_save_timestamp() -> u32 {
     let mut l = save_unix_time();
@@ -897,7 +879,6 @@ fn write_level_block(state: &State) -> io::Result<()> {
     Ok(())
 }
 
-/// Port of `svWrite`.
 pub fn sv_write() -> bool {
     with_state_mut(sv_write_state).unwrap_or(false)
 }
@@ -1011,7 +992,6 @@ fn open_save_file(filename: &str) -> io::Result<(Option<i32>, bool)> {
     Ok((fd, fd.is_some() && FILEPTR.with(|fp| fp.borrow().is_some())))
 }
 
-/// Port of `saveChar`.
 pub fn save_char(filename: &str) -> bool {
     if with_state(|state| state.game.character_saved) {
         return true;
@@ -1075,7 +1055,6 @@ pub fn save_char(filename: &str) -> bool {
     true
 }
 
-/// Port of `saveGame`.
 pub fn save_game() -> bool {
     while !save_char(&with_state(|state| state.config_save_game.clone())) {
         let save_name = with_state(|state| state.config_save_game.clone());
@@ -1659,7 +1638,6 @@ fn finish_load_success(
     with_state(|state| state.dg.game_turn >= 0)
 }
 
-/// Port of `loadGame`.
 pub fn load_game(generate: &mut bool) -> bool {
     *generate = true;
     let buffer_mode = test_buffer_active();

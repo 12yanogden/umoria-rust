@@ -1,7 +1,7 @@
-//! `player_tunnel` parity.
+//! `player_tunnel` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -64,7 +64,7 @@ fn equip_wield(weapon: Inventory) {
     });
 }
 
-fn cpp_digging_ability(str: u8, weapon: Inventory, weapon_is_heavy: bool) -> i32 {
+fn expected_digging_ability(str: u8, weapon: Inventory, weapon_is_heavy: bool) -> i32 {
     let mut digging_ability = i32::from(str);
     if (weapon.flags & TR_TUNNEL) != 0 {
         digging_ability += 25 + i32::from(weapon.misc_use) * 50;
@@ -118,9 +118,9 @@ fn setup_target_tile(y: i32, x: i32, feature_id: u8, treasure_id: u8, category_i
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Digging-ability math (deterministic, no RNG)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_digging_ability_weapon_formula() {
@@ -136,7 +136,7 @@ fn player_digging_ability_weapon_formula() {
         to_damage: 7,
         ..Default::default()
     };
-    let expected = cpp_digging_ability(18, weapon, false);
+    let expected = expected_digging_ability(18, weapon, false);
     assert_eq!(player_digging_ability(weapon), expected);
     assert_eq!(expected, (18 + max_dice_roll(weapon.damage) + 5 + 7) / 2);
 }
@@ -153,7 +153,7 @@ fn player_digging_ability_tunnel_tool_formula() {
         misc_use: 2,
         ..Default::default()
     };
-    let expected = cpp_digging_ability(16, weapon, false);
+    let expected = expected_digging_ability(16, weapon, false);
     assert_eq!(player_digging_ability(weapon), expected);
     assert_eq!(expected, 16 + 25 + 2 * 50);
 }
@@ -173,7 +173,7 @@ fn player_digging_ability_heavy_weapon_penalty() {
         to_damage: 0,
         ..Default::default()
     };
-    let expected = cpp_digging_ability(10, weapon, true);
+    let expected = expected_digging_ability(10, weapon, true);
     assert_eq!(player_digging_ability(weapon), expected);
 }
 
@@ -195,9 +195,9 @@ fn player_digging_ability_consumes_no_rng() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // No-weapon / illegal-tile paths
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_tunnel_hands_only_message() {
@@ -255,9 +255,9 @@ fn player_tunnel_boundary_wall_message_no_rng() {
     with_state(|s| assert_eq!(s.dg.floor[5][6].feature_id, TILE_BOUNDARY_WALL));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Confusion RNG gate
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_tunnel_non_confused_skips_confusion_rolls() {
@@ -275,7 +275,7 @@ fn player_tunnel_non_confused_skips_confusion_rolls() {
         ..Default::default()
     });
     player_tunnel(6);
-    // Granite path: randomNumber(1200)+80 consumed; next probe is randomNumber(1200).
+ // Granite path: randomNumber(1200)+80 consumed; next probe is randomNumber(1200).
     assert_eq!(next_random_pair(1200), (1200, 273));
 }
 
@@ -295,7 +295,7 @@ fn player_tunnel_confused_consumes_two_rolls_before_material() {
         ..Default::default()
     });
     player_tunnel(6);
-    // seed 42: randomNumber(4)=3 (>1), randomNumber(9)=8, then granite roll.
+ // seed 42: randomNumber(4)=3 (>1), randomNumber(9)=8, then granite roll.
     assert_eq!(next_random_pair(1200), (1200, 436));
 }
 
@@ -376,9 +376,9 @@ fn player_tunnel_granite_success_converts_tile() {
     with_state(|s| assert_eq!(s.dg.floor[5][6].feature_id, TILE_CORR_FLOOR));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Rubble path — randomNumber(180) gate + optional treasure reveal
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_tunnel_rubble_failure_message() {
@@ -417,7 +417,7 @@ fn player_tunnel_rubble_success_removes_object() {
     player_tunnel(6);
     assert_eq!(last_message_text(), "You have removed the rubble.");
     with_state(|s| assert_eq!(s.dg.floor[5][6].treasure_id, 0));
-    // randomNumber(10) consumed; seed 1 next roll for max=10 is 7.
+ // randomNumber(10) consumed; seed 1 next roll for max=10 is 7.
     assert_eq!(next_random_pair(10), (10, 10));
 }
 
@@ -441,13 +441,13 @@ fn player_tunnel_rubble_treasure_reveal_rng_site() {
     });
     player_tunnel(6);
     with_state(|s| assert_eq!(s.dg.floor[5][6].treasure_id, 0));
-    // seed 99: randomNumber(180) then randomNumber(10)==1 triggers placement RNG.
+ // seed 99: randomNumber(180) then randomNumber(10)==1 triggers placement RNG.
     assert_eq!(next_random_pair(10), (10, 6));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Secret door path
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_tunnel_secret_door_triggers_search() {
@@ -469,6 +469,6 @@ fn player_tunnel_secret_door_triggers_search() {
     });
     player_tunnel(6);
     assert_eq!(last_message_text(), "You tunnel into the granite wall.");
-    // player_search at py.pos consumes nine randomNumber(100) rolls.
+ // player_search at py.pos consumes nine randomNumber(100) rolls.
     assert_eq!(next_random_pair(100), (100, 8));
 }

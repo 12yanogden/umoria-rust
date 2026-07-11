@@ -1,4 +1,4 @@
-:  - Map area (panel)
+: - Map area (panel)
 ^A - Cure all maladies and remove curses
 ^B - Print random objects sample to file
 ^D - Jump to depth # (level)
@@ -11,6 +11,6 @@
 ^T - Teleport player randomly
 ^U - Summon random monster
 ^W - Wizard mode on/off
-+  - Gain experience
-%  - Generate a dungeon item
-@  - Create an object *CAN CAUSE FATAL ERROR*
++ - Gain experience
+% - Generate a dungeon item
+@ - Create an object *CAN CAUSE FATAL ERROR*

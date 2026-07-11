@@ -481,7 +481,7 @@ fn masked_save_diff(entry: &GoldenEntry, expected: &[u8], actual: &[u8]) -> Opti
 }
 
 #[test]
-fn test_full_save_byte_identical_to_cpp() {
+fn test_full_save_byte_identical_to_expected() {
     let manifest = load_manifest().expect("manifest");
     let entry = manifest
         .goldens
@@ -504,14 +504,21 @@ fn test_full_save_byte_identical_to_cpp() {
     assert!(save_char("game.sav"));
 
     let actual = test_buffer_bytes();
-    assert_eq!(actual.len(), golden.len(), "save length must match C++");
+    assert_eq!(
+        actual.len(),
+        golden.len(),
+        "save length must match expected"
+    );
     if let Some(diff) = masked_save_diff(entry, &golden, &actual) {
-        panic!("masked save bytes must match C++ golden: {}", diff.render());
+        panic!(
+            "masked save bytes must match expected golden: {}",
+            diff.render()
+        );
     }
 }
 
 #[test]
-fn test_dead_save_byte_identical_to_cpp() {
+fn test_dead_save_byte_identical_to_expected() {
     setup_buffer_save();
     with_state_mut(|state| {
         state.game.character_is_dead = true;

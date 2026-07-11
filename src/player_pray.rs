@@ -1,4 +1,4 @@
-//! Port of `src/player_pray.cpp` — priest prayer driver.
+//! Priest prayer driver
 
 use crate::config::monsters::defense::{CD_EVIL, CD_UNDEAD};
 use crate::config::spells::SPELL_TYPE_PRIEST;
@@ -26,7 +26,7 @@ use crate::ui_inventory::inventory_get_input_for_item_id;
 use crate::ui_io::get_direction_with_memory;
 use crate::ui_io::terminal;
 
-/// C++ `player_pray.cpp` lines 45–77.
+/// 77
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i32)]
 enum PriestSpellId {
@@ -63,7 +63,7 @@ enum PriestSpellId {
     HolyWord,
 }
 
-/// C++ `player_pray.cpp` lines 10–42.
+/// 42
 #[must_use]
 pub fn player_can_pray(item_pos_begin: &mut i32, item_pos_end: &mut i32) -> bool {
     let block_reason = with_state(|state| {
@@ -99,7 +99,7 @@ pub fn player_can_pray(item_pos_begin: &mut i32, item_pos_end: &mut i32) -> bool
     }
 }
 
-/// C++ `player_pray.cpp` lines 80–206.
+/// 206
 pub fn player_recite_prayer(prayer_type: i32) {
     let (pos, level) = with_state(|state| (state.py.pos, state.py.misc.level));
     let mut dir = 0;
@@ -247,7 +247,7 @@ pub fn player_recite_prayer(prayer_type: i32) {
     }
 }
 
-/// C++ `player_pray.cpp` lines 209–272.
+/// 272
 pub fn pray() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -312,7 +312,7 @@ pub fn pray() {
         return;
     }
 
-    // C++ player_pray.cpp lines 256–259: read live current_mana after recite.
+    // read live current_mana after recite
     let current_mana = with_state(|state| i32::from(state.py.misc.current_mana));
     if mana_required > current_mana {
         terminal::print_message(Some("You faint from fatigue!"));

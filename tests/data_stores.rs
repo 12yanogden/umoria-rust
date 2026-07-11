@@ -1,4 +1,4 @@
-//! `data_stores` static store data tables parity.
+//! `data_stores` static store data tables tests.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -11,9 +11,9 @@ use umoria::data_stores::{RACE_GOLD_ADJUSTMENTS, STORE_CHOICES};
 use umoria::player::PLAYER_MAX_RACES;
 use umoria::store::{MAX_STORES, STORE_MAX_ITEM_TYPES};
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Dimension tests
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn race_gold_adjustments_dimensions() {
     assert_eq!(RACE_GOLD_ADJUSTMENTS.len(), 8);
@@ -34,9 +34,9 @@ fn store_choices_dimensions() {
     }
 }
 
-// ---------------------------------------------------------------------------
-// 2. race_gold_adjustments spot-checks (src/data_stores.cpp lines 12–22)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 2. race_gold_adjustments spot-checks
+// --------------------------------------------------------------------------
 #[test]
 fn race_gold_adjustments_diagonal() {
     assert_eq!(RACE_GOLD_ADJUSTMENTS[0][0], 100);
@@ -58,9 +58,9 @@ fn race_gold_adjustments_off_diagonal() {
     assert_eq!(RACE_GOLD_ADJUSTMENTS[0][3], 110);
 }
 
-// ---------------------------------------------------------------------------
-// 3. store_choices spot-checks (src/data_stores.cpp lines 25–56)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 3. store_choices spot-checks
+// --------------------------------------------------------------------------
 #[test]
 fn store_choices_general_store_row() {
     assert_eq!(

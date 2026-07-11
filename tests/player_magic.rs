@@ -1,7 +1,7 @@
 //! `player_magic` temporary-effect helpers.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -62,9 +62,9 @@ fn recall_defenses(monster_id: i32) -> u16 {
     with_state(|s| s.creature_recall[monster_id as usize].defenses)
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. playerProtectEvil — RNG-order golden
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn player_protect_evil_rng_order_seed42_level10() {
     reset_for_new_game(Some(42));
@@ -75,7 +75,7 @@ fn player_protect_evil_rng_order_seed42_level10() {
 
     assert!(player_protect_evil());
 
-    // seed 42: randomNumber(25) == 2; protect_evil += 2 + 3*10
+ // seed 42: randomNumber(25) == 2; protect_evil += 2 + 3*10
     with_state(|s| assert_eq!(s.py.flags.protect_evil, 32));
     assert_eq!(next_random_pair(25), (25, 23));
 }
@@ -90,13 +90,13 @@ fn player_protect_evil_returns_false_when_already_protected() {
 
     assert!(!player_protect_evil());
 
-    // 7 + randomNumber(25)=2 + 3*5
+ // 7 + randomNumber(25)=2 + 3*5
     with_state(|s| assert_eq!(s.py.flags.protect_evil, 24));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Cure / remove-fear helpers — table-driven counter semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn player_cure_confusion_counter_semantics() {
     for counter in [0i16, 1, 2, 500] {
@@ -173,9 +173,9 @@ fn cure_helpers_consume_no_rng() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. playerBless / playerDetectInvisible — pure +=
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn player_bless_adds_adjustment_without_clamp() {
     reset_for_new_game(None);
@@ -208,9 +208,9 @@ fn bless_and_detect_invisible_consume_no_rng() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. itemMagicAbilityDamage — slay/brand branches
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn item_magic_ability_damage_slay_dragon() {
     reset_for_new_game(None);

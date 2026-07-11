@@ -1,4 +1,4 @@
-//! Port of src/helpers.cpp — see `phase_2`.
+//! Small string and bit helpers.
 
 use std::ffi::CString;
 use std::fmt::Write;
@@ -8,7 +8,7 @@ use libc::{c_char, ERANGE};
 
 use crate::types::{Vtype_t, MORIA_MESSAGE_SIZE};
 
-/// Returns position of first set bit and clears that bit — C++ `getAndClearFirstBit`.
+/// Returns position of first set bit and clears that bit.
 pub fn get_and_clear_first_bit(flag: &mut u32) -> i32 {
     let mut mask = 0x1u32;
 
@@ -23,12 +23,12 @@ pub fn get_and_clear_first_bit(flag: &mut u32) -> i32 {
     -1
 }
 
-/// C NUL-terminated byte slice length (excluding terminator).
+/// NUL-terminated byte slice length (excluding terminator).
 fn c_strlen(buf: &[u8]) -> usize {
     buf.iter().position(|&b| b == 0).unwrap_or(buf.len())
 }
 
-/// C `strchr`-style search for `needle` starting at `from` within `haystack`.
+/// Search for `needle` starting at `from` within `haystack`.
 fn c_strchr(haystack: &[u8], from: usize, needle: u8) -> Option<usize> {
     haystack[from..]
         .iter()
@@ -36,7 +36,7 @@ fn c_strchr(haystack: &[u8], from: usize, needle: u8) -> Option<usize> {
         .map(|pos| from + pos)
 }
 
-/// Write `formatted` into `buf` like `snprintf(buf, MORIA_MESSAGE_SIZE, …)`.
+/// Write `formatted` into `buf`, truncating to `MORIA_MESSAGE_SIZE`.
 fn snprintf_vtype(buf: &mut Vtype_t, formatted: &str) {
     let max = MORIA_MESSAGE_SIZE;
     let bytes = formatted.as_bytes();
@@ -48,7 +48,7 @@ fn snprintf_vtype(buf: &mut Vtype_t, formatted: &str) {
     }
 }
 
-/// Insert a long number into a string — C++ `insertNumberIntoString`.
+/// Insert a long number into a string.
 pub fn insert_number_into_string(
     to_string: &mut Vtype_t,
     from_string: &[u8],
@@ -99,7 +99,7 @@ pub fn insert_number_into_string(
     snprintf_vtype(to_string, &formatted);
 }
 
-/// Inserts a string into a string — C++ `insertStringIntoString`.
+/// Insert a string into a string.
 pub fn insert_string_into_string(
     to_string: &mut Vtype_t,
     from_string: &[u8],
@@ -167,7 +167,6 @@ pub fn insert_string_into_string(
     }
     new_string[write_pos] = 0;
 
-    // strcpy(to_string, new_string)
     to_string.copy_from_slice(&new_string);
 }
 
@@ -208,7 +207,7 @@ pub fn sscanf_lx(str: &str, number: &mut i32) -> i32 {
     }
 }
 
-/// Parse base-10 integer with C `strtol` semantics — C++ `stringToNumber`.
+/// Parse a base-10 integer with `strtol` error-checking semantics.
 pub fn string_to_number(str: &str, number: &mut i32) -> bool {
     let Ok(c_str) = CString::new(str) else {
         return false;
@@ -244,12 +243,12 @@ pub fn string_to_number(str: &str, number: &mut i32) -> bool {
     }
 }
 
-/// C++ `getCurrentUnixTime` — `time(nullptr)` cast to `u32`.
+/// Current Unix time as `u32`.
 pub fn get_current_unix_time() -> u32 {
     unsafe { libc::time(ptr::null_mut()) as u32 }
 }
 
-/// C++ `humanDateString` — `localtime` + `strftime` into 11-byte buffer.
+/// Format the current local date into an 11-byte buffer.
 pub fn human_date_string(day: &mut [u8; 11]) {
     unsafe {
         let now = libc::time(ptr::null_mut());

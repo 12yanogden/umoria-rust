@@ -1,14 +1,8 @@
-//! Port of src/config.cpp / src/config.h — const namespaces and file paths.
-//!
-//! C++ nested `namespace` names map to nested Rust `mod`s with identical constant names.
-//! The C++ `monsters::move` namespace is `move_flags` here because `move` is a Rust keyword.
-//!
-//! Runtime-mutable C++ globals (`config::options`, `config::files::save_game`) are owned by
-//! `game::State` (`phase_1.3`). This module exposes their default values only.
+//! Compile-time and runtime configuration constants.
 
 #![allow(
     non_upper_case_globals,
-    reason = "C++ config::* names are lowercase snake_case"
+    reason = "config::* names are lowercase snake_case"
 )]
 
 pub mod files {
@@ -23,10 +17,9 @@ pub mod files {
     pub const death_tomb: &str = "data/death_tomb.txt";
     pub const death_royal: &str = "data/death_royal.txt";
     pub const scores: &str = "scores.dat";
-    /// Default for the runtime-mutable C++ `std::string save_game`.
+    /// Default path for the runtime-mutable save-game filename.
     pub const save_game: &str = "game.sav";
 
-    // phase_1.3 scaffold aliases (SCREAMING_SNAKE)
     pub const SPLASH_SCREEN: &str = splash_screen;
     pub const WELCOME_SCREEN: &str = welcome_screen;
     pub const LICENSE: &str = license;
@@ -41,7 +34,7 @@ pub mod files {
     pub const SAVE_GAME: &str = save_game;
 }
 
-/// Default values for C++ `config::options` (runtime-mutable in game state).
+/// Default values for `config::options` (runtime-mutable in game state)
 pub mod options {
     pub const display_counts: bool = true;
     pub const find_bound: bool = false;
@@ -177,7 +170,7 @@ pub mod monsters {
     pub const MON_MIN_INDEX_ID: u8 = 2;
     pub const SCARE_MONSTER: u8 = 99;
 
-    /// C++ `config::monsters::move` — `move_flags` avoids the Rust keyword.
+    /// `move_flags` avoids the Rust keyword
     pub mod move_flags {
         pub const CM_ALL_MV_FLAGS: u32 = 0x0000_003F;
         pub const CM_ATTACK_ONLY: u32 = 0x0000_0001;

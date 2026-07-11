@@ -1,4 +1,4 @@
-//! Port of `src/player_traps.cpp` — see `phase_4.4.10`.
+//! Player trap detection and disarming.
 
 use crate::config::treasure::chests::{
     CH_EXPLODE, CH_LOCKED, CH_LOSE_STR, CH_PARALYSED, CH_POISON, CH_SUMMON, CH_TRAPPED,
@@ -31,7 +31,7 @@ fn trap_hit_label(text: &str) -> Vtype_t {
     buf
 }
 
-/// C++ `player_traps.cpp` lines 10–30.
+/// 30
 fn player_trap_disarm_ability() -> i32 {
     let (mut ability, blind, confused, image, class_id, level, int_stat) = with_state(|state| {
         (
@@ -68,7 +68,7 @@ fn player_trap_disarm_ability() -> i32 {
     ability
 }
 
-/// C++ player_traps.cpp lines 32–61.
+/// 61
 #[doc(hidden)]
 pub fn player_disarm_floor_trap(coord: Coord_t, total: i32, level: i32, dir: i32, misc_use: i16) {
     let confused = with_state(|state| state.py.flags.confused);
@@ -108,7 +108,7 @@ pub fn player_disarm_floor_trap(coord: Coord_t, total: i32, level: i32, dir: i32
     });
 }
 
-/// C++ player_traps.cpp lines 63–101.
+/// 101
 #[doc(hidden)]
 pub fn player_disarm_chest_trap(coord: Coord_t, total: i32, treasure_id: u8) {
     let identified =
@@ -172,7 +172,7 @@ pub fn player_disarm_chest_trap(coord: Coord_t, total: i32, treasure_id: u8) {
     });
 }
 
-/// C++ `player_traps.cpp` lines 104–140.
+/// 140
 pub fn player_disarm_trap() {
     let mut dir = 0i32;
     if !get_direction_with_memory(None, &mut dir) {
@@ -225,7 +225,7 @@ pub fn player_disarm_trap() {
     }
 }
 
-/// C++ `player_traps.cpp` lines 142–155.
+/// 155
 fn chest_loose_strength() {
     terminal::print_message(Some("A small needle has pricked you!"));
 
@@ -245,7 +245,7 @@ fn chest_loose_strength() {
     terminal::print_message(Some("You feel weakened!"));
 }
 
-/// C++ `player_traps.cpp` lines 157–163.
+/// 163
 fn chest_poison() {
     terminal::print_message(Some("A small needle has pricked you!"));
 
@@ -260,7 +260,7 @@ fn chest_poison() {
     });
 }
 
-/// C++ `player_traps.cpp` lines 165–175.
+/// 175
 fn chest_paralysed() {
     terminal::print_message(Some("A puff of yellow gas surrounds you!"));
 
@@ -277,7 +277,7 @@ fn chest_paralysed() {
     });
 }
 
-/// C++ `player_traps.cpp` lines 177–185.
+/// 185
 fn chest_summon_monster(coord: Coord_t) {
     let mut position = Coord_t { y: 0, x: 0 };
 
@@ -288,7 +288,7 @@ fn chest_summon_monster(coord: Coord_t) {
     }
 }
 
-/// C++ `player_traps.cpp` lines 187–193.
+/// 193
 fn chest_explode(coord: Coord_t) {
     terminal::print_message(Some("There is a sudden explosion!"));
 
@@ -300,7 +300,7 @@ fn chest_explode(coord: Coord_t) {
     );
 }
 
-/// C++ `player_traps.cpp` lines 197–219.
+/// 219
 pub fn chest_trap(coord: Coord_t) {
     let flags = with_state(|state| {
         let treasure_id = state.dg.floor[coord.y as usize][coord.x as usize].treasure_id;

@@ -1,7 +1,7 @@
 //! Dungeon core & tile helpers (`dungeon`).
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -64,9 +64,9 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Pure-helper parity (no RNG)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn coord_in_bounds_hand_picked_table() {
     setup_dungeon(10, 20);
@@ -141,7 +141,7 @@ fn coord_corridor_walls_next_to_counts_corr_without_doors() {
             },
         );
     }
-    // Door treasure blocks counting (category_id >= TV_MIN_DOORS).
+ // Door treasure blocks counting (category_id >= TV_MIN_DOORS).
     with_state_mut(|s| {
         s.game.treasure.current_id = 1;
         s.dg.floor[4][5].treasure_id = 1;
@@ -177,9 +177,9 @@ fn cave_tile_visible_truth_table() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. caveGetTileSymbol RNG-order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn cave_get_tile_symbol_no_rng_when_image_zero() {
     reset_for_new_game(Some(42));
@@ -204,7 +204,7 @@ fn cave_get_tile_symbol_rng_order_with_image() {
         s.dg.floor[5][5].feature_id = TILE_LIGHT_FLOOR;
     });
     let sym = cave_get_tile_symbol(Coord_t { y: 5, x: 5 });
-    // seed 42: randomNumber(12) -> 9 (not 1), so floor tile '.'; next draws 9, 91.
+ // seed 42: randomNumber(12) -> 9 (not 1), so floor tile '.'; next draws 9, 91.
     assert_eq!(sym, b'.');
     assert_eq!(next_random_pair(12), (12, 9));
     assert_eq!(next_random_pair(95), (95, 91));
@@ -220,13 +220,13 @@ fn cave_get_tile_symbol_hallucination_symbol_from_golden_stream() {
         s.dg.floor[2][2].feature_id = TILE_LIGHT_FLOOR;
     });
     let sym = cave_get_tile_symbol(Coord_t { y: 2, x: 2 });
-    // seed 1: randomNumber(12)==1, randomNumber(95)+31 == 46
+ // seed 1: randomNumber(12)==1, randomNumber(95)+31 == 46
     assert_eq!(sym, 46);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. dungeonPlaceGold RNG-order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_gold_rng_order_and_result_seed42() {
     reset_for_new_game(Some(42));
@@ -242,9 +242,9 @@ fn dungeon_place_gold_rng_order_and_result_seed42() {
     assert_eq!(treasure_id, 1);
     let item = with_state(|s| s.game.treasure.list[treasure_id as usize]);
     assert_eq!(item.category_id, umoria::treasure::TV_GOLD);
-    // gold_type_id = ((randomNumber(7)+2)/2)-1 with first roll 5 -> ((5+2)/2)-1 = 2
+ // gold_type_id = ((randomNumber(7)+2)/2)-1 with first roll 5 -> ((5+2)/2)-1 = 2
     assert_eq!(item.id, OBJ_GOLD_LIST);
-    // base cost 3; cost += 8*randomNumber(3)+randomNumber(8) -> 3+8*1+2=13 for seed 42
+ // base cost 3; cost += 8*randomNumber(3)+randomNumber(8) -> 3+8*1+2=13 for seed 42
     assert_eq!(item.cost, 13);
 
     assert_eq!(next_random_pair(7), (7, 6));
@@ -253,9 +253,9 @@ fn dungeon_place_gold_rng_order_and_result_seed42() {
     assert_eq!(next_random_pair(8), (8, 8));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. dungeonAllocateAndPlaceObject / trap allocation
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 fn feature_is_floor(feature_id: i32) -> bool {
     feature_id <= i32::from(MAX_CAVE_FLOOR)
 }
@@ -322,9 +322,9 @@ fn dungeon_allocate_and_place_trap_fixed_seed() {
     assert_eq!(item.category_id, TV_INVIS_TRAP);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. dungeonPlaceRandomObjectNear retry loops (gold path)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_random_object_near_gold_path_seed1() {
     reset_for_new_game(Some(1));
@@ -337,8 +337,8 @@ fn dungeon_place_random_object_near_gold_path_seed1() {
     });
     let origin = Coord_t { y: 10, x: 10 };
     dungeon_place_random_object_near(origin, 1);
-    // C++ sets i=9 on success inside i<=10, so one post-success attempt may place a
-    // second object. Seed 1 places gold at (12,7) then a second item.
+ // sets i=9 on success inside i<=10, so one post-success attempt may place a
+ // second object. Seed 1 places gold at (12,7) then a second item.
     let at = Coord_t { y: 12, x: 7 };
     assert_eq!(tile_at(at).treasure_id, 1);
     assert_eq!(
@@ -349,9 +349,9 @@ fn dungeon_place_random_object_near_gold_path_seed1() {
     assert!(with_state(|s| s.game.treasure.current_id) >= 2);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Deletion helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_delete_object_restores_floor_and_frees_treasure() {
     reset_for_new_game(None);
@@ -376,8 +376,8 @@ fn dungeon_delete_object_restores_floor_and_frees_treasure() {
 
 #[test]
 fn dungeon_delete_object_field_mark_only_returns_false() {
-    // C++ clears field_mark then returns caveTileVisible — so field_mark-only
-    // visibility must yield false after delete.
+ // clears field_mark then returns caveTileVisible — so field_mark-only
+ // visibility must yield false after delete.
     reset_for_new_game(None);
     setup_dungeon(10, 10);
     let coord = Coord_t { y: 5, x: 5 };
@@ -466,9 +466,9 @@ fn dungeon_delete_monster_composes_remove_and_record() {
     assert_eq!(with_state(|s| s.dg.floor[2][2].creature_id), 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Integer-semantics: dungeonPlaceGold cost accumulation
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_gold_cost_int32_truncation() {
     reset_for_new_game(Some(1));
@@ -561,7 +561,7 @@ fn cave_get_tile_symbol_granite_hash() {
     assert_eq!(cave_get_tile_symbol(Coord_t { y: 5, x: 5 }), b'#');
 }
 
-// Golden manifest sanity — phase_1 harness available for RNG draws.
+// Golden manifest sanity — harness available for RNG draws.
 #[test]
 fn golden_rng_manifest_loads_for_dungeon_tests() {
     let root = golden_root();

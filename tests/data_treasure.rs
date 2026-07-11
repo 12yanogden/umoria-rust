@@ -1,8 +1,7 @@
-//! `data_treasure` (`game_objects` + `special_item_names`).
-//! Phase 2.8 (partial) — descriptive string arrays from data_tables.cpp
+//! `data_treasure` (`game_objects` + `special_item_names`) and descriptive string arrays.
 #![allow(
     clippy::assertions_on_constants,
-    reason = "constant assertions document table sizes from C++ headers"
+    reason = "constant assertions document table sizes from headers"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -63,7 +62,7 @@ fn assert_object(index: usize, expected: DungeonObject) {
 
 #[allow(
     clippy::too_many_arguments,
-    reason = "test helper mirrors multi-arg C++ setup"
+    reason = "test helper mirrors multi-arg setup"
 )]
 fn obj(
     name: &'static str,
@@ -101,9 +100,9 @@ fn obj(
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Length gates
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn game_objects_length() {
@@ -138,9 +137,9 @@ fn descriptive_array_lengths() {
     assert_eq!(SYLLABLES.len(), 153);
 }
 
-// ---------------------------------------------------------------------------
-// game_objects spot checks (field-for-field vs C++ data_treasure.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// game_objects spot checks
+// --------------------------------------------------------------------------
 
 #[test]
 fn game_objects_spot_checks() {
@@ -481,13 +480,13 @@ fn game_objects_spot_checks() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // special_item_names spot checks
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn special_item_names_spot_checks() {
-    // C++ CNIL → "" in Rust &str table
+ // CNIL → "" in Rust &str table
     assert_eq!(SPECIAL_ITEM_NAMES[SpecialNameIds::SN_NULL as usize], "");
     assert_eq!(
         SPECIAL_ITEM_NAMES[SpecialNameIds::SN_FREE_ACTION as usize],
@@ -503,9 +502,9 @@ fn special_item_names_spot_checks() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// Descriptive string array spot checks (data_tables.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// Descriptive string array spot checks
+// --------------------------------------------------------------------------
 
 #[test]
 fn descriptive_arrays_spot_checks() {

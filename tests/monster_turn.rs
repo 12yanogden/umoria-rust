@@ -1,7 +1,7 @@
-//! Turn engine & visibility parity.
+//! Turn engine & visibility tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -118,9 +118,9 @@ fn message_text(id: i16) -> String {
     })
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. monsterMovementRate parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_movement_rate_positive_speed_matches_rest_gate() {
     reset_for_new_game(None);
@@ -143,9 +143,9 @@ fn monster_movement_rate_negative_speed_uses_game_turn_mod_seed42() {
     assert_eq!(next_random_pair(100), (100, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. monsterIsVisible / monsterUpdateVisibility / monsterMakeVisible parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_is_visible_lit_floor_without_invisible_flag() {
     reset_for_new_game(None);
@@ -254,9 +254,9 @@ fn monster_update_visibility_unlights_when_out_of_sight() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. memoryUpdateRecall parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn memory_update_recall_wake_ignore_and_rcmove_bits() {
     reset_for_new_game(None);
@@ -290,9 +290,9 @@ fn memory_update_recall_wake_ignore_and_rcmove_bits() {
     with_state(|s| assert_eq!(s.creature_recall[GREY_MUSHROOM_ID as usize].wake, 1));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. monsterAttackingUpdate RNG-order parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_attacking_update_aggravate_skips_sleep_rng_seed42() {
     reset_for_new_game(Some(42));
@@ -341,9 +341,9 @@ fn monster_attacking_update_sleep_notice_rng_order_seed1000() {
     assert_eq!(next_random_pair(1024), (1024, 221));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. updateMonsters iteration parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn update_monsters_iterates_downward_and_recomputes_distance() {
     reset_for_new_game(None);
@@ -387,9 +387,9 @@ fn update_monsters_deletes_negative_hp_before_and_after() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. monsterSleep parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_sleep_rng_order_and_messages_seed42() {
     reset_for_new_game(Some(42));
@@ -405,9 +405,9 @@ fn monster_sleep_rng_order_and_messages_seed42() {
     assert_eq!(next_random_pair(40), (40, 33));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. printMonsterActionText / monsterNameDescription parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_name_description_lit_vs_unlit() {
     assert_eq!(

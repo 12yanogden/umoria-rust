@@ -1,7 +1,7 @@
-//! Monster death, hit resolution & loot parity.
+//! Monster death, hit resolution & loot tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -131,9 +131,9 @@ fn flags_from_bits(bits: u32) -> u32 {
     flags
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. monster_take_hit parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_take_hit_survival_returns_minus_one_and_no_rng() {
     reset_for_new_game(Some(42));
@@ -237,9 +237,9 @@ fn monster_take_hit_win_creature_updates_recall_when_unlit() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. monster_death_item_drop_type parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_death_item_drop_type_bit_composition() {
     assert_eq!(monster_death_item_drop_type(0), 0);
@@ -256,9 +256,9 @@ fn monster_death_item_drop_type_bit_composition() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. monster_death_item_drop_count RNG-order parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_death_item_drop_count_isolated_flags_seed42() {
     let cases = [
@@ -302,9 +302,9 @@ fn monster_death_item_drop_count_all_flag_combos_rng_order_seed42() {
     assert_eq!(next_random_pair(100), (100, 15));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. monster_death parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_death_winner_path_sets_total_winner_and_messages() {
     reset_for_new_game(Some(42));
@@ -339,9 +339,9 @@ fn monster_death_summon_and_return_mask_seed42() {
     assert_eq!(mask, CM_CARRY_OBJ | (2 << CM_TR_SHIFT));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Integer-semantics tests
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_take_hit_i16_hp_wrap_triggers_death() {
     reset_for_new_game(Some(42));

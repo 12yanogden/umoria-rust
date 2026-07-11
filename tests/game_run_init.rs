@@ -137,7 +137,7 @@ fn price_adjust_formula_round_half_up_and_boundaries() {
 }
 
 #[test]
-fn initialize_monster_levels_matches_cpp_reference() {
+fn initialize_monster_levels_matches_expected_reference() {
     setup_harness();
     initialize_monster_levels();
     let expected = reference_monster_levels();
@@ -145,7 +145,7 @@ fn initialize_monster_levels_matches_cpp_reference() {
 }
 
 #[test]
-fn initialize_treasure_levels_matches_cpp_reference() {
+fn initialize_treasure_levels_matches_expected_reference() {
     setup_harness();
     initialize_treasure_levels();
     let (expected_levels, expected_sorted) = reference_treasure_tables();

@@ -1,7 +1,7 @@
-//! `player_bash` parity.
+//! `player_bash` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -170,9 +170,9 @@ fn bash_hit_chance() -> i32 {
     })
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Dispatch — routing and zero-RNG invalid targets
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn player_bash_empty_space_message_and_no_rng() {
     assert_rng_unchanged_after(
@@ -246,9 +246,9 @@ fn player_bash_routes_to_chest() {
     assert!(last_message_text().contains("chest"));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Monster bash — RNG order (hit + stun + stumble)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn player_bash_monster_rng_order_hit_stun_seed1() {
     reset_for_new_game(Some(1));
@@ -320,9 +320,9 @@ fn player_bash_monster_avg_hp_uses_max_dice_roll_when_cd_max_hp() {
     with_state(|s| assert!(s.monsters[2].stunned_amount > 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Door bash — RNG order and int16 misc_use cast
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn player_bash_door_success_rng_order_seed4() {
     reset_for_new_game(Some(4));
@@ -386,9 +386,9 @@ fn player_bash_door_misc_use_int16_cast_can_be_negative() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Chest bash — RNG order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn player_bash_chest_destroy_rng_order_seed9() {
     reset_for_new_game(Some(9));

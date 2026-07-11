@@ -1,7 +1,7 @@
-//! `monster_manager` parity.
+//! `monster_manager` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -67,9 +67,9 @@ fn reset_monster_slots() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. monsterGetOneSuitableForLevel RNG-order/value parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_get_one_suitable_for_level_zero_seed42() {
     reset_for_new_game(Some(42));
@@ -99,9 +99,9 @@ fn monster_get_one_suitable_for_level_normal_branch_seed42() {
     assert_eq!(next_random_pair(50), (50, 7));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. monsterPlaceNew parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_place_new_max_hp_and_fields_seed42() {
     reset_for_new_game(Some(42));
@@ -175,9 +175,9 @@ fn monster_place_new_returns_false_when_popm_fails() {
     assert!(!monster_place_new(Coord_t { y: 5, x: 5 }, 0, false));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. popm / compactMonsters parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn popm_increments_next_free_monster_id() {
     reset_for_new_game(Some(42));
@@ -263,9 +263,9 @@ fn compact_monsters_fails_when_cur_dis_below_zero() {
     assert!(!compact_monsters());
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. monsterPlaceWinning parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_place_winning_noop_when_total_winner() {
     reset_for_new_game(Some(42));
@@ -297,9 +297,9 @@ fn monster_place_winning_places_endgame_monster_seed42() {
     assert_eq!(next_random_pair(12), (12, 9));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. monsterPlaceNewWithinDistance parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_place_new_within_distance_one_monster_seed42() {
     reset_for_new_game(Some(42));
@@ -334,9 +334,9 @@ fn monster_place_new_within_distance_dragon_forces_sleeping() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. monsterSummon / monsterSummonUndead / placeMonsterAdjacentTo
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_summon_adjacent_seed42() {
     reset_for_new_game(Some(42));
@@ -373,9 +373,9 @@ fn monster_summon_undead_adjacent_seed42() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Integer-semantics tests
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn monster_place_new_uint8_distance_wrap() {
     reset_for_new_game(Some(42));

@@ -1,7 +1,7 @@
 //! Bolt / ball / breath damage parity (`spells`).
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -134,9 +134,9 @@ fn vtype_from_str(text: &str) -> Vtype_t {
     buf
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. spell_get_area_affect_flags
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_get_area_affect_flags_maps_all_spell_types() {
@@ -162,9 +162,9 @@ fn spell_get_area_affect_flags_maps_all_spell_types() {
     assert_eq!(holy.harm_type, CD_EVIL);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Damage-scaling golden (resist / immune / susceptible)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn damage_scaling_neutral_creature_no_modifiers() {
@@ -244,7 +244,7 @@ fn damage_scaling_holy_orb_doubles_vs_evil() {
 }
 
 #[test]
-fn damage_scaling_area_falloff_matches_cpp_integer_division() {
+fn damage_scaling_area_falloff_matches_expected_integer_division() {
     assert_eq!(spell_apply_area_distance_falloff(100, 0), 100);
     assert_eq!(spell_apply_area_distance_falloff(100, 1), 50);
     assert_eq!(spell_apply_area_distance_falloff(100, 2), 33);
@@ -296,9 +296,9 @@ fn ball_applies_distance_scaled_damage_seed100() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Stop conditions (wall / monster / max range)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn bolt_stops_at_first_monster_without_hitting_later_target() {
@@ -406,9 +406,9 @@ fn ball_stops_travel_at_object_bolts_max_range() {
     with_state(|s| assert_eq!(s.monsters[2].hp, 500));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Item destruction ordering
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn frost_ball_destroys_potion_in_row_major_scan_order() {
@@ -433,9 +433,9 @@ fn frost_ball_destroys_potion_in_row_major_scan_order() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Breath player damage — randomNumber(0) guard
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn breath_applies_minimum_one_player_damage_when_scaled_to_zero() {
@@ -458,12 +458,12 @@ fn breath_applies_minimum_one_player_damage_when_scaled_to_zero() {
     assert_eq!(next_random_pair(1), (1, 1));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Integer semantics (i16 wrap on breath direct HP subtract)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn integer_subtraction_uses_i16_truncation_like_cpp() {
+fn integer_subtraction_uses_i16_truncation_like_expected() {
     assert_eq!((i32::from(5i16) - 10) as i16, -5i16);
     assert_eq!((i32::from(1i16) - 2) as i16, -1i16);
 }
@@ -494,9 +494,9 @@ fn breath_kills_monster_when_hp_drops_below_zero() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. RNG-order golden — bolt kill consumes death-drop rolls
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn bolt_kill_rng_order_seed500() {
@@ -523,9 +523,9 @@ fn bolt_kill_rng_order_seed500() {
     assert_eq!(next_random_pair(4), (4, 3));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. Ball multi-monster row-major hit order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn ball_hits_monsters_in_row_major_explosion_order() {

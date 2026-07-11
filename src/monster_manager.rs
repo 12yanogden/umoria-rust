@@ -1,4 +1,4 @@
-//! Port of `src/monster_manager.cpp` — see `phase_4.2.1`.
+//! Monster allocation and creature list management.
 
 use crate::config::monsters::defense::{CD_MAX_HP, CD_UNDEAD};
 use crate::config::monsters::move_flags::CM_WIN;
@@ -20,7 +20,7 @@ use crate::monster::MON_MAX_LEVELS;
 use crate::types::Coord_t;
 use crate::ui_io::terminal;
 
-/// C++ `monster_manager.cpp` lines 21–28.
+/// 28
 fn popm() -> i32 {
     let needs_compact = with_state(|state| {
         state.next_free_monster_id == i16::from(crate::monster::MON_TOTAL_ALLOCATIONS)
@@ -83,7 +83,7 @@ fn monster_place_new_state(
     state.dg.floor[coord.y as usize][coord.x as usize].creature_id = monster_id as u8;
 }
 
-/// C++ `monster_manager.cpp` lines 31–70.
+/// 70
 pub fn monster_place_new(coord: Coord_t, creature_id: i32, sleeping: bool) -> bool {
     let monster_id = popm();
     if monster_id == -1 {
@@ -97,7 +97,7 @@ pub fn monster_place_new(coord: Coord_t, creature_id: i32, sleeping: bool) -> bo
     true
 }
 
-/// C++ `monster_manager.cpp` lines 73–124.
+/// 124
 pub fn monster_place_winning() {
     if crate::game::game(|g| g.total_winner) {
         return;
@@ -155,7 +155,7 @@ pub fn monster_place_winning() {
     });
 }
 
-/// C++ monster_manager.cpp lines 129–160.
+/// 160
 #[doc(hidden)]
 pub fn monster_get_one_suitable_for_level(level: i32) -> i32 {
     with_state_mut(|state| monster_get_one_suitable_for_level_state(state, level))
@@ -195,7 +195,7 @@ fn monster_get_one_suitable_for_level_state(state: &mut State, mut level: i32) -
         + i32::from(state.monster_levels[(level - 1) as usize])
 }
 
-/// C++ `monster_manager.cpp` lines 163–187.
+/// 187
 pub fn monster_place_new_within_distance(
     number: i32,
     distance_from_source: i32,
@@ -230,11 +230,11 @@ pub fn monster_place_new_within_distance(
     }
 }
 
-/// C++ `monster_manager.cpp` lines 189–215.
+/// 215
 fn place_monster_adjacent_to(monster_id: i32, coord: &mut Coord_t, slp: bool) -> bool {
     let mut placed = false;
 
-    // C++ `for (i = 0; i <= 9; i++)` with `i = 9` on success then increments to 10
+    // `for (i = 0; i <= 9; i++)` with `i = 9` on success then increments to 10
     // and exits — equivalent to break (unlike dungeonPlaceRandomObjectNear's i<=10).
     for _ in 0..=9 {
         let position = with_state_mut(|state| {
@@ -264,7 +264,7 @@ fn place_monster_adjacent_to(monster_id: i32, coord: &mut Coord_t, slp: bool) ->
     placed
 }
 
-/// C++ `monster_manager.cpp` lines 218–221.
+/// 221
 pub fn monster_summon(coord: &mut Coord_t, sleeping: bool) -> bool {
     let level = with_state(|state| {
         i32::from(state.dg.current_level) + i32::from(MON_SUMMONED_LEVEL_ADJUST)
@@ -273,7 +273,7 @@ pub fn monster_summon(coord: &mut Coord_t, sleeping: bool) -> bool {
     place_monster_adjacent_to(monster_id, coord, sleeping)
 }
 
-/// C++ `monster_manager.cpp` lines 224–246.
+/// 246
 pub fn monster_summon_undead(coord: &mut Coord_t) -> bool {
     let monster_id = with_state_mut(|state| {
         let mut max_levels = i32::from(state.monster_levels[MON_MAX_LEVELS as usize]);
@@ -306,7 +306,7 @@ pub fn monster_summon_undead(coord: &mut Coord_t) -> bool {
     place_monster_adjacent_to(monster_id, coord, false)
 }
 
-/// C++ `monster_manager.cpp` lines 250–285.
+/// 285
 pub fn compact_monsters() -> bool {
     terminal::print_message(Some("Compacting monsters..."));
 

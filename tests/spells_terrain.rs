@@ -1,7 +1,7 @@
-//! Terrain & wall spells (`spells`) parity.
+//! Terrain & wall spells (`spells`) tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -137,7 +137,7 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-/// Mirror C++ earthquake RNG consumption for the current dungeon fixture.
+/// Mirror earthquake RNG consumption for the current dungeon fixture.
 fn reference_earthquake_rng_after(player_pos: Coord_t) -> (i32, i32) {
     for coord_y in player_pos.y - 8..=player_pos.y + 8 {
         for coord_x in player_pos.x - 8..=player_pos.x + 8 {
@@ -145,12 +145,12 @@ fn reference_earthquake_rng_after(player_pos: Coord_t) -> (i32, i32) {
                 y: coord_y,
                 x: coord_x,
             };
-            // Keep nested `if`s (not `&&`-collapsed): floor RNG must run whenever the
-            // 1-in-8 roll hits, even when `creature_id <= 1`. Collapsing would only be
-            // safe if the floor check stayed outside the creature branch.
+ // Keep nested `if`s (not `&&`-collapsed): floor RNG must run whenever the
+ // 1-in-8 roll hits, even when `creature_id <= 1`. Collapsing would only be
+ // safe if the floor check stayed outside the creature branch.
             #[allow(
                 clippy::collapsible_if,
-                reason = "nested structure mirrors C++ earthquake RNG; floor roll is sibling of creature branch"
+                reason = "nested structure mirrors earthquake RNG; floor roll is sibling of creature branch"
             )]
             if (coord.y != player_pos.y || coord.x != player_pos.x) && coord_in_bounds(coord) {
                 if random_number(8) == 1 {
@@ -179,7 +179,7 @@ fn reference_earthquake_rng_after(player_pos: Coord_t) -> (i32, i32) {
     next_random_pair(8)
 }
 
-/// Mirror C++ destroy-area RNG consumption for the current dungeon fixture.
+/// Mirror destroy-area RNG consumption for the current dungeon fixture.
 fn reference_destroy_area_rng_after(center: Coord_t) -> ((i32, i32), i16) {
     if with_state(|s| s.dg.current_level) > 0 {
         for spot_y in center.y - 15..=center.y + 15 {
@@ -206,9 +206,9 @@ fn reference_destroy_area_rng_after(center: Coord_t) -> ((i32, i32), i16) {
     (next_random_pair(8), blind)
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. RNG-order golden — earthquake
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_earthquake_rng_order_matches_scan_seed42() {
@@ -263,9 +263,9 @@ fn spell_earthquake_affected_floor_becomes_wall_seed42() {
     assert!(affected > 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. RNG-order golden — destroy area
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_destroy_area_rng_order_and_blind_seed42() {
@@ -311,9 +311,9 @@ fn spell_destroy_area_skips_grid_when_current_level_zero() {
     with_state(|s| assert!(s.py.flags.blind >= 11 && s.py.flags.blind <= 20));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. Wall-to-mud / build-wall crush
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_wall_to_mud_granite_turns_to_floor_seed42() {
@@ -422,9 +422,9 @@ fn spell_wall_to_mud_stone_creature_takes_fixed_damage_seed42() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Tile-feature parity — warding glyph, destroy doors
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_warding_glyph_places_scare_monster_no_rng() {
@@ -495,9 +495,9 @@ fn spell_destroy_doors_traps_disarms_chest_without_deleting() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Integer semantics — blind int16 accumulation
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn spell_destroy_area_blind_accumulates_int16_seed42() {

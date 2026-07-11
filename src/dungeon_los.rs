@@ -1,4 +1,4 @@
-//! Port of `src/dungeon_los.cpp` — line-of-sight and look commands.
+//! Line-of-sight and look commands
 
 use std::cell::RefCell;
 use std::cmp::Ordering;
@@ -21,7 +21,7 @@ use crate::ui_io::ESCAPE;
 
 const GRADF: i32 = 10_000;
 
-// C++ dungeon_los.cpp lines 234–237
+// 237
 const LOS_DIR_SET_FXY: [i32; 5] = [0, 1, 0, 0, -1];
 const LOS_DIR_SET_FXX: [i32; 5] = [0, 0, -1, 1, 0];
 const LOS_DIR_SET_FYY: [i32; 5] = [0, 0, 1, -1, 0];
@@ -60,7 +60,7 @@ fn with_los_look_mut<R>(f: impl FnOnce(&mut LosLookState) -> R) -> R {
     LOS_LOOK.with(|s| f(&mut s.borrow_mut()))
 }
 
-/// Test hook — reset file-static look state (dungeon_los.cpp globals).
+/// Test hook — reset file-static look state (globals)
 #[doc(hidden)]
 pub fn los_look_reset_for_test() {
     with_los_look_mut(|s| *s = LosLookState::default());
@@ -101,7 +101,7 @@ fn snprintf_obj_desc(buf: &mut Obj_desc_t, formatted: &str) {
     buf[n] = 0;
 }
 
-/// C++ `dungeon_los.cpp` lines 25–176 — Joseph Hall integer LOS.
+/// Joseph Hall integer LOS
 pub fn los(from: Coord_t, to: Coord_t) -> bool {
     let mut from = from;
     let mut to = to;
@@ -226,7 +226,7 @@ pub fn los(from: Coord_t, to: Coord_t) -> bool {
     true
 }
 
-/// C++ `dungeon_los.cpp` lines 258–357.
+/// 357
 pub fn look() {
     if with_state(|s| s.py.flags.blind > 0) {
         terminal::print_message(Some("You can't see a damn thing!"));
@@ -347,7 +347,7 @@ pub fn look() {
     }
 }
 
-/// C++ `dungeon_los.cpp` lines 375–463.
+/// 463
 pub fn look_ray(y: i32, mut from: i32, to: i32) -> bool {
     if from <= to || y > i32::from(MON_MAX_SIGHT) {
         return false;
@@ -380,7 +380,7 @@ pub fn look_ray(y: i32, mut from: i32, to: i32) -> bool {
         with_los_look_mut(|s| s.hack_no_query = false);
     }
 
-    // C++ `goto init_transparent` when the first cell is already transparent:
+    // `goto init_transparent` when the first cell is already transparent
     // skip the recursive lookRay / find-next-window and jump to window extension.
     let mut skip_to_extend_window = transparent;
 
@@ -434,7 +434,7 @@ pub fn look_ray(y: i32, mut from: i32, to: i32) -> bool {
     }
 }
 
-/// C++ `dungeon_los.cpp` lines 465–575.
+/// 575
 pub fn look_see(mut coord: Coord_t, transparent: &mut bool) -> bool {
     if coord.x < 0 || coord.y < 0 || coord.y > coord.x {
         let msg = format!("Illegal call to lookSee({}, {})", coord.y, coord.x);
@@ -508,7 +508,7 @@ pub fn look_see(mut coord: Coord_t, transparent: &mut bool) -> bool {
             let category_id =
                 with_state(|s| s.game.treasure.list[tile.treasure_id as usize].category_id);
             if category_id == TV_SECRET_DOOR {
-                // C++ goto granite (lines 518–519, 537–545)
+                // 545)
                 wall_description = if msg[0] != 0 {
                     Some("a granite wall")
                 } else {

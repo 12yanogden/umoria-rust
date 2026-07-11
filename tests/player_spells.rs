@@ -1,7 +1,7 @@
-//! Player spell & mana learning parity.
+//! Player spell & mana learning tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -54,7 +54,7 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-fn cpp_wis_int_adj(value: i32) -> i32 {
+fn expected_wis_int_adj(value: i32) -> i32 {
     if value > 117 {
         7
     } else if value > 107 {
@@ -72,8 +72,8 @@ fn cpp_wis_int_adj(value: i32) -> i32 {
     }
 }
 
-fn cpp_new_mana(_stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i32 {
-    let adj = cpp_wis_int_adj(i32::from(used_stat));
+fn expected_new_mana(_stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i32 {
+    let adj = expected_wis_int_adj(i32::from(used_stat));
     let levels =
         i32::from(level) - i32::from(CLASSES[class_id as usize].min_level_for_spell_casting) + 1;
     match adj {
@@ -87,8 +87,13 @@ fn cpp_new_mana(_stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i
     }
 }
 
-fn cpp_number_of_spells_allowed(_stat: PlayerAttr, class_id: u8, level: u16, used_stat: u8) -> i32 {
-    let adj = cpp_wis_int_adj(i32::from(used_stat));
+fn expected_number_of_spells_allowed(
+    _stat: PlayerAttr,
+    class_id: u8,
+    level: u16,
+    used_stat: u8,
+) -> i32 {
+    let adj = expected_wis_int_adj(i32::from(used_stat));
     let levels =
         i32::from(level) - i32::from(CLASSES[class_id as usize].min_level_for_spell_casting) + 1;
     match adj {
@@ -100,7 +105,7 @@ fn cpp_number_of_spells_allowed(_stat: PlayerAttr, class_id: u8, level: u16, use
     }
 }
 
-fn cpp_number_of_spells_known(spells_learnt: u32) -> i32 {
+fn expected_number_of_spells_known(spells_learnt: u32) -> i32 {
     let mut known = 0;
     let mut mask = 1u32;
     while mask != 0 {
@@ -112,7 +117,7 @@ fn cpp_number_of_spells_known(spells_learnt: u32) -> i32 {
     known
 }
 
-fn cpp_learnable_spells(
+fn expected_learnable_spells(
     spells: &[Spell; 31],
     level: u16,
     spells_learnt: u32,
@@ -159,9 +164,9 @@ fn setup_base_player(class_id: u8, level: u16) {
     set_floor_light(Coord_t { y: 5, x: 5 }, true);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. playerCanRead / lastKnownSpell / playerDetermineLearnableSpells
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_can_read_false_when_blind() {
@@ -216,18 +221,18 @@ fn determine_learnable_spells_or_from_magic_books() {
     assert_eq!(player_determine_learnable_spells(), 0b1101);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. newMana / playerGainMana
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn new_mana_matches_cpp_formula() {
+fn new_mana_matches_expected_formula() {
     reset_for_new_game(None);
     setup_base_player(MAGE_CLASS_ID, 10);
     set_used_stat(PlayerAttr::A_INT, 18);
     assert_eq!(
         new_mana(PlayerAttr::A_INT),
-        cpp_new_mana(PlayerAttr::A_INT, MAGE_CLASS_ID, 10, 18)
+        expected_new_mana(PlayerAttr::A_INT, MAGE_CLASS_ID, 10, 18)
     );
     assert_eq!(new_mana(PlayerAttr::A_INT), 15);
 }
@@ -262,7 +267,8 @@ fn player_gain_mana_scales_current_proportionally() {
     });
     player_gain_mana(PlayerAttr::A_INT);
     with_state(|s| {
-        let expected_mana = i64::from(cpp_new_mana(PlayerAttr::A_INT, MAGE_CLASS_ID, 10, 18) + 1);
+        let expected_mana =
+            i64::from(expected_new_mana(PlayerAttr::A_INT, MAGE_CLASS_ID, 10, 18) + 1);
         let value = ((5i64 << 16) + 0x8000) / 10 * expected_mana;
         assert_eq!(s.py.misc.mana, expected_mana as i16);
         assert_eq!(s.py.misc.current_mana, (value >> 16) as i16);
@@ -286,9 +292,9 @@ fn player_gain_mana_clears_mana_when_no_spells_known() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. playerCalculateAllowedSpellsCount helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn number_of_spells_allowed_and_known() {
@@ -297,10 +303,13 @@ fn number_of_spells_allowed_and_known() {
     set_used_stat(PlayerAttr::A_WIS, 18);
     assert_eq!(
         number_of_spells_allowed(PlayerAttr::A_WIS),
-        cpp_number_of_spells_allowed(PlayerAttr::A_WIS, PRIEST_CLASS_ID, 10, 18)
+        expected_number_of_spells_allowed(PlayerAttr::A_WIS, PRIEST_CLASS_ID, 10, 18)
     );
     with_state_mut(|s| s.py.flags.spells_learnt = 0b1010);
-    assert_eq!(number_of_spells_known(), cpp_number_of_spells_known(0b1010));
+    assert_eq!(
+        number_of_spells_known(),
+        expected_number_of_spells_known(0b1010)
+    );
     assert_eq!(number_of_spells_known(), 2);
 }
 
@@ -359,14 +368,14 @@ fn calculate_allowed_spells_caps_by_learnable_count() {
     player_calculate_allowed_spells_count(PlayerAttr::A_WIS);
     let spells = &MAGIC_SPELLS[(PRIEST_CLASS_ID - 1) as usize];
     with_state(|s| {
-        let expected = cpp_learnable_spells(spells, 5, 0, 5);
+        let expected = expected_learnable_spells(spells, 5, 0, 5);
         assert_eq!(s.py.flags.new_spells_to_learn, expected as u8);
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. playerGainSpells — zero-roll early returns
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn gain_spells_confused_consumes_no_rng() {
@@ -405,12 +414,12 @@ fn gain_spells_zero_to_learn_sets_free_turn_no_rng() {
     assert_eq!(next_random_pair(100), (100, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. playerGainSpells — priest RNG golden (seed 42)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn priest_spell_bank_level10_matches_cpp() {
+fn priest_spell_bank_level10_matches_expected() {
     let class_id = PRIEST_CLASS_ID as usize;
     let level = 10u8;
     let mut spell_flag = 0x7FFF_FFFFu32;
@@ -467,16 +476,16 @@ fn gain_spells_priest_learn_sets_initial_mana() {
     with_state(|s| assert!(s.py.misc.mana > 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. playerGainSpells — mage interactive path
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn gain_spells_mage_picks_from_menu_seed42() {
     reset_for_new_game(Some(42));
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
-    // pop order: first key consumed first
+ // pop order: first key consumed first
     test_push_getch_keys(&[b'b' as i32]); // learn spell_bank[1]
 
     setup_base_player(MAGE_CLASS_ID, 10);
@@ -498,12 +507,12 @@ fn gain_spells_mage_picks_from_menu_seed42() {
     assert_eq!(next_random_pair(100), (100, 2));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Integer semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
-fn bitmask_shift_matches_cpp_u32() {
+fn bitmask_shift_matches_expected_u32() {
     let order_id = 5u8;
     let mask = 1u32 << order_id;
     assert_eq!(mask, 32);

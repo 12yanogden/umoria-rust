@@ -1,28 +1,30 @@
 [package]
 name = "umoria"
-version = "5.7.15"          # mirror CURRENT_VERSION_* in src/version.h
+version = "5.7.15" # mirror CURRENT_VERSION_* in src/version.rs
 edition = "2021"
-rust-version = "1.81"       # lint attribute reasons; LazyLock available since 1.80
+rust-version = "1.81" # lint attribute reasons; LazyLock available since 1.80
 license = "GPL-3.0-or-later"
 publish = false
-# Exclude the C++ reference tree from any packaging (kept in-tree for CMake).
-exclude = ["src/*.cpp", "src/*.h", "umoria/", "data/"]
+exclude = ["data/"]
 
 [lib]
 name = "umoria"
 path = "src/lib.rs"
 
 [[bin]]
-name = "umoria"             # match the C++ executable + CLI/default game.sav
+name = "umoria" # CLI / default game.sav
 path = "src/main.rs"
 
+[[bin]]
+name = "rng_capture"
+path = "tools/capture/rng_capture.rs"
+
 [dependencies]
-ncurses = "6.0.1"   # thin FFI over system ncurses; 1:1 with ui_io.cpp's calls
-libc = "0.2"        # select()/FD_SET, write(), getlogin/getpwuid/getuid/setuid/getgid for the non-curses helpers
+ncurses = "6.0.1" # thin FFI over system ncurses
+libc = "0.2" # select()/FD_SET, write(), getlogin/getpwuid/getuid/setuid/getgid for the non-curses helpers
 
 [dev-dependencies]
-ncurses = "6.0.1"   # integration tests link-check ncurses directly
-# HOOK (phase_1.5): differential fidelity-test deps added here.
+ncurses = "6.0.1" # integration tests link-check ncurses directly
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
@@ -34,19 +36,16 @@ default = []
 differential_live = []
 
 [profile.release]
-# Notes: C++ reference builds -O2 (Release). Keep Rust release defaults
-# (opt-level = 3). Do NOT enable settings that change integer/overflow
-# semantics; phase_2 relies on explicit wrapping ops, not profile flags.
+# Keep Rust release defaults (opt-level = 3). Do NOT enable settings that change
+# integer/overflow semantics; gameplay uses explicit wrapping ops.
 
 [profile.dev]
-# overflow-checks stay ON in dev by default; the port must use explicit
-# wrapping_*/as casts where C++ relied on wrap/truncation, so dev builds
-# never mask a semantics bug behind a silent wrap.
+# overflow-checks stay ON in dev by default; use explicit wrapping_*/as casts
+# where the game relies on wrap/truncation, so silent wraps never hide bugs.
 
 # ---------------------------------------------------------------------------
-# Lint policy (mirrors ~/Projects/rust/aro workspace.lints, adapted for this
-# C++→Rust port: FFI unsafe is required; truncating `as` casts are intentional
-# C++ fidelity and are allowed rather than denied).
+# Lint policy: FFI unsafe is required; truncating `as` casts are intentional
+# for classic Umoria integer widths and are allowed rather than denied.
 # ---------------------------------------------------------------------------
 [lints.rust]
 # ncurses/libc FFI requires unsafe; do not forbid. Prefer scoped unsafe blocks.
@@ -71,10 +70,9 @@ missing_panics_doc = "allow"
 wildcard_imports = "allow"
 return_self_not_must_use = "allow"
 
-# Port-fidelity overrides — 1:1 C++ translation units are large, take many
-# args, and intentionally keep parallel match arms / bool-heavy structs /
-# stack floor arrays matching the reference. Do not "fix" these by reshaping
-# control flow away from the C++ source.
+# Gameplay modules are large, take many args, and keep parallel match arms /
+# bool-heavy structs / stack floor arrays. Do not "fix" by reshaping control
+# flow away from established behavior.
 too_many_lines = "allow"
 too_many_arguments = "allow"
 cognitive_complexity = "allow"
@@ -83,8 +81,8 @@ struct_excessive_bools = "allow"
 large_stack_arrays = "allow"
 similar_names = "allow"
 doc_markdown = "allow"
-# Hex/bitflag tables mirrored from C++ (`data_*.rs`) — digit separators would
-# churn thousands of lines without improving fidelity to the reference.
+# Hex/bitflag tables in `data_*.rs` — digit separators would churn thousands of
+# lines without improving clarity of the static tables.
 unreadable_literal = "allow"
 
 # Cargo overrides
@@ -108,9 +106,7 @@ dbg_macro = "deny"
 print_stdout = "deny"
 print_stderr = "deny"
 
-# Type-safety: aro denies these. This port keeps thousands of intentional
-# truncating/wrapping `as` casts to match C++ integer semantics — allow with
-# that documented rationale rather than rewriting the translation unit-by-unit.
+# Intentional truncating/wrapping `as` casts for classic Umoria integer widths.
 as_conversions = "allow"
 cast_possible_truncation = "allow"
 cast_possible_wrap = "allow"

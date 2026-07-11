@@ -1,4 +1,4 @@
-//! Port of src/treasure.cpp / src/treasure.h — magical treasure enchantment.
+//! Magical treasure enchantment
 
 use crate::config::identification::{ID_NO_SHOW_P1, ID_SHOW_HIT_DAM, ID_SHOW_P1};
 use crate::config::treasure::chests::{
@@ -77,13 +77,11 @@ pub const TV_SECRET_DOOR: u8 = 109;
 pub const TV_STORE_DOOR: u8 = 110;
 pub const TV_MAX_VISIBLE: u8 = 110;
 
-/// Port of `magicShouldBeEnchanted` in treasure.cpp.
 #[doc(hidden)]
 pub fn magic_should_be_enchanted(state: &mut State, chance: i32) -> bool {
     random_number_state(state, 100) <= chance
 }
 
-/// Port of `magicEnchantmentBonus` in treasure.cpp.
 #[doc(hidden)]
 pub fn magic_enchantment_bonus(state: &mut State, base: i32, max_standard: i32, level: i32) -> i32 {
     let mut stand_deviation =
@@ -1071,19 +1069,16 @@ pub(crate) fn magic_treasure_magical_ability_state(state: &mut State, item_id: i
     }
 }
 
-/// Port of `wandMagic` in treasure.cpp.
 #[doc(hidden)]
 pub fn wand_magic_charges(id: u8) -> i32 {
     with_state_mut(|state| wand_magic(state, id))
 }
 
-/// Port of `staffMagic` in treasure.cpp.
 #[doc(hidden)]
 pub fn staff_magic_charges(id: u8) -> i32 {
     with_state_mut(|state| staff_magic(state, id))
 }
 
-/// Port of `magicTreasureMagicalAbility` in treasure.cpp.
 pub fn magic_treasure_magical_ability(item_id: i32, level: i32) {
     with_state_mut(|state| magic_treasure_magical_ability_state(state, item_id, level));
 }

@@ -1,7 +1,7 @@
-//! Player bonus hub & combat resolution parity.
+//! Player bonus hub & combat resolution tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -86,7 +86,7 @@ fn place_monster(id: i32, creature_id: u16, hp: i16, coord: Coord_t, lit: bool) 
     });
 }
 
-fn cpp_test_being_hit(
+fn expected_test_being_hit(
     base_to_hit: i32,
     level: i32,
     plus_to_hit: i32,
@@ -102,7 +102,7 @@ fn cpp_test_being_hit(
     die != 1 && (die == 20 || (hit_chance > 0 && random_number(hit_chance) > armor_class))
 }
 
-fn cpp_weapon_critical_blow(
+fn expected_weapon_critical_blow(
     weapon_weight: i32,
     plus_to_hit: i32,
     damage: i32,
@@ -130,7 +130,7 @@ fn cpp_weapon_critical_blow(
     critical
 }
 
-fn cpp_saving_throw(class_id: u8, level: u16, saving_throw: i16, wis: u8) -> bool {
+fn expected_saving_throw(class_id: u8, level: u16, saving_throw: i16, wis: u8) -> bool {
     let wis_adj = wis_int_adj(i32::from(wis));
     let class_level_adjustment =
         i32::from(CLASS_LEVEL_ADJ[class_id as usize][PlayerClassLevelAdj::SAVE as usize])
@@ -193,7 +193,7 @@ fn make_test_item(
     }
 }
 
-fn cpp_recalculate_bonuses_from_inventory(
+fn expected_recalculate_bonuses_from_inventory(
     items: &[Inventory; PLAYER_INVENTORY_SIZE as usize],
 ) -> (i16, i16, i16, i16, i16, i16, i16, i16) {
     let mut plusses_to_hit = 0i16;
@@ -244,9 +244,9 @@ fn cpp_recalculate_bonuses_from_inventory(
     )
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. RNG-order/count parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn test_being_hit_rng_short_circuit_natural_one() {
@@ -288,7 +288,7 @@ fn test_being_hit_rng_two_rolls_on_normal_hit() {
         s.py.misc.class_id = 4;
         s.py.misc.level = 10;
     });
-    let expected = cpp_test_being_hit(60, 10, 2, 5, 4, CLASS_MISC_HIT);
+    let expected = expected_test_being_hit(60, 10, 2, 5, 4, CLASS_MISC_HIT);
     reset_for_new_game(Some(1234));
     with_state_mut(|s| {
         s.py.misc.class_id = 4;
@@ -305,7 +305,7 @@ fn weapon_critical_blow_rng_fail_path_single_roll() {
         s.py.misc.class_id = 1;
         s.py.misc.level = 1;
     });
-    let expected = cpp_weapon_critical_blow(1, 0, 4, 1, 1, PlayerClassLevelAdj::BTH as u8);
+    let expected = expected_weapon_critical_blow(1, 0, 4, 1, 1, PlayerClassLevelAdj::BTH as u8);
     reset_for_new_game(Some(42));
     with_state_mut(|s| {
         s.py.misc.class_id = 1;
@@ -322,7 +322,7 @@ fn weapon_critical_blow_rng_success_path_two_rolls() {
         s.py.misc.class_id = 1;
         s.py.misc.level = 40;
     });
-    let expected = cpp_weapon_critical_blow(500, 10, 6, 1, 40, PlayerClassLevelAdj::BTH as u8);
+    let expected = expected_weapon_critical_blow(500, 10, 6, 1, 40, PlayerClassLevelAdj::BTH as u8);
     reset_for_new_game(Some(1));
     with_state_mut(|s| {
         s.py.misc.class_id = 1;
@@ -341,7 +341,7 @@ fn saving_throw_rng_order_seed42() {
         s.py.misc.saving_throw = 10;
         s.py.stats.used[PlayerAttr::A_WIS as usize] = 15;
     });
-    let expected = cpp_saving_throw(2, 5, 10, 15);
+    let expected = expected_saving_throw(2, 5, 10, 15);
     reset_for_new_game(Some(42));
     with_state_mut(|s| {
         s.py.misc.class_id = 2;
@@ -374,9 +374,9 @@ fn attack_monster_unarmed_rng_sequence_seed42() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. playerRecalculateBonuses state parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn recalculate_bonuses_empty_inventory() {
@@ -427,7 +427,8 @@ fn recalculate_bonuses_identified_weapon_and_resist_flags() {
     player_recalculate_bonuses();
     with_state(|s| {
         let inv = s.py.inventory;
-        let (pth, ptd, mac, ac, dth, dtd, dac, dtac) = cpp_recalculate_bonuses_from_inventory(&inv);
+        let (pth, ptd, mac, ac, dth, dtd, dac, dtac) =
+            expected_recalculate_bonuses_from_inventory(&inv);
         let base_th = player_to_hit_adjustment() as i16;
         let base_td = player_damage_adjustment() as i16;
         let base_mac = player_armor_class_adjustment() as i16;
@@ -459,7 +460,7 @@ fn recalculate_bonuses_cursed_unidentified_hides_base_ac() {
     with_state(|s| {
         assert_eq!(s.py.misc.display_to_hit, base_th);
         assert_eq!(s.py.misc.plusses_to_hit, base_th.wrapping_add(5));
-        // C++: cursed + unidentified → neither display branch runs; only display_to_ac added.
+ // cursed + unidentified → neither display branch runs; only display_to_ac added.
         assert_eq!(s.py.misc.display_ac, base_mac);
         assert_eq!(s.py.misc.magical_ac, base_mac.wrapping_add(3));
         assert_eq!(s.py.misc.ac, 2);
@@ -522,9 +523,9 @@ fn recalculate_bonuses_bow_excludes_damage_plusses() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. playerAdjustBonusesForItem factor symmetry
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn adjust_bonuses_for_item_wear_remove_symmetry() {
@@ -589,9 +590,9 @@ fn adjust_bonuses_for_item_speed_calls_change_speed() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. playerTakeOff + curse helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn ring_empty_helpers() {
@@ -671,9 +672,9 @@ fn take_off_auxiliary_skips_bonus_adjustment() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Combat math value parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn calculate_to_hit_blows_bare_hands_and_ammo() {
@@ -735,9 +736,9 @@ fn attack_position_respects_afraid() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Integer semantics — i16 wrapping on AC sums
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn recalculate_bonuses_i16_ac_wrapping() {

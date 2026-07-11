@@ -1,6 +1,5 @@
-//! Port of src/spells.h / spells.cpp — spell selection, detection, and utility spells.
+//! Spell selection, detection, and utility spells
 
-/// Port of `MagicSpellFlags` in spells.h.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum MagicSpellFlags {
@@ -105,7 +104,7 @@ fn wis_int_adj_from_used(value: u8) -> i32 {
     }
 }
 
-/// C++ `mage_spells.cpp` lines 270–295.
+/// 295
 pub(crate) fn spell_chance_of_success_for_state(state: &State, spell_id: i32) -> i32 {
     let class_id = state.py.misc.class_id as usize;
     let spell = &MAGIC_SPELLS[class_id - 1][spell_id as usize];
@@ -128,12 +127,12 @@ pub(crate) fn spell_chance_of_success_for_state(state: &State, spell_id: i32) ->
     chance.clamp(5, 95)
 }
 
-/// C++ `mage_spells.cpp` lines 270–295 (needed by `display_spells_list` during learning).
+/// 295 (needed by `display_spells_list` during learning)
 pub fn spell_chance_of_success(spell_id: i32) -> i32 {
     with_state(|state| spell_chance_of_success_for_state(state, spell_id))
 }
 
-/// Build castable spell ids from a spellbook — C++ castSpellGetId lines 109–130.
+/// Build castable spell ids from a spellbook — castSpellGetId lines 109–130
 pub fn build_castable_spell_list(item_id: i32) -> Option<(i32, Vec<i32>)> {
     with_state(|state| {
         let mut flags = state.py.inventory[item_id as usize].flags;
@@ -159,7 +158,7 @@ pub fn build_castable_spell_list(item_id: i32) -> Option<(i32, Vec<i32>)> {
     })
 }
 
-/// C++ spells.cpp lines 11–102 — spell-menu selection.
+/// spell-menu selection
 fn spell_get_id(
     spell_ids: &[i32],
     number_of_choices: i32,
@@ -274,7 +273,7 @@ fn spell_get_id(
     spell_found
 }
 
-/// C++ spells.cpp lines 109–150.
+/// 150
 pub fn cast_spell_get_id(
     prompt: &str,
     item_id: i32,
@@ -326,7 +325,7 @@ pub fn cast_spell_get_id(
     result
 }
 
-/// C++ spells.cpp lines 158–176.
+/// 176
 #[must_use]
 pub fn spell_detect_treasure_within_vicinity() -> bool {
     let (top, bottom, left, right) = with_state(|state| {
@@ -370,7 +369,7 @@ pub fn spell_detect_treasure_within_vicinity() -> bool {
     detected
 }
 
-/// C++ spells.cpp lines 179–197.
+/// 197
 #[must_use]
 pub fn spell_detect_objects_within_vicinity() -> bool {
     let (top, bottom, left, right) = with_state(|state| {
@@ -414,7 +413,7 @@ pub fn spell_detect_objects_within_vicinity() -> bool {
     detected
 }
 
-/// C++ spells.cpp lines 200–225.
+/// 225
 #[must_use]
 pub fn spell_detect_traps_within_vicinity() -> bool {
     let (top, bottom, left, right) = with_state(|state| {
@@ -462,7 +461,7 @@ pub fn spell_detect_traps_within_vicinity() -> bool {
     detected
 }
 
-/// C++ spells.cpp lines 228–258 (`spellDetectSecretDoorssWithinVicinity`).
+/// Detect secret doors within the player vicinity.
 #[must_use]
 pub fn spell_detect_secret_doors_within_vicinity() -> bool {
     let (top, bottom, left, right) = with_state(|state| {
@@ -516,7 +515,7 @@ pub fn spell_detect_secret_doors_within_vicinity() -> bool {
     detected
 }
 
-/// C++ spells.cpp lines 261–286.
+/// 286
 #[must_use]
 pub fn spell_detect_invisible_creatures_within_vicinity() -> bool {
     let mut detected = false;
@@ -585,7 +584,7 @@ fn dungeon_light_area_around_floor_tile(coord: Coord_t) {
     }
 }
 
-/// C++ spells.cpp lines 385–402.
+/// 402
 pub fn spell_map_current_area() {
     let (panel_top, panel_bottom, panel_left, panel_right) = with_state(|state| {
         (
@@ -621,7 +620,7 @@ pub fn spell_map_current_area() {
     draw_dungeon_panel();
 }
 
-/// C++ spells.cpp lines 405–429.
+/// 429
 #[must_use]
 pub fn spell_identify_item() -> bool {
     let mut item_id = 0;
@@ -670,7 +669,7 @@ pub fn spell_identify_item() -> bool {
     true
 }
 
-/// C++ spells.cpp lines 432–450.
+/// 450
 #[must_use]
 pub fn spell_aggravate_monsters(affect_distance: i32) -> bool {
     let mut aggravated = false;
@@ -700,7 +699,7 @@ pub fn spell_aggravate_monsters(affect_distance: i32) -> bool {
     aggravated
 }
 
-/// C++ spells.cpp lines 453–486.
+/// 486
 #[must_use]
 pub fn spell_surround_player_with_traps() -> bool {
     let player_pos = with_state(|state| state.py.pos);
@@ -744,7 +743,7 @@ pub fn spell_surround_player_with_traps() -> bool {
     true
 }
 
-/// C++ spells.cpp lines 489–521.
+/// 521
 #[must_use]
 pub fn spell_surround_player_with_doors() -> bool {
     let mut created = false;
@@ -793,7 +792,7 @@ pub fn spell_surround_player_with_doors() -> bool {
     created
 }
 
-/// C++ spells.cpp lines 524–557.
+/// 557
 #[must_use]
 pub fn spell_destroy_adjacent_doors_traps() -> bool {
     let mut destroyed = false;
@@ -841,7 +840,7 @@ pub fn spell_destroy_adjacent_doors_traps() -> bool {
     destroyed
 }
 
-/// C++ spells.cpp lines 560–584.
+/// 584
 #[must_use]
 pub fn spell_detect_monsters() -> bool {
     let mut detected = false;
@@ -887,7 +886,7 @@ pub fn spell_detect_monsters() -> bool {
     detected
 }
 
-/// C++ spells.cpp lines 1881–1906.
+/// 1906
 #[must_use]
 pub fn spell_detect_evil() -> bool {
     let mut detected = false;
@@ -933,7 +932,7 @@ pub fn spell_detect_evil() -> bool {
     detected
 }
 
-// C++ spells.cpp lines 587–608.
+// 608
 fn spell_light_line_touches_monster(monster_id: i32) {
     monster_update_visibility(monster_id);
 
@@ -966,7 +965,7 @@ fn spell_light_line_touches_monster(monster_id: i32) {
     }
 }
 
-/// C++ spells.cpp lines 291–314.
+/// 314
 #[must_use]
 pub fn spell_light_area(coord: Coord_t) -> bool {
     if with_state(|state| state.py.flags.blind < 1) {
@@ -998,7 +997,7 @@ pub fn spell_light_area(coord: Coord_t) -> bool {
     lit
 }
 
-/// C++ spells.cpp lines 317–365.
+/// 365
 #[must_use]
 pub fn spell_darken_area(coord: Coord_t) -> bool {
     let mut darkened = false;
@@ -1064,7 +1063,7 @@ pub fn spell_darken_area(coord: Coord_t) -> bool {
     darkened
 }
 
-/// C++ spells.cpp lines 611–654.
+/// 654
 pub fn spell_light_line(coord: Coord_t, direction: i32) {
     let mut coord = coord;
     let mut distance = 0;
@@ -1116,7 +1115,7 @@ pub fn spell_light_line(coord: Coord_t, direction: i32) {
     }
 }
 
-/// C++ spells.cpp lines 657–667.
+/// 667
 pub fn spell_starlite(coord: Coord_t) {
     if with_state(|state| state.py.flags.blind < 1) {
         terminal::print_message(Some(
@@ -1131,7 +1130,7 @@ pub fn spell_starlite(coord: Coord_t) {
     }
 }
 
-/// C++ spells.cpp lines 670–713.
+/// 713
 #[must_use]
 pub fn spell_disarm_all_in_direction(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -1202,7 +1201,7 @@ pub use crate::inventory::{
     damage_poisoned_gas, execute_disenchant_attack,
 };
 
-/// Core recharge logic after item selection — C++ spells.cpp lines 1114–1144.
+/// Core recharge logic after item selection —
 pub fn spell_recharge_item_at(item_id: i32, number_of_charges: i32) {
     let mut fail_chance = with_state(|state| {
         let item = &state.py.inventory[item_id as usize];
@@ -1235,7 +1234,7 @@ pub fn spell_recharge_item_at(item_id: i32, number_of_charges: i32) {
     }
 }
 
-/// C++ spells.cpp lines 1102–1146.
+/// 1146
 #[must_use]
 pub fn spell_recharge_item(number_of_charges: i32) -> bool {
     let mut item_pos_start = -1;
@@ -1267,7 +1266,7 @@ pub fn spell_recharge_item(number_of_charges: i32) -> bool {
     true
 }
 
-/// C++ spells.cpp lines 1631–1662.
+/// 1662
 pub fn spell_teleport_away_monster(monster_id: i32, mut distance_from_player: i32) {
     let mut counter = 0;
     let mut coord = Coord_t { y: 0, x: 0 };
@@ -1315,7 +1314,7 @@ pub fn spell_teleport_away_monster(monster_id: i32, mut distance_from_player: i3
     monster_update_visibility(monster_id);
 }
 
-/// C++ spells.cpp lines 1665–1700.
+/// 1700
 pub fn spell_teleport_player_to(coord: Coord_t) {
     let mut distance = 1;
     let mut counter = 0;
@@ -1372,7 +1371,7 @@ pub fn spell_teleport_player_to(coord: Coord_t) {
     update_monsters(false);
 }
 
-/// C++ spells.cpp lines 1909–1938.
+/// 1938
 #[must_use]
 pub fn spell_change_player_hit_points(adjustment: i32) -> bool {
     if with_state(|state| state.py.misc.current_hp >= state.py.misc.max_hp) {
@@ -1404,7 +1403,7 @@ pub fn spell_change_player_hit_points(adjustment: i32) -> bool {
     true
 }
 
-/// C++ spells.cpp lines 1381–1456.
+/// 1456
 #[must_use]
 pub fn spell_wall_to_mud(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -1504,7 +1503,7 @@ pub fn spell_wall_to_mud(coord: Coord_t, direction: i32) -> bool {
     turned
 }
 
-/// C++ spells.cpp lines 1460–1495.
+/// 1495
 #[must_use]
 pub fn spell_destroy_doors_traps_in_direction(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -1562,7 +1561,7 @@ pub fn spell_destroy_doors_traps_in_direction(coord: Coord_t, direction: i32) ->
     destroyed
 }
 
-/// C++ spells.cpp lines 1542–1604.
+/// 1604
 #[must_use]
 pub fn spell_build_wall(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -1638,7 +1637,7 @@ pub fn spell_build_wall(coord: Coord_t, direction: i32) -> bool {
     built
 }
 
-/// C++ spells.cpp lines 1940–1966.
+/// 1966
 fn earthquake_hits_monster(monster_id: i32) {
     let (movement, sprite, name) = with_state(|state| {
         let monster = &state.monsters[monster_id as usize];
@@ -1671,7 +1670,7 @@ fn earthquake_hits_monster(monster_id: i32) {
     }
 }
 
-/// C++ spells.cpp lines 1971–2008.
+/// 2008
 pub fn spell_earthquake() {
     let player_pos = with_state(|state| state.py.pos);
 
@@ -1738,7 +1737,7 @@ pub fn spell_earthquake() {
     }
 }
 
-/// C++ spells.cpp lines 2011–2028.
+/// 2028
 pub fn spell_create_food() {
     let player_pos = with_state(|state| state.py.pos);
     let has_object = with_state(|state| {
@@ -1762,7 +1761,7 @@ pub fn spell_create_food() {
     });
 }
 
-/// C++ spells.cpp lines 2106–2113.
+/// 2113
 pub fn spell_lose_str() {
     if with_state(|state| !state.py.flags.sustain_str) {
         let _ = crate::player_stats::player_stat_random_decrease(PlayerAttr::A_STR);
@@ -1772,7 +1771,7 @@ pub fn spell_lose_str() {
     }
 }
 
-/// C++ spells.cpp lines 2116–2123.
+/// 2123
 pub fn spell_lose_int() {
     if with_state(|state| !state.py.flags.sustain_int) {
         let _ = crate::player_stats::player_stat_random_decrease(PlayerAttr::A_INT);
@@ -1782,7 +1781,7 @@ pub fn spell_lose_int() {
     }
 }
 
-/// C++ spells.cpp lines 2126–2133.
+/// 2133
 pub fn spell_lose_wis() {
     if with_state(|state| !state.py.flags.sustain_wis) {
         let _ = crate::player_stats::player_stat_random_decrease(PlayerAttr::A_WIS);
@@ -1792,7 +1791,7 @@ pub fn spell_lose_wis() {
     }
 }
 
-/// C++ spells.cpp lines 2136–2143.
+/// 2143
 pub fn spell_lose_dex() {
     if with_state(|state| !state.py.flags.sustain_dex) {
         let _ = crate::player_stats::player_stat_random_decrease(PlayerAttr::A_DEX);
@@ -1802,7 +1801,7 @@ pub fn spell_lose_dex() {
     }
 }
 
-/// C++ spells.cpp lines 2146–2153.
+/// 2153
 pub fn spell_lose_con() {
     if with_state(|state| !state.py.flags.sustain_con) {
         let _ = crate::player_stats::player_stat_random_decrease(PlayerAttr::A_CON);
@@ -1812,7 +1811,7 @@ pub fn spell_lose_con() {
     }
 }
 
-/// C++ spells.cpp lines 2156–2163.
+/// 2163
 pub fn spell_lose_chr() {
     if with_state(|state| !state.py.flags.sustain_chr) {
         let _ = crate::player_stats::player_stat_random_decrease(PlayerAttr::A_CHR);
@@ -1822,7 +1821,7 @@ pub fn spell_lose_chr() {
     }
 }
 
-/// C++ spells.cpp lines 2166–2199.
+/// 2199
 pub fn spell_lose_exp(adjustment: i32) {
     with_state_mut(|state| {
         if adjustment > state.py.misc.exp {
@@ -1867,7 +1866,7 @@ pub fn spell_lose_exp(adjustment: i32) {
     }
 }
 
-/// C++ spells.cpp lines 2202–2213.
+/// 2213
 #[must_use]
 pub fn spell_slow_poison() -> bool {
     let poisoned = with_state(|state| state.py.flags.poisoned);
@@ -1885,7 +1884,7 @@ pub fn spell_slow_poison() -> bool {
     true
 }
 
-/// C++ spells.cpp lines 2289–2312.
+/// 2312
 #[must_use]
 pub fn spell_enchant_item(plusses: &mut i16, max_bonus_limit: i16) -> bool {
     if max_bonus_limit <= 0 {
@@ -1909,7 +1908,7 @@ pub fn spell_enchant_item(plusses: &mut i16, max_bonus_limit: i16) -> bool {
     false
 }
 
-/// C++ spells.cpp lines 2315–2327.
+/// 2327
 #[must_use]
 pub fn spell_remove_curse_from_all_worn_items() -> bool {
     let mut removed = false;
@@ -1936,7 +1935,7 @@ pub fn spell_remove_curse_from_all_worn_items() -> bool {
     removed
 }
 
-/// C++ spells.cpp lines 2330–2344.
+/// 2344
 #[must_use]
 pub fn spell_restore_player_levels() -> bool {
     if !with_state(|state| state.py.misc.max_exp > state.py.misc.exp) {
@@ -1959,10 +1958,10 @@ pub fn spell_restore_player_levels() -> bool {
     true
 }
 
-/// Predicate mirroring C++ `bool (*)(Inventory_t *)` destroy hooks.
+/// Predicate mirroring `bool (*)(Inventory_t *)` destroy hooks
 pub type ItemDestroyPredicate = fn(&Inventory) -> bool;
 
-/// Output of `spellGetAreaAffectFlags`.
+/// Flags describing which area-affect spell effects apply.
 #[derive(Clone, Copy, Debug)]
 pub struct SpellAreaAffect {
     pub weapon_type: u32,
@@ -1970,7 +1969,7 @@ pub struct SpellAreaAffect {
     pub destroy: ItemDestroyPredicate,
 }
 
-/// C++ spells.cpp lines 716–756.
+/// 756
 pub fn spell_get_area_affect_flags(spell_type: MagicSpellFlags) -> SpellAreaAffect {
     match spell_type {
         MagicSpellFlags::MagicMissile => SpellAreaAffect {
@@ -2041,7 +2040,7 @@ fn print_bolt_strikes_monster_message(creature_name: &str, bolt_name: &str, is_l
     terminal::print_message(Some(&format!("The {bolt_name} strikes {monster_name}.")));
 }
 
-/// C++ spells.cpp lines 770–806.
+/// 806
 fn spell_fire_bolt_touches_monster(
     coord: Coord_t,
     damage: i32,
@@ -2098,7 +2097,7 @@ fn spell_fire_bolt_touches_monster(
     }
 }
 
-/// C++ spells.cpp lines 809–846.
+/// 846
 pub fn spell_fire_bolt(
     mut coord: Coord_t,
     direction: i32,
@@ -2294,7 +2293,7 @@ fn spell_explosion_at(
     (total_hits, total_kills)
 }
 
-/// C++ spells.cpp lines 849–981.
+/// 981
 pub fn spell_fire_ball(
     mut coord: Coord_t,
     direction: i32,
@@ -2347,7 +2346,7 @@ pub fn spell_fire_ball(
     }
 }
 
-/// C++ spells.cpp lines 985–1099.
+/// 1099
 pub fn spell_breath(
     coord: Coord_t,
     monster_id: i32,
@@ -2493,7 +2492,7 @@ pub fn spell_breath(
     }
 }
 
-/// C++ spells.cpp lines 1149–1185.
+/// 1185
 #[must_use]
 pub fn spell_change_monster_hit_points(coord: Coord_t, direction: i32, damage_hp: i32) -> bool {
     let mut coord = coord;
@@ -2541,7 +2540,7 @@ pub fn spell_change_monster_hit_points(coord: Coord_t, direction: i32, damage_hp
     changed
 }
 
-/// C++ spells.cpp lines 1188–1228.
+/// 1228
 #[must_use]
 pub fn spell_drain_life_from_monster(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -2601,7 +2600,7 @@ pub fn spell_drain_life_from_monster(coord: Coord_t, direction: i32) -> bool {
     drained
 }
 
-/// C++ spells.cpp lines 1232–1279.
+/// 1279
 #[must_use]
 pub fn spell_speed_monster(coord: Coord_t, direction: i32, speed: i32) -> bool {
     let mut coord = coord;
@@ -2665,7 +2664,7 @@ pub fn spell_speed_monster(coord: Coord_t, direction: i32, speed: i32) -> bool {
     changed
 }
 
-/// C++ spells.cpp lines 1282–1334.
+/// 1334
 #[must_use]
 pub fn spell_confuse_monster(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -2741,7 +2740,7 @@ pub fn spell_confuse_monster(coord: Coord_t, direction: i32) -> bool {
     confused
 }
 
-/// C++ spells.cpp lines 1337–1378.
+/// 1378
 #[must_use]
 pub fn spell_sleep_monster(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -2804,7 +2803,7 @@ pub fn spell_sleep_monster(coord: Coord_t, direction: i32) -> bool {
     asleep
 }
 
-/// C++ spells.cpp lines 1499–1539.
+/// 1539
 #[must_use]
 pub fn spell_polymorph_monster(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -2872,7 +2871,7 @@ pub fn spell_polymorph_monster(coord: Coord_t, direction: i32) -> bool {
     morphed
 }
 
-/// C++ spells.cpp lines 1607–1628.
+/// 1628
 #[must_use]
 pub fn spell_clone_monster(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -2906,7 +2905,7 @@ pub fn spell_clone_monster(coord: Coord_t, direction: i32) -> bool {
     false
 }
 
-/// C++ spells.cpp lines 1703–1730.
+/// 1730
 #[must_use]
 pub fn spell_teleport_away_monster_in_direction(coord: Coord_t, direction: i32) -> bool {
     let mut coord = coord;
@@ -2943,7 +2942,7 @@ pub fn spell_teleport_away_monster_in_direction(coord: Coord_t, direction: i32) 
     teleported
 }
 
-/// C++ spells.cpp lines 1734–1748.
+/// 1748
 #[must_use]
 pub fn spell_mass_genocide() -> bool {
     let mut killed = false;
@@ -2970,7 +2969,7 @@ pub fn spell_mass_genocide() -> bool {
     killed
 }
 
-/// C++ spells.cpp lines 1753–1779.
+/// 1779
 #[must_use]
 pub fn spell_genocide() -> bool {
     let mut creature_char = 0u8;
@@ -3013,7 +3012,7 @@ pub fn spell_genocide() -> bool {
     killed
 }
 
-/// C++ spells.cpp lines 1783–1819.
+/// 1819
 #[must_use]
 pub fn spell_speed_all_monsters(speed: i32) -> bool {
     let mut speedy = false;
@@ -3074,7 +3073,7 @@ pub fn spell_speed_all_monsters(speed: i32) -> bool {
     speedy
 }
 
-/// C++ spells.cpp lines 1822–1852.
+/// 1852
 #[must_use]
 pub fn spell_sleep_all_monsters() -> bool {
     let mut asleep = false;
@@ -3132,7 +3131,7 @@ pub fn spell_sleep_all_monsters() -> bool {
     asleep
 }
 
-/// C++ spells.cpp lines 1856–1878.
+/// 1878
 #[must_use]
 pub fn spell_mass_polymorph() -> bool {
     let mut morphed = false;
@@ -3173,7 +3172,7 @@ pub fn spell_mass_polymorph() -> bool {
     morphed
 }
 
-/// C++ spells.cpp lines 2032–2064.
+/// 2064
 #[must_use]
 pub fn spell_dispel_creature(creature_defense: i32, damage: i32) -> bool {
     let mut dispelled = false;
@@ -3230,7 +3229,7 @@ pub fn spell_dispel_creature(creature_defense: i32, damage: i32) -> bool {
     dispelled
 }
 
-/// C++ spells.cpp lines 2067–2094.
+/// 2094
 #[must_use]
 pub fn spell_turn_undead() -> bool {
     let mut turned = false;
@@ -3284,7 +3283,7 @@ pub fn spell_turn_undead() -> bool {
     turned
 }
 
-/// C++ spells.cpp lines 2097–2103.
+/// 2103
 pub fn spell_warding_glyph() {
     let player_pos = with_state(|state| state.py.pos);
     let y = player_pos.y as usize;
@@ -3329,7 +3328,7 @@ fn replace_spot(coord: Coord_t, typ: i32) {
     });
 }
 
-/// C++ spells.cpp lines 2260–2284.
+/// 2284
 pub fn spell_destroy_area(coord: Coord_t) {
     if with_state(|state| state.dg.current_level) > 0 {
         for spot_y in coord.y - 15..=coord.y + 15 {
@@ -3363,7 +3362,6 @@ pub fn spell_destroy_area(coord: Coord_t) {
     });
 }
 
-/// Port of `Spell_t` in spells.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Spell {
     pub level_required: u8,

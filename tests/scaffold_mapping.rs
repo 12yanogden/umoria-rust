@@ -1,4 +1,4 @@
-//! Meta-tests verifying the Rust crate scaffold mirrors the C++ source layout.
+//! Meta-tests verifying the Rust crate module layout stays coherent.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -7,7 +7,7 @@
     reason = "integration-test helpers sit outside #[test]; clippy.toml allow-*-in-tests only covers test fn bodies"
 )]
 
-use std::collections::{BTreeSet, HashSet};
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -19,29 +19,8 @@ fn src_dir() -> PathBuf {
     repo_root().join("src")
 }
 
-fn cpp_stems() -> Vec<String> {
-    let mut stems: Vec<String> = fs::read_dir(src_dir())
-        .expect("src/ directory must exist")
-        .filter_map(|entry| {
-            let entry = entry.ok()?;
-            let path = entry.path();
-            if path.extension()?.to_str()? == "cpp" {
-                path.file_stem()?.to_str().map(String::from)
-            } else {
-                None
-            }
-        })
-        .collect();
-    stems.sort();
-    stems
-}
-
-fn non_main_cpp_stems() -> Vec<String> {
-    cpp_stems().into_iter().filter(|s| s != "main").collect()
-}
-
-fn declared_modules(main_rs: &str) -> BTreeSet<String> {
-    main_rs
+fn declared_modules(lib_rs: &str) -> BTreeSet<String> {
+    lib_rs
         .lines()
         .filter_map(|line| {
             let line = line.split("//").next()?.trim();
@@ -52,7 +31,7 @@ fn declared_modules(main_rs: &str) -> BTreeSet<String> {
             }
             Some(name.to_string())
         })
-        .chain(main_rs.lines().filter_map(|line| {
+        .chain(lib_rs.lines().filter_map(|line| {
             let line = line.split("//").next()?.trim();
             if line.starts_with("pub mod ") {
                 return None;
@@ -68,95 +47,56 @@ fn declared_modules(main_rs: &str) -> BTreeSet<String> {
 }
 
 #[test]
-fn test_every_cpp_has_sibling_rs_module() {
-    for stem in cpp_stems() {
-        let rs_path = src_dir().join(format!("{stem}.rs"));
+fn test_no_c_or_cxx_sources_in_src() {
+    let entries = fs::read_dir(src_dir()).expect("src/ directory must exist");
+    for entry in entries {
+        let path = entry.expect("src entry").path();
+        let Some(ext) = path.extension().and_then(|e| e.to_str()) else {
+            continue;
+        };
         assert!(
-            rs_path.is_file(),
-            "missing sibling Rust module for src/{stem}.cpp: expected {}",
-            rs_path.display()
-        );
-    }
-}
-
-#[test]
-fn test_header_only_modules_exist() {
-    for name in ["types", "version", "dungeon_tile"] {
-        let path = src_dir().join(format!("{name}.rs"));
-        assert!(
-            path.is_file(),
-            "missing header-only module: {}",
+            !matches!(ext, "cpp" | "cc" | "cxx" | "c" | "h" | "hpp" | "hxx"),
+            "C/C++ source must not remain in src/: {}",
             path.display()
         );
     }
+    assert!(
+        !repo_root().join("CMakeLists.txt").exists(),
+        "CMakeLists.txt must not be present (Rust-only repo)"
+    );
 }
 
 #[test]
 fn test_main_declares_every_module() {
     let lib_rs = fs::read_to_string(src_dir().join("lib.rs")).expect("src/lib.rs must exist");
-
     let declared = declared_modules(&lib_rs);
 
-    for stem in non_main_cpp_stems() {
+    for name in &declared {
+        let path = src_dir().join(format!("{name}.rs"));
         assert!(
-            declared.contains(&stem),
-            "src/lib.rs missing `mod {stem};` declaration"
+            path.is_file(),
+            "declared module `{name}` missing file {}",
+            path.display()
         );
     }
-
-    for name in ["types", "version", "dungeon_tile"] {
-        assert!(
-            declared.contains(name),
-            "src/lib.rs missing `mod {name};` declaration"
-        );
-    }
-
-    // 50 non-main cpp modules + entry (main.cpp logic) + 3 header-only = 54 declarations.
-    // main.cpp maps to src/entry.rs; main.rs is a thin binary wrapper.
-    assert!(
-        declared.contains("entry"),
-        "src/lib.rs missing `mod entry;` for main.cpp"
-    );
-    assert_eq!(
-        declared.len(),
-        54,
-        "expected exactly 54 module declarations in lib.rs, found {}",
-        declared.len()
-    );
-}
-
-#[test]
-fn test_no_orphan_cpp_or_unmapped() {
-    let lib_rs = fs::read_to_string(src_dir().join("lib.rs")).expect("src/lib.rs must exist");
-    let declared = declared_modules(&lib_rs);
-
-    let expected: BTreeSet<String> = non_main_cpp_stems()
-        .into_iter()
-        .chain([
-            "entry".into(),
-            "types".into(),
-            "version".into(),
-            "dungeon_tile".into(),
-        ])
-        .collect();
-
-    assert_eq!(
-        declared, expected,
-        "declared modules must exactly match non-main cpp stems plus header-only modules"
-    );
 
     assert!(
         !declared.contains("main"),
-        "main.cpp maps to src/entry.rs; there must be no `mod main;`"
-    );
-
-    assert!(
-        src_dir().join("entry.rs").is_file(),
-        "main.cpp counterpart must be src/entry.rs"
+        "binary entry is src/main.rs; there must be no `mod main;`"
     );
     assert!(
-        src_dir().join("main.rs").is_file(),
-        "binary entry must be src/main.rs"
+        declared.contains("entry"),
+        "src/lib.rs missing `mod entry;`"
+    );
+    assert!(src_dir().join("entry.rs").is_file());
+    assert!(src_dir().join("main.rs").is_file());
+    // Nested path module owned by identification.rs (not declared from lib.rs).
+    assert!(src_dir().join("identification_desc.rs").is_file());
+    assert_eq!(
+        declared.len(),
+        54,
+        "expected exactly 54 library modules, found {}",
+        declared.len()
     );
 }
 
@@ -164,77 +104,12 @@ fn test_no_orphan_cpp_or_unmapped() {
 fn test_curses_and_headers_have_no_module() {
     assert!(
         !src_dir().join("curses.rs").exists(),
-        "curses.h must not have a Rust module (phase_1.2 terminal binding)"
+        "curses.rs must not exist"
     );
     assert!(
         !src_dir().join("headers.rs").exists(),
-        "headers.h must not have a Rust module (umbrella include)"
+        "headers.rs must not exist"
     );
-}
-
-#[test]
-fn test_mapping_table_coverage() {
-    let manifest_path = repo_root().join("MODULE_MAP");
-    let manifest = fs::read_to_string(&manifest_path).unwrap_or_else(|_| {
-        panic!(
-            "MODULE_MAP manifest must exist at {}",
-            manifest_path.display()
-        )
-    });
-
-    let mut mapped_cpp: HashSet<String> = HashSet::new();
-    let mut mapped_h: HashSet<String> = HashSet::new();
-
-    for line in manifest.lines() {
-        let line = line.trim();
-        if line.is_empty() || line.starts_with('#') {
-            continue;
-        }
-        let parts: Vec<&str> = line.split_whitespace().collect();
-        assert!(
-            parts.len() >= 2,
-            "invalid MODULE_MAP line (expected `<kind> <filename>`): {line}"
-        );
-        match parts[0] {
-            "cpp" => {
-                mapped_cpp.insert(parts[1].to_string());
-            }
-            "h" => {
-                mapped_h.insert(parts[1].to_string());
-            }
-            other => panic!("unknown MODULE_MAP entry kind: {other}"),
-        }
-    }
-
-    let actual_cpp: HashSet<String> = cpp_stems()
-        .into_iter()
-        .map(|s| format!("{s}.cpp"))
-        .collect();
-    let actual_h: HashSet<String> = fs::read_dir(src_dir())
-        .expect("src/ directory must exist")
-        .filter_map(|entry| {
-            let entry = entry.ok()?;
-            let path = entry.path();
-            if path.extension()?.to_str()? == "h" {
-                path.file_name()?.to_str().map(String::from)
-            } else {
-                None
-            }
-        })
-        .collect();
-
-    assert_eq!(
-        mapped_cpp, actual_cpp,
-        "MODULE_MAP cpp entries must match src/*.cpp"
-    );
-    assert_eq!(
-        mapped_h, actual_h,
-        "MODULE_MAP h entries must match src/*.h"
-    );
-
-    assert_eq!(mapped_cpp.len(), 51, "expected 51 cpp files in MODULE_MAP");
-    assert_eq!(mapped_h.len(), 26, "expected 26 h files in MODULE_MAP");
-    assert_eq!(mapped_cpp.len() + mapped_h.len(), 77);
 }
 
 #[test]
@@ -243,9 +118,9 @@ fn test_data_files_present() {
     let required = [
         "help.txt",
         "welcome.txt",
-        "splash.txt.in",
+        "splash.txt",
+        "versions.txt",
         "scores.dat",
-        "versions.txt.in",
     ];
     for name in required {
         let path = data_dir.join(name);

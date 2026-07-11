@@ -8,7 +8,7 @@
 )]
 #![allow(
     unused_imports,
-    reason = "re-exports and C++-mirrored imports kept for call-site parity"
+    reason = "re-exports and -mirrored imports kept for call-site parity"
 )]
 
 mod common;
@@ -18,7 +18,6 @@ use common::{
 };
 
 /// Smoke check: golden screen artifact exists and has expected dimensions.
-///
 /// Live PTY replay lives in [`transcript_replay_live_matches_golden_screen`]
 /// (enabled with `--features differential_live`, which CI's Test job uses via `--all-features`).
 #[test]
@@ -57,7 +56,6 @@ fn transcript_replay_matches_golden_screen() {
 }
 
 /// Live PTY replay against the binary — required under `differential_live`.
-///
 /// Default `cargo test` skips this (feature off). CI runs `cargo test --all-features`.
 #[cfg(feature = "differential_live")]
 #[test]

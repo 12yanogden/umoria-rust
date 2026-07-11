@@ -1,4 +1,4 @@
-//! Port of `src/data_stores.cpp` — immutable store definition tables.
+//! Immutable store definition tables
 
 use std::sync::LazyLock;
 

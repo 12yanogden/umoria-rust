@@ -1,4 +1,4 @@
-//! `data_store_owners` store owner table parity.
+//! `data_store_owners` store owner table tests.
 #![allow(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -24,9 +24,9 @@ use umoria::store::{
     SPEECH_SELLING_HAGGLE_FINAL as SPEECH_SELLING_HAGGLE_FINAL_N, SPEECH_SORRY as SPEECH_SORRY_N,
 };
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Length assertions
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn store_owners_length() {
     assert_eq!(STORE_OWNERS.len(), 18);
@@ -73,9 +73,9 @@ fn speech_array_lengths() {
     assert_eq!(SPEECH_SORRY.len(), SPEECH_SORRY_N as usize);
 }
 
-// ---------------------------------------------------------------------------
-// 2. Spot-check store_owners[0] and [17] (src/data_store_owners.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 2. Spot-check store_owners[0] and [17]
+// --------------------------------------------------------------------------
 #[test]
 fn store_owners_first_entry() {
     let o = &STORE_OWNERS[0];
@@ -100,9 +100,9 @@ fn store_owners_last_entry() {
     assert_eq!(o.max_insults, 10);
 }
 
-// ---------------------------------------------------------------------------
-// 3. Spot-check speech arrays (src/data_store_owners.cpp)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 3. Spot-check speech arrays
+// --------------------------------------------------------------------------
 #[test]
 fn speech_sale_accepted_spot_checks() {
     assert_eq!(SPEECH_SALE_ACCEPTED[0], "Done!");

@@ -1,7 +1,7 @@
-//! `player_traps` parity.
+//! `player_traps` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -156,9 +156,9 @@ fn reset_monster_slots() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Floor trap disarm — RNG gates
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn floor_trap_disarm_success_rng_order_seed42() {
@@ -169,7 +169,7 @@ fn floor_trap_disarm_success_rng_order_seed42() {
 
     player_disarm_floor_trap(TARGET, 50, 10, NORTH, 0);
 
-    // After success, player_move always consumes randomNumber(4) (C++ playerRandomMovement).
+    // After success, player_move always consumes randomNumber(4) (playerRandomMovement).
     assert_eq!(next_random_pair(100), (100, 2));
     with_state(|s| {
         assert_eq!(
@@ -237,9 +237,9 @@ fn floor_trap_disarm_skips_random_number_total_when_total_le_5() {
     assert_eq!(random_number(100), after_low_total);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. Chest disarm — RNG gates
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn chest_disarm_success_rng_order_seed12() {
@@ -307,9 +307,9 @@ fn chest_disarm_skips_random_number_total_when_total_le_5() {
     assert_eq!(random_number(100), after_low_total);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. chestTrap — per-flag RNG order
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn chest_trap_lose_str_rng_order_seed9() {
@@ -428,9 +428,9 @@ fn chest_trap_free_action_skips_paralysis_rng() {
     with_state(|s| assert_eq!(s.py.flags.paralysis, 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. playerDisarmTrap dispatch + outcome messages
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_disarm_trap_no_target_sets_free_turn() {

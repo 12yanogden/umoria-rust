@@ -16,7 +16,7 @@ use umoria::game_save::{
 };
 
 #[test]
-fn scores_byte_exact_roundtrip_matches_cpp_golden() {
+fn scores_byte_exact_roundtrip_matches_expected_golden() {
     let manifest = load_manifest().expect("manifest.json should parse");
     let entry = manifest
         .goldens
@@ -31,7 +31,7 @@ fn scores_byte_exact_roundtrip_matches_cpp_golden() {
         "golden scores artifact must contain a version header and at least one record"
     );
 
-    // Preserve the golden version header; decode each HighScore record and re-encode.
+ // Preserve the golden version header; decode each HighScore record and re-encode.
     let mut rebuilt = golden[..3].to_vec();
     let mut offset = 3usize;
     while offset + HIGH_SCORE_RECORD_SIZE <= golden.len() {

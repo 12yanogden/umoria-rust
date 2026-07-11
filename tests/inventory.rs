@@ -1,7 +1,7 @@
-//! `inventory` parity.
+//! `inventory` tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -113,9 +113,9 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. Stacking & slot logic
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn inventory_item_stackable_boundaries() {
@@ -156,7 +156,7 @@ fn inventory_item_stackable_boundaries() {
         1,
         10
     )));
-    // sub_category_id 192 is both ITEM_SINGLE_STACK_MAX and ITEM_GROUP_MIN (torch case).
+ // sub_category_id 192 is both ITEM_SINGLE_STACK_MAX and ITEM_GROUP_MIN (torch case).
     assert!(inventory_item_single_stackable(make_item(
         TV_FOOD,
         ITEM_GROUP_MIN,
@@ -190,9 +190,9 @@ fn inventory_find_range_finds_contiguous_tval_block() {
     assert_eq!(end, 1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. Flags & curses
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn inventory_collect_flags_ors_worn_equipment() {
@@ -207,7 +207,7 @@ fn inventory_collect_flags_ors_worn_equipment() {
 }
 
 #[test]
-fn inventory_curse_helpers_match_cpp_bits() {
+fn inventory_curse_helpers_match_expected_bits() {
     let mut item = Inventory::default();
     assert!(!inventory_item_is_cursed(item));
     item.flags = TR_CURSED;
@@ -217,9 +217,9 @@ fn inventory_curse_helpers_match_cpp_bits() {
     assert_eq!(item.flags, 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. Carry / capacity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn inventory_can_carry_item_count_empty_pack() {
@@ -249,7 +249,7 @@ fn inventory_carry_item_stacks_and_updates_weight() {
 }
 
 #[test]
-fn inventory_can_carry_item_heaviness_matches_cpp_formula() {
+fn inventory_can_carry_item_heaviness_matches_expected_formula() {
     reset_for_new_game(Some(1));
     setup_player_base();
     let limit = with_state(|s| {
@@ -269,9 +269,9 @@ fn inventory_can_carry_item_heaviness_matches_cpp_formula() {
     assert!(inventory_can_carry_item(item));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. Destroy / drop / copy / take-one
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn inventory_destroy_item_partial_stack_single_stackable() {
@@ -347,9 +347,9 @@ fn inventory_drop_item_one_of_stack() {
     assert!(message_text(with_state(|s| s.last_message_id)).starts_with("Dropped "));
 }
 
-// ---------------------------------------------------------------------------
-// 10. C++ integer semantics
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 10. Integer semantics
+// --------------------------------------------------------------------------
 
 #[test]
 fn inventory_carry_item_items_count_wraps_at_255() {
@@ -377,9 +377,9 @@ fn inventory_destroy_item_weight_uses_u16_times_u8() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. RNG-order golden — inventory_damage_item
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn inventory_damage_item_rng_order_seed_42_frost() {
@@ -422,9 +422,9 @@ fn inventory_damage_item_fire_three_rolls_seed_777() {
     with_state(|s| assert_eq!(s.py.pack.unique_items, 3));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. damage* handlers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn damage_fire_applies_resistance_and_pack_message() {
@@ -488,9 +488,9 @@ fn damage_acid_flag_divisor_and_pack_destruction() {
     with_state(|s| assert_eq!(s.py.misc.current_hp, 490));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. executeDisenchantAttack
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn execute_disenchant_attack_seed_42_reduces_enchantment() {
@@ -533,9 +533,9 @@ fn execute_disenchant_attack_seed_42_reduces_enchantment() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Diminish light / charges
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn inventory_diminish_light_attack_seed_42() {
@@ -572,9 +572,9 @@ fn inventory_diminish_charges_attack_drains_wand() {
     with_state(|s| assert_eq!(s.py.inventory[0].misc_use, 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 9. damageMinusAC
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn damage_minus_ac_damages_armor_seed_42() {

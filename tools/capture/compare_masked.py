@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase 1.4.4 - Masked comparison of Umoria golden binary files.
+"""Masked comparison of Umoria golden binary files.
 
 On macOS SIP blocks ``libfaketime`` DYLD injection, so clock-derived bytes in
 the save/score files cannot be frozen. Instead we compare *outside* the
@@ -7,19 +7,19 @@ documented volatile byte ranges (the save timestamp ``l`` and the player
 ``date_of_birth``; the score ``birth_date``).
 
 Umoria's save/score byte streams are XOR-obfuscated with a *chained* running
-key: ``ciphertext[i] = ciphertext[i-1] ^ plaintext[i]`` (see ``wrByte``/``wrLong``
-in ``src/game_save.cpp``). A single differing plaintext byte therefore cascades
+key: ``ciphertext[i] = ciphertext[i-1] ^ plaintext[i]`` (see ``wr_byte``/``wr_long``
+in ``src/game_save.rs``). A single differing plaintext byte therefore cascades
 through every following ciphertext byte, so masking must be done on the DECODED
 plaintext, where ``plaintext[i] = ciphertext[i] ^ ciphertext[i-1]`` is local.
 
 Decode schemes (which byte indices reset the running key to 0 before the byte):
-  * ``save``  - the three version bytes plus the ``char_tmp`` byte each reset
+  * ``save`` - the three version bytes plus the ``char_tmp`` byte each reset
                 ``xor_byte`` to 0, i.e. indices {0, 1, 2, 3} (``saveChar()``).
   * ``score`` - the three version bytes reset (indices {0, 1, 2}); each 64-byte
                 ``HighScore_t`` record additionally re-seeds the key from its own
                 first raw byte (``readHighScore`` does ``xor_byte = getByte()``),
                 which the chained decode already handles for the record body.
-  * ``raw``   - no decoding (compare bytes as-is).
+  * ``raw`` - no decoding (compare bytes as-is).
 
 Usage:
     compare_masked.py --scheme save --mask 3894:4 --mask 3910:4 FILE_A FILE_B
@@ -93,7 +93,7 @@ def main():
     print(f"DIFFER: {len(diffs)} plaintext byte(s) differ outside masks; "
           f"first at {diffs[0] if diffs else '?'}", file=sys.stderr)
     for i in diffs[:16]:
-        print(f"  offset {i}: {da[i]:#04x} != {db[i]:#04x}", file=sys.stderr)
+        print(f" offset {i}: {da[i]:#04x} != {db[i]:#04x}", file=sys.stderr)
     return 1
 
 

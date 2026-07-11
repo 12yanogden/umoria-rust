@@ -1,4 +1,4 @@
-//! Port of `src/game_run.cpp` — boot path (`phase_5.6.1`) and command dispatch (`phase_5.6.3`).
+//! Boot path and command dispatch.
 
 use std::cell::{Cell, RefCell};
 use std::path::Path;
@@ -237,7 +237,6 @@ pub fn test_set_play_dungeon_max_turns(max: u32) {
     TEST_PLAY_DUNGEON_MAX_TURNS.with(|c| c.set(max));
 }
 
-/// C++ `examineBook` (`game_run.cpp:2083–2146`).
 pub fn examine_book() {
     let mut item_pos_start = 0i32;
     let mut item_pos_end = 0i32;
@@ -314,7 +313,6 @@ pub fn examine_book() {
     }
 }
 
-/// C++ `dungeonGoUpLevel` (`game_run.cpp:2149–2163`).
 pub fn dungeon_go_up_level() {
     let (y, x) = with_state(|state| (state.py.pos.y as usize, state.py.pos.x as usize));
     let tile_id = with_state(|state| state.dg.floor[y][x].treasure_id);
@@ -332,7 +330,6 @@ pub fn dungeon_go_up_level() {
     }
 }
 
-/// C++ `dungeonGoDownLevel` (`game_run.cpp:2166–2180`).
 pub fn dungeon_go_down_level() {
     let (y, x) = with_state(|state| (state.py.pos.y as usize, state.py.pos.x as usize));
     let tile_id = with_state(|state| state.dg.floor[y][x].treasure_id);
@@ -351,7 +348,6 @@ pub fn dungeon_go_down_level() {
     }
 }
 
-/// C++ `dungeonJamDoor` (`game_run.cpp:2183–2248`).
 pub fn dungeon_jam_door() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -431,7 +427,6 @@ pub fn dungeon_jam_door() {
     }
 }
 
-/// C++ `inventoryRefillLamp` (`game_run.cpp:2251–2284`).
 pub fn inventory_refill_lamp() {
     with_state_mut(|state| state.game.player_free_turn = true);
 
@@ -510,7 +505,6 @@ fn vtype_as_str(buf: &[u8]) -> String {
     String::from_utf8_lossy(&buf[..end]).into_owned()
 }
 
-/// C++ `getCommandRepeatCount` (`game_run.cpp:951–993`).
 pub fn get_command_repeat_count(last_input_command: &mut u8) -> i32 {
     terminal::put_string_clear_to_eol("Repeat count:", terminal::Coord { y: 0, x: 0 });
 
@@ -553,7 +547,6 @@ pub fn get_command_repeat_count(last_input_command: &mut u8) -> i32 {
     repeat_count as i32
 }
 
-/// C++ `parseAlternateCtrlInput` (`game_run.cpp:995–1014`).
 pub fn parse_alternate_ctrl_input(mut last_input_command: u8) -> u8 {
     if with_state(|state| state.game.command_count > 0) {
         print_character_movement_state();
@@ -617,7 +610,6 @@ fn direction_to_tunnel_key(direction: i32) -> u8 {
     }
 }
 
-/// C++ `originalCommands` (`game_run.cpp:1109–1331`).
 pub fn original_commands(mut command: u8) -> u8 {
     let mut direction = 0i32;
 
@@ -693,7 +685,6 @@ pub fn original_commands(mut command: u8) -> u8 {
     command
 }
 
-/// C++ `moveWithoutPickup` (`game_run.cpp:1333–1386`).
 pub fn move_without_pickup(command: &mut u8) -> bool {
     let cmd = *command;
     if cmd != b'-' {
@@ -713,7 +704,6 @@ pub fn move_without_pickup(command: &mut u8) -> bool {
     false
 }
 
-/// C++ `commandQuit` (`game_run.cpp:1388–1397`).
 pub fn command_quit() {
     terminal::flush_input_buffer();
 
@@ -726,7 +716,6 @@ pub fn command_quit() {
     }
 }
 
-/// C++ `calculateMaxMessageCount` (`game_run.cpp:1399–1412`).
 pub fn calculate_max_message_count() -> u8 {
     let mut max_messages = MESSAGE_HISTORY_SIZE as u8;
 
@@ -743,7 +732,6 @@ pub fn calculate_max_message_count() -> u8 {
     max_messages
 }
 
-/// C++ `commandPreviousMessage` (`game_run.cpp:1414–1444`).
 pub fn command_previous_message() {
     let max_messages = calculate_max_message_count();
 
@@ -788,7 +776,6 @@ pub fn command_previous_message() {
     terminal::terminal_restore_screen();
 }
 
-/// C++ `commandFlipWizardMode` (`game_run.cpp:1446–1455`).
 pub fn command_flip_wizard_mode() {
     if with_state(|state| state.game.wizard_mode) {
         with_state_mut(|state| state.game.wizard_mode = false);
@@ -800,7 +787,6 @@ pub fn command_flip_wizard_mode() {
     print_character_winner();
 }
 
-/// C++ `commandSaveAndExit` (`game_run.cpp:1457–1476`).
 pub fn command_save_and_exit() {
     if with_state(|state| state.game.total_winner) {
         terminal::print_message(Some(
@@ -824,7 +810,6 @@ pub fn command_save_and_exit() {
     }
 }
 
-/// C++ `commandLocateOnMap` (`game_run.cpp:1478–1548`).
 pub fn command_locate_on_map() {
     if with_state(|state| state.py.flags.blind > 0) || player_no_light() {
         terminal::print_message(Some("You can't see your map."));
@@ -902,7 +887,6 @@ pub fn command_locate_on_map() {
     }
 }
 
-/// C++ `commandToggleSearch` (`game_run.cpp:1550–1556`).
 pub fn command_toggle_search() {
     if with_state(|state| state.py.flags.status & PY_SEARCH != 0) {
         player_search_off();
@@ -911,7 +895,6 @@ pub fn command_toggle_search() {
     }
 }
 
-/// C++ `doWizardCommands` (`game_run.cpp:1558–1634`).
 pub fn do_wizard_commands(command: u8) {
     match command {
         c if c == ctrl_key(b'A') => wizard_cure_all(),
@@ -1048,7 +1031,6 @@ pub const VALID_COUNT_TRUE: &[u8] = &[
     b'+',
 ];
 
-/// C++ `validCountCommand` (`game_run.cpp:1898–1986`).
 pub fn valid_count_command(command: u8) -> bool {
     if VALID_COUNT_FALSE.contains(&command) {
         return false;
@@ -1059,7 +1041,6 @@ pub fn valid_count_command(command: u8) -> bool {
     false
 }
 
-/// C++ `doCommand` (`game_run.cpp:1640–1895`).
 pub fn do_command(mut command: u8) {
     let do_pickup = move_without_pickup(&mut command);
 
@@ -1234,7 +1215,6 @@ pub fn do_command(mut command: u8) {
     with_state_mut(|state| state.game.last_command = command);
 }
 
-/// C++ `executeInputCommands` (`game_run.cpp:1017–1107`).
 pub fn execute_input_commands(command: &mut u8, find_count: &mut i32) {
     let mut last_input_command = *command;
 
@@ -1375,7 +1355,6 @@ fn setup_command_test_state() {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 5.6.2 — per-turn player status/upkeep updates
 // ---------------------------------------------------------------------------
 
 #[doc(hidden)]
@@ -2154,24 +2133,23 @@ pub fn player_detect_enchantment() {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 5.6.1 — startMoria boot path and init helpers
 // ---------------------------------------------------------------------------
 
-/// Round-half-up cost adjustment (C++ `priceAdjust` formula).
+/// Round-half-up cost adjustment.
 #[must_use]
 pub fn price_adjust_cost(cost: i32, adjustment: i32) -> i32 {
     ((cost * adjustment) + 50) / 100
 }
 
-/// C++ `game_run.cpp` lines 236–243.
+/// 243
 pub fn price_adjust() {
     if COST_ADJUSTMENT != 100 {
-        // C++ mutates the global `game_objects` table at boot. Rust keeps immutable
+        // mutates the global `game_objects` table at boot. Rust keeps immutable
         // `GAME_OBJECTS`; when COST_ADJUSTMENT != 100 the port would need mutable storage.
     }
 }
 
-/// C++ `game_run.cpp` lines 189–201.
+/// 201
 pub fn initialize_monster_levels() {
     with_state_mut(|state| {
         for level in &mut state.monster_levels {
@@ -2189,7 +2167,7 @@ pub fn initialize_monster_levels() {
     });
 }
 
-/// C++ `game_run.cpp` lines 204–233.
+/// 233
 pub fn initialize_treasure_levels() {
     with_state_mut(|state| {
         for level in &mut state.treasure_levels {
@@ -2215,7 +2193,7 @@ pub fn initialize_treasure_levels() {
     });
 }
 
-/// C++ `game_run.cpp` lines 160–186.
+/// 186
 pub fn initialize_character_inventory() {
     with_state_mut(|state| {
         for entry in &mut state.py.inventory {
@@ -2240,7 +2218,7 @@ pub fn initialize_character_inventory() {
     }
 }
 
-/// C++ `game_run.cpp` lines 252–259.
+/// 259
 pub fn reset_dungeon_flags() {
     with_state_mut(|state| {
         state.game.command_count = 0;
@@ -2254,7 +2232,7 @@ pub fn reset_dungeon_flags() {
     });
 }
 
-/// C++ `game_run.cpp` lines 262–264.
+/// 264
 pub fn player_initialize_player_light() {
     with_state_mut(|state| {
         state.py.carrying_light = state.py.inventory[PlayerEquipment::Light as usize].misc_use > 0;
@@ -2569,7 +2547,6 @@ fn play_dungeon_turn_body(last_input_command: &mut u8, find_count: &mut i32, tur
     }
 }
 
-/// C++ `playDungeon` (`game_run.cpp:2287–2425`).
 pub fn play_dungeon() {
     record_boot_event(BootEvent::PlayDungeon);
     let call = TEST_PLAY_DUNGEON_CALLS.with(|c| {
@@ -2594,7 +2571,7 @@ pub fn play_dungeon() {
     apply_play_dungeon_test_script(call);
 }
 
-/// C++ `game_run.cpp` lines 28–157.
+/// 157
 pub fn start_moria(seed: u32, start_new_game: bool, roguelike_keys: bool) {
     with_state_mut(|state| state.options.use_roguelike_keys = roguelike_keys);
     record_boot_event(BootEvent::SetRoguelikeKeys);

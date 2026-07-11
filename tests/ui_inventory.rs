@@ -42,9 +42,9 @@ fn set_inscription(item_id: usize, ch: u8) {
     });
 }
 
-// ---------------------------------------------------------------------------
-// Pure logic — inventoryItemWeightText (ui_inventory.cpp:8-14)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// Pure logic — inventoryItemWeightText
+// --------------------------------------------------------------------------
 #[test]
 fn weight_text_123_total() {
     reset_for_new_game(None);
@@ -73,9 +73,9 @@ fn weight_text_zero_total() {
     assert_eq!(inventory_item_weight_text(0), "  0.0 lb");
 }
 
-// ---------------------------------------------------------------------------
-// equipmentPositionDescription (ui_inventory.cpp:124-156)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// equipmentPositionDescription
+// --------------------------------------------------------------------------
 #[test]
 fn equipment_position_all_slots() {
     assert_eq!(
@@ -152,9 +152,9 @@ fn equipment_position_unknown_id() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// playerItemWearingDescription (ui_inventory.cpp:93-122)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// playerItemWearingDescription
+// --------------------------------------------------------------------------
 #[test]
 fn player_item_wearing_all_slots() {
     assert_eq!(
@@ -212,9 +212,9 @@ fn player_item_wearing_default() {
     assert_eq!(player_item_wearing_description(21), "carrying in your pack");
 }
 
-// ---------------------------------------------------------------------------
-// buildCommandHeading (ui_inventory.cpp:508-523)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// buildCommandHeading
+// --------------------------------------------------------------------------
 #[test]
 fn build_command_heading_blank_screen_list_suffix() {
     let s = build_command_heading(0, 2, "", b'w', "Wear/Wield", Screen::Blank);
@@ -242,9 +242,9 @@ fn build_command_heading_take_off_no_digits() {
     );
 }
 
-// ---------------------------------------------------------------------------
-// inventoryGetItemMatchingInscription (ui_inventory.cpp:484-506)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// inventoryGetItemMatchingInscription
+// --------------------------------------------------------------------------
 #[test]
 fn inscription_match_digit_in_range() {
     reset_for_new_game(None);
@@ -265,7 +265,7 @@ fn inscription_match_digit_not_found() {
 fn inscription_match_digit_skipped_for_r_command() {
     reset_for_new_game(None);
     set_inscription(2, b'5');
-    // command 'r' falls through to which-'a' branch: '5'-'a' = negative / wrong
+ // command 'r' falls through to which-'a' branch: '5'-'a' = negative / wrong
     assert_eq!(
         inventory_get_item_matching_inscription(b'5', b'r', 0, 5),
         -44
@@ -292,9 +292,9 @@ fn inscription_match_lowercase_c() {
     assert_eq!(inventory_get_item_matching_inscription(b'c', b'd', 0, 5), 2);
 }
 
-// ---------------------------------------------------------------------------
-// inventoryGetSlotToWearEquipment non-ring (ui_inventory.cpp:572-628)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// inventoryGetSlotToWearEquipment non-ring
+// --------------------------------------------------------------------------
 #[test]
 fn wear_slot_weapons_to_wield() {
     for cat in [
@@ -362,7 +362,7 @@ fn wear_slot_unknown_category() {
 
 #[test]
 fn wear_slot_ring_path() {
-    // C++: empty right hand → Right; empty left (right occupied) → Left.
+ // empty right hand → Right; empty left (right occupied) → Left.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     with_state_mut(|s| {
@@ -384,9 +384,9 @@ fn wear_slot_ring_path() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
-// switch_screen_line_pos + bottom pos (ui_inventory.cpp:281-323)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// switch_screen_line_pos + bottom pos
+// --------------------------------------------------------------------------
 #[test]
 fn switch_screen_line_pos_branches() {
     assert_eq!(switch_screen_line_pos(Screen::Blank, 5, 0, 2, 3), 0);
@@ -399,19 +399,19 @@ fn switch_screen_line_pos_branches() {
 
 #[test]
 fn apply_switch_screen_bottom_extend() {
-    // currentLinePos >= screen_bottom_pos → bottom = currentLinePos+1
+ // currentLinePos >= screen_bottom_pos → bottom = currentLinePos+1
     assert_eq!(apply_switch_screen_bottom_pos(5, 3), (6, true));
 }
 
 #[test]
 fn apply_switch_screen_bottom_shrink() {
-    // currentLinePos < screen_bottom_pos → erase from currentLinePos+1 .. bottom
+ // currentLinePos < screen_bottom_pos → erase from currentLinePos+1 .. bottom
     assert_eq!(apply_switch_screen_bottom_pos(2, 5), (5, false));
 }
 
-// ---------------------------------------------------------------------------
-// uiCommandSwitchScreen state (ui_inventory.cpp:281-323)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// uiCommandSwitchScreen state
+// --------------------------------------------------------------------------
 #[test]
 fn ui_command_switch_screen_noop_same_screen() {
     reset_for_new_game(None);
@@ -443,9 +443,9 @@ fn ui_command_switch_screen_help_sets_bottom() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
-// requestAndShowInventoryScreen (ui_inventory.cpp:339-364)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// requestAndShowInventoryScreen
+// --------------------------------------------------------------------------
 #[test]
 fn request_inventory_screen_fresh_start() {
     reset_for_new_game(None);
@@ -489,9 +489,9 @@ fn request_inventory_screen_changed_recover_aborts() {
     });
 }
 
-// ---------------------------------------------------------------------------
-// Command helpers (ui_inventory.cpp:366-432)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// Command helpers
+// --------------------------------------------------------------------------
 #[test]
 fn take_off_no_equipment() {
     reset_for_new_game(None);
@@ -511,7 +511,7 @@ fn take_off_pack_full_blocks() {
 
 #[test]
 fn take_off_switches_to_equipment() {
-    // C++ ui_inventory.cpp:378-380 — only switch when current != Blank.
+ // only switch when current != Blank.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     with_state_mut(|s| s.py.equipment_count = 1);
@@ -599,9 +599,9 @@ fn wear_wield_nothing_message() {
     assert!(!ui_command_inventory_wear_wield_item(false));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // RefCell nest regression — must panic on old nested-borrow code
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 fn push_keys_in_consume_order(keys: &[i32]) {
     let mut reversed = keys.to_vec();
@@ -679,7 +679,7 @@ fn inventory_drop_uppercase_verify_does_not_panic() {
         s.py.pos.x = 5;
         s.dg.floor[5][5].treasure_id = 0;
     });
-    // d → select A (uppercase verify) → n (decline) → ESC
+ // d → select A (uppercase verify) → n (decline) → ESC
     push_keys_in_consume_order(&[
         i32::from(umoria::ui_io::ESCAPE),
         i32::from(b'n'),
@@ -701,7 +701,7 @@ fn inventory_drop_stack_confirm_does_not_panic() {
         s.py.pos.x = 5;
         s.dg.floor[5][5].treasure_id = 0;
     });
-    // d → a → n (don't drop all / abort path) → ESC
+ // d → a → n (don't drop all / abort path) → ESC
     push_keys_in_consume_order(&[
         i32::from(umoria::ui_io::ESCAPE),
         i32::from(b'n'),
@@ -741,7 +741,7 @@ fn inventory_wear_cursed_slot_message_does_not_panic() {
         s.py.inventory[slot].flags |= TR_CURSED;
         s.py.equipment_count = 1;
     });
-    // w → a (try wear over cursed) → ESC
+ // w → a (try wear over cursed) → ESC
     push_keys_in_consume_order(&[i32::from(umoria::ui_io::ESCAPE), i32::from(b'a')]);
     umoria::ui_inventory::inventory_execute_command(b'w');
     test_set_ncurses_stub(false);

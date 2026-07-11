@@ -1,7 +1,7 @@
 //! `store_inventory` parity (pricing, stock maintenance, inventory ops).
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -83,9 +83,9 @@ fn set_all_stores_same(owner_id: u8, unique: u8, item: Inventory, cost: i32) {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. storeItemValue per-category parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_item_value_cursed_is_zero() {
@@ -249,9 +249,9 @@ fn store_item_value_group_stack_multiplies_by_count() {
     assert_eq!(store_item_value(&item), 50);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. storeItemSellPrice parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_item_sell_price_zero_when_cursed_or_valueless() {
@@ -325,9 +325,9 @@ fn store_item_sell_price_min_inflate_clamped_to_max() {
     assert_eq!(min, max);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 6. storeCheckPlayerItemsCount parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_check_player_items_count_room_available() {
@@ -377,9 +377,9 @@ fn store_check_player_items_count_group_requires_misc_match() {
     assert!(!store_check_player_items_count(&store, &item));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 7. storeCarryItem parity
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_carry_item_rejects_zero_sell_price() {
@@ -421,9 +421,9 @@ fn store_carry_item_merges_stack_and_caps_at_twenty_four() {
 
 #[test]
 fn store_carry_item_insert_before_higher_category_and_negative_cost() {
-    // Store sorted by descending category: inserting FOOD (80) into a store
-    // that already has SWORD (23) hits `item_category > store_item.category_id`
-    // and inserts at slot 0 (C++ store_inventory.cpp lines 299–302).
+ // Store sorted by descending category: inserting FOOD (80) into a store
+ // that already has SWORD (23) hits `item_category > store_item.category_id`
+ // and inserts at slot 0.
     reset_for_new_game(Some(42));
     with_state_mut(|s| {
         s.py.misc.race_id = 0;
@@ -449,8 +449,8 @@ fn store_carry_item_insert_before_higher_category_and_negative_cost() {
 
 #[test]
 fn store_carry_item_append_returns_post_insert_index() {
-    // C++ store_inventory.cpp lines 307–311: after append insert,
-    // index_id = unique_items_counter - 1 (the new last slot), not pos - 1.
+ // after append insert,
+ // index_id = unique_items_counter - 1 (the new last slot), not pos - 1.
     reset_for_new_game(Some(42));
     with_state_mut(|s| {
         s.py.misc.race_id = 0;
@@ -474,9 +474,9 @@ fn store_carry_item_append_returns_post_insert_index() {
     assert_eq!(store_snapshot(0).0, 2);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. storeDestroyItem RNG
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_destroy_item_single_stackable_partial_seed42() {
@@ -530,9 +530,9 @@ fn store_destroy_item_non_single_stackable_compacts_slot() {
     assert_eq!(random_number(100), 73);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. storeMaintenance RNG-order golden
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_maintenance_seed42_counter15_all_stores() {
@@ -594,9 +594,9 @@ fn store_maintenance_sell_only_high_stock_shrinking_destroy_arg() {
     assert!(after <= before);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. storeItemCreate via maintenance buy path
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_item_create_acceptance_via_empty_store_seed42() {
@@ -621,9 +621,9 @@ fn store_item_create_acceptance_via_empty_store_seed42() {
     assert!(unique > 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 8. Integer-semantics tests
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn store_item_value_wand_charge_bonus_integer_division() {
@@ -682,7 +682,7 @@ fn inventory_item_single_stackable_boundaries_for_destroy() {
 }
 
 #[test]
-fn store_maintenance_branch_constants_match_cpp() {
+fn store_maintenance_branch_constants_match_expected() {
     assert_eq!(STORE_MIN_AUTO_SELL_ITEMS, 10);
     assert_eq!(STORE_MAX_AUTO_BUY_ITEMS, 18);
     assert_eq!(STORE_STOCK_TURN_AROUND, 9);

@@ -1,7 +1,7 @@
-//! Identification state, flavor init & identify logic parity.
+//! Identification state, flavor init & identify logic tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -139,7 +139,7 @@ fn make_item(category_id: u8, sub_category_id: u8, items_count: u8) -> Inventory
 }
 
 #[test]
-fn magic_initialize_item_names_matches_cpp_goldens() {
+fn magic_initialize_item_names_matches_expected_goldens() {
     const MAIN_SEED: u32 = 12345;
     const MAGIC_SEEDS: [u32; 4] = [1, 42, 12345, 1_700_000_000];
 
@@ -169,13 +169,13 @@ fn magic_initialize_item_names_matches_cpp_goldens() {
 }
 
 #[test]
-fn magic_initialize_item_names_restore_matches_cpp_seed_set() {
+fn magic_initialize_item_names_restore_matches_expected_seed_set() {
     setup_main_rng(999);
     let before = get_seed();
     with_state_mut(|s| s.game.magic_seed = 42);
     magic_initialize_item_names();
-    // C++ seedResetToOldSeed() calls setRandomSeed(old_seed), which re-normalizes:
-    // restored = (old_seed % (RNG_M-1)) + 1 — one past the saved stream position.
+ // seedResetToOldSeed() calls setRandomSeed(old_seed), which re-normalizes:
+ // restored = (old_seed % (RNG_M-1)) + 1 — one past the saved stream position.
     assert_eq!(get_seed(), before.wrapping_add(1));
 }
 
@@ -414,7 +414,7 @@ fn magic_item_title_truncates_at_nine_chars() {
     with_state(|s| {
         for title in &s.flavor.magic_item_titles {
             let end = title.iter().position(|&b| b == 0).unwrap_or(10);
-            assert!(end <= 9, "title longer than C++ vtype_t allows");
+            assert!(end <= 9, "title longer than vtype_t allows");
         }
     });
 }

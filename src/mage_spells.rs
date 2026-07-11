@@ -1,4 +1,4 @@
-//! Port of `src/mage_spells.cpp` — mage spellcasting driver.
+//! Mage spellcasting driver
 
 use crate::config::spells::SPELL_TYPE_MAGE;
 use crate::data_player::{CLASSES, MAGIC_SPELLS, SPELL_NAMES};
@@ -26,7 +26,7 @@ use crate::ui_io::terminal;
 
 pub use crate::spells::spell_chance_of_success;
 
-/// C++ `mage_spells.cpp` lines 11–43.
+/// 43
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i32)]
 enum MageSpellId {
@@ -63,7 +63,7 @@ enum MageSpellId {
     Genocide,
 }
 
-/// C++ `mage_spells.cpp` lines 45–67.
+/// 67
 #[must_use]
 pub fn can_read_spells() -> bool {
     let block_reason = with_state(|state| {
@@ -93,7 +93,7 @@ pub fn can_read_spells() -> bool {
     }
 }
 
-/// C++ `mage_spells.cpp` lines 69–199.
+/// 199
 pub fn cast_spell(spell_id: i32) {
     let (pos, level) = with_state(|state| (state.py.pos, state.py.misc.level));
     let mut dir = 0;
@@ -241,7 +241,7 @@ pub fn cast_spell(spell_id: i32) {
     }
 }
 
-/// C++ `mage_spells.cpp` lines 202–267.
+/// 267
 pub fn get_and_cast_magic_spell() {
     with_state_mut(|state| state.game.player_free_turn = true);
 

@@ -1,7 +1,7 @@
 //! Tunnels & intersection doors in `dungeon_generate`.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -57,9 +57,9 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. dungeonBuildTunnel golden
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_build_tunnel_null_wall_straight_seed42() {
     reset_for_new_game(Some(42));
@@ -137,9 +137,9 @@ fn dungeon_build_tunnel_null_wall_pocket_seed42() {
     assert_eq!(next_random_pair(12), (12, 1));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. dungeonPlaceDoorIfNextToTwoWalls guard
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_place_door_if_next_to_two_walls_no_rng_when_not_corr() {
     reset_for_new_game(Some(42));
@@ -193,9 +193,9 @@ fn dungeon_place_door_if_next_to_two_walls_places_door_seed3() {
     assert_eq!(next_random_pair(7), (7, 3));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. dungeonIsNextTo truth table
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn dungeon_is_next_to_truth_table() {
     reset_for_new_game(Some(42));
@@ -239,9 +239,9 @@ fn dungeon_is_next_to_truth_table() {
     assert!(dungeon_is_next_to(horizontal_wall_pair));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Door-queue integration
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn door_queue_integration_two_rooms_seed42() {
     reset_for_new_game(Some(42));

@@ -1,4 +1,4 @@
-//! Port of `src/data_recall.cpp` — immutable recall description tables.
+//! Immutable recall description tables
 
 pub const RECALL_DESCRIPTION_ATTACK_TYPE: [&str; 25] = [
     "do something undefined",

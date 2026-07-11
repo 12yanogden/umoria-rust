@@ -1,8 +1,8 @@
-//! Shared helpers for phase 1.5 differential fidelity tests.
+//! Shared helpers for golden / harness integration tests.
 
 #![allow(
     dead_code,
-    reason = "translation units retain C++ symbols not yet referenced from Rust call sites"
+    reason = "helpers may be unused across individual test crates"
 )]
 
 use serde::Deserialize;
@@ -56,7 +56,13 @@ pub struct GoldenEntry {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct GeneratedWith {
+    #[serde(default)]
+    pub cargo: Option<String>,
+    #[serde(default)]
+    pub rustc: Option<String>,
+    #[serde(default)]
     pub cmake: Option<String>,
+    #[serde(default)]
     pub compiler: Option<String>,
     pub os: Option<String>,
     pub ncurses: Option<String>,
@@ -381,13 +387,9 @@ pub fn replay_transcript(
         return Err(io::Error::other("cargo build --bin umoria failed"));
     }
 
-    let run_dir = repo_root().join("umoria");
+    let run_dir = repo_root();
     // Match tools/capture/play.sh: golden transcripts assume a fresh save slot.
     let _ = fs::remove_file(run_dir.join("game.sav"));
-    let scores_initial = golden_root().join("scores/scores_initial.dat");
-    if scores_initial.is_file() {
-        fs::copy(&scores_initial, run_dir.join("scores.dat"))?;
-    }
 
     let pty_system = native_pty_system();
     let pair = pty_system
@@ -404,7 +406,7 @@ pub fn replay_transcript(
         .map_err(|e| io::Error::other(e.to_string()))?;
 
     let mut cmd = CommandBuilder::new(repo_root().join("target/debug/umoria"));
-    cmd.cwd(repo_root().join("umoria"));
+    cmd.cwd(run_dir);
     cmd.arg("-s");
     cmd.arg(seed.to_string());
     if let Some(term) = env_string(env, "TERM") {

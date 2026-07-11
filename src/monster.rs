@@ -1,6 +1,6 @@
-//! Port of src/monster.h — creature/monster data types and constants.
-//! Death/hit/loot logic from monster.cpp lines 1353–1493 (phase 4.2.6).
-//! Melee attacks on player from monster.cpp lines 256–475, 1541–1745 (phase 4.2.3).
+//! Creature/monster data types and constants
+//! Monster death, hit, and loot logic.
+//! Melee attacks on the player.
 
 use crate::config::dungeon::objects::OBJ_OPEN_DOOR;
 use crate::config::monsters::defense::{CD_EVIL, CD_INFRA, CD_NO_SLEEP, CD_UNDEAD};
@@ -86,7 +86,6 @@ pub const MON_TOTAL_ALLOCATIONS: u8 = 125;
 pub const MON_MAX_LEVELS: u8 = 40;
 pub const MON_MAX_ATTACKS: u8 = 4;
 
-/// Port of `Creature_t` in monster.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Creature {
     pub name: &'static str,
@@ -104,7 +103,6 @@ pub struct Creature {
     pub level: u8,
 }
 
-/// Port of `Monster_t` in monster.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Monster {
     pub hp: i16,
@@ -118,7 +116,6 @@ pub struct Monster {
     pub confused_amount: u8,
 }
 
-/// Port of `MonsterAttack_t` in monster.h.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct MonsterAttack {
     pub type_id: u8,
@@ -138,7 +135,7 @@ pub const BLANK_MONSTER: Monster = Monster {
     confused_amount: 0,
 };
 
-/// C++ monster.cpp lines 1353–1397.
+/// 1397
 pub fn monster_take_hit(monster_id: i32, damage: i32) -> i32 {
     let survives = with_state_mut(|state| {
         let monster = &mut state.monsters[monster_id as usize];
@@ -192,7 +189,7 @@ pub fn monster_take_hit(monster_id: i32, damage: i32) -> i32 {
     creature_id
 }
 
-/// C++ monster.cpp lines 1399–1417.
+/// 1417
 pub fn monster_death_item_drop_type(flags: u32) -> i32 {
     let mut object = i32::from((flags & CM_CARRY_OBJ) != 0);
 
@@ -207,7 +204,7 @@ pub fn monster_death_item_drop_type(flags: u32) -> i32 {
     object
 }
 
-/// C++ monster.cpp lines 1419–1443.
+/// 1443
 pub fn monster_death_item_drop_count(flags: u32) -> i32 {
     let mut count = 0;
 
@@ -234,7 +231,7 @@ pub fn monster_death_item_drop_count(flags: u32) -> i32 {
     count
 }
 
-/// C++ monster.cpp lines 1451–1493.
+/// 1493
 pub fn monster_death(coord: Coord_t, flags: u32) -> u32 {
     let item_type = monster_death_item_drop_type(flags);
     let item_count = monster_death_item_drop_count(flags);
@@ -306,7 +303,7 @@ fn vtype_snprintf(buf: &mut Vtype_t, formatted: &str) {
     buf[n] = 0;
 }
 
-/// C++ monster.cpp lines 16–37.
+/// 37
 #[must_use]
 pub fn monster_is_visible(monster: &Monster) -> bool {
     let (visible, recall_movement, recall_defense) = with_state(|state| {
@@ -354,7 +351,7 @@ pub fn monster_is_visible(monster: &Monster) -> bool {
     visible
 }
 
-/// C++ monster.cpp lines 40–72.
+/// 72
 pub fn monster_update_visibility(monster_id: i32) {
     let (distance, pos, was_lit, player_pos, wizard, blind, in_panel) = with_state(|state| {
         let monster = &state.monsters[monster_id as usize];
@@ -395,7 +392,7 @@ pub fn monster_update_visibility(monster_id: i32) {
     }
 }
 
-/// C++ monster.cpp lines 74–92.
+/// 92
 #[must_use]
 pub fn monster_movement_rate(speed: i16) -> i32 {
     if speed > 0 {
@@ -408,7 +405,7 @@ pub fn monster_movement_rate(speed: i16) -> i32 {
     with_state(|state| i32::from((state.dg.game_turn % (2 - i32::from(speed))) == 0))
 }
 
-/// C++ monster.cpp lines 1235–1253.
+/// 1253
 pub fn memory_update_recall(monster: &Monster, wake: bool, ignore: bool, rcmove: u32) {
     if !monster.lit {
         return;
@@ -425,7 +422,7 @@ pub fn memory_update_recall(monster: &Monster, wake: bool, ignore: bool, rcmove:
     });
 }
 
-/// C++ monster.cpp lines 1255–1310.
+/// 1310
 pub fn monster_attacking_update(monster_id: i32, moves: i32) {
     for _ in 0..moves {
         let mut wake = false;
@@ -506,7 +503,7 @@ pub fn monster_attacking_update(monster_id: i32, moves: i32) {
     }
 }
 
-/// C++ monster.cpp lines 1313–1349.
+/// 1349
 pub fn update_monsters(attack: bool) {
     test_record_update_monsters(attack);
     let start_id = with_state(|state| i32::from(state.next_free_monster_id - 1));
@@ -549,12 +546,12 @@ pub fn update_monsters(attack: bool) {
     }
 }
 
-/// C++ monster.cpp lines 1495–1497.
+/// 1497
 pub fn print_monster_action_text(name: &str, action: &str) {
     terminal::print_message(Some(&format!("{name} {action}")));
 }
 
-/// C++ monster.cpp lines 1499–1504.
+/// 1504
 #[must_use]
 pub fn monster_name_description(real_name: &str, is_lit: bool) -> String {
     if is_lit {
@@ -564,7 +561,7 @@ pub fn monster_name_description(real_name: &str, is_lit: bool) -> String {
     }
 }
 
-/// C++ monster.cpp lines 1507–1539.
+/// 1539
 #[must_use]
 pub fn monster_sleep(coord: Coord_t) -> bool {
     let mut asleep = false;
@@ -619,7 +616,7 @@ pub fn monster_sleep(coord: Coord_t) -> bool {
     asleep
 }
 
-/// C++ monster.cpp lines 256–355.
+/// 355
 pub fn monster_print_attack_description(msg: &mut Vtype_t, attack_id: i32) {
     match attack_id {
         1 => {
@@ -714,7 +711,7 @@ fn c_vtype_str(buf: &Vtype_t) -> &str {
     std::str::from_utf8(&buf[..end]).unwrap_or("")
 }
 
-/// C++ monster.cpp lines 357–381.
+/// 381
 pub fn monster_confuse_on_attack(
     creature: &Creature,
     confused_amount: &mut u8,
@@ -757,7 +754,7 @@ pub fn monster_confuse_on_attack(
     }
 }
 
-/// C++ monster.cpp lines 1541–1745.
+/// 1745
 pub fn execute_attack_on_player(
     creature_level: u8,
     monster_hp: &mut i16,
@@ -1024,7 +1021,7 @@ pub fn execute_attack_on_player(
     noticed
 }
 
-/// C++ monster.cpp lines 384–475.
+/// 475
 pub fn monster_attack_player(monster_id: i32) {
     if with_state(|state| state.game.character_is_dead) {
         return;
@@ -1138,7 +1135,7 @@ pub fn monster_attack_player(monster_id: i32) {
     }
 }
 
-/// C++ monster.cpp lines 674–687.
+/// 687
 pub fn monster_can_cast_spells(monster: &Monster, spells: u32) -> bool {
     if random_number((spells & CS_FREQ) as i32) != 1 {
         return false;
@@ -1150,7 +1147,7 @@ pub fn monster_can_cast_spells(monster: &Monster, spells: u32) -> bool {
     within_range && unobstructed
 }
 
-/// C++ monster.cpp lines 689–844.
+/// 844
 pub fn monster_execute_casting_of_spell(
     monster_id: i32,
     spell_id: i32,
@@ -1390,7 +1387,7 @@ pub fn monster_execute_casting_of_spell(
     }
 }
 
-/// C++ monster.cpp lines 849–915.
+/// 915
 pub fn monster_cast_spell(monster_id: i32) -> bool {
     if with_state(|state| state.game.character_is_dead) {
         return false;
@@ -1470,7 +1467,7 @@ pub fn monster_cast_spell(monster_id: i32) -> bool {
     true
 }
 
-/// C++ monster.cpp lines 95–103.
+/// 103
 fn monster_make_visible(coord: Coord_t) -> bool {
     let monster_id = with_state(|state| {
         i32::from(state.dg.floor[coord.y as usize][coord.x as usize].creature_id)
@@ -1483,7 +1480,7 @@ fn monster_make_visible(coord: Coord_t) -> bool {
     with_state(|state| state.monsters[monster_id as usize].lit)
 }
 
-/// C++ monster.cpp lines 106–254.
+/// 254
 pub fn monster_get_move_direction(monster_id: i32, directions: &mut [i32; 9]) {
     let (monster_pos, player_pos) =
         with_state(|state| (state.monsters[monster_id as usize].pos, state.py.pos));
@@ -1624,7 +1621,7 @@ pub fn monster_get_move_direction(monster_id: i32, directions: &mut [i32; 9]) {
     }
 }
 
-/// C++ monster.cpp lines 477–540.
+/// 540
 pub fn monster_open_door(
     coord: Coord_t,
     monster_hp: i16,
@@ -1728,7 +1725,7 @@ pub fn monster_open_door(
     }
 }
 
-/// C++ monster.cpp lines 542–558.
+/// 558
 pub fn glyph_of_warding_protection(
     creature_id: u16,
     move_bits: u32,
@@ -1754,7 +1751,7 @@ pub fn glyph_of_warding_protection(
     }
 }
 
-/// C++ monster.cpp lines 560–594.
+/// 594
 pub fn monster_moves_on_player(
     monster_id: i32,
     tile_creature_id: u8,
@@ -1805,7 +1802,7 @@ pub fn monster_moves_on_player(
     }
 }
 
-/// C++ monster.cpp lines 596–620.
+/// 620
 pub fn monster_allowed_to_move(
     monster_id: i32,
     move_bits: u32,
@@ -1851,7 +1848,7 @@ pub fn monster_allowed_to_move(
     *do_turn = true;
 }
 
-/// C++ monster.cpp lines 623–672.
+/// 672
 pub fn make_move(monster_id: i32, directions: &[i32; 9], rcmove: &mut u32) {
     let move_bits = with_state(|state| {
         let creature_id = state.monsters[monster_id as usize].creature_id;
@@ -1933,7 +1930,7 @@ pub fn make_move(monster_id: i32, directions: &[i32; 9], rcmove: &mut u32) {
     }
 }
 
-/// C++ monster.cpp lines 919–983.
+/// 983
 pub fn monster_multiply(coord: Coord_t, creature_id: i32, monster_id: i32) -> bool {
     let mut position = Coord_t { y: 0, x: 0 };
 
@@ -1991,7 +1988,7 @@ pub fn monster_multiply(coord: Coord_t, creature_id: i32, monster_id: i32) -> bo
     false
 }
 
-/// C++ monster.cpp lines 985–1009.
+/// 1009
 pub fn monster_multiply_critter(monster_id: i32, rcmove: &mut u32) {
     let pos = with_state(|state| state.monsters[monster_id as usize].pos);
     let mut counter = 0;
@@ -2019,7 +2016,7 @@ pub fn monster_multiply_critter(monster_id: i32, rcmove: &mut u32) {
     }
 }
 
-/// C++ monster.cpp lines 1011–1067.
+/// 1067
 pub fn monster_move_out_of_wall(monster_id: i32, rcmove: &mut u32) {
     let hp = with_state(|state| state.monsters[monster_id as usize].hp);
     if hp < 0 {
@@ -2071,7 +2068,7 @@ pub fn monster_move_out_of_wall(monster_id: i32, rcmove: &mut u32) {
     }
 }
 
-/// C++ monster.cpp lines 1070–1084.
+/// 1084
 pub fn monster_move_undead(creature: &Creature, monster_id: i32, rcmove: &mut u32) {
     let mut directions = [0i32; 9];
     monster_get_move_direction(monster_id, &mut directions);
@@ -2087,7 +2084,7 @@ pub fn monster_move_undead(creature: &Creature, monster_id: i32, rcmove: &mut u3
     }
 }
 
-/// C++ monster.cpp lines 1086–1099.
+/// 1099
 pub fn monster_move_confused(creature: &Creature, monster_id: i32, rcmove: &mut u32) {
     let mut directions = [0i32; 9];
 
@@ -2102,7 +2099,7 @@ pub fn monster_move_confused(creature: &Creature, monster_id: i32, rcmove: &mut 
     }
 }
 
-/// C++ monster.cpp lines 1101–1119.
+/// 1119
 pub fn monster_do_move(monster_id: i32, rcmove: &mut u32) -> bool {
     let (confused_amount, creature_id) = with_state(|state| {
         let monster = &state.monsters[monster_id as usize];
@@ -2129,7 +2126,7 @@ pub fn monster_do_move(monster_id: i32, rcmove: &mut u32) -> bool {
     false
 }
 
-/// C++ monster.cpp lines 1121–1133.
+/// 1133
 pub fn monster_move_randomly(monster_id: i32, rcmove: &mut u32, randomness: u32) {
     let mut directions = [0i32; 9];
 
@@ -2143,7 +2140,7 @@ pub fn monster_move_randomly(monster_id: i32, rcmove: &mut u32, randomness: u32)
     make_move(monster_id, &directions, rcmove);
 }
 
-/// C++ monster.cpp lines 1135–1151.
+/// 1151
 pub fn monster_move_normally(monster_id: i32, rcmove: &mut u32) {
     let mut directions = [0i32; 9];
 
@@ -2161,7 +2158,7 @@ pub fn monster_move_normally(monster_id: i32, rcmove: &mut u32) {
     make_move(monster_id, &directions, rcmove);
 }
 
-/// C++ monster.cpp lines 1153–1164.
+/// 1164
 pub fn monster_attack_without_moving(monster_id: i32, rcmove: &mut u32, distance_from_player: u8) {
     let mut directions = [0i32; 9];
 
@@ -2173,7 +2170,7 @@ pub fn monster_attack_without_moving(monster_id: i32, rcmove: &mut u32, distance
     }
 }
 
-/// C++ monster.cpp lines 1167–1233.
+/// 1233
 pub fn monster_move(monster_id: i32, rcmove: &mut u32) {
     let (creature_id, distance_from_player, monster_pos) = with_state(|state| {
         let monster = &state.monsters[monster_id as usize];

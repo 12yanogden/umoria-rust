@@ -20,12 +20,12 @@ use umoria::ui_io::{
     test_set_ui_trace, test_ui_trace_events, trim_trailing_spaces, UiTraceEvent, ESCAPE,
 };
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T1 — putString truncation (pure)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t1_put_string_truncation_boundaries() {
-    // C++ ui_io.cpp lines 147–154: clamp x>79, strncpy to 79-x, force NUL.
+ // clamp x>79, strncpy to 79-x, force NUL.
     assert_eq!(ui_io::truncate_for_put_string("ABCDEFGH", 75), "ABCD");
     assert_eq!(ui_io::truncate_for_put_string("AB", 79), "");
     assert_eq!(ui_io::truncate_for_put_string("AB", 85), "");
@@ -39,20 +39,20 @@ fn t1_put_string_truncation_boundaries() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T3 — panel coordinate interpolation (pure)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t3_panel_screen_coord_subtracts_offsets() {
-    // C++ ui_io.cpp lines 182–190, 194–202.
+ // , 194–202.
     let coord = Coord { y: 10, x: 30 };
     let screen = panel_screen_coord(coord, 2, 13);
     assert_eq!(screen, Coord { y: 8, x: 17 });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T4 — message ring buffer & message line cap (pure)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t4_cap_message_line_resize_79() {
     let long = ui_io::cap_message_line("A".repeat(100));
@@ -65,7 +65,7 @@ fn t4_cap_message_line_resize_79() {
 
 #[test]
 fn t4_message_ring_wrap_and_truncation() {
-    // C++ ui_io.cpp lines 304–312.
+ // .
     assert_eq!(advance_message_ring_index(21), 0);
     assert_eq!(advance_message_ring_index(0), 1);
 
@@ -79,12 +79,12 @@ fn t4_message_ring_wrap_and_truncation() {
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T5 — printMessage combine / -more- thresholds (pure)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t5_combine_and_more_thresholds() {
-    // C++ ui_io.cpp lines 250–277: old_len = strlen + 1; >= 73 → -more-.
+ // old_len = strlen + 1; >= 73 → -more-.
     let old = message_old_len(b"hello"); // 5 + 1 = 6
     assert_eq!(old, 6);
     assert!(should_combine_messages(6, 64)); // 64+6+2=72 < 73
@@ -111,15 +111,15 @@ fn t5_more_prompt_accepts_space_escape_cr_lf() {
     assert!(!more_prompt_accepts_key(b'q'));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T6 — getKeyInput
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t6_get_key_input_normal_char() {
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
-    // Queue is LIFO (pop); push in reverse consume order.
+ // Queue is LIFO (pop); push in reverse consume order.
     test_push_getch_keys(&[i32::from(b'a')]);
     assert_eq!(terminal::get_key_input(), b'a');
     test_set_ncurses_stub(false);
@@ -130,7 +130,7 @@ fn t6_get_key_input_ctrl_r_redraw() {
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
-    // ^R is consumed; next key is returned. getKeyInput never returns ^R.
+ // ^R is consumed; next key is returned. getKeyInput never returns ^R.
     test_push_getch_keys(&[i32::from(b'z'), i32::from(ctrl_key(b'R'))]);
     assert_eq!(terminal::get_key_input(), b'z');
     test_set_ncurses_stub(false);
@@ -138,8 +138,8 @@ fn t6_get_key_input_ctrl_r_redraw() {
 
 #[test]
 fn t6_get_key_input_eof_hangup_path() {
-    // C++: EOF bumps eof_flag and returns ESCAPE when character is in-progress
-    // (generated but not yet saved) — otherwise endGame() is called.
+ // EOF bumps eof_flag and returns ESCAPE when character is in-progress
+ // (generated but not yet saved) — otherwise endGame() is called.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_set_eof_flag(0);
@@ -154,9 +154,9 @@ fn t6_get_key_input_eof_hangup_path() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T7 — getCommand wrappers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t7_command_wrappers_input() {
     reset_for_new_game(None);
@@ -173,19 +173,19 @@ fn t7_command_wrappers_input() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T8 — getStringInput editing (pure helpers)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t8_string_input_end_col_clamped_to_79() {
-    // C++ ui_io.cpp lines 409–414.
+ // .
     assert_eq!(clamp_string_input_end_col(70, 20), 79);
     assert_eq!(clamp_string_input_end_col(10, 5), 14);
 }
 
 #[test]
 fn t8_isprint_matches_c_ascii() {
-    // C++ ui_io.cpp line 441: isprint(key) — documented as 0x20..=0x7e.
+ // isprint(key) — documented as 0x20..=0x7e.
     assert!(!is_printable_key(0x1f));
     assert!(is_printable_key(b'a' as i32));
     assert!(!is_printable_key(0x7f));
@@ -200,12 +200,12 @@ fn t8_trim_trailing_blanks_on_submit() {
     assert_eq!(buf[len], 0);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T9 — confirmations (pure)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t9_confirmation_key_codes() {
-    // C++ ui_io.cpp lines 494–500.
+ // .
     assert_eq!(confirmation_key_result(b'y'), 1);
     assert_eq!(confirmation_key_result(b'Y'), 1);
     assert_eq!(confirmation_key_result(b'n'), 0);
@@ -213,9 +213,9 @@ fn t9_confirmation_key_codes() {
     assert_eq!(confirmation_key_result(b'q'), -1);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T10 — putQIO / bell / flush
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t10_put_qio_sets_screen_has_changed() {
     reset_for_new_game(None);
@@ -252,15 +252,15 @@ fn t10_flush_input_buffer_drains_queue() {
     test_push_getch_keys(&[i32::from(b'a'), i32::from(b'b')]);
     terminal::flush_input_buffer();
     assert!(test_flush_input_buffer_count() >= 1);
-    // After drain, no keys remain for a subsequent getch pop.
+ // After drain, no keys remain for a subsequent getch pop.
     test_set_select_ready(None);
     test_set_ui_detail_capture(false);
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T11 — checkForNonBlockingKeyPress
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[cfg(unix)]
 #[test]
 fn t11_non_blocking_key_press_unix() {
@@ -269,7 +269,7 @@ fn t11_non_blocking_key_press_unix() {
     test_set_select_ready(Some(false));
     assert!(!terminal::check_for_non_blocking_key_press(0));
     test_set_select_ready(Some(true));
-    // Timed select path with empty queue returns true when microseconds > 0.
+ // Timed select path with empty queue returns true when microseconds > 0.
     assert!(terminal::check_for_non_blocking_key_press(1));
     test_set_select_ready(None);
     test_set_ncurses_stub(false);
@@ -280,9 +280,9 @@ fn t11_non_blocking_key_press_unix() {
 #[ignore = "TODO(windows): non-macOS reference target; timeout(8) path"]
 fn t11_non_blocking_key_press_windows() {}
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T12 — system/file helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t12_get_default_player_name_fallback_x() {
     reset_for_new_game(None);
@@ -327,12 +327,12 @@ fn t12_check_file_permissions_success_on_normal_process() {
     assert!(terminal::check_file_permissions());
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // T13 — terminal lifecycle
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn t13_terminal_initialize_and_restore() {
-    // Stub path: initialize/restore must not panic and must register UI hooks.
+ // Stub path: initialize/restore must not panic and must register UI hooks.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     assert!(terminal::terminal_initialize());
@@ -358,9 +358,9 @@ fn t13_terminal_save_restore_screen() {
     test_set_ncurses_stub(false);
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 fn vtype_from(s: &[u8]) -> Vtype_t {
     let mut v = [0u8; MORIA_MESSAGE_SIZE];
     let n = s.len().min(MORIA_MESSAGE_SIZE - 1);

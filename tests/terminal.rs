@@ -9,25 +9,25 @@
 
 use umoria::ui_io::{self, terminal, Coord};
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 1. Crate-links smoke test (no initscr)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn ncurses_crate_links_without_initscr() {
-    // ^R = CTRL_KEY('R') = 0x12; keyname does not require initscr.
+ // ^R = CTRL_KEY('R') = 0x12; keyname does not require initscr.
     let name = ncurses::keyname(0x12);
     assert!(
         name.as_ref().is_some_and(|s| !s.is_empty()),
         "ncurses::keyname(0x12) should return a non-empty string"
     );
-    // Prove ERR/OK constants are linkable.
+ // Prove ERR/OK constants are linkable.
     let _ = ncurses::ERR;
     let _ = ncurses::OK;
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 2. 80-col truncation helper (pure, no TTY)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn truncate_for_put_string_clamps_x_and_truncates() {
     assert_eq!(ui_io::truncate_for_put_string("ABCDEFGH", 75), "ABCD");
@@ -45,9 +45,9 @@ fn truncate_for_put_string_output_length_is_79_minus_x() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 3. message_line resize(79) cap (pure)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn cap_message_line_truncates_overlong_input() {
     let capped = ui_io::cap_message_line("A".repeat(100));
@@ -63,9 +63,9 @@ fn cap_message_line_nul_pads_shorter_input() {
     assert!(capped.as_bytes()[5..].iter().all(|&b| b == 0));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 4. Standout sign-bit encoding (pure)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn encode_tile_plain_byte() {
     assert_eq!(ui_io::encode_tile(b'@'), 0x40);
@@ -73,21 +73,21 @@ fn encode_tile_plain_byte() {
 
 #[test]
 fn encode_tile_standout_high_bit_sign_extends() {
-    // C passes `char` to mvaddch; signed char 0xC0 (-64) sign-extends into chtype.
+ // C passes `char` to mvaddch; signed char 0xC0 (-64) sign-extends into chtype.
     assert_eq!(
         ui_io::encode_tile(0xC0),
         0xC0_u8 as i8 as ncurses::ll::chtype
     );
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // 5. API-surface compile test
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 #[test]
 fn terminal_api_surface_signatures_exist() {
     #[allow(
         dead_code,
-        reason = "translation units retain C++ symbols not yet referenced from Rust call sites"
+        reason = "helpers may be unused across individual test crates"
     )]
     fn assert_signatures() {
         let _: fn() -> bool = terminal::terminal_initialize;

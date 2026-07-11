@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Phase 1.4.3 test 7 (tightened in phase 1.4.6): pty transcript capture.
+# PTY transcript capture.
 #
-# play.sh runs the reference binary under a pty with a fixed keystroke script
+# play.sh runs the Rust umoria binary under a pty with a fixed keystroke script
 # (ending in an explicit ^X save+quit) and renders the raw pty bytes through a
 # real terminal emulator (pyte) into a 24x80 final-screen dump.
 #
 # The screen must be:
-#   1. non-empty,
-#   2. stable ACROSS SEPARATE capture bursts (capture, sleep, capture again) —
-#      not merely across two back-to-back runs. The old escape-stripping
-#      concatenator was stable within a burst but drifted across bursts because
-#      it concatenated the (timing-dependent) raw byte stream instead of
-#      modeling cursor positioning; the pyte 24x80 render is chunk-independent.
-#   3. bounded to <= 80 columns per line. The old concatenator jammed columns
-#      together into multi-hundred-character lines, so this guards against a
-#      regression back to it.
+# 1. non-empty,
+# 2. stable ACROSS SEPARATE capture bursts (capture, sleep, capture again) —
+# not merely across two back-to-back runs. The old escape-stripping
+# concatenator was stable within a burst but drifted across bursts because
+# it concatenated the (timing-dependent) raw byte stream instead of
+# modeling cursor positioning; the pyte 24x80 render is chunk-independent.
+# 3. bounded to <= 80 columns per line. The old concatenator jammed columns
+# together into multi-hundred-character lines, so this guards against a
+# regression back to it.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 TDIR="$ROOT/tests/golden/transcripts"

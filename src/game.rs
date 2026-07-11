@@ -1,4 +1,4 @@
-//! Port of src/game.cpp / src/game.h — central mutable game state owner.
+//! Central mutable game state owner
 
 #[cfg(debug_assertions)]
 use std::cell::Cell;
@@ -14,12 +14,11 @@ use crate::types::{
     TREASURE_MAX_LEVELS,
 };
 
-/// Port of `NORMAL_TABLE_SD` in game.h — upstream gap: belongs in types.rs (`phase_2.4`).
 pub const NORMAL_TABLE_SD: u8 = 64;
 
 const SHRT_MAX: i32 = 32_767;
 
-/// Authoritative `normal_table` from `data_tables.cpp` lines 93-126.
+/// Lookup table for the normal distribution helper.
 const NORMAL_TABLE_VALUES: [u16; NORMAL_TABLE_SIZE] = [
     206, 613, 1022, 1430, 1838, 2245, 2652, 3058, 3463, 3867, 4271, 4673, 5075, 5475, 5874, 6271,
     6667, 7061, 7454, 7845, 8234, 8621, 9006, 9389, 9770, 10148, 10524, 10898, 11269, 11638, 12004,
@@ -47,7 +46,7 @@ thread_local! {
     static TEST_UNIX_TIME: std::cell::Cell<Option<u32>> = const { std::cell::Cell::new(None) };
 }
 
-/// Test hook for `seeds_initialize(0)` until phase_2.3 provides `helpers::get_current_unix_time`.
+/// Test hook for `seeds_initialize(0)` until provides `helpers::get_current_unix_time`
 #[doc(hidden)]
 pub fn set_test_unix_time(clock: Option<u32>) {
     TEST_UNIX_TIME.with(|t| t.set(clock));
@@ -65,7 +64,6 @@ fn get_current_unix_time() -> u32 {
     crate::helpers::get_current_unix_time()
 }
 
-/// Port of `config::options` (config.cpp).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Options {
     pub display_counts: bool,
@@ -99,14 +97,14 @@ impl Default for Options {
     }
 }
 
-/// RNG state (`rnd_seed` + `old_seed` from rng.cpp / game.cpp).
+/// RNG state (`rnd_seed` + `old_seed` / )
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Rng {
     pub seed: u32,
     pub old_seed: u32,
 }
 
-/// Treasure heap inside `Game_t` (game.h).
+/// Treasure heap inside game state.
 #[derive(Clone, Debug)]
 pub struct GameTreasure {
     pub current_id: i16,
@@ -122,7 +120,7 @@ impl Default for GameTreasure {
     }
 }
 
-/// Screen state inside `Game_t` (game.h).
+/// Screen state inside game state.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct GameScreen {
     pub current_screen_id: Screen,
@@ -132,7 +130,7 @@ pub struct GameScreen {
     pub wear_high_id: i32,
 }
 
-/// Port of `Game_t` (game.h) — defaults match C++ member initializers.
+/// defaults match member initializers
 #[derive(Clone, Debug)]
 pub struct GameState {
     pub magic_seed: u32,
@@ -391,7 +389,6 @@ pub fn reset_for_new_game(seed: Option<u32>) {
     }
 }
 
-/// Port of `randomNumber` in game.cpp.
 pub fn random_number(max: i32) -> i32 {
     with_state_mut(|state| random_number_state(state, max))
 }
@@ -400,7 +397,6 @@ pub(crate) fn random_number_state(state: &mut State, max: i32) -> i32 {
     (rnd_state(state) % max) + 1
 }
 
-/// Port of `randomNumberNormalDistribution` in game.cpp.
 pub fn random_number_normal_distribution(mean: i32, standard: i32) -> i32 {
     with_state_mut(|state| random_number_normal_distribution_state(state, mean, standard))
 }
@@ -452,7 +448,6 @@ pub(crate) fn random_number_normal_distribution_state(
     mean + offset
 }
 
-/// Port of `seedsInitialize` in game.cpp.
 pub fn seeds_initialize(seed: u32) {
     with_state_mut(|state| {
         let mut clock_var = if seed == 0 {
@@ -475,7 +470,6 @@ pub fn seeds_initialize(seed: u32) {
     });
 }
 
-/// Port of `seedSet` in game.cpp.
 pub(crate) fn seed_set_state(state: &mut State, seed: u32) {
     state.rng.old_seed = state.rng.seed;
     set_seed_state(state, seed);
@@ -485,7 +479,6 @@ pub fn seed_set(seed: u32) {
     with_state_mut(|state| seed_set_state(state, seed));
 }
 
-/// Port of `seedResetToOldSeed` in game.cpp.
 pub(crate) fn seed_reset_to_old_seed_state(state: &mut State) {
     set_seed_state(state, state.rng.old_seed);
 }
@@ -540,7 +533,6 @@ macro_rules! py {
     };
 }
 
-// C++ `Game_t game = Game_t{};` (game.cpp:14) — realized by `State::default()`.
 // (No separate global; residuals read/write `State.game` / `State.options` via `with_state`.)
 
 /// Terminal/UI callbacks for lifecycle helpers (avoids `game` ↔ `ui_io` module cycle).
@@ -579,7 +571,7 @@ fn game_ui() -> GameUiHooks {
     hooks
 }
 
-/// One row of the C++ `game_options[]` table (game.cpp:118–134).
+/// One row of the `game_options[]` table (:118–134)
 #[derive(Clone, Copy)]
 pub struct GameOptionEntry {
     pub prompt: &'static str,
@@ -649,13 +641,12 @@ pub fn game_options_table() -> &'static [GameOptionEntry] {
     &TABLE
 }
 
-/// C++ `snprintf(..., "%-38s: %s", prompt, val ? "yes" : "no ")` (game.cpp:143).
 pub fn format_option_line(prompt: &str, value: bool) -> String {
     let yes_no = if value { "yes" } else { "no " };
     format!("{prompt:<38}: {yes_no}")
 }
 
-/// C++ game.cpp lines 224–232.
+/// 232
 pub fn get_random_direction() -> i32 {
     loop {
         let dir = random_number(9);
@@ -665,7 +656,7 @@ pub fn get_random_direction() -> i32 {
     }
 }
 
-/// C++ game.cpp lines 235–258 (`mapRoguelikeKeysToKeypad`).
+/// Map roguelike keys onto the keypad direction set.
 pub fn map_roguelike_keys_to_keypad(command: u8) -> u8 {
     match command {
         b'h' => b'4',
@@ -681,7 +672,6 @@ pub fn map_roguelike_keys_to_keypad(command: u8) -> u8 {
     }
 }
 
-/// C++ `setGameOptions()` (game.cpp:137–200).
 pub fn set_game_options() {
     let ui = game_ui();
     let table = game_options_table();
@@ -778,7 +768,6 @@ pub fn test_set_direction(direction: Option<i32>) {
     TEST_DIRECTION.with(|d| d.set(direction));
 }
 
-/// C++ `getDirectionWithMemory` (game.cpp:262–296).
 pub fn get_direction_with_memory(prompt: Option<&str>, direction: &mut i32) -> bool {
     if let Some(dir) = TEST_DIRECTION.with(std::cell::Cell::get) {
         *direction = dir;
@@ -817,7 +806,6 @@ pub fn get_direction_with_memory(prompt: Option<&str>, direction: &mut i32) -> b
     }
 }
 
-/// Port of `getAllDirections` in game.cpp lines 300–320.
 pub fn get_all_directions(prompt: &str, direction: &mut i32) -> bool {
     let ui = game_ui();
     let mut command = 0u8;
@@ -841,7 +829,7 @@ pub fn get_all_directions(prompt: &str, direction: &mut i32) -> bool {
     }
 }
 
-/// C++ `ui.h` `ESCAPE` (`'\033'`).
+/// `'\033'`
 const ESCAPE: u8 = 0o33;
 
 thread_local! {
@@ -862,7 +850,6 @@ pub fn test_reset_exit_program_called() {
     TEST_EXIT_PROGRAM_CALLED.with(|c| c.set(false));
 }
 
-/// Port of `validGameVersion` in game.cpp lines 204–218.
 pub fn valid_game_version(major: u8, minor: u8, patch: u8) -> bool {
     if major != 5 {
         return false;
@@ -876,7 +863,6 @@ pub fn valid_game_version(major: u8, minor: u8, patch: u8) -> bool {
     minor <= 7
 }
 
-/// Port of `isCurrentGameVersion` in game.cpp lines 220–222.
 pub fn is_current_game_version(major: u8, minor: u8, patch: u8) -> bool {
     major == crate::version::CURRENT_VERSION_MAJOR
         && minor == crate::version::CURRENT_VERSION_MINOR
@@ -915,7 +901,7 @@ pub fn abort_program_output(msg: &str) -> String {
     format!("Program was manually aborted with the message:\n{msg}\n")
 }
 
-/// C++ game.cpp lines 323–326.
+/// 326
 pub fn exit_program() {
     pre_exit_sequence();
     if TEST_SKIP_PROCESS_EXIT.with(std::cell::Cell::get) {
@@ -924,7 +910,7 @@ pub fn exit_program() {
     std::process::exit(0);
 }
 
-/// C++ game.cpp lines 330–338.
+/// 338
 pub fn abort_program(msg: &str) {
     pre_exit_sequence();
     let output = abort_program_output(msg);

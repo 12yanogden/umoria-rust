@@ -1,7 +1,7 @@
-//! Player movement/state/search/experience/doors/tunnel parity.
+//! Player movement/state/search/experience/doors/tunnel tests.
 #![allow(
     clippy::int_plus_one,
-    reason = "test assertions mirror C++ inclusive bound comparisons"
+    reason = "test assertions use inclusive bound comparisons"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -54,7 +54,7 @@ fn next_random_pair(max: i32) -> (i32, i32) {
     (max, random_number(max))
 }
 
-fn cpp_gain_kill_exp(
+fn expected_gain_kill_exp(
     kill_exp: u16,
     creature_level: u8,
     player_level: u16,
@@ -76,7 +76,7 @@ fn cpp_gain_kill_exp(
     (quotient, new_fraction)
 }
 
-fn cpp_carrying_load_limit(used_str: u8, body_weight: u16) -> i32 {
+fn expected_carrying_load_limit(used_str: u8, body_weight: u16) -> i32 {
     let mut weight_cap =
         i32::from(used_str) * i32::from(PLAYER_WEIGHT_CAP) + i32::from(body_weight);
     if weight_cap > 3000 {
@@ -85,9 +85,9 @@ fn cpp_carrying_load_limit(used_str: u8, body_weight: u16) -> i32 {
     weight_cap
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Gender / rank title
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_gender_label_parity() {
@@ -131,9 +131,9 @@ fn player_rank_title_matrix() {
     assert_eq!(player_rank_title(), "**QUEEN**");
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Load / strength
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_carrying_load_limit_parity() {
@@ -146,7 +146,7 @@ fn player_carrying_load_limit_parity() {
             });
             assert_eq!(
                 player_carrying_load_limit(),
-                cpp_carrying_load_limit(used_str, body_weight)
+                expected_carrying_load_limit(used_str, body_weight)
             );
         }
     }
@@ -174,9 +174,9 @@ fn player_strength_heavy_weapon_and_pack_speed() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Experience
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_gain_kill_experience_parity_matrix() {
@@ -202,7 +202,7 @@ fn player_gain_kill_experience_parity_matrix() {
             ..Default::default()
         };
         let (expected_quotient, expected_fraction) =
-            cpp_gain_kill_exp(kill_exp, creature_level, player_level, 12345);
+            expected_gain_kill_exp(kill_exp, creature_level, player_level, 12345);
         player_gain_kill_experience(&creature);
         with_state(|s| {
             assert_eq!(
@@ -215,9 +215,9 @@ fn player_gain_kill_experience_parity_matrix() {
     }
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Search / disturb / rest state transitions
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_search_on_off_state_parity() {
@@ -283,9 +283,9 @@ fn player_rest_on_via_command_count() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Movement helpers
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_move_position_bounds_parity() {
@@ -317,9 +317,9 @@ fn player_no_light_parity() {
     assert!(!player_no_light());
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // RNG-order paths
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_teleport_rng_and_destination_seed42() {
@@ -340,7 +340,7 @@ fn player_teleport_rng_and_destination_seed42() {
         assert!(tile.creature_id < 2);
         assert!(!s.game.teleport_player);
     });
-    // Post-teleport RNG stream (rolls consumed during placement loop + update_monsters).
+ // Post-teleport RNG stream (rolls consumed during placement loop + update_monsters).
     assert_eq!(next_random_pair(20), (20, 16));
     assert_eq!(next_random_pair(20), (20, 2));
 }
@@ -352,7 +352,7 @@ fn player_search_rng_roll_count_seed99() {
     setup_open_dungeon(10, 10);
     let coord = Coord_t { y: 5, x: 5 };
     player_search(coord, 50);
-    // Nine adjacent tiles × one randomNumber(100) each.
+ // Nine adjacent tiles × one randomNumber(100) each.
     assert_eq!(next_random_pair(100), (100, 30));
 }
 
@@ -405,9 +405,9 @@ fn open_closed_chest_lock_pick_rng_seed888() {
     assert_eq!(next_random_pair(100), (100, 10));
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Tunnel wall
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_tunnel_wall_ability_gate() {
@@ -425,9 +425,9 @@ fn player_tunnel_wall_ability_gate() {
     });
 }
 
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 // Lock picking skill (deterministic components)
-// ---------------------------------------------------------------------------
+// --------------------------------------------------------------------------
 
 #[test]
 fn player_lock_picking_skill_formula() {

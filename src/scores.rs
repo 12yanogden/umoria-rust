@@ -1,4 +1,4 @@
-//! Port of src/scores.cpp — high-score file I/O and display.
+//! High-score file I/O and display
 
 use std::cell::{Cell, RefCell};
 use std::fs::{File, OpenOptions};
@@ -18,10 +18,10 @@ use crate::types::CNIL;
 use crate::ui_io::{self, terminal, ESCAPE};
 use crate::version::{CURRENT_VERSION_MAJOR, CURRENT_VERSION_MINOR, CURRENT_VERSION_PATCH};
 
-/// C++ `MAX_HIGH_SCORE_ENTRIES`.
+/// `MAX_HIGH_SCORE_ENTRIES`
 pub const MAX_HIGH_SCORE_ENTRIES: u16 = 1000;
 
-/// C++ `sizeof(HighScore_t) + sizeof(char)` seek stride (73 bytes).
+/// 73 bytes
 pub const HIGH_SCORE_RECORD_STRIDE: usize = HIGH_SCORE_RECORD_SIZE;
 
 pub use crate::game_save::HighScore as HighScore_t;
@@ -75,7 +75,6 @@ fn close_score_file() {
     scores_clear_eof();
 }
 
-/// Port of `highScoreGenderLabel`.
 pub fn high_score_gender_label() -> u8 {
     if player_is_male() {
         b'M'
@@ -84,7 +83,6 @@ pub fn high_score_gender_label() -> u8 {
     }
 }
 
-/// Port of `playerCalculateTotalPoints`.
 pub fn player_calculate_total_points_for_state(state: &crate::game::State) -> i32 {
     let mut total = state
         .py
@@ -129,7 +127,7 @@ fn c_isspace(byte: u8) -> bool {
     matches!(byte, b' ' | b'\t' | b'\n' | b'\x0b' | b'\x0c' | b'\r')
 }
 
-/// Port of the article/space skip before `strcpy(new_entry.died_from, tmp)`.
+/// Strip leading article/space from a death cause before writing the score record.
 pub fn strip_died_from_for_high_score(src: &[u8]) -> [u8; 25] {
     let mut tmp = 0usize;
     if src.first() == Some(&b'a') {
@@ -185,7 +183,7 @@ fn open_score_file_read_write() -> io::Result<File> {
         .open(scores_path())
 }
 
-/// Port of `initializeScoreFile` in `game_files.cpp` — opens `"rb+"` while setuid.
+/// opens `"rb+"` while setuid
 pub fn initialize_score_file() -> bool {
     if let Ok(file) = open_score_file_read_write() {
         HIGHSCORE_FP.with(|fp| *fp.borrow_mut() = Some(file));
@@ -213,7 +211,6 @@ fn install_score_file(file: File) {
     set_fileptr(file);
 }
 
-/// Port of `recordNewHighScore`.
 pub fn record_new_high_score() {
     TEST_CHARACTER_SAVED_AT_RECORD.with(|c| {
         c.set(Some(with_state(|state| state.game.character_saved)));
@@ -339,7 +336,7 @@ fn format_left_str(value: &str, width: usize, precision: usize) -> String {
     }
 }
 
-/// Port of the `snprintf` line in `showScoresScreen` (100-byte cap).
+/// Format one high-score row for display (100-byte cap).
 pub fn format_show_scores_line(rank: i32, score: &HighScore) -> String {
     let race_name = CHARACTER_RACES
         .get(score.race as usize)
@@ -366,7 +363,6 @@ pub fn format_show_scores_line(rank: i32, score: &HighScore) -> String {
     msg
 }
 
-/// Port of `showScoresScreen`.
 pub fn show_scores_screen() {
     let Ok(file) = open_score_file_read() else {
         let path = scores_path();

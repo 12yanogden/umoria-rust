@@ -1,4 +1,4 @@
-//! Port of `src/dungeon_tile.h` — tile type and fval constants.
+//! Tile type and fval constants
 
 pub const TILE_NULL_WALL: u8 = 0;
 pub const TILE_DARK_FLOOR: u8 = 1;
@@ -20,7 +20,7 @@ pub const TILE_MAGMA_WALL: u8 = 13;
 pub const TILE_QUARTZ_WALL: u8 = 14;
 pub const TILE_BOUNDARY_WALL: u8 = 15;
 
-/// Port of `Tile_t` in `dungeon_tile.h`.
+/// One dungeon map cell.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Tile {
     pub creature_id: u8,

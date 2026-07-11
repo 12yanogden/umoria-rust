@@ -1,4 +1,4 @@
-//! Port of `src/store_inventory.cpp` — store pricing, stock maintenance, and inventory ops.
+//! Store pricing, stock maintenance, and inventory ops
 
 use crate::config::dungeon::objects::OBJ_NOTHING;
 use crate::config::identification::{ID_DAMD, ID_STORE_BOUGHT};
@@ -177,7 +177,7 @@ pub(crate) fn store_item_value_for_state(state: &State, item: &Inventory) -> i32
     }
 }
 
-/// C++ `store_inventory.cpp` lines 59–90.
+/// 90
 pub fn store_item_value(item: &Inventory) -> i32 {
     with_state(|state| store_item_value_for_state(state, item))
 }
@@ -214,7 +214,7 @@ fn store_item_sell_price_for_state(
     price
 }
 
-/// C++ `store_inventory.cpp` lines 195–219.
+/// 219
 pub fn store_item_sell_price(
     store: &Store,
     min_price: &mut i32,
@@ -224,7 +224,7 @@ pub fn store_item_sell_price(
     with_state(|state| store_item_sell_price_for_state(state, store, min_price, max_price, item))
 }
 
-/// C++ `store_inventory.cpp` lines 222–245.
+/// 245
 pub fn store_check_player_items_count(store: &Store, item: &Inventory) -> bool {
     if store.unique_items_counter < STORE_MAX_DISCRETE_ITEMS {
         return true;
@@ -335,7 +335,7 @@ fn store_carry_item_state(state: &mut State, store_id: i32, index_id: &mut i32, 
         item_id += 1;
     }
 
-    // Becomes last item in list — C++ store_inventory.cpp lines 307–311:
+    // Becomes last item in list
     // after insert, unique_items_counter has been incremented, so
     // index_id = unique_items_counter - 1 == insert position `pos`.
     if !flag {
@@ -345,7 +345,7 @@ fn store_carry_item_state(state: &mut State, store_id: i32, index_id: &mut i32, 
     }
 }
 
-/// C++ `store_inventory.cpp` lines 261–312.
+/// 312
 pub fn store_carry_item(store_id: i32, index_id: &mut i32, item: &mut Inventory) {
     with_state_mut(|state| store_carry_item_state(state, store_id, index_id, item));
 }
@@ -387,13 +387,13 @@ fn store_destroy_item_state(state: &mut State, store_id: i32, item_id: i32, only
     }
 }
 
-/// C++ `store_inventory.cpp` lines 316–345.
+/// 345
 pub fn store_destroy_item(store_id: i32, item_id: i32, only_one_of: bool) {
     with_state_mut(|state| store_destroy_item_state(state, store_id, item_id, only_one_of));
 }
 
 fn store_item_create(store_id: i32, max_cost: i16) {
-    // C++ store_inventory.cpp line 349: popt() may compactObjects at capacity.
+    // popt() may compactObjects at capacity
     // Call popt() outside with_state_mut so compact can re-enter global state.
     let free_id = popt();
 
@@ -430,7 +430,7 @@ fn store_item_create(store_id: i32, max_cost: i16) {
     });
 }
 
-/// C++ `store_inventory.cpp` lines 24–56.
+/// 56
 pub fn store_maintenance() {
     for store_id in 0..MAX_STORES as i32 {
         with_state_mut(|state| {

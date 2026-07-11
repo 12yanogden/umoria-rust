@@ -1,18 +1,16 @@
-# Golden-capture tooling (phase 1.4)
+# Golden-capture tooling
 
-Additive capture tooling for the C++ reference `umoria` binary. **Nothing here
-modifies `src/` or the game build target** — it only builds/links the unmodified
-reference and records golden artifacts under `tests/golden/` for the Rust
-differential tests (phase 1.5+).
+Capture tooling for the Rust `umoria` binary. Records golden artifacts under
+`tests/golden/` for differential / transcript tests.
 
 ## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `build_ref.sh` | Pinned Release out-of-source CMake build → `build/ref/umoria`, synced to `umoria/`. |
-| `rng_capture.cpp` + `capture_rng.sh` | External harness linking unmodified `rng.o`/data objects; emits RNG goldens (z10001, sequences, normal_table). |
+| `capture_rng.sh` + `rng_capture` bin | Emits RNG goldens (z10001, sequences, normal_table) via `cargo run --bin rng_capture`. |
 | `pty_driver.py` | OS-uniform pseudo-terminal driver: spawns `umoria -s <seed> [extra] [save]` with `TERM=xterm LINES=24 COLS=80`, feeds a `*.keys` script with pacing, captures raw pty output and renders the final `*.screen`. |
-| `play.sh` | Thin wrapper: `play.sh <name> <seed>` → `transcripts/<name>.{screen,raw}` and copies `game.sav` → `save/<name>.sav`. |
+| `play.sh` | Thin wrapper: `play.sh <name> <seed>` → `transcripts/<name>.{screen,raw}` and copies `game.sav` → `save/<name>.sav`. Uses `target/release/umoria` (or `$UMORIA_BIN`). |
+| `regen.sh` | Rebuild Rust binary, re-capture all goldens, rewrite `manifest.json`. |
 | `compare_masked.py` | Decode-aware masked comparison (see below). |
 
 ## Deterministic screen rendering (`*.screen`)
@@ -35,8 +33,8 @@ graceful fallback (with a stderr warning) when `pyte` is not installed.
 ## XOR obfuscation & masked comparison
 
 Save/score byte streams use a *chained* running XOR key:
-`ciphertext[i] = ciphertext[i-1] ^ plaintext[i]` (`wrByte`/`wrLong` in
-`src/game_save.cpp`). A single differing plaintext byte therefore cascades to
+`ciphertext[i] = ciphertext[i-1] ^ plaintext[i]` (`wr_byte` / `wr_long` in
+`src/game_save.rs`). A single differing plaintext byte therefore cascades to
 every following ciphertext byte, so comparison must be done on the **decoded
 plaintext**, where `plaintext[i] = ciphertext[i] ^ ciphertext[i-1]` is local.
 
@@ -51,22 +49,22 @@ Measured offsets:
 
 | Golden | Field | Decoded offset:len | Source |
 |--------|-------|--------------------|--------|
-| `save/newchar_seed42.sav` | save timestamp `l` = `getCurrentUnixTime()` | `3894:4` | `game_save.cpp:299` |
-| `save/newchar_seed42.sav` | `py.misc.date_of_birth` | `3910:4` | `game_save.cpp:309` |
-| `scores/*.dat` | `HighScore_t.birth_date` (record N) | `8 + 64*N : 4` | `game_save.cpp:1189` |
+| `save/newchar_seed42.sav` | save timestamp `l` = `get_current_unix_time()` | `3894:4` | `game_save.rs` (sv_write) |
+| `save/newchar_seed42.sav` | `py.misc.date_of_birth` | `3910:4` | `game_save.rs` (sv_write) |
+| `scores/*.dat` | `HighScore.birth_date` (record N) | `8 + 64*N : 4` | `game_save.rs` / scores |
 
 Save offsets are scenario-specific (they follow the variable-length recall /
 inventory / store data). They were located empirically by decoding two captures
 taken ≥1 s apart and diffing the plaintext, then confirmed against the field
-order in `svWrite()` (only the timestamp `l` and `date_of_birth` differ; the
+order in `sv_write()` (only the timestamp `l` and `date_of_birth` differ; the
 intervening `character_died_from="(saved)"` and `max_score` are deterministic).
 
 ## Score WRITE golden (documented limitation)
 
 `scores/scores_initial.dat` is a genuine populated high-score file (one real
-`HighScore_t` record) and pins the score-file read/format; `scores/scores_screen.txt`
+high-score record) and pins the score-file read/format; `scores/scores_screen.txt`
 pins the `umoria -d` display. A *fresh* score-WRITE golden
-(`scores_<scenario>.dat` produced by `recordNewHighScore` on death) is
+(`scores_<scenario>.dat` produced by `record_new_high_score` on death) is
 **deferred**: recording a score requires the character to die in-game, i.e. a
 long brittle deterministic keystroke death sequence disproportionate to this
 capture leaf. The write byte layout is already pinned by `scores_initial.dat`,
