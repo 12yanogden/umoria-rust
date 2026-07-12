@@ -60,8 +60,8 @@ describe("itemsCatalogFragment (phase_3.2.3)", () => {
     assert.ok(Array.isArray(itemsCatalogFragment));
   });
 
-  it("2. count === 16", () => {
-    assert.equal(itemsCatalogFragment.length, 16);
+  it("2. count === 15", () => {
+    assert.equal(itemsCatalogFragment.length, 15);
   });
 
   it("3. unique slugs, all prefixed items/", () => {
@@ -78,10 +78,10 @@ describe("itemsCatalogFragment (phase_3.2.3)", () => {
     }
   });
 
-  it("5. order 10..160 step 10, unique", () => {
+  it("5. order 10..150 step 10, unique", () => {
     const orders = itemsCatalogFragment.map((e) => e.order).sort((a, b) => a - b);
     assert.equal(new Set(orders).size, orders.length);
-    assert.deepEqual(orders, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160]);
+    assert.deepEqual(orders, [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150]);
   });
 
   it("6. items.txt coverage — every table group in ≥1 source label", () => {

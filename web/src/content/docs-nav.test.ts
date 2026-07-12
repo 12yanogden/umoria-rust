@@ -17,7 +17,7 @@ import {
 const EXPECTED_IDS = [
   "getting-started",
   "character",
-  "dungeon",
+  "locations",
   "combat",
   "items",
   "spells",
@@ -28,7 +28,7 @@ const EXPECTED_IDS = [
 const EXPECTED_LABELS: Record<(typeof EXPECTED_IDS)[number], string> = {
   "getting-started": "Getting Started",
   character: "Character",
-  dungeon: "Dungeon",
+  locations: "Locations",
   combat: "Combat",
   items: "Items",
   spells: "Spells",
@@ -107,7 +107,7 @@ describe("docs-nav taxonomy", () => {
   });
 
   it("12. section from slug", () => {
-    assert.equal(sectionIdFromSlug("dungeon/traps"), "dungeon");
+    assert.equal(sectionIdFromSlug("locations/traps"), "locations");
     assert.equal(sectionIdFromSlug("index"), null);
   });
 

@@ -1,5 +1,5 @@
 ---
-title: "Diggers, light, chests & miscellany"
+title: "Diggers, gold, gems & miscellany"
 date: 2026-07-11
 author: "Umoria"
 order: 150
@@ -9,12 +9,14 @@ sources:
     href: "https://beej.us/moria/items.txt"
   - label: "mmspoilers · Diggers"
     href: "https://beej.us/moria/mmspoilers/items.html#diggers"
+  - label: "mmspoilers · Gems"
+    href: "https://beej.us/moria/mmspoilers/items.html#gems"
 ---
 
 <!-- docs-stub: outline only; full prose out of scope -->
 
 ## Outline
 
-- Digging tools, lights, chests, skeletons/flotsam; shop-only consumables table tail.
+- Digging tools, lights, chests; copper/silver/gold/gem piles auto-convert to gold pieces on pickup (not carried as items); shop-only miscellany table tail.
 - Depends on: items/overview
-- Related: items/overview, dungeon/stores, wizard/items
+- Related: items/overview, locations/stores, wizard/items

@@ -58,18 +58,7 @@ Non-catalog scaffold/fixture philes (e.g. `_placeholder`, `_sources-fixture`) st
 
 ## Volumes (phase_4.2)
 
-Section → volume map is authoritative in `src/content/docs-section-volume-map.ts` (`DOCS_SECTION_TO_VOLUME`; re-exported from `src/config/volumes.ts`). Labels in `volumes.ts` match `docs-nav.ts` section labels.
-
-| Section | Volume |
-| --- | --- |
-| getting-started | volume-0 |
-| character | volume-1 |
-| dungeon | volume-2 |
-| combat | volume-3 |
-| items | volume-4 |
-| spells | volume-5 |
-| wizard | volume-6 |
-| reference | volume-7 |
+Section → volume numbers and labels are authoritative in `src/content/docs-section-volume-map.ts` (`DOCS_SECTION_TO_VOLUME`, `DOCS_VOLUME_LABELS`; re-exported from `src/config/volumes.ts`). Labels match `docs-nav.ts` section labels. Section ids: `getting-started` … `reference` → `volume-0` … `volume-7`.
 
 Stub philes: one per catalog slug at `src/content/philes/volume-<N>/<catalog-slug>.phile`. Underscore-prefixed fixtures (`_placeholder`, `_sources-fixture`) are non-catalog.
 

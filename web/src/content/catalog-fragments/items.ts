@@ -21,7 +21,7 @@ export const itemsCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/items.html"
       }
     ],
-    relatedSlugs: ["items/weapons", "items/armor", "dungeon/stores"]
+    relatedSlugs: ["items/weapons", "items/armor", "locations/stores"]
   },
   {
     slug: "items/weapons",
@@ -39,7 +39,7 @@ export const itemsCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/items.html#weapons"
       }
     ],
-    relatedSlugs: ["items/special-properties", "combat/damage", "items/weapon-artifacts"],
+    relatedSlugs: ["items/special-properties", "combat/damage", "items/weapon-artifacts", "combat/hit-probability"],
     dependsOnSlugs: ["items/overview"]
   },
   {
@@ -89,7 +89,7 @@ export const itemsCatalogFragment: DocsCatalogEntry[] = [
       }
     ],
     relatedSlugs: ["items/weapons", "items/special-properties"],
-    dependsOnSlugs: ["items/weapons"]
+    dependsOnSlugs: ["items/weapons", "items/special-properties"]
   },
   {
     slug: "items/armor-artifacts",
@@ -104,7 +104,7 @@ export const itemsCatalogFragment: DocsCatalogEntry[] = [
       }
     ],
     relatedSlugs: ["items/armor", "items/special-properties"],
-    dependsOnSlugs: ["items/armor"]
+    dependsOnSlugs: ["items/armor", "items/special-properties"]
   },
   {
     slug: "items/rings",
@@ -180,7 +180,7 @@ export const itemsCatalogFragment: DocsCatalogEntry[] = [
       }
     ],
     relatedSlugs: ["spells/system", "spells/mage", "spells/priest"],
-    dependsOnSlugs: ["items/overview"]
+    dependsOnSlugs: ["items/overview", "spells/system"]
   },
   {
     slug: "items/wands",
@@ -255,13 +255,14 @@ export const itemsCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/items.html#food"
       }
     ],
-    relatedSlugs: ["items/potions", "dungeon/stores"],
+    relatedSlugs: ["items/potions", "locations/stores"],
     dependsOnSlugs: ["items/overview"]
   },
   {
     slug: "items/diggers-and-misc",
-    title: "Diggers, light, chests & miscellany",
-    summary: "Digging tools, lights, chests, skeletons/flotsam; shop-only consumables table tail.",
+    title: "Diggers, gold, gems & miscellany",
+    summary:
+      "Digging tools, lights, chests; copper/silver/gold/gem piles auto-convert to gold pieces on pickup (not carried as items); shop-only miscellany table tail.",
     section: "items",
     order: 150,
     sources: [
@@ -272,24 +273,13 @@ export const itemsCatalogFragment: DocsCatalogEntry[] = [
       {
         label: "mmspoilers · Diggers",
         href: "https://beej.us/moria/mmspoilers/items.html#diggers"
-      }
-    ],
-    relatedSlugs: ["items/overview", "dungeon/stores", "wizard/items"],
-    dependsOnSlugs: ["items/overview"]
-  },
-  {
-    slug: "items/gems",
-    title: "Gems",
-    summary: "Gem types, values, selling strategy (mmspoilers-only detail).",
-    section: "items",
-    order: 160,
-    sources: [
+      },
       {
         label: "mmspoilers · Gems",
         href: "https://beej.us/moria/mmspoilers/items.html#gems"
       }
     ],
-    relatedSlugs: ["dungeon/stores", "items/overview"],
+    relatedSlugs: ["items/overview", "locations/stores", "wizard/items"],
     dependsOnSlugs: ["items/overview"]
   }
 ];

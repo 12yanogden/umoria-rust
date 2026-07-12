@@ -17,4 +17,4 @@ sources:
 
 - Rations, waybread, mushrooms/molds with food values and stat effects.
 - Depends on: items/overview
-- Related: items/potions, dungeon/stores
+- Related: items/potions, locations/stores

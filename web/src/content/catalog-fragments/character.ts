@@ -53,8 +53,15 @@ export const characterCatalogFragment: DocsCatalogEntry[] = [
         href: "src/data_player.rs"
       }
     ],
-    relatedSlugs: ["character/races", "character/experience", "spells/system"],
-    dependsOnSlugs: ["character/races"]
+    relatedSlugs: [
+      "character/races",
+      "character/experience",
+      "spells/system",
+      "spells/mage",
+      "spells/priest",
+      "character/social-class"
+    ],
+    dependsOnSlugs: ["character/races", "character/attributes"]
   },
   {
     slug: "character/experience",
@@ -73,81 +80,38 @@ export const characterCatalogFragment: DocsCatalogEntry[] = [
   },
   {
     slug: "character/social-class",
-    title: "Social class overview",
-    summary: "What social class affects (starting gold, flavor); pointer to race-group tables.",
+    title: "Social class",
+    summary:
+      "Starting gold from social class (character.rs); race-group parent-occupation tables (§1–§6) on this page.",
     section: "character",
     order: 50,
     sources: [
       {
         label: "classes.txt · Introduction",
         href: "https://beej.us/moria/classes.txt"
-      }
-    ],
-    relatedSlugs: [
-      "character/social-class-humanoids",
-      "character/social-class-elves",
-      "character/social-class-smallfolk",
-      "character/social-class-dwarves-trolls"
-    ]
-  },
-  {
-    slug: "character/social-class-humanoids",
-    title: "Social class — Human, Half-Elf, Half-Orc",
-    summary: "Parent occupation bases, birth/family adjustments, half-elf elvish parent mods.",
-    section: "character",
-    order: 60,
-    sources: [
+      },
       {
         label: "classes.txt · §1 Humans, Half-Elves, Half-Orcs",
         href: "https://beej.us/moria/classes.txt"
-      }
-    ],
-    relatedSlugs: ["character/races", "character/social-class"],
-    dependsOnSlugs: ["character/social-class"]
-  },
-  {
-    slug: "character/social-class-elves",
-    title: "Social class — Elves",
-    summary: "Elf parent occupation and birth circumstance tables.",
-    section: "character",
-    order: 70,
-    sources: [
+      },
       {
         label: "classes.txt · §2 Elves",
         href: "https://beej.us/moria/classes.txt"
-      }
-    ],
-    relatedSlugs: ["character/races", "character/social-class"],
-    dependsOnSlugs: ["character/social-class"]
-  },
-  {
-    slug: "character/social-class-smallfolk",
-    title: "Social class — Halflings & Gnomes",
-    summary: "Halfling and gnome social-class tables (§3–4).",
-    section: "character",
-    order: 80,
-    sources: [
+      },
       {
         label: "classes.txt · §3 Halflings, §4 Gnomes",
         href: "https://beej.us/moria/classes.txt"
-      }
-    ],
-    relatedSlugs: ["character/races", "character/social-class"],
-    dependsOnSlugs: ["character/social-class"]
-  },
-  {
-    slug: "character/social-class-dwarves-trolls",
-    title: "Social class — Dwarves & Half-Trolls",
-    summary: "Dwarf and half-troll occupation tables and troll parent race mods.",
-    section: "character",
-    order: 90,
-    sources: [
+      },
       {
         label: "classes.txt · §5 Dwarves, §6 Half-Trolls",
         href: "https://beej.us/moria/classes.txt"
+      },
+      {
+        label: "Umoria start gold",
+        href: "src/character.rs"
       }
     ],
-    relatedSlugs: ["character/races", "character/social-class"],
-    dependsOnSlugs: ["character/social-class"]
+    relatedSlugs: ["character/races", "character/classes"],
+    dependsOnSlugs: ["character/races", "character/classes"]
   }
 ];

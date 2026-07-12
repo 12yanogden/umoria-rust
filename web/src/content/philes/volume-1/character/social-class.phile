@@ -1,5 +1,5 @@
 ---
-title: "Social class overview"
+title: "Social class"
 date: 2026-07-11
 author: "Umoria"
 order: 50
@@ -7,11 +7,22 @@ slug: "character/social-class"
 sources:
   - label: "classes.txt · Introduction"
     href: "https://beej.us/moria/classes.txt"
+  - label: "classes.txt · §1 Humans, Half-Elves, Half-Orcs"
+    href: "https://beej.us/moria/classes.txt"
+  - label: "classes.txt · §2 Elves"
+    href: "https://beej.us/moria/classes.txt"
+  - label: "classes.txt · §3 Halflings, §4 Gnomes"
+    href: "https://beej.us/moria/classes.txt"
+  - label: "classes.txt · §5 Dwarves, §6 Half-Trolls"
+    href: "https://beej.us/moria/classes.txt"
+  - label: "Umoria start gold"
+    href: "src/character.rs"
 ---
 
 <!-- docs-stub: outline only; full prose out of scope -->
 
 ## Outline
 
-- What social class affects (starting gold, flavor); pointer to race-group tables.
-- Related: character/social-class-humanoids, character/social-class-elves, character/social-class-smallfolk, character/social-class-dwarves-trolls
+- Starting gold from social class (character.rs); race-group parent-occupation tables (§1–§6) on this page.
+- Depends on: character/races, character/classes
+- Related: character/races, character/classes

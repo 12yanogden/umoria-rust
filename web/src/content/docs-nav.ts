@@ -13,7 +13,7 @@
 export type DocsNavSectionId =
   | "getting-started"
   | "character"
-  | "dungeon"
+  | "locations"
   | "combat"
   | "items"
   | "spells"
@@ -35,7 +35,7 @@ export const DOCS_HOME_SLUG = "index" as const;
 export const DOCS_NAV_SECTION_IDS: readonly DocsNavSectionId[] = [
   "getting-started",
   "character",
-  "dungeon",
+  "locations",
   "combat",
   "items",
   "spells",
@@ -57,9 +57,9 @@ export const DOCS_NAV_SECTIONS: DocsNavSection[] = [
     description: "Races, classes, attributes, experience, and social class."
   },
   {
-    id: "dungeon",
+    id: "locations",
     order: 3,
-    label: "Dungeon",
+    label: "Locations",
     description: "The city, stores, haggling, the underground, and traps."
   },
   {

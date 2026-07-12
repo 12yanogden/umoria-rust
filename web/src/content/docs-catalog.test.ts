@@ -51,13 +51,10 @@ const REQUIRED_DEPENDS_ON: ReadonlyArray<readonly [string, readonly string[]]> =
   ["getting-started/playing", ["getting-started/install"]],
   ["character/classes", ["character/attributes", "character/races"]],
   ["character/experience", ["character/classes"]],
-  ["character/social-class-humanoids", ["character/social-class", "character/classes"]],
-  ["character/social-class-elves", ["character/social-class", "character/classes"]],
-  ["character/social-class-smallfolk", ["character/social-class", "character/classes"]],
-  ["character/social-class-dwarves-trolls", ["character/social-class", "character/classes"]],
-  ["dungeon/stores", ["dungeon/city"]],
-  ["dungeon/haggling", ["dungeon/stores"]],
-  ["dungeon/underground", ["dungeon/city"]],
+  ["character/social-class", ["character/races", "character/classes"]],
+  ["locations/stores", ["locations/city"]],
+  ["locations/haggling", ["locations/stores"]],
+  ["locations/underground", ["locations/city"]],
   ["combat/monster-attacks", ["combat/monsters"]],
   ["combat/damage", ["combat/hit-probability"]],
   ["combat/armor-class", ["combat/damage"]],
@@ -82,7 +79,7 @@ const REQUIRED_RELATED: ReadonlyArray<readonly [string, readonly string[]]> = [
     [
       "getting-started/install",
       "character/attributes",
-      "dungeon/city",
+      "locations/city",
       "combat/monsters",
       "items/overview",
       "spells/system",
@@ -94,17 +91,9 @@ const REQUIRED_RELATED: ReadonlyArray<readonly [string, readonly string[]]> = [
     "character/classes",
     ["spells/mage", "spells/priest", "character/social-class", "character/experience"]
   ],
-  [
-    "character/social-class",
-    [
-      "character/social-class-humanoids",
-      "character/social-class-elves",
-      "character/social-class-smallfolk",
-      "character/social-class-dwarves-trolls"
-    ]
-  ],
-  ["dungeon/stores", ["dungeon/haggling", "dungeon/city"]],
-  ["dungeon/haggling", ["dungeon/stores"]],
+  ["character/social-class", ["character/races", "character/classes"]],
+  ["locations/stores", ["locations/haggling", "locations/city"]],
+  ["locations/haggling", ["locations/stores"]],
   ["items/weapons", ["items/special-properties", "combat/damage", "combat/hit-probability"]],
   ["items/armor", ["items/special-properties", "combat/armor-class"]],
   ["items/special-properties", ["items/weapons", "items/armor"]],

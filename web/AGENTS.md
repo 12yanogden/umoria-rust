@@ -8,8 +8,9 @@
 - `bun run check`
 - `bun run build`
 
-## Scope notes
+## Pointers
 
-- Content conventions: `CONTENT_CONVENTIONS.md`
+- Run / build / deploy: `README.md`
+- Content conventions (phile schema, sources, routes, volumes): `CONTENT_CONVENTIONS.md`
 - Do not add GitHub Actions deploy workflows here (phase_5)
 - Do not invent the docs article catalog here (phase_3)

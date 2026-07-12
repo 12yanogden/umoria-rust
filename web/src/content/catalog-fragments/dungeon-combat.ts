@@ -1,15 +1,15 @@
 /**
- * Dungeon + combat catalog fragment (phase_3.2.2).
+ * Locations + combat catalog fragment (phase_3.2.2).
  * Merged by phase_3.4 into docs-catalog.ts — no article prose here.
  */
 import type { DocsCatalogEntry } from "../docs-catalog-types.ts";
 
 export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
   {
-    slug: "dungeon/city",
+    slug: "locations/city",
     title: "The City",
     summary: "Town level: starting area, stores, zero XP for town kills.",
-    section: "dungeon",
+    section: "locations",
     order: 10,
     sources: [
       {
@@ -17,13 +17,13 @@ export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/dungeon.html#city"
       }
     ],
-    relatedSlugs: ["dungeon/stores", "dungeon/underground"]
+    relatedSlugs: ["locations/stores", "locations/underground"]
   },
   {
-    slug: "dungeon/stores",
+    slug: "locations/stores",
     title: "Stores",
     summary: "Six store types, shopkeeper stats table (Max$, markup, haggle%, race, insults).",
-    section: "dungeon",
+    section: "locations",
     order: 20,
     sources: [
       {
@@ -35,14 +35,14 @@ export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
         href: "src/data_store_owners.rs"
       }
     ],
-    relatedSlugs: ["dungeon/haggling", "dungeon/city", "character/attributes"],
-    dependsOnSlugs: ["dungeon/city"]
+    relatedSlugs: ["locations/haggling", "locations/city", "character/attributes"],
+    dependsOnSlugs: ["locations/city"]
   },
   {
-    slug: "dungeon/haggling",
+    slug: "locations/haggling",
     title: "Haggling",
     summary: "Offer/final price formulas, unidentified item pricing, race/CHA adjustments, insult rules.",
-    section: "dungeon",
+    section: "locations",
     order: 30,
     sources: [
       {
@@ -50,14 +50,14 @@ export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/dungeon.html#haggling"
       }
     ],
-    relatedSlugs: ["dungeon/stores", "character/attributes"],
-    dependsOnSlugs: ["dungeon/stores"]
+    relatedSlugs: ["locations/stores", "character/attributes"],
+    dependsOnSlugs: ["locations/stores"]
   },
   {
-    slug: "dungeon/underground",
+    slug: "locations/underground",
     title: "The Underground",
     summary: "Level size, stair one-way generation, no return to prior level.",
-    section: "dungeon",
+    section: "locations",
     order: 40,
     sources: [
       {
@@ -65,13 +65,14 @@ export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/dungeon.html#underground"
       }
     ],
-    relatedSlugs: ["dungeon/traps", "dungeon/city"]
+    relatedSlugs: ["locations/traps", "locations/city"],
+    dependsOnSlugs: ["locations/city"]
   },
   {
-    slug: "dungeon/traps",
+    slug: "locations/traps",
     title: "Traps",
     summary: "Trap types, XP values, effects (pits, gas, runes, dart stat drain, etc.).",
-    section: "dungeon",
+    section: "locations",
     order: 50,
     sources: [
       {
@@ -79,8 +80,8 @@ export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/dungeon.html#traps"
       }
     ],
-    relatedSlugs: ["dungeon/underground", "combat/monsters"],
-    dependsOnSlugs: ["dungeon/underground"]
+    relatedSlugs: ["locations/underground", "combat/monsters"],
+    dependsOnSlugs: ["locations/underground"]
   },
   {
     slug: "combat/monsters",
@@ -123,7 +124,7 @@ export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/combat.html#hitprob"
       }
     ],
-    relatedSlugs: ["character/attributes", "combat/armor-class"],
+    relatedSlugs: ["character/attributes", "combat/armor-class", "combat/damage", "items/weapons"],
     dependsOnSlugs: ["character/attributes"]
   },
   {
@@ -169,6 +170,6 @@ export const dungeonCombatCatalogFragment: DocsCatalogEntry[] = [
       }
     ],
     relatedSlugs: ["items/armor", "character/attributes", "combat/hit-probability"],
-    dependsOnSlugs: ["character/attributes"]
+    dependsOnSlugs: ["character/attributes", "combat/damage"]
   }
 ];

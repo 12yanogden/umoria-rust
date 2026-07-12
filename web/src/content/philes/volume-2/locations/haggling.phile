@@ -3,7 +3,7 @@ title: "Haggling"
 date: 2026-07-11
 author: "Umoria"
 order: 30
-slug: "dungeon/haggling"
+slug: "locations/haggling"
 sources:
   - label: "mmspoilers · Dungeon › Haggling"
     href: "https://beej.us/moria/mmspoilers/dungeon.html#haggling"
@@ -14,5 +14,5 @@ sources:
 ## Outline
 
 - Offer/final price formulas, unidentified item pricing, race/CHA adjustments, insult rules.
-- Depends on: dungeon/stores
-- Related: dungeon/stores, character/attributes
+- Depends on: locations/stores
+- Related: locations/stores, character/attributes

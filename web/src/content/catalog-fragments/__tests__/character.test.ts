@@ -12,14 +12,10 @@ const EXPECTED_SLUGS = [
   "character/races",
   "character/classes",
   "character/experience",
-  "character/social-class",
-  "character/social-class-humanoids",
-  "character/social-class-elves",
-  "character/social-class-smallfolk",
-  "character/social-class-dwarves-trolls"
+  "character/social-class"
 ] as const;
 
-const EXPECTED_ORDERS = [10, 20, 30, 40, 50, 60, 70, 80, 90] as const;
+const EXPECTED_ORDERS = [10, 20, 30, 40, 50] as const;
 
 const MMSPOILERS_ANCHORS = [
   "https://beej.us/moria/mmspoilers/character.html#attributes",
@@ -35,8 +31,8 @@ describe("characterCatalogFragment", () => {
     assert.ok(Array.isArray(characterCatalogFragment));
   });
 
-  it("2. count === 9", () => {
-    assert.equal(characterCatalogFragment.length, 9);
+  it("2. count === 5", () => {
+    assert.equal(characterCatalogFragment.length, 5);
   });
 
   it("3. unique slugs within fragment", () => {
@@ -52,7 +48,7 @@ describe("characterCatalogFragment", () => {
     }
   });
 
-  it("5. order monotonic 10..90, unique within section", () => {
+  it("5. order monotonic 10..50, unique within section", () => {
     const orders = characterCatalogFragment.map((e) => e.order);
     assert.deepEqual(orders, [...EXPECTED_ORDERS]);
     assert.equal(new Set(orders).size, orders.length);

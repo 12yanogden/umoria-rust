@@ -18,7 +18,7 @@ const EXPECTED_SLUGS = [
   "getting-started/contributing"
 ] as const;
 
-const SPOILER_PREFIXES = ["character/", "dungeon/", "combat/", "items/", "spells/", "wizard/", "reference/"] as const;
+const SPOILER_PREFIXES = ["character/", "locations/", "combat/", "items/", "spells/", "wizard/", "reference/"] as const;
 
 const DEPENDS_ON_INSTALL = [
   "getting-started/playing",

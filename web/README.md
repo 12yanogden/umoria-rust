@@ -24,13 +24,12 @@ bun run test:docs-stubs       # stub completeness / sources / outline checks
 ## Layout
 
 - `src/config/` — site, volumes, appearance, effects
-- `src/content/philes/` — `.phile` articles by volume (`volume-0`…`volume-7` per section map)
+- `src/content/philes/` — `.phile` articles by volume
 - `src/content/docs-catalog.ts` — article catalog (source of truth for stubs)
 - `src/pages/docs/` — public `/docs/` and `/docs/<slug>/` routes
 - `src/layouts/`, `src/modules/textmode/` — Entropic textmode stack
-- `CONTENT_CONVENTIONS.md` — phile/volume/sources contract
 
-Docs stubs are outlines only; regenerate with `bun run docs:generate-stubs` when the catalog changes.
+Phile schema, sources, volumes, and ownership: see [`CONTENT_CONVENTIONS.md`](./CONTENT_CONVENTIONS.md).
 
 ## GitHub Pages
 

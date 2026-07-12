@@ -41,7 +41,7 @@ export const spellsWizardReferenceCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/spells.html#mana"
       }
     ],
-    relatedSlugs: ["spells/system", "character/attributes"],
+    relatedSlugs: ["spells/system", "character/attributes", "spells/mage", "spells/priest", "spells/failure"],
     dependsOnSlugs: ["spells/system"]
   },
   {
@@ -61,7 +61,7 @@ export const spellsWizardReferenceCatalogFragment: DocsCatalogEntry[] = [
       }
     ],
     relatedSlugs: ["spells/mana", "character/attributes"],
-    dependsOnSlugs: ["spells/mana"]
+    dependsOnSlugs: ["spells/mana", "spells/system"]
   },
   {
     slug: "spells/mage",
@@ -83,8 +83,8 @@ export const spellsWizardReferenceCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/spells.txt"
       }
     ],
-    relatedSlugs: ["spells/system", "spells/failure", "items/books"],
-    dependsOnSlugs: ["spells/system", "spells/failure"]
+    relatedSlugs: ["spells/system", "spells/failure", "items/books", "spells/priest", "character/classes"],
+    dependsOnSlugs: ["spells/system", "spells/failure", "spells/mana", "character/classes"]
   },
   {
     slug: "spells/priest",
@@ -106,8 +106,8 @@ export const spellsWizardReferenceCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/spells.txt"
       }
     ],
-    relatedSlugs: ["spells/system", "spells/failure", "items/books"],
-    dependsOnSlugs: ["spells/system", "spells/failure"]
+    relatedSlugs: ["spells/system", "spells/failure", "items/books", "spells/mage", "character/classes"],
+    dependsOnSlugs: ["spells/system", "spells/failure", "spells/mana", "character/classes"]
   },
   {
     slug: "wizard/overview",
@@ -151,7 +151,7 @@ export const spellsWizardReferenceCatalogFragment: DocsCatalogEntry[] = [
       }
     ],
     relatedSlugs: ["items/overview", "items/special-properties"],
-    dependsOnSlugs: ["wizard/commands"]
+    dependsOnSlugs: ["wizard/commands", "wizard/overview", "items/overview"]
   },
   {
     slug: "reference/sources",
@@ -173,7 +173,13 @@ export const spellsWizardReferenceCatalogFragment: DocsCatalogEntry[] = [
         href: "https://beej.us/moria/mmspoilers/index.html"
       }
     ],
-    relatedSlugs: ["reference/versions"]
+    relatedSlugs: [
+      "reference/versions",
+      "character/social-class",
+      "items/overview",
+      "spells/system",
+      "items/special-properties"
+    ]
   },
   {
     slug: "reference/versions",

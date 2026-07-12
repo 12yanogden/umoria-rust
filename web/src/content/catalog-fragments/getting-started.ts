@@ -23,8 +23,13 @@ export const gettingStartedCatalog: DocsCatalogEntry[] = [
       "getting-started/differences",
       "getting-started/contributing",
       "character/classes",
-      "dungeon/city",
-      "reference/sources"
+      "locations/city",
+      "reference/sources",
+      "character/attributes",
+      "combat/monsters",
+      "items/overview",
+      "spells/system",
+      "wizard/overview"
     ]
   },
   {
@@ -54,7 +59,7 @@ export const gettingStartedCatalog: DocsCatalogEntry[] = [
       "character/classes",
       "character/races",
       "character/attributes",
-      "dungeon/city",
+      "locations/city",
       "combat/monsters",
       "wizard/overview"
     ],

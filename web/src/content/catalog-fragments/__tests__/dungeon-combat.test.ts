@@ -1,5 +1,5 @@
 /**
- * TDD tests for dungeon + combat catalog fragment (phase_3.2.2).
+ * TDD tests for locations + combat catalog fragment (phase_3.2.2).
  * Run: bun run test  (from web/)
  */
 import assert from "node:assert/strict";
@@ -7,12 +7,12 @@ import { describe, it } from "node:test";
 
 import { dungeonCombatCatalogFragment } from "../dungeon-combat.ts";
 
-const EXPECTED_DUNGEON_SLUGS = [
-  "dungeon/city",
-  "dungeon/stores",
-  "dungeon/haggling",
-  "dungeon/underground",
-  "dungeon/traps"
+const EXPECTED_LOCATIONS_SLUGS = [
+  "locations/city",
+  "locations/stores",
+  "locations/haggling",
+  "locations/underground",
+  "locations/traps"
 ] as const;
 
 const EXPECTED_COMBAT_SLUGS = [
@@ -24,9 +24,9 @@ const EXPECTED_COMBAT_SLUGS = [
   "combat/armor-class"
 ] as const;
 
-const EXPECTED_SLUGS = [...EXPECTED_DUNGEON_SLUGS, ...EXPECTED_COMBAT_SLUGS] as const;
+const EXPECTED_SLUGS = [...EXPECTED_LOCATIONS_SLUGS, ...EXPECTED_COMBAT_SLUGS] as const;
 
-const DUNGEON_ORDERS = [10, 20, 30, 40, 50] as const;
+const LOCATIONS_ORDERS = [10, 20, 30, 40, 50] as const;
 const COMBAT_ORDERS = [10, 20, 30, 40, 50, 60] as const;
 
 const MMSPOILERS_ANCHORS = [
@@ -48,7 +48,7 @@ describe("dungeonCombatCatalogFragment", () => {
     assert.ok(Array.isArray(dungeonCombatCatalogFragment));
   });
 
-  it("2. count === 11 (5 dungeon + 6 combat)", () => {
+  it("2. count === 11 (5 locations + 6 combat)", () => {
     assert.equal(dungeonCombatCatalogFragment.length, 11);
   });
 
@@ -58,10 +58,10 @@ describe("dungeonCombatCatalogFragment", () => {
     assert.deepEqual(slugs, [...EXPECTED_SLUGS]);
   });
 
-  it("4. section filter — 5 dungeon, 6 combat", () => {
-    const dungeon = dungeonCombatCatalogFragment.filter((e) => e.section === "dungeon");
+  it("4. section filter — 5 locations, 6 combat", () => {
+    const locations = dungeonCombatCatalogFragment.filter((e) => e.section === "locations");
     const combat = dungeonCombatCatalogFragment.filter((e) => e.section === "combat");
-    assert.equal(dungeon.length, 5);
+    assert.equal(locations.length, 5);
     assert.equal(combat.length, 6);
   });
 
@@ -71,18 +71,18 @@ describe("dungeonCombatCatalogFragment", () => {
     }
   });
 
-  it("6. order — dungeon 10–50, combat 10–60; unique per section", () => {
-    const dungeon = dungeonCombatCatalogFragment.filter((e) => e.section === "dungeon");
+  it("6. order — locations 10–50, combat 10–60; unique per section", () => {
+    const locations = dungeonCombatCatalogFragment.filter((e) => e.section === "locations");
     const combat = dungeonCombatCatalogFragment.filter((e) => e.section === "combat");
     assert.deepEqual(
-      dungeon.map((e) => e.order),
-      [...DUNGEON_ORDERS]
+      locations.map((e) => e.order),
+      [...LOCATIONS_ORDERS]
     );
     assert.deepEqual(
       combat.map((e) => e.order),
       [...COMBAT_ORDERS]
     );
-    assert.equal(new Set(dungeon.map((e) => e.order)).size, dungeon.length);
+    assert.equal(new Set(locations.map((e) => e.order)).size, locations.length);
     assert.equal(new Set(combat.map((e) => e.order)).size, combat.length);
   });
 

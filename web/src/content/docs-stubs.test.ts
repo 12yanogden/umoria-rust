@@ -62,7 +62,7 @@ describe("docs stubs (phase_4.2)", () => {
     const expected: Record<DocsNavSectionId, number> = {
       "getting-started": 0,
       character: 1,
-      dungeon: 2,
+      locations: 2,
       combat: 3,
       items: 4,
       spells: 5,

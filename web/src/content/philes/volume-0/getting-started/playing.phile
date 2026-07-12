@@ -17,4 +17,4 @@ sources:
 
 - Run the game from the repository root, CLI flags, saves, and where to go next in the docs.
 - Depends on: getting-started/install
-- Related: character/classes, character/races, character/attributes, dungeon/city, combat/monsters, wizard/overview
+- Related: character/classes, character/races, character/attributes, locations/city, combat/monsters, wizard/overview
