@@ -1,0 +1,43 @@
+---
+/**
+ * Docs landing listing — all catalog articles grouped by DocsNavSection.
+ * Driven solely by docs-catalog.ts (phase_4.3).
+ */
+import { docsCatalog } from "../content/docs-catalog";
+import { withBase } from "../modules/paths";
+
+const sections = [...docsCatalog.sections].sort((a, b) => a.order - b.order);
+
+const groups = sections
+  .map((section) => ({
+    section,
+    articles: docsCatalog.articles
+      .filter((a) => a.section === section.id)
+      .sort((a, b) => a.order - b.order)
+  }))
+  .filter((g) => g.articles.length > 0);
+---
+
+<section class="stub-screen docs-index" data-docs-index>
+  <h1>Docs</h1>
+  <p>Player and reference docs for this Rust port of Umoria. Stubs link to outlines and sources.</p>
+
+  {
+    groups.map(({ section, articles }) => (
+      <section class="docs-index-section" data-docs-section={section.id}>
+        <h2>{section.label}</h2>
+        {section.description ? <p class="docs-index-section-desc">{section.description}</p> : null}
+        <ul class="docs-index-list">
+          {articles.map((article) => (
+            <li>
+              <a href={withBase(`/docs/${article.slug}/`)}>{article.title}</a>
+              {article.summary ? (
+                <span class="docs-index-summary"> — {article.summary}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</section>

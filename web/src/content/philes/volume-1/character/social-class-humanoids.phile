@@ -1,0 +1,18 @@
+---
+title: "Social class — Human, Half-Elf, Half-Orc"
+date: 2026-07-11
+author: "Umoria"
+order: 60
+slug: "character/social-class-humanoids"
+sources:
+  - label: "classes.txt · §1 Humans, Half-Elves, Half-Orcs"
+    href: "https://beej.us/moria/classes.txt"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Parent occupation bases, birth/family adjustments, half-elf elvish parent mods.
+- Depends on: character/social-class, character/classes
+- Related: character/races, character/social-class

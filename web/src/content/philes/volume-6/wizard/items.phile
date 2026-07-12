@@ -1,0 +1,18 @@
+---
+title: "Wizard items"
+date: 2026-07-11
+author: "Umoria"
+order: 30
+slug: "wizard/items"
+sources:
+  - label: "mmspoilers · Wizard Items"
+    href: "https://beej.us/moria/mmspoilers/wizardmode.html#wizarditems"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- @-create item prompts: Tval/Subval/flags hex tables for testing items.
+- Depends on: wizard/commands, wizard/overview, items/overview
+- Related: items/overview, items/special-properties

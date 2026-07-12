@@ -1,0 +1,18 @@
+---
+title: "Bashing"
+date: 2026-07-11
+author: "Umoria"
+order: 50
+slug: "combat/bashing"
+sources:
+  - label: "mmspoilers · Combat › Bashing"
+    href: "https://beej.us/moria/mmspoilers/combat.html#bashing"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Non-weapon bash damage, weight/strength interaction, store-sold bash weapons note.
+- Depends on: combat/damage
+- Related: combat/damage, character/attributes

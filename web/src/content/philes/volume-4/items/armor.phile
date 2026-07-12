@@ -1,0 +1,20 @@
+---
+title: "Armor & worn gear"
+date: 2026-07-11
+author: "Umoria"
+order: 30
+slug: "items/armor"
+sources:
+  - label: "items.txt · Soft/Hard/Shields/Footwear/Headgear/Misc armor"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Armor"
+    href: "https://beej.us/moria/mmspoilers/items.html#armor"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Soft/hard armor, shields, footwear, headgear, misc armor (cloaks/gloves); mmspoilers armor.
+- Depends on: items/overview
+- Related: items/special-properties, combat/armor-class, items/armor-artifacts

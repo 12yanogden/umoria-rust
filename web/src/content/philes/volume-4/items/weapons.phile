@@ -1,0 +1,20 @@
+---
+title: "Weapons & missiles"
+date: 2026-07-11
+author: "Umoria"
+order: 20
+slug: "items/weapons"
+sources:
+  - label: "items.txt · Swords/Hafted/Polearms/Bows/Missiles"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Weapons"
+    href: "https://beej.us/moria/mmspoilers/items.html#weapons"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Swords, hafted, polearms, bows, missiles tables from items.txt; mmspoilers weapons section.
+- Depends on: items/overview
+- Related: items/special-properties, combat/damage, items/weapon-artifacts, combat/hit-probability

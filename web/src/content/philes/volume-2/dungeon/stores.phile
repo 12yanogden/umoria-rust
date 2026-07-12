@@ -1,0 +1,20 @@
+---
+title: "Stores"
+date: 2026-07-11
+author: "Umoria"
+order: 20
+slug: "dungeon/stores"
+sources:
+  - label: "mmspoilers · Dungeon › Stores"
+    href: "https://beej.us/moria/mmspoilers/dungeon.html#stores"
+  - label: "Umoria shopkeepers (optional cross-check)"
+    href: "src/data_store_owners.rs"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Six store types, shopkeeper stats table (Max$, markup, haggle%, race, insults).
+- Depends on: dungeon/city
+- Related: dungeon/haggling, dungeon/city, character/attributes

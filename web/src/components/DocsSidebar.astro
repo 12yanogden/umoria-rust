@@ -1,0 +1,75 @@
+---
+/**
+ * In-docs sidebar / volume nav (phase_4.4). Secondary chrome only — does not replace SiteNav.
+ */
+import { getDocsNavTree } from "../content/docs-nav-tree";
+import { isActivePath, withBase } from "../modules/paths";
+
+type Props = {
+  /** Catalog slug of the page being viewed (empty on docs index). */
+  currentSlug?: string;
+};
+
+const currentSlug = Astro.props.currentSlug ?? "";
+const pathname = Astro.url.pathname;
+const tree = getDocsNavTree();
+const docsIndexHref = withBase("/docs/");
+const docsIndexActive = isActivePath(pathname, "/docs/") && !currentSlug;
+
+const groups = tree.map((group) => ({
+  ...group,
+  articles: group.articles.map((article) => {
+    const active =
+      currentSlug === article.slug || isActivePath(pathname, article.href);
+    return {
+      ...article,
+      href: withBase(article.href),
+      active,
+      label: active ? `[${article.title}]` : article.title
+    };
+  })
+}));
+---
+
+<nav class="docs-sidebar" data-docs-sidebar aria-label="Docs sections">
+  <pre class="textmode-pre docs-sidebar-pre">
+    <span class="docs-sidebar-frame">┌─ DOCS ────────────────────────────</span>
+    {
+      docsIndexActive ? (
+        <a href={docsIndexHref} aria-current="page" class="docs-sidebar-index">
+          [Docs index]
+        </a>
+      ) : (
+        <a href={docsIndexHref} class="docs-sidebar-index">
+          Docs index
+        </a>
+      )
+    }
+    {
+      groups.map((group) => (
+        <>
+          <span class="docs-sidebar-section" data-volume={group.volume}>
+            │ {group.label}
+          </span>
+          {group.articles.map((article) =>
+            article.active ? (
+              <a
+                href={article.href}
+                aria-current="page"
+                class="docs-sidebar-link"
+                data-active
+              >
+                │   {article.label}
+              </a>
+            ) : (
+              <a href={article.href} class="docs-sidebar-link">
+                │   {article.label}
+              </a>
+            )
+          )}
+        </>
+      ))
+    }
+    <span class="docs-sidebar-frame">└───────────────────────────────────</span>
+  </pre>
+</nav>

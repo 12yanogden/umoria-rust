@@ -1,0 +1,20 @@
+---
+title: "Playing"
+date: 2026-07-11
+author: "Umoria"
+order: 2
+slug: "getting-started/playing"
+sources:
+  - label: "README · Playing"
+    href: "README.md#playing"
+  - label: "README · Testing and goldens"
+    href: "README.md#testing-and-goldens"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Run the game from the repository root, CLI flags, saves, and where to go next in the docs.
+- Depends on: getting-started/install
+- Related: character/classes, character/races, character/attributes, dungeon/city, combat/monsters, wizard/overview

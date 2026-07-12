@@ -1,0 +1,7 @@
+# Entropic (vendored)
+
+This `web/` tree is based on [Entropic](https://github.com/CuB3y0nd/entropic) (MIT License).
+
+Copyright (c) 2026 CuB3y0nd — see `LICENSE` for the full MIT text.
+
+Umoria site branding and content are separate from the upstream demo philes/CVE material, which were removed for this project.

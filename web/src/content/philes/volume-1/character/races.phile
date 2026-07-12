@@ -1,0 +1,19 @@
+---
+title: "Races"
+date: 2026-07-11
+author: "Umoria"
+order: 20
+slug: "character/races"
+sources:
+  - label: "mmspoilers · Character › Races"
+    href: "https://beej.us/moria/mmspoilers/character.html#races"
+  - label: "Umoria data (races)"
+    href: "src/data_player.rs"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Eight races: stat mods, class bitmap, skills, age/height/weight, infravision, hit die.
+- Related: character/classes, character/experience

@@ -1,0 +1,13 @@
+---
+import type { DocsSourceRef } from "../content/docs-catalog-types";
+import { renderSourcesHtml } from "../modules/philes/sources";
+
+type Props = {
+  sources: DocsSourceRef[];
+};
+
+const { sources } = Astro.props;
+const html = renderSourcesHtml(sources ?? []);
+---
+
+<div class="phile-sources-mount" set:html={html} />

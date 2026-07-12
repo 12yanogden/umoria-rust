@@ -1,0 +1,17 @@
+---
+title: "Attributes"
+date: 2026-07-11
+author: "Umoria"
+order: 10
+slug: "character/attributes"
+sources:
+  - label: "mmspoilers · Character › Attributes"
+    href: "https://beej.us/moria/mmspoilers/character.html#attributes"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- STR/DEX/INT/WIS/CON/CHA tables, carry capacity, attacks/round, device use from INT.
+- Related: character/classes, combat/hit-probability, combat/armor-class, spells/mana

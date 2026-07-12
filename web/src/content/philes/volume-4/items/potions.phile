@@ -1,0 +1,20 @@
+---
+title: "Potions"
+date: 2026-07-11
+author: "Umoria"
+order: 130
+slug: "items/potions"
+sources:
+  - label: "items.txt · Potions"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Potions"
+    href: "https://beej.us/moria/mmspoilers/items.html#potions"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Potion list, restore/gain effects, shop vs dungeon depths.
+- Depends on: items/overview
+- Related: items/food, character/attributes

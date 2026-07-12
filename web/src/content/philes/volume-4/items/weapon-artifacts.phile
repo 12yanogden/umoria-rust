@@ -1,0 +1,18 @@
+---
+title: "Weapon artifacts"
+date: 2026-07-11
+author: "Umoria"
+order: 50
+slug: "items/weapon-artifacts"
+sources:
+  - label: "mmspoilers · Weapon Artifacts"
+    href: "https://beej.us/moria/mmspoilers/items.html#weaponartifacts"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Named artifact weapons and powers from mmspoilers (not duplicated in items.txt tables).
+- Depends on: items/weapons, items/special-properties
+- Related: items/weapons, items/special-properties

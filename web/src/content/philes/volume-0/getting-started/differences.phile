@@ -1,0 +1,24 @@
+---
+title: "This port vs classic"
+date: 2026-07-11
+author: "Umoria"
+order: 3
+slug: "getting-started/differences"
+sources:
+  - label: "README · project lineage"
+    href: "README.md"
+  - label: "CHANGELOG · HEAD"
+    href: "CHANGELOG.md"
+  - label: "CHANGELOG · 5.7.15"
+    href: "CHANGELOG.md#5715-2021-06-02"
+  - label: "Historical documents"
+    href: "historical/"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- How this Rust 5.7.15 ncurses port relates to upstream C Umoria and what changed in the lineage.
+- Depends on: getting-started/install
+- Related: reference/versions, reference/sources, getting-started/install, character/races

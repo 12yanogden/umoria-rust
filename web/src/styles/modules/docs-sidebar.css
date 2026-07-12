@@ -1,0 +1,66 @@
+/* In-docs sidebar / volume nav (phase_4.4) — secondary chrome beside article body */
+
+.docs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25em;
+  align-items: stretch;
+  width: 100%;
+}
+
+@media (min-width: 960px) {
+  .docs-page {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2em;
+  }
+
+  .docs-sidebar {
+    flex: 0 0 auto;
+    max-width: 36ch;
+    position: sticky;
+    top: 1em;
+  }
+
+  .docs-page .phile-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.docs-sidebar {
+  text-align: left;
+  margin: 0 0 0.5em;
+}
+
+.docs-sidebar-pre {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0;
+  white-space: pre;
+}
+
+.docs-sidebar-frame,
+.docs-sidebar-section {
+  display: block;
+  color: var(--fg);
+}
+
+.docs-sidebar-section {
+  margin-top: 0.5em;
+  font-weight: normal;
+}
+
+.docs-sidebar-index,
+.docs-sidebar-link {
+  display: block;
+  text-decoration: none;
+}
+
+.docs-sidebar a[aria-current="page"],
+.docs-sidebar a[data-active] {
+  background: var(--link-hover-bg);
+  color: var(--link-hover);
+  text-decoration: none;
+}

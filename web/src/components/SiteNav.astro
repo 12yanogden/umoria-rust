@@ -1,0 +1,33 @@
+---
+import { siteConfig } from "../config";
+import { isActivePath, withBase } from "../modules/paths";
+
+const pathname = Astro.url.pathname;
+const links = siteConfig.primaryNav.map((item) => {
+  const active = isActivePath(pathname, item.path);
+  return {
+    href: withBase(item.path),
+    label: active ? `[${item.label}]` : item.label,
+    active
+  };
+});
+---
+
+<nav class="site-nav" data-site-nav aria-label="Primary">
+  <div class="textmode-pre site-nav-pre">
+    {
+      links.map((link, index) => (
+        <>
+          {index > 0 ? <span class="site-nav-sep"> | </span> : null}
+          {link.active ? (
+            <a href={link.href} aria-current="page">
+              {link.label}
+            </a>
+          ) : (
+            <a href={link.href}>{link.label}</a>
+          )}
+        </>
+      ))
+    }
+  </div>
+</nav>

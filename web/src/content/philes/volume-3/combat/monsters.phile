@@ -1,0 +1,17 @@
+---
+title: "Monster descriptions"
+date: 2026-07-11
+author: "Umoria"
+order: 10
+slug: "combat/monsters"
+sources:
+  - label: "mmspoilers · Combat › Monster Descriptions"
+    href: "https://beej.us/moria/mmspoilers/combat.html#mdescriptions"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Monster flag/ability matrix and stat blocks — large table; stub links to mmspoilers source.
+- Related: combat/monster-attacks, combat/damage

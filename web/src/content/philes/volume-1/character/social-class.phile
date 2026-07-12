@@ -1,0 +1,17 @@
+---
+title: "Social class overview"
+date: 2026-07-11
+author: "Umoria"
+order: 50
+slug: "character/social-class"
+sources:
+  - label: "classes.txt · Introduction"
+    href: "https://beej.us/moria/classes.txt"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- What social class affects (starting gold, flavor); pointer to race-group tables.
+- Related: character/social-class-humanoids, character/social-class-elves, character/social-class-smallfolk, character/social-class-dwarves-trolls

@@ -1,0 +1,19 @@
+---
+title: "Documentation"
+date: 2026-07-11
+author: "Umoria"
+order: 0
+slug: "index"
+sources:
+  - label: "Site IA"
+    href: ".cursor/plans/umoria-web-site/phase_3.md"
+  - label: "README · project intro"
+    href: "README.md"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Overview of site docs and entry points into each nav section.
+- Related: getting-started/install, getting-started/playing, getting-started/differences, getting-started/contributing, character/classes, dungeon/city, reference/sources, character/attributes, combat/monsters, items/overview, spells/system, wizard/overview

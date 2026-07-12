@@ -1,0 +1,18 @@
+---
+title: "Weapon & armour specials"
+date: 2026-07-11
+author: "Umoria"
+order: 40
+slug: "items/special-properties"
+sources:
+  - label: "weapnarm.txt (full file)"
+    href: "https://beej.us/moria/weapnarm.txt"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Ego prefixes/suffixes: (HA), (DF), slays, resist gear, helm/glove/boot/cloak effects.
+- Depends on: items/weapons, items/armor
+- Related: items/weapons, items/armor, items/rings

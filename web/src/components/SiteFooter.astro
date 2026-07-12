@@ -1,0 +1,27 @@
+---
+const REPO = "https://github.com/12yanogden/umoria-rust";
+const LICENSE_URL = `${REPO}/blob/main/LICENSE`;
+const AUTHORS_URL = `${REPO}/blob/main/AUTHORS`;
+
+const aboutBlurb =
+  "Umoria continues the Moria lineage begun by Robert Alan Koeneke and James E. Wilson. This site covers the Rust port of Umoria 5.7.x.";
+---
+
+<footer class="site-footer" data-site-footer data-owned-by="phase_2.4" aria-label="Site">
+  <div class="textmode-pre site-footer-pre">
+    <p class="site-footer-line" data-footer-about>
+      {aboutBlurb}
+    </p>
+    <p class="site-footer-line" data-footer-license>
+      Licensed under <span>GPL-3.0-or-later</span>
+      {" — "}
+      <a href={LICENSE_URL}>LICENSE</a>
+      {" / "}
+      <a href={AUTHORS_URL}>AUTHORS</a>
+    </p>
+    <p class="site-footer-line" data-footer-repo>
+      <a href={REPO}>Source</a>
+      {" on GitHub"}
+    </p>
+  </div>
+</footer>

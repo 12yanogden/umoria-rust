@@ -1,0 +1,9 @@
+---
+import TextmodeLayout from "../layouts/textmode/TextmodeLayout.astro";
+import HomeScreen from "../components/home/HomeScreen.astro";
+import { siteConfig } from "../config";
+---
+
+<TextmodeLayout title={siteConfig.name} description={siteConfig.description}>
+  <HomeScreen />
+</TextmodeLayout>

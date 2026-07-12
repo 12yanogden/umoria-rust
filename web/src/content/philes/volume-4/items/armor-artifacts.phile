@@ -1,0 +1,18 @@
+---
+title: "Armor artifacts"
+date: 2026-07-11
+author: "Umoria"
+order: 60
+slug: "items/armor-artifacts"
+sources:
+  - label: "mmspoilers · Armor Artifacts"
+    href: "https://beej.us/moria/mmspoilers/items.html#armorartifacts"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Named artifact armor set pieces and powers.
+- Depends on: items/armor, items/special-properties
+- Related: items/armor, items/special-properties

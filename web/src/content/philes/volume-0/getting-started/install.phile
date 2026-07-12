@@ -1,0 +1,21 @@
+---
+title: "Install & build"
+date: 2026-07-11
+author: "Umoria"
+order: 1
+slug: "getting-started/install"
+sources:
+  - label: "README · Platforms"
+    href: "README.md#platforms"
+  - label: "README · Building"
+    href: "README.md#building"
+  - label: "MSRV"
+    href: "rust-toolchain.toml"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Build Umoria 5.7.15 from source on macOS/Linux with Rust, ncurses, and pkg-config.
+- Related: getting-started/playing, getting-started/differences, reference/versions

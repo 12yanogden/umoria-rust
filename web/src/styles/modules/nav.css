@@ -1,0 +1,85 @@
+.site-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.site-nav {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 0 0 1em;
+}
+
+.site-nav-pre {
+  display: inline-block;
+  text-align: left;
+}
+
+.site-nav-sep {
+  color: var(--fg);
+}
+
+.site-nav a[aria-current="page"] {
+  background: var(--link-hover-bg);
+  color: var(--link-hover);
+  text-decoration: none;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: 1.5em 0 0;
+  text-align: center;
+}
+
+.site-footer-pre {
+  display: inline-block;
+  text-align: left;
+  max-width: min(72ch, 100%);
+  white-space: normal;
+}
+
+.site-footer-line {
+  margin: 0 0 0.75em;
+  line-height: 1.35;
+}
+
+.site-footer-line:last-child {
+  margin-bottom: 0;
+}
+
+.stub-screen {
+  padding: 1em 0;
+}
+
+.docs-index h1 {
+  margin: 0 0 0.5em;
+}
+
+.docs-index-section {
+  margin: 1.25em 0;
+}
+
+.docs-index-section h2 {
+  margin: 0 0 0.35em;
+}
+
+.docs-index-section-desc {
+  margin: 0 0 0.5em;
+  opacity: 0.85;
+}
+
+.docs-index-list {
+  margin: 0;
+  padding-left: 1.25em;
+}
+
+.docs-index-list li {
+  margin: 0.35em 0;
+}
+
+.docs-index-summary {
+  opacity: 0.8;
+}

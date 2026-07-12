@@ -1,0 +1,20 @@
+---
+title: "Diggers, light, chests & miscellany"
+date: 2026-07-11
+author: "Umoria"
+order: 150
+slug: "items/diggers-and-misc"
+sources:
+  - label: "items.txt · Miscellaneous + Shop Items"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Diggers"
+    href: "https://beej.us/moria/mmspoilers/items.html#diggers"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Digging tools, lights, chests, skeletons/flotsam; shop-only consumables table tail.
+- Depends on: items/overview
+- Related: items/overview, dungeon/stores, wizard/items

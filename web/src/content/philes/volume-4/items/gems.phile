@@ -1,0 +1,18 @@
+---
+title: "Gems"
+date: 2026-07-11
+author: "Umoria"
+order: 160
+slug: "items/gems"
+sources:
+  - label: "mmspoilers · Gems"
+    href: "https://beej.us/moria/mmspoilers/items.html#gems"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Gem types, values, selling strategy (mmspoilers-only detail).
+- Depends on: items/overview
+- Related: dungeon/stores, items/overview

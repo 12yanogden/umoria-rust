@@ -1,0 +1,20 @@
+---
+title: "Rings"
+date: 2026-07-11
+author: "Umoria"
+order: 70
+slug: "items/rings"
+sources:
+  - label: "items.txt · Rings"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Rings"
+    href: "https://beej.us/moria/mmspoilers/items.html#rings"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Ring types, base costs, depths; mmspoilers rings + items.txt Rings table.
+- Depends on: items/overview
+- Related: items/amulets, items/special-properties

@@ -1,0 +1,20 @@
+---
+title: "Food, mushrooms & molds"
+date: 2026-07-11
+author: "Umoria"
+order: 140
+slug: "items/food"
+sources:
+  - label: "items.txt · Normal Food + Mushrooms and Molds"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Food"
+    href: "https://beej.us/moria/mmspoilers/items.html#food"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Rations, waybread, mushrooms/molds with food values and stat effects.
+- Depends on: items/overview
+- Related: items/potions, dungeon/stores

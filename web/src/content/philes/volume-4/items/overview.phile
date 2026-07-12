@@ -1,0 +1,19 @@
+---
+title: "Items overview"
+date: 2026-07-11
+author: "Umoria"
+order: 10
+slug: "items/overview"
+sources:
+  - label: "items.txt · intro & column legend"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Items intro"
+    href: "https://beej.us/moria/mmspoilers/items.html"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Column legend ($$, Wt, AC, Dam, Feet, etc.), {magik}/damned rules, large vs small items, shop-only note.
+- Related: items/weapons, items/armor, dungeon/stores

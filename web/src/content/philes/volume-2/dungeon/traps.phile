@@ -1,0 +1,18 @@
+---
+title: "Traps"
+date: 2026-07-11
+author: "Umoria"
+order: 50
+slug: "dungeon/traps"
+sources:
+  - label: "mmspoilers · Dungeon › Traps"
+    href: "https://beej.us/moria/mmspoilers/dungeon.html#traps"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Trap types, XP values, effects (pits, gas, runes, dart stat drain, etc.).
+- Depends on: dungeon/underground
+- Related: dungeon/underground, combat/monsters

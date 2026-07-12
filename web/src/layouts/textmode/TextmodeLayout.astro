@@ -1,0 +1,31 @@
+---
+import SiteFooter from "../../components/SiteFooter.astro";
+import SiteNav from "../../components/SiteNav.astro";
+import BaseLayout from "../base/BaseLayout.astro";
+
+type Props = {
+  title?: string;
+  tabTitle?: string;
+  description?: string;
+  preloadCjk?: boolean;
+  pageType?: "website" | "article";
+  publishedTime?: Date;
+};
+---
+
+<BaseLayout
+  title={Astro.props.title}
+  tabTitle={Astro.props.tabTitle}
+  description={Astro.props.description}
+  preloadCjk={Astro.props.preloadCjk}
+  pageType={Astro.props.pageType}
+  publishedTime={Astro.props.publishedTime}
+>
+  <div class="site-shell">
+    <SiteNav />
+    <main class="screen">
+      <slot />
+    </main>
+    <SiteFooter />
+  </div>
+</BaseLayout>

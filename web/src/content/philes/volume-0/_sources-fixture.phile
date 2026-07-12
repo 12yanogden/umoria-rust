@@ -1,0 +1,16 @@
+---
+title: "Sources fixture (non-catalog)"
+date: 2026-01-01
+author: "Umoria"
+order: 1
+slug: "_sources-fixture"
+sources:
+  - label: "Beej classes.txt"
+    href: "https://beej.us/moria/classes.txt"
+---
+
+--[ Notice ]-----------------------------------------------------------------
+
+Minimal phase_4.1 test fixture for Sources attribution layout wiring.
+Not part of the documentation article catalog (phase_3).
+phase_4.2 will materialize real catalog stubs.

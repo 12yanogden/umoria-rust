@@ -1,0 +1,20 @@
+---
+title: "Staves"
+date: 2026-07-11
+author: "Umoria"
+order: 120
+slug: "items/staves"
+sources:
+  - label: "items.txt · Staffs"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Staves"
+    href: "https://beej.us/moria/mmspoilers/items.html#staves"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Staff types, charges, effects by depth.
+- Depends on: items/overview
+- Related: items/wands, spells/mage

@@ -1,0 +1,20 @@
+---
+title: "Amulets"
+date: 2026-07-11
+author: "Umoria"
+order: 80
+slug: "items/amulets"
+sources:
+  - label: "items.txt · Amulets"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Amulets"
+    href: "https://beej.us/moria/mmspoilers/items.html#amulets"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Amulet types, DOOM/Magi notes; mmspoilers amulets section.
+- Depends on: items/overview
+- Related: items/rings, character/attributes

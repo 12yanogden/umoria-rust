@@ -1,0 +1,20 @@
+---
+title: "Spell system"
+date: 2026-07-11
+author: "Umoria"
+order: 10
+slug: "spells/system"
+sources:
+  - label: "spells.txt · §1 intro"
+    href: "https://beej.us/moria/spells.txt"
+  - label: "mmspoilers · Spell System"
+    href: "https://beej.us/moria/mmspoilers/spells.html#spellsystem"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Who casts what (mage vs priest books), spell attributes (level/mana/fail/XP), book requirements for mages.
+- Depends on: character/classes
+- Related: spells/mana, spells/failure, character/classes, items/books

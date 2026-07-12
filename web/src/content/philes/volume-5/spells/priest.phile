@@ -1,0 +1,22 @@
+---
+title: "Priest spells"
+date: 2026-07-11
+author: "Umoria"
+order: 50
+slug: "spells/priest"
+sources:
+  - label: "spells.txt · §1.1 Priest Spells"
+    href: "https://beej.us/moria/spells.txt"
+  - label: "mmspoilers · Cleric Spells"
+    href: "https://beej.us/moria/mmspoilers/spells.html#clericspells"
+  - label: "spells.txt · §1.3 Monster saves"
+    href: "https://beej.us/moria/spells.txt"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Full cleric/paladin prayer tables and alphabetical effect summaries.
+- Depends on: spells/system, spells/failure, spells/mana, character/classes
+- Related: spells/system, spells/failure, items/books, spells/mage, character/classes

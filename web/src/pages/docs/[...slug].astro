@@ -1,0 +1,40 @@
+---
+/**
+ * Public docs URL shims: /docs/<catalog-slug>/ → phile under volume-<N>/.
+ * Storage path ≠ public URL (phase_4).
+ */
+import TextmodeLayout from "../../layouts/textmode/TextmodeLayout.astro";
+import DocsSidebar from "../../components/DocsSidebar.astro";
+import PhileShell from "../../components/phile/PhileShell.astro";
+import { docsCatalog } from "../../content/docs-catalog";
+import { getPhileByCatalogSlug } from "../../modules/philes/repository";
+import { phileExcerpt } from "../../modules/seo/xml";
+
+export async function getStaticPaths() {
+  return docsCatalog.articles.map((entry) => ({
+    params: { slug: entry.slug }
+  }));
+}
+
+const catalogSlug = Astro.params.slug ?? "";
+const phile = await getPhileByCatalogSlug(catalogSlug);
+
+if (!phile) {
+  return Astro.redirect("/docs/");
+}
+
+const hasCjk = phile.data.lang === "zh" || /[\p{Script=Han}]/u.test(`${phile.data.title}\n${phile.body}`);
+---
+
+<TextmodeLayout
+  title={phile.data.title}
+  description={phileExcerpt(phile)}
+  preloadCjk={hasCjk}
+  pageType="article"
+  publishedTime={phile.data.date}
+>
+  <div class="docs-page">
+    <DocsSidebar currentSlug={catalogSlug} />
+    <PhileShell phile={phile} />
+  </div>
+</TextmodeLayout>

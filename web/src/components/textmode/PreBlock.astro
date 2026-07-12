@@ -1,0 +1,8 @@
+---
+type Props = {
+  class?: string;
+  html?: string;
+};
+---
+
+<pre class:list={["textmode-pre", Astro.props.class]} set:html={Astro.props.html}><slot /></pre>

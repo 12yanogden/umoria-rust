@@ -1,0 +1,18 @@
+---
+title: "The Underground"
+date: 2026-07-11
+author: "Umoria"
+order: 40
+slug: "dungeon/underground"
+sources:
+  - label: "mmspoilers · Dungeon › Underground"
+    href: "https://beej.us/moria/mmspoilers/dungeon.html#underground"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Level size, stair one-way generation, no return to prior level.
+- Depends on: dungeon/city
+- Related: dungeon/traps, dungeon/city

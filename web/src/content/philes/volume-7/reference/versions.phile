@@ -1,0 +1,21 @@
+---
+title: "Moria versions & FAQ notes"
+date: 2026-07-11
+author: "Umoria"
+order: 20
+slug: "reference/versions"
+sources:
+  - label: "mmspoilers · Moria Versions"
+    href: "https://beej.us/moria/mmspoilers/general.html#moriaversions"
+  - label: "mmspoilers · FAQ"
+    href: "https://beej.us/moria/mmspoilers/general.html#frequentlyaskedquestions"
+  - label: "mmspoilers · Revision History"
+    href: "https://beej.us/moria/mmspoilers/beginning.html#revisionhistory"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- 5.x vs 4.87, spoiler revision policy, FAQ pointer.
+- Related: getting-started/differences, reference/sources

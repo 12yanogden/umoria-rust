@@ -1,0 +1,20 @@
+---
+title: "Spell books"
+date: 2026-07-11
+author: "Umoria"
+order: 100
+slug: "items/books"
+sources:
+  - label: "items.txt · Books"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Spell system (book table)"
+    href: "https://beej.us/moria/mmspoilers/spells.html#spellsystem"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Eight mage/priest books (cost/depth); ties to spell learning.
+- Depends on: items/overview, spells/system
+- Related: spells/system, spells/mage, spells/priest

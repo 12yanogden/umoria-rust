@@ -1,0 +1,18 @@
+---
+title: "AC calculation"
+date: 2026-07-11
+author: "Umoria"
+order: 60
+slug: "combat/armor-class"
+sources:
+  - label: "mmspoilers · Combat › AC calculation"
+    href: "https://beej.us/moria/mmspoilers/combat.html#accalc"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- AC sources, armor vs dex, shield and magical AC stacking rules.
+- Depends on: character/attributes, combat/damage
+- Related: items/armor, character/attributes, combat/hit-probability

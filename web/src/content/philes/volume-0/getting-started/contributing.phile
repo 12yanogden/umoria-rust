@@ -1,0 +1,24 @@
+---
+title: "Contributing"
+date: 2026-07-11
+author: "Umoria"
+order: 4
+slug: "getting-started/contributing"
+sources:
+  - label: "CONTRIBUTING"
+    href: "CONTRIBUTING.md"
+  - label: "Code of Conduct"
+    href: "CODE_OF_CONDUCT.md"
+  - label: "Golden capture"
+    href: "tools/capture/README.md"
+  - label: "README · contributions pointer"
+    href: "README.md#code-of-conduct-and-contributions"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Report bugs, run local checks, and open PRs without changing gameplay rules.
+- Depends on: getting-started/install
+- Related: getting-started/install, getting-started/differences

@@ -1,0 +1,39 @@
+---
+import TextmodeLayout from "../layouts/textmode/TextmodeLayout.astro";
+
+const releasesUrl = "https://github.com/12yanogden/umoria-rust/releases";
+---
+
+<TextmodeLayout title="Downloads" description="Build Umoria from source or check GitHub Releases for binaries.">
+  <article class="stub-screen downloads-page">
+    <h1>Downloads</h1>
+
+    <p>
+      Primary platforms are Unix-like systems with ncurses — <strong>macOS</strong> and
+      <strong>Linux</strong>. Distributed via git only (crate <code>publish = false</code>; not on
+      crates.io). Windows is not a proven target.
+    </p>
+
+    <section>
+      <h2>Build from source</h2>
+      <p>Requirements: a recent stable Rust toolchain, system ncurses, and pkg-config.</p>
+      <ul>
+        <li>macOS (Homebrew): <code>brew install ncurses pkg-config</code></li>
+        <li>Debian/Ubuntu: <code>sudo apt-get install libncurses-dev pkg-config</code></li>
+      </ul>
+      <pre class="textmode-pre"><code>cargo build --release</code></pre>
+      <p>The binary is <code>target/release/umoria</code>.</p>
+    </section>
+
+    <section>
+      <h2>Release artifacts</h2>
+      <p>
+        Prebuilt binaries may appear on GitHub Releases when available (the page may be empty for
+        now).
+      </p>
+      <p>
+        <a href={releasesUrl}>GitHub Releases</a>
+      </p>
+    </section>
+  </article>
+</TextmodeLayout>

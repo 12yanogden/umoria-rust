@@ -1,0 +1,18 @@
+---
+title: "Damage calculation"
+date: 2026-07-11
+author: "Umoria"
+order: 40
+slug: "combat/damage"
+sources:
+  - label: "mmspoilers · Combat › Damage calculation"
+    href: "https://beej.us/moria/mmspoilers/combat.html#damagecalc"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Player and monster damage formulas, criticals, slays/resists overview.
+- Depends on: combat/hit-probability
+- Related: combat/monster-attacks, items/weapons

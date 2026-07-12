@@ -1,0 +1,20 @@
+---
+title: "Scrolls"
+date: 2026-07-11
+author: "Umoria"
+order: 90
+slug: "items/scrolls"
+sources:
+  - label: "items.txt · Scrolls"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Scrolls"
+    href: "https://beej.us/moria/mmspoilers/items.html#scrolls"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Scroll list by depth; identify/enchant/genocide tiers.
+- Depends on: items/overview
+- Related: items/overview, spells/system

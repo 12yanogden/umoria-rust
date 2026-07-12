@@ -1,0 +1,26 @@
+---
+import TextmodeLayout from "../../../layouts/textmode/TextmodeLayout.astro";
+import VolumeScreen from "../../../components/volume/VolumeScreen.astro";
+import { getAllVolumes, getVolume } from "../../../modules/volumes/repository";
+import { volumeListLabel, volumeTitle } from "../../../modules/volumes/labels";
+
+export async function getStaticPaths() {
+  const volumes = await getAllVolumes();
+  return volumes.map((volume) => ({
+    params: { volume: String(volume.number) }
+  }));
+}
+
+const volumeNumber = Number(Astro.params.volume);
+const volume = await getVolume(volumeNumber);
+
+if (!volume) {
+  return Astro.redirect("/");
+}
+
+const hasCjk = volume.philes.some((phile) => phile.data.lang === "zh" || /[\p{Script=Han}]/u.test(phile.data.title));
+---
+
+<TextmodeLayout title={volumeTitle(volume)} description={volumeListLabel(volume)} preloadCjk={hasCjk}>
+  <VolumeScreen volume={volume} />
+</TextmodeLayout>

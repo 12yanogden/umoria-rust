@@ -1,0 +1,20 @@
+---
+title: "Classes"
+date: 2026-07-11
+author: "Umoria"
+order: 30
+slug: "character/classes"
+sources:
+  - label: "mmspoilers · Character › Classes"
+    href: "https://beej.us/moria/mmspoilers/character.html#classes"
+  - label: "Umoria data (classes)"
+    href: "src/data_player.rs"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Six classes: stat mods, skills, per-level skill growth, spell access overview.
+- Depends on: character/races, character/attributes
+- Related: character/races, character/experience, spells/system, spells/mage, spells/priest, character/social-class

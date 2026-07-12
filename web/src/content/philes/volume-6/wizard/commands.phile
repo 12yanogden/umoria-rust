@@ -1,0 +1,18 @@
+---
+title: "Wizard commands"
+date: 2026-07-11
+author: "Umoria"
+order: 20
+slug: "wizard/commands"
+sources:
+  - label: "mmspoilers · Wizard Commands"
+    href: "https://beej.us/moria/mmspoilers/wizardmode.html#wizardcommands"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Normal vs rogue keymap table (^A–^W, mapping, teleport, etc.).
+- Depends on: wizard/overview
+- Related: wizard/overview, wizard/items

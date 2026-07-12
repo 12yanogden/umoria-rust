@@ -1,0 +1,53 @@
+---
+import { siteConfig } from "../../config";
+import { withBase } from "../../modules/paths";
+import { escapeHtml, link, textHtml } from "../../modules/textmode/core/html";
+
+const asciiText = siteConfig.homeAsciiArt;
+const asciiHtml = textHtml(asciiText);
+const asciiAttr = escapeHtml(asciiText);
+const hero = siteConfig.homeHero;
+const downloadsHref = withBase("/downloads/");
+const docsHref = withBase("/docs/");
+const ctaHtml = [
+  link(downloadsHref, hero.downloadsLabel),
+  "  |  ",
+  link(docsHref, hero.docsLabel)
+].join("");
+---
+
+<section class="home-shell" data-home-hero>
+  <div class="ascii-hero" data-home-brand aria-label={hero.brand}>
+    <h1 class="home-brand-title">{hero.brand}</h1>
+    <pre
+      id="home-ascii"
+      class="textmode-pre home-pre ascii-pre"
+      data-ascii-text={asciiAttr}
+      aria-hidden="true"
+      set:html={asciiHtml}
+    ></pre>
+    <pre
+      id="home-ascii-glitch"
+      class="textmode-pre home-pre ascii-pre ascii-glitch"
+      aria-hidden="true"
+    ></pre>
+  </div>
+
+  <div class="home-copy textmode-pre home-pre">
+    <p class="home-headline" data-home-headline>{hero.headline}</p>
+    <p class="home-support" data-home-support>{hero.support}</p>
+    <p class="home-cta" data-home-cta set:html={ctaHtml} />
+  </div>
+</section>
+
+<script>
+  import { initHomeAsciiGlitch } from "../../modules/textmode/glitch/home";
+
+  window.addEventListener(
+    "load",
+    () => {
+      window.setTimeout(initHomeAsciiGlitch, 1200);
+    },
+    { once: true, passive: true }
+  );
+</script>

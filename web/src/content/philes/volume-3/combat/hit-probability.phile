@@ -1,0 +1,18 @@
+---
+title: "Hit probability"
+date: 2026-07-11
+author: "Umoria"
+order: 30
+slug: "combat/hit-probability"
+sources:
+  - label: "mmspoilers · Combat › Hit probability"
+    href: "https://beej.us/moria/mmspoilers/combat.html#hitprob"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- To-hit calculation, skill bonuses, visibility and terrain modifiers.
+- Depends on: character/attributes
+- Related: character/attributes, combat/armor-class, combat/damage, items/weapons

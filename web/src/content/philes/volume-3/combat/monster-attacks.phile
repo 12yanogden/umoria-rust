@@ -1,0 +1,18 @@
+---
+title: "Monster attacks"
+date: 2026-07-11
+author: "Umoria"
+order: 20
+slug: "combat/monster-attacks"
+sources:
+  - label: "mmspoilers · Combat › Monster Attacks"
+    href: "https://beej.us/moria/mmspoilers/combat.html#mattacks"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Breath/spell/special attack types and frequencies from combat spoilers.
+- Depends on: combat/monsters
+- Related: combat/monsters, combat/damage

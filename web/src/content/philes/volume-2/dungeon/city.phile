@@ -1,0 +1,17 @@
+---
+title: "The City"
+date: 2026-07-11
+author: "Umoria"
+order: 10
+slug: "dungeon/city"
+sources:
+  - label: "mmspoilers · Dungeon › City"
+    href: "https://beej.us/moria/mmspoilers/dungeon.html#city"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Town level: starting area, stores, zero XP for town kills.
+- Related: dungeon/stores, dungeon/underground

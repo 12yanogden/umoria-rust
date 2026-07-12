@@ -1,0 +1,54 @@
+# dependencies / package manager state
+node_modules/
+.pnpm-store/
+
+# Astro / Vite output
+dist/
+.astro/
+.vite/
+node_modules/.vite/
+
+# framework deploy output
+.vercel/
+.netlify/
+
+# local caches
+.cache/
+.turbo/
+*.tsbuildinfo
+__pycache__/
+*.py[cod]
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+bun-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# environment
+.env
+.env.*
+!.env.example
+!.env.test
+
+# editor / local agent state
+.vscode/
+.idea/
+.codex/
+.agents/
+
+# test and coverage output
+coverage/
+playwright-report/
+test-results/
+
+# scratch files
+tmp/
+.tmp/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db

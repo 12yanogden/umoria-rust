@@ -1,0 +1,20 @@
+---
+title: "Wands"
+date: 2026-07-11
+author: "Umoria"
+order: 110
+slug: "items/wands"
+sources:
+  - label: "items.txt · Wands"
+    href: "https://beej.us/moria/items.txt"
+  - label: "mmspoilers · Wands"
+    href: "https://beej.us/moria/mmspoilers/items.html#wands"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Wand types, levels, costs; device use level implications.
+- Depends on: items/overview
+- Related: items/staves, character/attributes

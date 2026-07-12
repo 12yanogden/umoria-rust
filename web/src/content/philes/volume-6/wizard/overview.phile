@@ -1,0 +1,17 @@
+---
+title: "Entering Wizard Mode"
+date: 2026-07-11
+author: "Umoria"
+order: 10
+slug: "wizard/overview"
+sources:
+  - label: "mmspoilers · Entering Wizard Mode"
+    href: "https://beej.us/moria/mmspoilers/wizardmode.html#enteringwizard"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- ^W toggle, `-w` CLI, resurrect dead char warning, high-score exclusion.
+- Related: wizard/commands, getting-started/playing

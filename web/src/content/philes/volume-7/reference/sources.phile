@@ -1,0 +1,21 @@
+---
+title: "Sources & attribution"
+date: 2026-07-11
+author: "Umoria"
+order: 10
+slug: "reference/sources"
+sources:
+  - label: "mmspoilers · Credits"
+    href: "https://beej.us/moria/mmspoilers/beginning.html#credits"
+  - label: "mmspoilers · Using the Spoilers"
+    href: "https://beej.us/moria/mmspoilers/beginning.html#usingthespoilers"
+  - label: "Beej index"
+    href: "https://beej.us/moria/mmspoilers/index.html"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- Beej HTML conversion, spoiler credits, disclaimer, how to cite this docs site.
+- Related: reference/versions, character/social-class, items/overview, spells/system, items/special-properties

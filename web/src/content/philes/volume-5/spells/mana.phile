@@ -1,0 +1,20 @@
+---
+title: "Mana"
+date: 2026-07-11
+author: "Umoria"
+order: 20
+slug: "spells/mana"
+sources:
+  - label: "spells.txt · mana factor table"
+    href: "https://beej.us/moria/spells.txt"
+  - label: "mmspoilers · Mana"
+    href: "https://beej.us/moria/mmspoilers/spells.html#mana"
+---
+
+<!-- docs-stub: outline only; full prose out of scope -->
+
+## Outline
+
+- INT/WIS factor table, mana formula, effective caster level for Rangers/Rogues.
+- Depends on: spells/system
+- Related: spells/system, character/attributes, spells/mage, spells/priest, spells/failure

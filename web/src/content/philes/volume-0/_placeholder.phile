@@ -1,0 +1,16 @@
+---
+title: "Volume placeholder (non-catalog)"
+date: 2026-01-01
+author: "Umoria"
+order: 0
+slug: "_placeholder"
+sources:
+  - label: "README · project intro"
+    href: "README.md"
+---
+
+--[ Notice ]-----------------------------------------------------------------
+
+This file is a non-catalog scaffold placeholder for Docs Volume 0.
+It is not part of the documentation article catalog (phase_3 owns that).
+phase_4 will replace volume contents with real stubs.
