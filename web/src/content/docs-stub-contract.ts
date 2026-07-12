@@ -4,8 +4,7 @@
  */
 
 /** Generated outline-only stub body marker. */
-export const DOCS_STUB_MARKER =
-  "<!-- docs-stub: outline only; full prose out of scope -->";
+export const DOCS_STUB_MARKER = "<!-- docs-stub: outline only; full prose out of scope -->";
 
 /** Authored full-article marker; generator must never overwrite these files. */
 export const DOCS_FULL_ARTICLE_MARKER = "<!-- FULL_ARTICLE -->";
