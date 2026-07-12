@@ -9,10 +9,87 @@ sources:
     href: "https://beej.us/moria/mmspoilers/dungeon.html#haggling"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Offer/final price formulas, unidentified item pricing, race/CHA adjustments, insult rules.
 
-- Offer/final price formulas, unidentified item pricing, race/CHA adjustments, insult rules.
+--[ Depends on ]-------------------------------------------------------------
+
 - Depends on: locations/stores
+
+--[ Price formula ]----------------------------------------------------------
+
+Final offer price:
+
+```text
+base cost of item
+  × final offer markup
+  × race adjustment
+  × CHA adjustment
+= final offer price
+```
+
+The initial offer is the same formula with the shopkeeper’s **First** markup
+instead of **Final**. First/Final come from the shopkeeper table
+(locations/stores). CHA adjustment is the shop-price percent from
+character/attributes (CHA 3 → 130% … 18 → 100% … 18/100 → 90%).
+
+--[ Unidentified sale prices ]-----------------------------------------------
+
+If the item is unidentified, shops use fixed prices so you cannot learn
+relative value by offering to sell:
+
+| Unidentified item | Price |
+| --- | ---: |
+| Weapon or armor | Base |
+| Diggers | Base |
+| Food | 1 |
+| Potion | 20 |
+| Scrolls | 20 |
+| Amulet | 45 |
+| Ring | 45 |
+| Wand | 50 |
+| Staff | 70 |
+
+- Wand/staff whose **type** is known but charge count is not → still base price.
+- Non-cursed ring/amulet type known but bonus unknown → still base price.
+- Ration-type foods are always identified; only molds and mushrooms use the
+  Food = 1 row above.
+
+--[ Race adjustment ]--------------------------------------------------------
+
+Percent markup from how well the player’s race and the shopkeeper’s race get
+along (columns = shopkeeper race):
+
+| Player | Human | H-Elf | Elf | H-ling | Gnome | Dwarf | H-Orc | H-Troll |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Human | 100 | 105 | 105 | 110 | 113 | 115 | 120 | 125 |
+| Half-Elf | 110 | 100 | 100 | 105 | 110 | 120 | 125 | 130 |
+| Elf | 110 | 105 | 100 | 105 | 110 | 120 | 125 | 130 |
+| Halfling | 115 | 110 | 105 | 95 | 105 | 110 | 115 | 130 |
+| Gnome | 115 | 115 | 110 | 105 | 95 | 110 | 115 | 130 |
+| Dwarf | 115 | 120 | 120 | 110 | 110 | 95 | 125 | 135 |
+| Half-Orc | 115 | 120 | 125 | 115 | 115 | 130 | 110 | 115 |
+| Half-Troll | 110 | 115 | 115 | 110 | 110 | 130 | 110 | 110 |
+
+--[ Insults and offer steps ]------------------------------------------------
+
+- When buying, if you do not **increase** your offer by at least Haggle%
+  (decrease when selling), the shopkeeper is insulted.
+- Reaching the Insults limit closes that store for **1000 turns**.
+- If you move by more than **3×Haggle%**, the keeper caps their match at
+  3×Haggle% — you gave them free money.
+
+--[ Skipping haggling ]------------------------------------------------------
+
+Haggling is not required for an item when:
+
+```text
+(good_haggles − 3 × bad_haggles − 5) > 0
+```
+
+and that value **squared** is greater than `price / 50`.
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: locations/stores, character/attributes

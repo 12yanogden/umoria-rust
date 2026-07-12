@@ -13,7 +13,32 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#gems"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Miscellany covers diggers, lights, chests, flotsam—and **gold/gem piles**, which are not carried inventory items in this port.
+
+## Diggers
+
+| Tool            | Dig | Depth | Notes        |
+| --------------- | --- | ----- | ------------ |
+| Shovel / Pick   | 0/1 | Town  | Shop-only base tools |
+| Gnomish Shovel  | +1  | 1000′ | Light (5 lb) |
+| Orcish Pick     | +2  | 1000′ |              |
+| Dwarven Shovel  | +2  | 2000′ |              |
+| Dwarven Pick    | +3  | 2500′ | Best dig     |
+
+Each dig plus above the tool’s Dig rating adds ~100 cost. Tunnel chance uses Strength + Dig×50 + 25 − heavy-item penalty (or weapon-based dig without a tool). Wall hardness: granite ≫ magma/quartz. Diggers over 15 lb count as large.
+
+## Lights, chests, junk
+
+Wooden torch (Light 4000), brass lantern / flask of oil (7500). Chests: wood → iron → steel, small/large; always large objects. Skeletons, shards, empty bottles, spikes are low-value clutter.
+
+## Gold and gems (pickup cash)
+
+Copper, silver, gold, mithril piles (`$`) and gem piles (`*`—garnets, opals, sapphires, rubies, diamonds, emeralds) are `TV_GOLD`. Stepping on them adds their rolled value to your gold pieces (`au`); they are **not** pack items. Spoiler base values run from a few gp (copper) to 80 (mithril); generated totals scale roughly value+9 … 9×value+8.
+
+## Shop-only tail
+
+Shop table adds hard biscuit, jerky, ale/wine, plain shovel/pick, and stacked town scrolls/potions/torches beyond dungeon-identical stock. See locations/stores for keepers and haggling.
 
 ## Outline
 

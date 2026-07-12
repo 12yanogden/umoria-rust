@@ -13,9 +13,52 @@ sources:
     href: "rust-toolchain.toml"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Build Umoria 5.7.15 from source on macOS/Linux with Rust, ncurses, and pkg-config.
 
-- Build Umoria 5.7.15 from source on macOS/Linux with Rust, ncurses, and pkg-config.
+--[ Platforms ]--------------------------------------------------------------
+
+Primary targets are Unix-like systems with ncurses: macOS and Linux.
+
+Windows is not a proven target. Some platform stubs exist in the tree, but
+play and CI are oriented around macOS/Linux. Contributions that harden
+Windows support are welcome; do not assume it works out of the box.
+
+The crate sets `publish = false` and is distributed via git only — it is
+not on crates.io.
+
+--[ Requirements ]-----------------------------------------------------------
+
+- A recent stable Rust toolchain (MSRV 1.81; see `Cargo.toml` /
+  `rust-toolchain.toml`)
+- System ncurses development libraries and pkg-config
+
+macOS (Homebrew):
+
+```text
+brew install ncurses pkg-config
+```
+
+Debian/Ubuntu:
+
+```text
+sudo apt-get install libncurses-dev pkg-config
+```
+
+--[ Build ]------------------------------------------------------------------
+
+From the repository root:
+
+```text
+cargo build --release
+```
+
+The binary is `target/release/umoria`.
+
+Next: run the game (getting-started/playing), or read how this port
+differs from classic Umoria (getting-started/differences).
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: getting-started/playing, getting-started/differences, reference/versions

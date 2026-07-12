@@ -11,10 +11,48 @@ sources:
     href: "https://beej.us/moria/mmspoilers/spells.html#mana"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Mana comes from caster level × INT/WIS factor (+1). Mage-book classes ([Mage](/docs/character/classes/), Ranger, Rogue) key off INT; priest-book classes (Priest, Paladin) key off WIS. See the [spell system](/docs/spells/system/) for who casts what.
 
-- INT/WIS factor table, mana formula, effective caster level for Rangers/Rogues.
+--[ INT/WIS factor ]---------------------------------------------------------
+
+```
+Stat level          Factor
+3–7                    0
+8–17                   1
+18–18/49             3/2
+18/50–18/69            2
+18/70–18/89          5/2
+18/90–18/99            3
+18/100                 4
+```
+
+Same bands also drive fail adjust and spells-per-level on [`/docs/character/attributes/`](/docs/character/attributes/).
+
+--[ Formula ]----------------------------------------------------------------
+
+```
+Mana = Factor × caster_level + 1
+```
+
+If Factor is 0 (key stat ≤ 7), mana is **0**—not 1—and you cannot cast.
+
+--[ Caster level ]-----------------------------------------------------------
+
+“Caster level” is how many levels you have been casting, not always raw character level:
+
+```
+Class              Caster level
+Mage / Priest /
+  Paladin          char_level
+Ranger             char_level − 2
+Rogue              char_level − 4
+```
+
+Rangers first learn at 3; Rogues at 5—hence the offsets. Example: level-10 Mage with INT 18 → Factor 3/2 → mana `1.5 × 10 + 1 = 16`. Same level Ranger with the same INT → `1.5 × 8 + 1 = 13`.
+
+Casting with insufficient mana raises failure sharply, can faint you for several turns, and may hurt HP. Details: [`/docs/spells/failure/`](/docs/spells/failure/).
+
 - Depends on: spells/system
 - Related: spells/system, character/attributes, spells/mage, spells/priest, spells/failure

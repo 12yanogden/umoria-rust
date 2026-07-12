@@ -9,10 +9,57 @@ sources:
     href: "https://beej.us/moria/mmspoilers/combat.html#hitprob"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+To-hit calculation, skill bonuses, visibility and terrain modifiers.
 
-- To-hit calculation, skill bonuses, visibility and terrain modifiers.
+--[ To-hit bonus ]-----------------------------------------------------------
+
+```
+  Hit bonus on weapon
++ Hit bonus on items
++ Hit bonus for DEX
++ Hit bonus for STR
+× 3
++ Fighting ability   (or Bow ability for missiles)
+────────────────────
+  Total to-hit bonus
+```
+
+A random roll from 1 through that total must be **greater than** the monster’s AC
+([AC calculation](/docs/combat/armor-class/)). DEX/STR hit bonuses come from
+[attributes](/docs/character/attributes/); weapon bonuses from [weapons](/docs/items/weapons/).
+
+--[ Auto miss / auto hit ]---------------------------------------------------
+
+Additionally, roll **1d20**:
+
+- **1** → forced miss
+- **20** → forced hit
+
+Everything else uses the to-hit vs AC check above.
+
+--[ Critical chance ]--------------------------------------------------------
+
+After a hit, critical opportunity:
+
+```
+  Hit bonus on weapon
++ Hit bonus on items
++ Hit bonus for DEX
++ Hit bonus for STR
+× 5
++ Fighting ability
++ Weapon weight × 10
+− Fighting ability at 0th level
+────────────────────
+  Critical chance
+```
+
+If a roll of 1..5000 is **less than** that chance, you scored a critical. Severity
+and damage multipliers: [/docs/combat/damage/](/docs/combat/damage/).
+
+--[ Related ]----------------------------------------------------------------
+
 - Depends on: character/attributes
 - Related: character/attributes, combat/armor-class, combat/damage, items/weapons

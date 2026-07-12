@@ -11,7 +11,22 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#potions"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Potions weigh 0.4 and bash 1d1. Many also add Food value when quaffed. Town stocks juice, water, cure light, and assorted hazards (blindness, confusion, salt water, sleep).
+
+## Healing ladder
+
+Cure Light (2d7 + blindness) → Serious (4d7 + blindness/confusion) → Critical (6d7 + poison too) → Healing (1000 HP + all three). Footnotes in items.txt: *1 blindness, *2 confusion, *3 poison.
+
+## Buffs and resists
+
+Boldness, Heroism / Super Heroism, Haste Self, Resist Heat/Cold, Slow/Neutralize Poison, Detect Invisible, Infra-Vision. Invulnerability (~2000′) grants huge temporary AC and physical immunity (items can still burn; exp can still drain).
+
+## Stats: gain, lose, restore
+
+~1250′: gain STR/INT/WIS/DEX/CON/CHR (some with food), Restore Mana, and lose-INT/WIS/Ugliness traps. ~2000′: Restore * for each stat, Restore Life Levels. **Gain Experience** (~2500′) multiplies exp (capped add). Lose Experience earlier (~500′) is the opposite hazard.
+
+Shop vs dungeon: town repeats some cures; deep restores and Gain Exp are dungeon prizes. Keep Restore * and Healing; ID before quaffing deep unknowns.
 
 ## Outline
 

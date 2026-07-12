@@ -11,10 +11,51 @@ sources:
     href: "src/data_player.rs"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Six classes: stat mods, skills, per-level skill growth, spell access overview.
 
-- Six classes: stat mods, skills, per-level skill growth, spell access overview.
+Race locks which classes you may pick (see character/races). Class mods stack on race mods at creation. Hit die here is the class contribution on top of racial HD. Spell lists live under spells/mage and spells/priest.
+
+--[ Stat mods ]--------------------------------------------------------------
+
+```
+Class     STR INT WIS DEX CON CHA  Spells   XP%  HD
+Warrior   +5  −2  −2  +2  +2  −1   none      0    9
+Mage      −5  +3   0  +1  −2  +1   mage     30    0
+Priest    −3  −3  +3  −1   0  +2   priest   20    2
+Rogue     +2  +1  −2  +3  +1  −1   mage      0    6
+Ranger    +2  +2   0  +1  +1  +1   mage     40    4
+Paladin   +3  −3  +1   0  +2  +2   priest   35    6
+```
+
+Mage-book classes (Mage, Rogue, Ranger) cast from INT. Priest-book classes (Priest, Paladin) cast from WIS. Warriors never learn spells.
+
+--[ Base skills ]------------------------------------------------------------
+
+```
+Class     disarm search stealth percept fight bows save
+Warrior     25     14      1      38     70   55   18
+Mage        30     16      2      20     34   20   36
+Priest      25     16      2      32     48   35   30
+Rogue       45     32      5      16     60   66   30
+Ranger      30     24      3      24     56   72   30
+Paladin     20     12      1      38     68   40   24
+```
+
+--[ Per-level growth ]-------------------------------------------------------
+
+Fight, bows, device, disarm, and saves rise each level:
+
+```
+Class     fight bows device disarm save
+Warrior     4    4     2      2     3
+Mage        2    2     4      3     3
+Priest      2    2     4      3     3
+Rogue       3    4     3      4     3
+Ranger      3    4     3      3     3
+Paladin     3    3     3      2     3
+```
+
 - Depends on: character/races, character/attributes
 - Related: character/races, character/experience, spells/system, spells/mage, spells/priest, character/social-class

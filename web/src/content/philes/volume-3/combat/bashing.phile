@@ -9,10 +9,53 @@ sources:
     href: "https://beej.us/moria/mmspoilers/combat.html#bashing"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Non-weapon bash damage, weight/strength interaction, store-sold bash weapons note.
 
-- Non-weapon bash damage, weight/strength interaction, store-sold bash weapons note.
+Bashing is harder to land than a weapon swing (including bare fists). You still
+use the hit-vs-AC procedure from [/docs/combat/hit-probability/](/docs/combat/hit-probability/),
+but the to-hit input is different.
+
+--[ Chance to hit ]----------------------------------------------------------
+
+```
+  STR to-hit bonus
++ Shield weight × 5
++ Player weight / 10
+────────────────────
+  Bash to-hit chance
+```
+
+Critical checks reuse the normal formula with **shield weight / 4** in place of
+weapon weight.
+
+--[ Damage ]-----------------------------------------------------------------
+
+Base shield bash damage is **1d1** or **1d2** depending on the shield, then the
+same damage pipeline as weapons ([damage](/docs/combat/damage/)), plus:
+
+```
++ (character weight / 60) + 3
+```
+
+from body mass slamming into the target. Store-sold “bash” weapons are ordinary
+weapons for swing math; this page is the dedicated bash/shield path.
+
+--[ Stun ]-------------------------------------------------------------------
+
+Bash usefulness is mostly the stun: treat as paralysis for **1d3** turns when
+
+```
+100 + 2d400  >  monster_HP + average_HP
+```
+
+The **Balrog** can never be stunned.
+
+If **1d150 > your DEX** (exceptional DEX added to the base, so 18/29 → 47), *you*
+are stunned for **1 + 1d2** rounds instead.
+
+--[ Related ]----------------------------------------------------------------
+
 - Depends on: combat/damage
 - Related: combat/damage, character/attributes

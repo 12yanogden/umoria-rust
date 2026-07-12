@@ -9,9 +9,31 @@ sources:
     href: "https://beej.us/moria/mmspoilers/dungeon.html#city"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Town level: starting area, stores, zero XP for town kills.
 
-- Town level: starting area, stores, zero XP for town kills.
+The city is a special part of Moria. Every new character starts here. Unlike
+dungeon levels, the town is only one screen big and contains stores that buy
+and sell items.
+
+--[ Town creatures ]---------------------------------------------------------
+
+Monsters appear on the town level, but town kills grant **zero experience**.
+The game assumes you grew up in an environment like this, so slaughtering
+town vermin does not advance you.
+
+--[ What town is for ]-------------------------------------------------------
+
+- Restock food, light, and basic gear at the stores (locations/stores).
+- Sell dungeon loot (subject to shopkeeper Max$ ceilings and haggling —
+  locations/haggling).
+- Prepare before descending into the underground (locations/underground).
+
+Town is the only persistent map. Taking stairs into the dungeon destroys the
+previous underground level and generates a new one — there is no staircase
+back to a floor you just left.
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: locations/stores, locations/underground

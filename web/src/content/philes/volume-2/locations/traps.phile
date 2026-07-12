@@ -9,10 +9,49 @@ sources:
     href: "https://beej.us/moria/mmspoilers/dungeon.html#traps"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Trap types, XP values, effects (pits, gas, runes, dart stat drain, etc.).
 
-- Trap types, XP values, effects (pits, gas, runes, dart stat drain, etc.).
+--[ Depends on ]-------------------------------------------------------------
+
 - Depends on: locations/underground
+
+--[ Overview ]---------------------------------------------------------------
+
+There are many traps in the dungeons. Some are natural occurrences; others
+are set by monsters to kill adventurers. The Exp column is the experience
+associated with dealing with that trap as described in the spoilers.
+
+--[ Trap table ]-------------------------------------------------------------
+
+| Trap | Exp | Description |
+| --- | ---: | --- |
+| open pit | 1 | Fall for 2d6 damage. Visible trap |
+| arrow trap | 3 | Arrow doing 1d8 damage |
+| covered pit | 2 | Fall for 2d6 damage |
+| trap door | 5 | Fall for 2d8 damage. Go down one level |
+| gas trap | 3 | Fall asleep for 1d10+4 turns |
+| loose rock | 0 | Hidden object under a rock. Not really a trap |
+| dart trap | 5 | Lowers Strength by 1 |
+| strange rune | 5 | Teleport trap |
+| loose rock | 5 | Falling rock hits for 2d6 damage. Leaves rubble |
+| gas trap | 10 | Corrodes a piece of armor |
+| strange rune | 5 | Summon 1d3+2 monsters |
+| blackened spot | 10 | Fire trap doing 4d6 damage |
+| corroded rock | 10 | Acid trap doing 4d6 damage |
+| gas trap | 5 | Poison gas doing 2d6 damage + poisoned |
+| gas trap | 5 | Blinded for 1d50+50 turns |
+| gas trap | 5 | Confused for 1d15+15 turns |
+| dart trap | 5 | Slowed for 1d20+10 turns |
+| dart trap | 5 | Lowers Constitution by 1 |
+| a strange rune | 0 | Glyph of warding, rune of protection. Harmless |
+
+Several display names repeat (gas trap, dart trap, loose rock, strange rune)
+with different effects — identify by description, not label alone.
+
+Monster abilities and combat context: combat/monsters.
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: locations/underground, combat/monsters

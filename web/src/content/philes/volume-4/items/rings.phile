@@ -11,7 +11,22 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#rings"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Rings weigh 0.2 and deal no damage. Depths below are feet (items.txt) / spoiler levels × 50.
+
+## Early (≈350′ / level 7)
+
+Adornment (junk), Protection, Searching, Feather Falling, Slow Digestion—plus cursed Aggravate Monster, Stupidity (−5 INT), Teleportation, Weakness (−5 STR). Resist Cold / Fire appear around 700′.
+
+## Mid to deep
+
+Increase Damage / To-Hit (~1000′). Stat rings (STR/INT/DEX/CON) ~1500′. See Invisible ~2000′. Sustain rings (all six stats) ~2200′.
+
+## Endgame (~2500′)
+
+Lordly Protection (Acid/Cold/Fire) [+5 AC + resist], Slaying, Speed, and **WOE**: −3 AC, −5 WIS & Searching, plus Teleportation and Aggravate Monster.
+
+Bonus ranges are bell-curved (Searching can swing hard). `+` marked types never damn; `*` types always do. Slow Digestion cuts food use by 1 per the food rules.
 
 ## Outline
 

@@ -9,10 +9,58 @@ sources:
     href: "https://beej.us/moria/mmspoilers/character.html#experience"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Level XP table, race/class penalties, XP gain sources, level titles by class.
 
-- Level XP table, race/class penalties, XP gain sources, level titles by class.
+Level drives HP, mana, spells, and skills. Max level is 40; max XP is 9,999,999. The engine keeps XP to hundredths even though the display shows integers.
+
+--[ Base XP to advance ]-----------------------------------------------------
+
+Needed XP for the next level is base × race factor × class factor.
+
+```
+Lv   XP        Lv   XP         Lv   XP
+1       10     14    1,400     27     35,000
+2       25     15    1,800     28     50,000
+3       45     16    2,300     29     75,000
+4       70     17    2,900     30    100,000
+5      100     18    3,600     31    150,000
+6      140     19    4,400     32    200,000
+7      200     20    5,400     33    300,000
+8      280     21    6,800     34    400,000
+9      380     22    8,400     35    500,000
+10     500     23   10,200     36    750,000
+11     650     24   12,500     37  1,500,000
+12     850     25   17,500     38  2,500,000
+13   1,100     26   25,000     39  5,000,000
+```
+
+Example: level-10 Gnome Mage → 11 needs `500 × 1.25 × 1.30 = 812.5`.
+
+Race penalties: Human 0%, Half-Elf/Halfling/Half-Orc 10%, Elf/Dwarf/Half-Troll 20%, Gnome 25%. Class: Warrior/Rogue 0%, Priest 20%, Mage 30%, Paladin 35%, Ranger 40%.
+
+--[ Gaining XP ]-------------------------------------------------------------
+
+- Defeat monsters
+- Disarm traps; pick locks
+- First successful use of an unknown scroll, potion, staff, wand, or rod
+- First successful cast of a spell
+- Potion of gain experience
+- Identify items: `(item_level + char_level/2) / char_level`
+
+--[ Level titles ]-----------------------------------------------------------
+
+Titles under your name come from `CLASS_RANK_TITLES` (levels 1–40). Samples:
+
+- Warrior: Rookie → … → Lord Noble
+- Mage: Novice → … → Wizard Lord
+- Priest: Believer → … → Noble Priest
+- Rogue: Vagabond → … → Guildmaster
+- Ranger: Runner(1st) → … → Ranger Lord
+- Paladin: Gallant → … → High Lord
+
+Full per-level strings: mmspoilers Character › Experience (or `src/data_player.rs`).
+
 - Depends on: character/classes
 - Related: character/classes, character/races

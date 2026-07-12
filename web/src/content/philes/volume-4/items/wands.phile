@@ -11,7 +11,16 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#wands"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Wands weigh 1 lb and bash for 1d1. Device success uses saving throw + INT device bonus + class device skill − wand level − 5 (halved if confused). Low chance still gets a slim retry formula; confusion randomizes zap direction. Cost `0` types are cursed/unbuyable; charges add ~5% each to base price.
+
+## Level bands (spoiler levels ≈ feet/50)
+
+- **Early (lv 2–7)** — Magic Missile, Light, Confuse/Slow/Sleep Monster, Stinking Cloud; junk Haste/Heal Monster.
+- **Mid (12–25)** — Stone-to-Mud, Trap/Door Destruction, Lightning Bolts, Disarming, Frost Bolts, Polymorph, Teleport Away, Wall Building, Fire Bolts.
+- **Deep (35–50)** — Lightning/Cold/Acid Balls, Drain Life, Fire Balls. Acid Balls is level **48**—warriors rarely use it reliably.
+
+Wonder fires a random wand effect. Ball damage falls off with distance (full / ½ / ⅓). Prefer identified combat wands; sell or ignore Haste/Heal/Clone Monster.
 
 ## Outline
 

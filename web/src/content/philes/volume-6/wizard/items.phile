@@ -9,10 +9,139 @@ sources:
     href: "https://beej.us/moria/mmspoilers/wizardmode.html#wizarditems"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+`@` create prompts: Tval groups, Subval ranges, P1, flags hex — for testing
+items (or, for munchkins, godlike gear). Keep the source handy.
 
-- @-create item prompts: Tval/Subval/flags hex tables for testing items.
-- Depends on: wizard/commands, wizard/overview, items/overview
-- Related: items/overview, items/special-properties
+Item tables for normal play live under
+[/docs/items/overview/](/docs/items/overview/) and
+[/docs/items/special-properties/](/docs/items/special-properties/).
+
+--[ Depends on ]-------------------------------------------------------------
+
+- Depends on: [/docs/wizard/commands/](/docs/wizard/commands/), [/docs/wizard/overview/](/docs/wizard/overview/), [/docs/items/overview/](/docs/items/overview/)
+
+--[ Create prompts ]---------------------------------------------------------
+
+`@` walks you through fields. Typical order from the spoilers:
+
+- **Tval** — object group (kind of item)
+- **Tchar** — map glyph for the object
+- **Subval** — distinguishes items within a group (use free ranges below)
+- **Weight** — tenths of a pound
+- **Number** — stack count (arrows, rations, …)
+- **Damage (dice / sides)** — base melee dice, or thrown damage if non-weapon
+- **+To Hit / +To Dam / AC / +To AC** — combat and armor bonuses
+- **P1** — misc number (ego bonus, charges, food value, … — see table)
+- **Flags (hex)** — powers; meanings depend on item kind; OR bits together
+- **Cost** — store base price if you sell it
+- **Level** — dungeon level where it would generate; also wand/staff use and
+  recharge difficulty. Wizard-created items are not rolled into the dungeon.
+
+--[ Tval groups ]------------------------------------------------------------
+
+Key rows (Subval = unused range in that group; P1 = usual meaning):
+
+```
+Tval  Group              Subval     P1
+----  -----              ------     --
+  1   Miscellaneous      14..63
+  2   Chest              19..63
+ 10   Sling ammo        195..255    Ego bonus
+ 11   Bolt              195..255    Ego bonus
+ 12   Arrow             195..255    Ego bonus
+ 13   Spike               2..63
+ 15   Light source       36..63     Turns left
+ 20   Bow                21..63     Ego bonus
+ 21   Hafted weapons     10..63     Ego bonus
+ 22   Polearm weapons    14..63     Ego bonus
+ 23   Swords             25..63     Ego bonus
+ 25   Digging             7..63     Dig bonus
+ 30   Boots               4..63     Ego bonus
+ 31   Gloves              3..63     Ego bonus
+ 32   Cloak               2..63     Ego bonus
+ 33   Helm                9..63     Ego bonus
+ 34   Shield              7..63     Ego bonus
+ 35   Hard armor         13..63     Ego bonus
+ 36   Soft armor         10..63     Ego bonus
+ 40   Amulets            10..63     Bonus +/-
+ 45   Rings              31..63     Bonus +/-
+ 55   Staves             23..63     Charges
+ 65   Wands              24..63     Charges
+ 70   Scroll 1           (none)
+ 71   Scroll 2          104..191
+ 75   Potion 1           (none)
+ 76   Potion 2          109..191
+ 77   Flask              70..93
+ 80   Food               85..89     Food value
+ 90   Magic book         68..93
+ 91   Prayer book        68..93
+```
+
+--[ Flags (hex overview) ]---------------------------------------------------
+
+Same bit positions mean different things by item kind. Add (OR) the hex
+values you want. Full tables: Beej
+[wizard items](https://beej.us/moria/mmspoilers/wizardmode.html#wizarditems).
+
+**Wearable** (weapons, armor, rings, amulets, …) — major bits:
+
+```
+0x00000001..0x00000020  +P1 to STR/INT/WIS/DEX/CON/CHR
+0x00000040 / 0x00000100 +P1 searching / stealth
+0x00000080              Slow digestion
+0x00000200              Aggravate
+0x00000400 / 0x00000800 Teleportation / regeneration
+0x00001000              +P1 speed
+0x00002000..0x00040000  Slay dragons/animals/evil/undead; frost/fire vuln
+0x00080000..0x00200000  Resist fire / acid / cold
+0x00400000              Sustain stat in P1
+0x00800000              Free action (no sleep/paralysis)
+0x01000000 / 0x02000000 See invisible / resist lightning
+0x04000000              Feather fall
+0x08000000 / 0x10000000 Blindness / causes fear
+0x20000000              Digging implement
+0x40000000              +P1×10' infravision
+0x80000000              Cursed {damned}
+```
+
+**Wands** — examples: starlight, bolts/balls (light/frost/fire/poison/acid),
+stone-to-mud, polymorph, heal, speed/slow/confuse/sleep monster, drain life,
+destruction, magic missile, wall building, clone, teleport monster, disarm,
+random effect.
+
+**Food** — poison/blind/fear/confuse; cures; lose/restore stats; heal or
+hurt HP ladders (spoilers list each bit).
+
+**Scroll 1** — enchant weapon hit/dam, enchant armor, identify, remove curse,
+light, summon, phase/teleport/level teleport, confuse, mapping, sleep,
+rune, detects, genocide, recharge, darkness, protect evil, create food,
+dispel undead, …
+
+**Scroll 2** — *enchant* weapon/armor, curse weapon/armor, summon undead,
+bless tiers, word of recall, destruction.
+
+**Staves** — light, detect doors/traps/treasure/objects/invisible/evil,
+teleport, earthquake, summon, destruction, starlight, speed/slow/sleep
+monsters, heal, remove curse, cure blind/poison/confuse, dispel evil,
+darkness, …
+
+**Potions 1 / 2** — gain/lose/restore stats; heal ladders; sleep/blind/
+confuse/poison; speed/slow; heroism/invulnerability; resist heat/cold;
+restore mana; infravision; etc. (Potion 2 starts at lose experience / salt
+water.)
+
+Spell books use flags as a spell bitmask (mage vs priest lists on Beej).
+Chests use a small lock/trap flag set (locked, needles, paralysis, explode,
+summon, …).
+
+--[ Cost and level ]---------------------------------------------------------
+
+**Cost** is the store base if you sell the object. **Level** is the depth
+band for random generation and affects wand/staff difficulty; wizard items
+themselves will not appear as dungeon drops.
+
+--[ Related ]----------------------------------------------------------------
+
+- Related: [/docs/items/overview/](/docs/items/overview/), [/docs/items/special-properties/](/docs/items/special-properties/)

@@ -11,7 +11,36 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Tables in Beej’s item spoilers answer practical questions: where something first appears, how heavy it is before you buy it, and whether a warrior can ever use a high-level wand. Depths are in feet; the dungeon “level” for generation is feet ÷ 50. About 1/12 of items are rolled as if you were deeper than you are.
+
+## Column legend
+
+Common columns across the tables:
+
+- **$$** — relative cost (shops adjust by Charisma, race, and keeper). Cost `--` means shops will not buy the base item unless it has positive identified enchantments.
+- **Wt** — weight in pounds. Wielding a weapon heavier than `1.5 × Strength` applies a To-Hit penalty.
+- **AC / Dam / Feet** — base armor class, damage dice, and minimum generation depth.
+- **Mul** (bows) — missile damage multiplier. **Num** (shop-only) — typical stack size in town.
+- Bracket notes may add Light turns, Food turns, Dig bonus, display glyph, or ring/amulet extras.
+
+Unidentified potions and scrolls sell for a flat 20; food 1; rings 45; wands 50; staffs 70. Known type without bonuses sells at base value. Ego flags such as (RL) or “of Noise” swing price once identified.
+
+## {magik} and damned
+
+Perception can flag magical armor and weapons as `{magik}` (pack or worn/wielded). Appearance names (potion colors, scroll titles) are shuffled per game but stable within a run.
+
+Items marked `*` in spoilers are always damned. Any negative enchantment is also damned. Items marked `+` are never damned and never roll negative bonuses. Generated enchantments never sit at zero except weapon To-Hit / To-Dam and armor To-AC.
+
+## Large vs small
+
+Always **large**: chests, bows, polearms, body armor, and staves. Other weapons and diggers over **15 lb** are large. Everything else is **small**. Large items do not drop from monsters that only carry small loot and do not appear in chests.
+
+## Shop-only note
+
+The shop table lists goods you cannot find as dungeon objects (plain shovel, shop food stacks) plus items normally sold in quantity. Many other shop wares match dungeon bases.
+
+Bonus ranges use a bell curve: extremes are rare; mid-range rolls dominate.
 
 ## Outline
 

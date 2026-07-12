@@ -62,15 +62,26 @@ Section → volume numbers and labels are authoritative in `src/content/docs-sec
 
 Stub philes: one per catalog slug at `src/content/philes/volume-<N>/<catalog-slug>.phile`. Underscore-prefixed fixtures (`_placeholder`, `_sources-fixture`) are non-catalog.
 
+### Outline stubs vs authored articles
+
+| Kind | Body signal | `docs:generate-stubs` | Stub gate (`docs-stubs.test.ts` case 3) |
+| --- | --- | --- | --- |
+| Outline stub | `<!-- docs-stub: outline only; full prose out of scope -->` | Overwrites from catalog | Outline bullets, summary/“outline”, body ≤ 4000 chars, **no** `FULL_ARTICLE` |
+| Authored article | Prefer `<!-- FULL_ARTICLE -->` near the top of the body after frontmatter; also any catalog phile that **lacks** the docs-stub marker | **Skipped** (never overwritten) | Exempt from stub-scale / outline-only checks; existence, title, sources, and required frontmatter still validated |
+
+Shared helpers: `src/content/docs-stub-contract.ts` (`DOCS_STUB_MARKER`, `DOCS_FULL_ARTICLE_MARKER`, `isAuthoredDocsBody`).
+
+When populating a stub: remove the docs-stub marker, write full prose, and add `<!-- FULL_ARTICLE -->` so regenerates and tests treat the page as authored.
+
 ### Regenerating stubs
 
-When `docs-catalog.ts` changes, regenerate outline stubs (catalog wins for frontmatter + outline until articles are authored):
+When `docs-catalog.ts` changes, regenerate **outline stubs only** (catalog wins for those files’ frontmatter + outline). Authored / `FULL_ARTICLE` pages are never overwritten:
 
 ```bash
 bun run docs:generate-stubs
 ```
 
-Idempotent: re-running overwrites generated stubs consistently.
+Idempotent for stubs: re-running overwrites remaining outline stubs consistently; skips authored pages.
 
 ## Ownership split
 

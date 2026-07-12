@@ -9,9 +9,73 @@ sources:
     href: "https://beej.us/moria/mmspoilers/combat.html#mdescriptions"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Monster flag/ability matrix and stat blocks — large table; stub links to mmspoilers source.
 
-- Monster flag/ability matrix and stat blocks — large table; stub links to mmspoilers source.
+The mmspoilers combat page prints every creature with XP and two wide flag columns.
+This site does **not** reproduce the full roster (hundreds of rows). Use the source
+table when you need a specific monster; this page explains how to read it.
+
+--[ Layout ]-----------------------------------------------------------------
+
+```
+Monster | Exp | <movement / loot flags> | <spell / breath flags + cast rate>
+```
+
+Left flags cover how the monster moves and what treasure it carries. Right flags
+cover innate spells/breaths and how often it casts (shown as “1 time in *x*”).
+
+--[ Movement & loot (left column) ]------------------------------------------
+
+Typical marks (left-to-right in the spoilers matrix):
+
+```
+Flag                         Meaning
+No physical movement         Stationary (molds, jellies, eyes, …)
+Move only to attack          Approaches when attacking
+Move and attack normal       Standard chase / fight AI
+20% / 40% / 75% random move  Erratic movement chance
+Invisible                    Needs See Invisible / detection
+Move through door / walls    Opens or phases terrain
+Move through creatures       Passes over other monsters
+Pickup objects               Collects floor items
+Multiply Monster             Can spawn more of its kind
+Carries small / objects / gold
+90% / 60% treasure           Drop frequency when killed
+1d2 / 2d2 / 4d2 objects/gold Drop quantity dice
+Win-the-Game Creatures       Unique endgame targets
+```
+
+--[ Spells & breaths (right column) ]----------------------------------------
+
+```
+Flag                      Meaning
+Casting amount (1 in x)   Spell attempt frequency
+Teleport Short / Long     Monster self-teleport
+Teleport to monster       Pulls you adjacent
+Cause Light / Serious Wnds Spell damage
+Hold Person               Paralysis-style hold
+Cause Blindness / Conf / Fear
+Summon Monsters / Undead
+Slow Person               Speed drain
+Drain Mana
+Breathe/Resist Lightning / Gas / Acid / Frost / Fire
+```
+
+Breath and resist marks often travel together: a fire-breather usually resists fire.
+
+--[ Reading tips ]-----------------------------------------------------------
+
+- **Exp** is the base award before race/class modifiers ([experience](/docs/character/experience/)).
+- Town trash (urchins, beggars, …) often shows Exp 0 — kills there give no XP
+  ([city](/docs/locations/city/)).
+- Attack *codes* when a hit lands (ATCK, POIS, EXP-, …) are on
+  [/docs/combat/monster-attacks/](/docs/combat/monster-attacks/).
+- Damage you deal back: [/docs/combat/damage/](/docs/combat/damage/).
+
+Full matrix: [mmspoilers · Monster Descriptions](https://beej.us/moria/mmspoilers/combat.html#mdescriptions).
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: combat/monster-attacks, combat/damage

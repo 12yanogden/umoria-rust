@@ -11,9 +11,31 @@ sources:
     href: "README.md"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Overview of site docs and entry points into each nav section.
 
-- Overview of site docs and entry points into each nav section.
+This site documents the Rust Umoria 5.7.15 port in this repository: how to
+build and play it, how it relates to classic Umoria, and the game systems
+covered by the spoiler-oriented sections.
+
+Start here if you are new to the port:
+
+- getting-started/install — build from source (Rust, ncurses, pkg-config)
+- getting-started/playing — run the binary, CLI flags, saves
+- getting-started/differences — this port vs classic C Umoria
+- getting-started/contributing — bugs, checks, PRs (no gameplay changes)
+
+Game reference sections (spoilers ahead):
+
+- character/classes — races, attributes, and class choices live nearby
+- locations/city — town, stores, and the dungeon
+- combat/monsters — creatures and combat math
+- items/overview — gear tables and special properties
+- spells/system — mage and priest magic
+- wizard/overview — debug / wizard mode
+- reference/sources — where the tables and FAQ notes come from
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: getting-started/install, getting-started/playing, getting-started/differences, getting-started/contributing, character/classes, locations/city, reference/sources, character/attributes, combat/monsters, items/overview, spells/system, wizard/overview

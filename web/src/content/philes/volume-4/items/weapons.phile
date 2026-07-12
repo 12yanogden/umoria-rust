@@ -11,7 +11,31 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#weapons"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Melee and missile bases live in five items.txt tables. Each +To-Hit or +To-Dam on a melee weapon adds about 100 to cost; ammo pluses are cheaper per piece.
+
+## Swords (|)
+
+Town starters include broken blades (−2/−2) and light daggers (1d4). Mid-depth favorites: broadsword (2d5, 450′), longsword (1d10, 600′), bastard sword / katana (3d4). Deep two-handers climb to claymore (3d6, 1500′), executioner’s sword (4d5, 2000′), and zweihander (4d6, 2500′). Watch weight: many deep blades are 18–28 lb.
+
+## Hafted (\) and polearms (/)
+
+Clubs and cat-o’-nine-tails early; war hammer (3d3), mace (2d4), morningstar / flail (2d6), then lead-filled mace and great flail. Polearms start with javelin/spear, then awl-pike, lance (2d8, 30 lb), battle axes, glaive, and balestarius (2d8, 1500′). All polearms count as **large** items.
+
+## Bows (}) and missiles ({)
+
+| Launcher        | Mul | Depth | Notes        |
+| --------------- | --- | ----- | ------------ |
+| Sling           | ×2  | 50′   | Rocks/shots  |
+| Short bow       | ×2  | 150′  |              |
+| Long bow        | ×3  | 500′  |              |
+| Light crossbow  | ×3  | 750′  | Heavy (~11 lb) |
+| Heavy crossbow  | ×4  | 1500′ | Also 1d1 bash |
+| Composite bow   | ×4  | 2000′ |              |
+
+Ammo: pebbles (1d2), arrows (1d4), bolts (1d5), iron shots (1d3). Bows are always large; ammo is small.
+
+Hands-empty melee is 1d2 with −2/−2. Full dice and depth lists are in the sources; ego prefixes are covered under specials and weapon artifacts.
 
 ## Outline
 

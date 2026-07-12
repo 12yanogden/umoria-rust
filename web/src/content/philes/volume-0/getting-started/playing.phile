@@ -11,10 +11,61 @@ sources:
     href: "README.md#testing-and-goldens"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Run the game from the repository root, CLI flags, saves, and where to go next in the docs.
 
-- Run the game from the repository root, CLI flags, saves, and where to go next in the docs.
+--[ Depends on ]-------------------------------------------------------------
+
 - Depends on: getting-started/install
+
+--[ Run ]--------------------------------------------------------------------
+
+Run from the repository root so relative paths resolve (`data/…`, `LICENSE`,
+default `game.sav` / `scores.dat`):
+
+```text
+./target/release/umoria
+# or
+cargo run --release
+```
+
+--[ CLI ]--------------------------------------------------------------------
+
+```text
+umoria [OPTIONS] SAVEGAME
+
+SAVEGAME is an optional save game filename (default: game.sav)
+
+Options:
+ -n Force start of a new game
+ -r Enable classic roguelike keys on startup
+ -d Display high scores and exit
+ -s NUMBER Game seed (decimal, max 2147483647)
+ -v Print version and exit
+ -h Display help
+```
+
+Example:
+
+```text
+./target/release/umoria -n -s 42
+```
+
+--[ Saves & checks ]---------------------------------------------------------
+
+Default save is `game.sav` in the working directory (override with SAVEGAME).
+Automated checks cover RNG sequences, save/score round-trips, and short
+scripted terminal transcripts — see the README testing notes and
+`tools/capture/README.md` if you are regenerating goldens.
+
+--[ Where next ]-------------------------------------------------------------
+
+- character/races, character/classes, character/attributes — who you are
+- locations/city — town before the dungeon
+- combat/monsters — what you will meet underground
+- wizard/overview — wizard / debug mode (spoilers)
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: character/classes, character/races, character/attributes, locations/city, combat/monsters, wizard/overview

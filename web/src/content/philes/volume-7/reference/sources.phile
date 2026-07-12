@@ -13,9 +13,48 @@ sources:
     href: "https://beej.us/moria/mmspoilers/index.html"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Beej HTML conversion, spoiler credits, disclaimer, how to cite this docs site.
 
-- Beej HTML conversion, spoiler credits, disclaimer, how to cite this docs site.
+This documentation rewrites classic Umoria / Moria spoiler material for the
+[`umoria-rust`](https://github.com/12yanogden/umoria-rust) port. Numbers and tables
+are attributed on each page via the Sources footer; prefer those links when
+cross-checking.
+
+--[ Beej spoilers ]----------------------------------------------------------
+
+The HTML spoilers at [beej.us/moria/mmspoilers](https://beej.us/moria/mmspoilers/index.html)
+are Beej’s conversion of the long-running Moria Spoilers file (originally curated for
+`rec.games.moria`). Companion `.txt` addenda (`classes.txt`, `items.txt`, `spells.txt`,
+`weapnarm.txt`) are cited where tables came from those files.
+
+--[ Credits (upstream) ]-----------------------------------------------------
+
+Notable contributors listed in the spoilers credits include (among others): Beej,
+Michael Beresis, Sharon L. Casteel, William Chuang, Aaron M. Clements, James Frye,
+David Grabiner, Maarten Hazewinkel, Ben Hodson, Jeremy Seip, Kevin Souter,
+Jon Vessey, Boudewijn Wayers, Nicholas C. Weaver — plus many net posters over the
+years. Alphabetical-by-surname listing and omissions are upstream’s, not a ranking.
+
+--[ Using spoilers ]---------------------------------------------------------
+
+Spoilers change how the game feels: horizons expand, but some mystery is lost.
+Section titles in the classic files end with a colon so you can search quickly
+(e.g. `/Armor:`). This site mirrors that by topic pages under `/docs/…`.
+
+--[ Citing this site ]-------------------------------------------------------
+
+For this docs tree, cite the page URL under `/docs/<slug>/` plus the Sources entries
+on that page. Deep game lore examples:
+
+- [Social class](/docs/character/social-class/) (consolidated race-group tables)
+- [Items overview](/docs/items/overview/)
+- [Spell system](/docs/spells/system/)
+- [Weapon & armour specials](/docs/items/special-properties/)
+
+Version / FAQ notes: [/docs/reference/versions/](/docs/reference/versions/).
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: reference/versions, character/social-class, items/overview, spells/system, items/special-properties

@@ -9,9 +9,42 @@ sources:
     href: "https://beej.us/moria/mmspoilers/wizardmode.html#enteringwizard"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Debug / cheat mode: ^W toggle, `moria -w`, resurrect, high-score exclusion.
 
-- ^W toggle, `-w` CLI, resurrect dead char warning, high-score exclusion.
-- Related: wizard/commands, getting-started/playing
+Wizard mode is meant for people who changed the source and need to test it.
+Using it “for fun” often spoils the game — either you stop playing, or you
+can no longer enjoy a run without cheating. Once you enter wizard mode, that
+character is excluded from the high score file.
+
+--[ Toggle and CLI ]---------------------------------------------------------
+
+In play, type **^W** (Control-W) to convert the current character into a
+wizard (and to leave wizard mode later — see
+[/docs/wizard/commands/](/docs/wizard/commands/)).
+
+From the shell:
+
+```
+moria -w
+```
+
+starts (or continues) with wizard mode enabled. Normal play without `-w` is
+covered under [/docs/getting-started/playing/](/docs/getting-started/playing/).
+
+--[ Resurrecting a dead character ]------------------------------------------
+
+To bring back a dead save:
+
+```
+moria -w <savefile>
+```
+
+The dungeon is destroyed and you return to the town (store) level. Inventory
+and equipment stay intact. Treat this as a debug recovery tool, not a
+standard death mechanic.
+
+--[ Related ]----------------------------------------------------------------
+
+- Related: [/docs/wizard/commands/](/docs/wizard/commands/), [/docs/getting-started/playing/](/docs/getting-started/playing/)

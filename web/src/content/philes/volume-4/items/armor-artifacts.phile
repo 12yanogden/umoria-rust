@@ -9,7 +9,24 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#armorartifacts"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+mmspoilers “Armor Artifacts” covers **ego armour set pieces**—resists and slot suffixes—not unique set uniques. Base AC tables stay on the armor page.
+
+## Shields and body armour
+
+- **(RA)/(RC)/(RF)/(RL)** — resist acid / cold / fire / lightning (≈⅓ damage for the element).
+- **(R)** — all four; large cost bump.
+- Acid stacking: corroded/resist-corrosion ≈½; (RA) ≈⅓; both ≈¼. Temporary resist potions stack with (RC)/(RF)/(R) toward ≈1/9.
+
+## Helms and crowns
+
+Helms: +INT / +WIS / Infra-Vision, or curses (Stupidity, Dullness, Blindness, Timidness, Weakness, Teleportation, Ugliness). Crowns add Might (CON/DEX/STR + Free Action), Lordliness (CHR/WIS), Magi (INT + (R)), Beauty, Seeing (See Invisible + search), Regeneration.
+
+## Gloves, boots, cloaks
+
+Gloves: Free Action, Slaying (+hit/+dam), or Clumsiness/Weakness. Boots: Slow Descent, Speed (+1), Stealth, or Slowness / Noise / Great Mass (×5 weight, big AC hit). Cloaks: Protection / Stealth, or Irritation / Vulnerability / Enveloping.
+
+Cross-check weapnarm wording on special-properties when numbers differ slightly between spoilers.
 
 ## Outline
 

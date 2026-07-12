@@ -11,10 +11,72 @@ sources:
     href: "src/data_store_owners.rs"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Six store types, shopkeeper stats table (Max$, markup, haggle%, race, insults).
 
-- Six store types, shopkeeper stats table (Max$, markup, haggle%, race, insults).
+--[ Depends on ]-------------------------------------------------------------
+
 - Depends on: locations/city
+
+--[ Store types ]------------------------------------------------------------
+
+There are six kinds of stores on the town level. Each can roll a different
+shopkeeper, who sets buy ceiling, markups, haggling difficulty, race, and
+insult tolerance.
+
+| Store | Sells |
+| --- | --- |
+| General store | Food, water, cloaks, picks, light sources, spikes |
+| Weaponsmith | Weapons |
+| Armory | Armor |
+| Temple | Potions, scrolls, prayer books, some bashing weapons |
+| Alchemist | Potions, scrolls |
+| Magic shop | Magic books, wands, staves, rings, amulets |
+
+--[ Column meanings ]--------------------------------------------------------
+
+| Column | Meaning |
+| --- | --- |
+| Max$ | Gold the keeper can spend when buying from you (e.g. you cannot sell a 3000 gp cloak to most general stores) |
+| First | Percent markup of base price for the first offer |
+| Final | Percent markup of base price for the final offer |
+| Haggle % | Minimum percent you must move your offer by without insulting the keeper |
+| Race | Shopkeeper race (feeds the race-adjustment matrix in locations/haggling) |
+| Insults | Insults before the store closes for 1000 turns |
+
+Race codes: Hu Human, Hl Halfling, El Elf, HE Half-Elf, Gn Gnome, HO Half-Orc,
+Dw Dwarf, HT Half-Troll.
+
+--[ Shopkeeper roster (Umoria) ]---------------------------------------------
+
+Table from `src/data_store_owners.rs`. Classic mmspoilers spell a few names
+differently (e.g. Best-Slayer / Comley / Muaser); stats match.
+
+| Shopkeeper | Store | Max$ | First | Final | Haggle % | Race | Insults |
+| --- | --- | ---: | ---: | ---: | ---: | --- | ---: |
+| Erick the Honest | General | 250 | 175 | 108 | 4 | Hu | 12 |
+| Andy the Friendly | General | 200 | 170 | 108 | 5 | Hl | 15 |
+| Lyar-el the Comely | General | 300 | 165 | 107 | 6 | El | 18 |
+| Mauglin the Grumpy | Armory | 32000 | 200 | 112 | 4 | Dw | 5 |
+| Darg-Low the Grim | Armory | 10000 | 190 | 111 | 4 | Hu | 9 |
+| Mauglim the Horrible | Armory | 3000 | 200 | 113 | 5 | HO | 9 |
+| Arndal Beast-Slayer | Weaponsmith | 10000 | 185 | 110 | 5 | HE | 8 |
+| Oglign Dragon-Slayer | Weaponsmith | 32000 | 195 | 112 | 4 | Dw | 8 |
+| Ithyl-Mak the Beastly | Weaponsmith | 3000 | 210 | 115 | 6 | HT | 8 |
+| Hardblow the Humble | Temple | 3500 | 175 | 109 | 6 | Hu | 15 |
+| Gunnar the Paladin | Temple | 5000 | 185 | 110 | 5 | Hu | 23 |
+| Delilah the Pure | Temple | 25000 | 180 | 107 | 6 | HE | 20 |
+| Ga-nat the Greedy | Alchemist | 12000 | 220 | 115 | 4 | Gn | 9 |
+| Mauser the Chemist | Alchemist | 10000 | 190 | 111 | 5 | HE | 8 |
+| Wizzle the Chaotic | Alchemist | 10000 | 190 | 110 | 6 | Hl | 8 |
+| Valeria Starshine | Magic | 32000 | 175 | 110 | 5 | El | 11 |
+| Gopher the Great! | Magic | 20000 | 215 | 113 | 6 | Gn | 10 |
+| Inglorian the Mage | Magic | 32000 | 200 | 110 | 7 | Hu | 10 |
+
+Pricing math, unidentified sale prices, race markup, and insult rules:
+locations/haggling. CHA also scales offers (character/attributes).
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: locations/haggling, locations/city, character/attributes

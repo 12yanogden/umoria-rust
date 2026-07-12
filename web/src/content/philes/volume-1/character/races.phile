@@ -11,9 +11,56 @@ sources:
     href: "src/data_player.rs"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Eight races: stat mods, class bitmap, skills, age/height/weight, infravision, hit die.
 
-- Eight races: stat mods, class bitmap, skills, age/height/weight, infravision, hit die.
+Tables below match Umoria `CHARACTER_RACES` in `src/data_player.rs` (mmspoilers-aligned). Class letters are Warrior Mage Priest Rogue Ranger Paladin. Lower perception (fos) is better. Saving throw tracks the device column.
+
+--[ Stat mods & classes ]----------------------------------------------------
+
+```
+Race       STR INT WIS DEX CON CHR  Classes   XP%
+Human       0   0   0   0   0   0   WMPRRP     0
+Half-Elf   −1  +1   0  +1  −1  +1   WMPRRP    10
+Elf        −1  +2  +1  +1  −2  +1   WMPRR     20
+Halfling   −2  +2  +1  +3  +1  +1   WM R      10
+Gnome      −1  +2   0  +2  +1  −2   WMPR      25
+Dwarf      +2  −3  +1  −2  +2  −3   W P       20
+Half-Orc   +2  −1   0   0  +1  −4   W PR      10
+Half-Troll +4  −4  −2  −4  +3  −6   W P       20
+```
+
+XP% is the race experience penalty (see character/experience).
+
+--[ Skills ]-----------------------------------------------------------------
+
+```
+Race       disarm search stealth percept fight bows device
+Human         0      0      0       0      0    0     0
+Half-Elf      2      6      1      −1     −1    5     3
+Elf           5      8      1      −2     −5   15     6
+Halfling     15     12      4      −5    −10   20    18
+Gnome        10      6      3      −3     −8   12    12
+Dwarf         2      7     −1       0     15    0     9
+Half-Orc     −3      0     −1       3     12   −5    −3
+Half-Troll   −5     −1     −2       5     20  −10    −8
+```
+
+--[ Body, infra, hit die ]---------------------------------------------------
+
+Age is `base + 1d(mod)`. Infravision in feet (`infra_vision` × 10 in code). Hit die is racial HP base before class.
+
+```
+Race       age        Ht♂/Wt♂          Ht♀/Wt♀         infra  HD
+Human      14+1d6     72+1d6/180+1d25  66+1d4/150+1d20    0'   10
+Half-Elf   24+1d16    66+1d6/130+1d15  62+1d6/100+1d10   20'    9
+Elf        75+1d75    60+1d4/100+1d6   54+1d4/80+1d6     30'    8
+Halfling   21+1d12    36+1d3/60+1d3    33+1d3/50+1d3     40'    6
+Gnome      50+1d40    42+1d3/90+1d6    39+1d3/75+1d3     40'    7
+Dwarf      35+1d15    48+1d3/150+1d10  46+1d3/120+1d10   50'    9
+Half-Orc   11+1d4     66+1d1/150+1d5   62+1d1/120+1d5    30'   10
+Half-Troll 20+1d10    96+1d10/255+1d50 84+1d8/225+1d40   30'   12
+```
+
 - Related: character/classes, character/experience

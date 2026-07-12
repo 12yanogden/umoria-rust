@@ -11,7 +11,18 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#staves"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Staves weigh 5 lb (always **large**) and bash 1d2. Activation chance matches wands: saving throw + INT device bonus + device skill − staff level − 5. Charges add ~5% to base cost; cost `0` staffs are unsellable.
+
+## Utility and detection
+
+Early: Cure Light Wounds, Light, Detect Invisible, Object/Treasure Location, Darkness (junk). Mid: Door/Stair & Trap Location, Sleep/Slow Monsters, Detect Evil, Starlight, Teleportation, Curing.
+
+## Deep combat and map control
+
+Earthquakes, Speed (or cursed Slowness), Mass Polymorph, Remove Curse, Dispel Evil, *Destruction* (blinds you briefly, clears the panel). Summoning appears both mid and deep as a trap staff.
+
+Charge dice vary (often 1d3+… through 1d20+…). Prefer Speed, Teleportation, Curing, and Dispel Evil once identified; dump Haste Monsters / Summoning / Darkness / Slowness.
 
 ## Outline
 

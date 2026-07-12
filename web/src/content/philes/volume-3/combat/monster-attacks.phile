@@ -9,10 +9,54 @@ sources:
     href: "https://beej.us/moria/mmspoilers/combat.html#mattacks"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Breath/spell/special attack types and frequencies from combat spoilers.
 
-- Breath/spell/special attack types and frequencies from combat spoilers.
+When a monster lands a melee (or special) hit, the attack type is one of the codes
+below. Which monsters use which codes — and how often they cast — lives in the
+[monster descriptions](/docs/combat/monsters/) matrix. This page is the legend.
+
+--[ Attack codes ]-----------------------------------------------------------
+
+```
+Code   Effect
+ATCK   Plain damage (no special side effect)
+CONF   Confuses you
+FEAR   Makes you afraid
+FIRE   Fire-based damage
+ACID   Acid-based damage
+COLD   Cold / frost damage
+LIGT   Lightning damage
+CORR   Corrosion (item damage)
+BLND   Blinds you
+PARA   Paralyzes you
+STL$   Steals money
+STLO   Steals an object
+POIS   Poisons you
+STR-   Drains Strength
+DEX-   Drains Dexterity
+CON-   Drains Constitution
+INT-   Drains Intelligence
+WIS-   Drains Wisdom
+EXP-   Drains experience
+AGGR   Aggravates monsters on the level
+DENC   Disenchants an item
+FOD-   Consumes food
+LIT-   Drains light
+CHG-   Drains charges from devices
+```
+
+Elemental hits (FIRE / ACID / COLD / LIGT) interact with resists on gear — see
+[armor specials](/docs/items/special-properties/) and [damage](/docs/combat/damage/).
+
+--[ Casting vs melee ]-------------------------------------------------------
+
+Spell/breath attempts are separate from melee: the right-hand monster flags give
+a “1 time in *x*” cast rate. Melee still uses the codes above when the monster
+connects in physical combat.
+
+--[ Related ]----------------------------------------------------------------
+
 - Depends on: combat/monsters
 - Related: combat/monsters, combat/damage

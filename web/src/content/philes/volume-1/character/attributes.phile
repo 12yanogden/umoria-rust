@@ -9,9 +9,86 @@ sources:
     href: "https://beej.us/moria/mmspoilers/character.html#attributes"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+STR/DEX/INT/WIS/CON/CHA tables, carry capacity, attacks/round, device use from INT.
 
-- STR/DEX/INT/WIS/CON/CHA tables, carry capacity, attacks/round, device use from INT.
+Core stats run 3–18, then exceptional strength as `18/xx` up to `18/100`. A plain 18 equals `18/00`. A second number beside a stat is the pre-drain original.
+
+--[ STR ]--------------------------------------------------------------------
+
+Hit and damage bonuses; carry capacity is `STR * 13` + body weight (cap 300.0 lbs). Heavy weapons need `STR * 1.5` ≥ weapon weight or you fight at a penalty.
+
+```
+STR range     +hit  +dam
+3             -3    -2
+4             -2    -1
+5–7           -1     0
+8–15           0     0
+16             0    +1
+17             0    +2
+18–18/74      +1    +3
+18/75–18/90   +2    +4
+18/91–18/99   +3    +5
+18/100        +4    +6
+```
+
+--[ DEX ]--------------------------------------------------------------------
+
+```
+DEX range     +hit  +AC  +disarm
+3             -3    -4    -8
+4             -2    -3    -6
+5             -2    -2    -4
+6             -1    -1    -2
+7             -1     0    -1
+8–12           0     0     0
+13–15          0     0    +1
+16            +1    +1    +2
+17            +2    +1    +2
+18–18/49      +3    +2    +4
+18/50–18/90   +4    +3    +5
+18/91–18/99   +4    +4    +6
+18/100        +5    +5    +8
+```
+
+Attacks/round come from weapon weight, STR, and DEX. `S/W` = STR ÷ weapon lbs (exceptional STR adds the `/xx` onto 18, so `18/29` → 47). Higher S/W and DEX unlock more blows (1–4).
+
+--[ INT / WIS ]--------------------------------------------------------------
+
+Mages, Rangers, and Rogues use INT for spells; Priests and Paladins use WIS. Device-use bonus always follows INT (any class).
+
+```
+INT/WIS       mana×  fail   device  spells/lv
+3–7             0    none      0     none
+8–14            1    −3%       1      1
+15–17           1    −6%       2      1
+18–18/49      3/2    −9%       3      1
+18/50–18/69     2   −12%       4     3/2
+18/70–18/89   5/2   −15%       5     3/2
+18/90–18/99     3   −18%       6      2
+18/100          4   −21%       7     5/2
+```
+
+--[ CON / CHA ]--------------------------------------------------------------
+
+```
+CON           HP bonus   poison HP/turn
+3             −4         4
+4             −3         3
+5             −2         3
+6             −1         2
+7–16           0         1
+17            +1         1/2
+18–18/74      +2         1/2
+18/75–18/99   +3         1/2
+18/100        +4         1/3
+```
+
+CHA only shifts shop prices (percent of base). Nothing but a Potion of Ugliness lowers it.
+
+```
+CHA 3→130% … 18→100% … 18/01–49→98% … 18/100→90%
+```
+
 - Related: character/classes, combat/hit-probability, combat/armor-class, spells/mana

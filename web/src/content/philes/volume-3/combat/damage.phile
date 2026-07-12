@@ -9,10 +9,56 @@ sources:
     href: "https://beej.us/moria/mmspoilers/combat.html#damagecalc"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Player and monster damage formulas, criticals, slays/resists overview.
 
-- Player and monster damage formulas, criticals, slays/resists overview.
+Assumes you already hit ([hit probability](/docs/combat/hit-probability/)).
+
+--[ Player damage ]----------------------------------------------------------
+
+```
+  Weapon damage dice
+× Ego / slay multiplier
+× Critical multiplier   (if crit)
++ To-dam on weapon
++ To-dam on other items
++ To-dam from STR
+────────────────────
+  Total damage
+```
+
+Weapon dice and ego prefixes live under [weapons](/docs/items/weapons/) and
+[special properties](/docs/items/special-properties/). Monster resists blunt the
+matching elemental/slay damage; see the monster flag matrix on
+[/docs/combat/monsters/](/docs/combat/monsters/).
+
+--[ Critical severity ]------------------------------------------------------
+
+If you scored a critical:
+
+```
+  Weapon weight × 10
++ Random 1..650
+────────────────────
+  Severity score
+```
+
+```
+Severity   Multiplier (label)
+0–399      2× damage + 5   (good)
+400–699    3× damage + 10  (excellent)
+700–899    4× damage + 15  (superb)
+900+       5× damage + 20  (*GREAT*)
+```
+
+--[ Monster damage ]---------------------------------------------------------
+
+Monster melee uses their dice plus any [attack codes](/docs/combat/monster-attacks/)
+(FIRE, POIS, EXP-, …). Your [AC](/docs/combat/armor-class/) only affects whether
+they connect, not this damage math.
+
+--[ Related ]----------------------------------------------------------------
+
 - Depends on: combat/hit-probability
 - Related: combat/monster-attacks, items/weapons

@@ -11,7 +11,19 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#amulets"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Amulets weigh 0.3. The set is small but includes two famous endgame pieces.
+
+## Mid-dungeon
+
+Searching, Slow Digestion, and cursed Teleportation from ~700′. Adornment (~800′). Charisma / Wisdom (~1000′). Resist Acid (~1200′).
+
+## DOOM and Magi (2500′)
+
+- **DOOM** (`*`) — −5 to all statistics and Searching; cost `--` (shops will not touch it). Always damned.
+- **the Magi** (`+`) — See Invisible, **Free Action** (cannot be slowed, slept, charmed, stunned, or paralysed), and a variable Searching bonus. Base cost 5000; never damned.
+
+Searching bonuses on amulets can range widely (−100…+50 in spoilers); expect mid values most often. Pair with rings for Slow Digestion stacking and Free Action coverage if Magi is not available.
 
 ## Outline
 

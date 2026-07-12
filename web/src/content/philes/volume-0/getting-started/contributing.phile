@@ -15,10 +15,55 @@ sources:
     href: "README.md#code-of-conduct-and-contributions"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Report bugs, run local checks, and open PRs without changing gameplay rules.
 
-- Report bugs, run local checks, and open PRs without changing gameplay rules.
+--[ Depends on ]-------------------------------------------------------------
+
 - Depends on: getting-started/install
+
+--[ Conduct ]----------------------------------------------------------------
+
+This project is governed by the Umoria Code of Conduct. By participating,
+you agree to uphold it. See CODE_OF_CONDUCT.md for details and reporting.
+
+--[ Do not change gameplay ]-------------------------------------------------
+
+Umoria’s rules were fine-tuned over many years. Prefer bug fixes, tests,
+docs, and build/CI hygiene over new features or balance tweaks.
+
+In scope:
+
+- Fixing bugs and regressions (include seed and repro steps)
+- Improving tests, goldens, docs, and build/CI hygiene
+- Platform fixes on the supported Unix path (macOS/Linux)
+
+--[ Reporting bugs ]---------------------------------------------------------
+
+Before filing, skim existing issues. When you file:
+
+- Use a clear, descriptive title
+- Give exact steps to reproduce (seed, CLI flags, key sequence if possible)
+- Describe what you saw vs. what you expected
+- Note OS, terminal, and how you built (`cargo build --release`, commit)
+- For crashes, include a backtrace (`RUST_BACKTRACE=1`) when you can
+
+--[ Pull requests ]----------------------------------------------------------
+
+Before opening a PR:
+
+1. Format: `cargo fmt --all`
+2. Lint: `cargo clippy --all-targets --all-features -- -Dwarnings`
+3. Full local gate: `./scripts/check.sh`
+
+When changing behavior-sensitive code, extend or update differential tests
+rather than loosening assertions. Regenerating goldens (when intentional)
+goes through `tools/capture/` — see that README.
+
+Preserve integer/overflow and RNG semantics the game relies on. Keep
+commits focused; separate pure refactors from behavior fixes when you can.
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: getting-started/install, getting-started/differences

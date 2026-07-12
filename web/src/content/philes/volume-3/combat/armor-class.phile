@@ -9,10 +9,34 @@ sources:
     href: "https://beej.us/moria/mmspoilers/combat.html#accalc"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+AC sources, armor vs dex, shield and magical AC stacking rules.
 
-- AC sources, armor vs dex, shield and magical AC stacking rules.
+--[ Formula ]----------------------------------------------------------------
+
+```
+  Sum of armor base AC
++ Magical / ego AC bonuses on armor
++ AC bonuses on other items (rings, amulets, …)
++ DEX armor-class bonus
++ Temporary spell AC (Bless, Chant, Prayer, …)
+────────────────────
+  Total AC
+```
+
+Armor pieces and shields contribute their listed AC ([armor](/docs/items/armor/)).
+DEX bonus bands are on [attributes](/docs/character/attributes/). Priest buffs
+(Bless / Chant / Prayer) add a flat AC (and to-hit) for a duration — see
+[/docs/spells/priest/](/docs/spells/priest/).
+
+--[ How AC is used ]---------------------------------------------------------
+
+Attackers must roll their to-hit total **above** your AC
+([hit probability](/docs/combat/hit-probability/)). AC does not reduce damage once
+a hit lands; resists and HP do that ([damage](/docs/combat/damage/)).
+
+--[ Related ]----------------------------------------------------------------
+
 - Depends on: character/attributes, combat/damage
 - Related: items/armor, character/attributes, combat/hit-probability

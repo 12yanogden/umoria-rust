@@ -11,7 +11,22 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#scrolls"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Scrolls weigh 0.5. You cannot read them while blind or confused. Some titles (Identify, Light, Trap Detection, Door/Stair Location) appear at multiple depths to stay common deeper—same scroll, boosted spawn rate.
+
+## Town and early
+
+Light, Object/Treasure Detection (town). Blessing, Detect Invisible, Phase Door, Identify (~50′). Word-of-Recall, Magic Mapping, Trap/Door detection and sleep/confusion utilities cluster ~250′. Remove Curse ~350′; Teleport ~500′.
+
+## Enchant and utility midgame
+
+Enchant Armor / Weapon To-Hit / To-Dam, Door Creation, Trap/Door Destruction, Holy Chant (~600′). Teleport Level (~1000′). Protection from Evil (~1500′).
+
+## Deep tiers
+
+Identify again at 1500′. **Genocide** (~1750′), *Destruction*, Dispel Undead, Recharging (~2000′). At 2500′: Curse Armor/Weapon, *Enchant Armor* / *Enchant Weapon*, Mass Genocide, Rune of Protection.
+
+Enchant success depends on current pluses vs a limit (+10 AC armour; +10 hit weapons; to-dam up to max weapon dice damage; +10 for missiles). *Enchant* scrolls attempt multiple steps, not one giant jump. Genocide / Mass Genocide cannot remove the Balrog.
 
 ## Outline
 

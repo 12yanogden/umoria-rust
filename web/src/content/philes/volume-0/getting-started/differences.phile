@@ -15,10 +15,36 @@ sources:
     href: "historical/"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+How this Rust 5.7.15 ncurses port relates to upstream C Umoria and what changed in the lineage.
 
-- How this Rust 5.7.15 ncurses port relates to upstream C Umoria and what changed in the lineage.
+--[ Depends on ]-------------------------------------------------------------
+
 - Depends on: getting-started/install
+
+--[ This repository ]--------------------------------------------------------
+
+Umoria continues the classic Moria lineage begun by Robert Alan Koeneke
+(1983) and James E. Wilson. Upstream project sites for the classic game:
+umoria.org and github.com/dungeons-of-moria/umoria.
+
+This repository implements Umoria 5.7.15 in Rust (Cargo / ncurses). HEAD
+changelog notes: golden capture and CI drive `target/release/umoria` via
+`cargo` only. Gameplay rules are meant to track classic 5.7.15 — prefer
+bug fixes and tooling over balance tweaks (see contributing).
+
+License is GPL-3.0-or-later. The 5.7.15 C release corrected an accidental
+GPL-2.0 license drift back to GPL-3.0-or-later; this Rust port keeps that
+lineage.
+
+--[ Historical docs ]--------------------------------------------------------
+
+Older manuals, changelogs, and FAQ material live under `historical/`. They
+are useful for history even where details are outdated for any 5.x build.
+Version and FAQ notes also appear under reference/versions and
+reference/sources.
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: reference/versions, reference/sources, getting-started/install, character/races

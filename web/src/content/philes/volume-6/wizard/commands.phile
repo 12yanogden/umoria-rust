@@ -9,10 +9,43 @@ sources:
     href: "https://beej.us/moria/mmspoilers/wizardmode.html#wizardcommands"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Normal vs rogue keymap for wizard-only commands (^A–^W, `:`, `@`, etc.).
 
-- Normal vs rogue keymap table (^A–^W, mapping, teleport, etc.).
-- Depends on: wizard/overview
-- Related: wizard/overview, wizard/items
+Requires wizard mode ([/docs/wizard/overview/](/docs/wizard/overview/)). Keys
+differ slightly between the normal and rogue-like keymaps; both columns are
+from Beej’s mmspoilers.
+
+--[ Depends on ]-------------------------------------------------------------
+
+- Depends on: [/docs/wizard/overview/](/docs/wizard/overview/)
+
+--[ Command table ]----------------------------------------------------------
+
+```
+Normal   Rogue    Description
+------   -----    -----------
+:        :        Magic mapping
+^A       ^A       Remove curse; cure blind/conf/pois/fear/slowness/stat
+^B       ^O       Generate objects for a level; print them to a file
+^D       ^D       Teleport character to specified level (1 lv = 50')
+^E       ^E       Edit stats, HP, mana, skills, gold, exp, level, speed
+^F       ^F       Eliminate all monsters on the screen
+^G       ^G       Randomly generate treasure around you
+^H       \        Wizard help
+^I/Tab   ^I/Tab   Identify an item
+^J       +        Double experience
+^L       *        Global overhead light (no darkness anywhere)
+^T       ^T       Teleport player
+^U       &        Summon random monster
+^W       ^W       Enter/exit wizard mode
+@        @        Create wizard item (see /docs/wizard/items/)
+```
+
+`--` style: Control letters are written `^A`, `^W`, etc. Rogue keymap
+remaps a few of these (`^B`→`^O`, `^H`→`\`, `^J`→`+`, `^L`→`*`, `^U`→`&`).
+
+--[ Related ]----------------------------------------------------------------
+
+- Related: [/docs/wizard/overview/](/docs/wizard/overview/), [/docs/wizard/items/](/docs/wizard/items/)

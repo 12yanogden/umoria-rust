@@ -11,7 +11,28 @@ sources:
     href: "https://beej.us/moria/mmspoilers/spells.html#spellsystem"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Eight books—four mage, four priest. Weight 3 lb; bash damage 1d1. items.txt lists every book at **2000′** minimum for dungeon finds (shops may stock earlier depending on play).
+
+## Mage books (Magic Spells)
+
+| Book                         | $$  |
+| ---------------------------- | --- |
+| Beginners-Magick             | 25  |
+| Magick I                     | 100 |
+| Magick II                    | 400 |
+| The Mages' Guide to Power    | 800 |
+
+## Priest books (Holy Prayers)
+
+| Book                         | $$  |
+| ---------------------------- | --- |
+| Beginners Handbook           | 25  |
+| Words of Wisdom              | 100 |
+| Chants and Blessings         | 400 |
+| Exorcisms and Dispellings    | 800 |
+
+Books gate which spells you can study; failure rates, mana, and spell lists live under spells/system, spells/mage, and spells/priest. Carry only what your class can use—dead weight otherwise.
 
 ## Outline
 

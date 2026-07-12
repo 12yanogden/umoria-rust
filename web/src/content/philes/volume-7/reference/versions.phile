@@ -13,9 +13,36 @@ sources:
     href: "https://beej.us/moria/mmspoilers/beginning.html#revisionhistory"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+5.x vs 4.87, spoiler revision policy, FAQ pointer.
 
-- 5.x vs 4.87, spoiler revision policy, FAQ pointer.
+--[ Game versions ]----------------------------------------------------------
+
+Classic spoilers target **Moria 5.x** (the spoilers text often cites **5.5.2** as a
+current reference). All 5.x builds play similarly for the formulas documented here.
+
+If you are on **4.87**, many spoilers numbers are wrong — upgrade or treat tables as
+approximate. Upstream FAQ material is linked from
+[mmspoilers · FAQ](https://beej.us/moria/mmspoilers/general.html#frequentlyaskedquestions)
+(historically posted to `rec.games.roguelike.moria`).
+
+This Rust port’s behavioral deltas vs classic Umoria are summarized under
+[/docs/getting-started/differences/](/docs/getting-started/differences/).
+
+--[ Spoiler revision policy ]------------------------------------------------
+
+Upstream revision numbering (spoilers file, not the game):
+
+```
+Bump     When
++0.01    Minor corrections / amplifications
++0.10    New sections or full rewrites of a section
++1.0     Complete rewrite of the entire spoilers file
+```
+
+Beej’s HTML conversion is updated continuously; text dumps may lag the live HTML.
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: getting-started/differences, reference/sources

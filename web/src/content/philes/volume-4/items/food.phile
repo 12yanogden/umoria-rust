@@ -11,7 +11,26 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#food"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Hunger ticks every move: base 2 + speed² + 3 if regenerating − 1 if resting. Slow Digestion (ring/amulet) reduces consumption by 1.
+
+## Normal food
+
+| Item                 | Food | Notes                          |
+| -------------------- | ---- | ------------------------------ |
+| Ration of Food       | 5000 | Always identified; town+dungeon |
+| Elvish Waybread      | 7500 | Also cures poison, heals 3d12  |
+| Slime Mold           | 3000 | Common early snack             |
+| Fine Grade Mush      | 1500 | Create Food / magic only       |
+| Shop: biscuit/jerky/ale/wine | 400–1750 | Shop-only stacks        |
+
+Rations and waybread reappear at deeper feet so they stay available.
+
+## Mushrooms (food 500) and molds (food 1200)
+
+Helpful: First-Aid, Minor/Light/Major Cures, Cure Blindness/Confusion/Paranoia/Poison, Restore Constitution, **Restoration** (all drained stats, ~1500′). Harmful: Poison, Confusion, Blindness, Paranoia, Hallucination, Weakness / Unhealth (also 1d18 damage; Unhealth can be thrown for big mold/mushroom dice).
+
+ID before eating deep fungi. Waybread and Restoration are the keepers; dump unidentified mushrooms when full.
 
 ## Outline
 

@@ -11,10 +11,49 @@ sources:
     href: "https://beej.us/moria/mmspoilers/spells.html#spellsystem"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Every class except [Warriors](/docs/character/classes/) casts something. Mage books go to Mages, Rangers, and Rogues (INT). Priest books go to Priests and Paladins (WIS). Full lists: [`/docs/spells/mage/`](/docs/spells/mage/), [`/docs/spells/priest/`](/docs/spells/priest/).
 
-- Who casts what (mage vs priest books), spell attributes (level/mana/fail/XP), book requirements for mages.
+--[ Spell attributes ]-------------------------------------------------------
+
+Each spell carries four fields:
+
+```
+Attr        Meaning
+Level       Minimum caster level to learn
+Mana        Mana spent on a cast attempt
+Failure     Base fail % before level/stat adjustments
+Experience  XP for first successful cast
+```
+
+Mana pool and fail math: [`/docs/spells/mana/`](/docs/spells/mana/), [`/docs/spells/failure/`](/docs/spells/failure/).
+
+--[ Books ]------------------------------------------------------------------
+
+Eight [spell books](/docs/items/books/)—four mage, four priest. Shop cost and dungeon depth:
+
+```
+Book                          Type   Cost  Depth
+[Beginners-Magick]            MAGE     25     40
+[Beginners Handbook]          CLER     25     40
+[Magick I]                    MAGE    100     40
+[Words of Wisdom]             CLER    100     40
+[Magick II]                   MAGE    400     40
+[Chants and Blessings]        CLER    400     40
+[The Mages' Guide to Power]   MAGE    800     40
+[Exorcism and Dispelling]     CLER    800     40
+```
+
+--[ Learning vs casting ]----------------------------------------------------
+
+**Mages / Rangers / Rogues** study from books: you need the book in inventory both to learn (`G`) and to cast. You may bank unspent learn slots and pick higher-level spells later.
+
+**Priests / Paladins** receive prayers from the deity. `G` picks randomly among spells you can learn; the book is **not** required to learn, but you **do** need it in inventory to cast.
+
+**Warriors** never learn or cast.
+
+Rangers open mage spells at character level 3; Rogues at 5. Mage-side offense: Rogues get none; Rangers get everything except Genocide. See [`/docs/spells/mage/`](/docs/spells/mage/).
+
 - Depends on: character/classes
 - Related: spells/mana, spells/failure, character/classes, items/books

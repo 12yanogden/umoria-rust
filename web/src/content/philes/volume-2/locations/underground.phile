@@ -9,10 +9,36 @@ sources:
     href: "https://beej.us/moria/mmspoilers/dungeon.html#underground"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Level size, stair one-way generation, no return to prior level.
 
-- Level size, stair one-way generation, no return to prior level.
+--[ Depends on ]-------------------------------------------------------------
+
 - Depends on: locations/city
+
+--[ Dungeon levels ]---------------------------------------------------------
+
+Each underground level is filled with rooms, monsters, and treasure. These
+levels are much bigger than the town level — typically **66** high and
+**198** characters wide.
+
+--[ Stairs are one-way ]-----------------------------------------------------
+
+When you pass through a stair:
+
+1. The old level is **destroyed**.
+2. A **new** level is created.
+3. There will **not** be a staircase back to the level you just left.
+
+You must explore the freshly generated map to find stairs up or down. Town
+(locations/city) remains the only persistent “home” map; everything below
+regenerates on each stair transit.
+
+Traps and other hazards appear throughout these levels (locations/traps).
+Creatures and combat math live under combat/monsters and related combat
+pages.
+
+--[ Related ]----------------------------------------------------------------
+
 - Related: locations/traps, locations/city

@@ -19,10 +19,91 @@ sources:
     href: "src/character.rs"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Starting gold from social class (character.rs); race-group parent-occupation tables (§1–§6) on this page.
 
-- Starting gold from social class (character.rs); race-group parent-occupation tables (§1–§6) on this page.
+Social class (1–100) is rolled from race-group background charts during history generation (`character_get_history`). It mainly sets starting gold and flavor text. Umoria start gold (`player_calculate_start_gold`):
+
+`social_class * 6 + 1d25 + 325 − Σ(5×(stat−10) for STR/INT/WIS/CON/DEX) + 5×(CHR−10)`, plus +50 if female, floor 80.
+
+Parent-occupation tables below are from Beej `classes.txt` (John Thornton). Final SC is clamped to 1–100.
+
+--[ §1 Humans, Half-Elves, Half-Orcs ]---------------------------------------
+
+```
+Occupation        base   Birth              adj   Family            adj
+Serf              16–19  1st child          +5    Well-liked        +5
+Yeoman            31–34  1 of several        0    Credit to family   0
+Townsman          41–44  Illegit. acknow.  −10    Black sheep      −35
+Guildsman         56–59  Illegit. unack.   −20
+Landed Knight     71–74  Adopted*          −20
+Titled Noble      81–84
+Royal Bloodline   91–94
+```
+
+\*Adopted applies to half-orcs only (all half-orcs are adopted).
+
+Half-elf elvish-parent adj: Green ♀0/♂+5, Grey ♀+5/♂+10, High ♀+15/♂+20.
+
+--[ §2 Elves ]---------------------------------------------------------------
+
+```
+Occupation   base   Birth           adj   Family     adj
+Ranger       31–34  Only child      +5    Green Elf   0
+Archer       41–44  1 of several     0    Grey Elf   +5
+Warrior      61–64                        High Elf  +10
+Mage         76–79
+Prince       91–94
+King         96–99
+```
+
+--[ §3 Halflings ]-----------------------------------------------------------
+
+```
+Occupation     base   Birth           adj   Family            adj
+Bum             6–9   Only child     +10    Well-liked        +5
+Tavern Owner   31–34  1 of several     0    Credit to family   0
+Miller         41–44                        Black sheep      −35
+Homeowner      51–54
+Burglar        61–64
+Warrior        66–69
+Mage           76–79
+Clan Elder     91–94
+```
+
+--[ §4 Gnomes ]--------------------------------------------------------------
+
+```
+Occupation   base   Birth           adj   Family            adj
+Beggar        6–9   Only child     +10    Well-liked        +5
+Braggart     21–24  1 of several     0    Credit to family   0
+Prankster    36–39                        Black sheep      −35
+Warrior      51–54
+Mage         76–79
+```
+
+--[ §5 Dwarves ]-------------------------------------------------------------
+
+```
+Occupation     base   Birth        adj   Family            adj
+Thief           1–9   Only child  +10    Well-liked        +5
+Prison Guard  16–24   1 of 2        0    Credit to family   0
+Miner          31–44                      Black sheep      −40
+Warrior       51–64
+Priest        71–84
+King            91+
+```
+
+--[ §6 Half-Trolls ]---------------------------------------------------------
+
+```
+Occupation    base   Troll parent          adj
+Warrior        1–4   Cave ♀−25 / ♂−20
+Cook           6–9   Hill ♀−15 / ♂−10
+Shaman       11–14   Water ♀−5 / ♂ 0
+Clan Chief   26–29
+```
+
 - Depends on: character/races, character/classes
 - Related: character/races, character/classes

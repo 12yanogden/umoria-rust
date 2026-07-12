@@ -1,5 +1,6 @@
 /**
  * Phase 4.2 — stub completeness, sources frontmatter, outline, volume map.
+ * Authored articles (FULL_ARTICLE / no stub marker) are exempt from stub-scale checks.
  * Run: bun run test  (from web/)
  */
 import assert from "node:assert/strict";
@@ -12,6 +13,12 @@ import { parse as parseYaml } from "yaml";
 import { docsCatalog } from "./docs-catalog.ts";
 import { DOCS_NAV_SECTIONS, type DocsNavSectionId } from "./docs-nav.ts";
 import { DOCS_SECTION_TO_VOLUME, stubRelPathForSlug } from "./docs-section-volume-map.ts";
+import {
+  DOCS_FULL_ARTICLE_MARKER,
+  DOCS_STUB_MARKER,
+  isAuthoredDocsBody,
+  isOutlineStubBody
+} from "./docs-stub-contract.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const webRoot = join(__dirname, "../..");
@@ -129,8 +136,8 @@ describe("docs stubs (phase_4.2)", () => {
     }
   });
 
-  it("3. title matches catalog; body has outline bullets; stub-scale", () => {
-    const MAX_BODY_CHARS = 4000;
+  it("3. title matches catalog; stubs keep outline scale; authored prose allowed", () => {
+    const MAX_STUB_BODY_CHARS = 4000;
     for (const entry of docsCatalog.articles) {
       const abs = join(webRoot, stubRelPathForSlug(entry.slug, entry.section));
       const { data, body } = parsePhileFile(abs);
@@ -139,16 +146,33 @@ describe("docs stubs (phase_4.2)", () => {
         entry.title.trim(),
         `${entry.slug}: title mismatch`
       );
-      assert.match(body, /^[\s\S]*^[\t ]*[-*] /m, `${entry.slug}: expected outline bullet list`);
-      assert.ok(
-        body.includes(entry.summary) || body.toLowerCase().includes("outline"),
-        `${entry.slug}: outline should reflect summary or mark outline`
-      );
-      assert.ok(
-        body.length <= MAX_BODY_CHARS,
-        `${entry.slug}: body too long for stub (${body.length} > ${MAX_BODY_CHARS})`
-      );
-      assert.doesNotMatch(body, /FULL_ARTICLE/, `${entry.slug}: must not mark full article`);
+
+      if (isOutlineStubBody(body)) {
+        assert.ok(
+          body.includes(DOCS_STUB_MARKER),
+          `${entry.slug}: outline stub must include stub marker`
+        );
+        assert.match(body, /^[\s\S]*^[\t ]*[-*] /m, `${entry.slug}: expected outline bullet list`);
+        assert.ok(
+          body.includes(entry.summary) || body.toLowerCase().includes("outline"),
+          `${entry.slug}: outline should reflect summary or mark outline`
+        );
+        assert.ok(
+          body.length <= MAX_STUB_BODY_CHARS,
+          `${entry.slug}: stub body too long (${body.length} > ${MAX_STUB_BODY_CHARS})`
+        );
+        assert.ok(
+          !body.includes(DOCS_FULL_ARTICLE_MARKER),
+          `${entry.slug}: stubs must not mark full article`
+        );
+      } else {
+        assert.ok(isAuthoredDocsBody(body), `${entry.slug}: expected authored body`);
+        assert.ok(body.trim().length >= 80, `${entry.slug}: authored body looks empty`);
+        assert.ok(
+          body.includes(DOCS_FULL_ARTICLE_MARKER) || !body.includes(DOCS_STUB_MARKER),
+          `${entry.slug}: authored pages use FULL_ARTICLE and/or omit stub marker`
+        );
+      }
     }
   });
 

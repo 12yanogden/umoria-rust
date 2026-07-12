@@ -1,14 +1,19 @@
 /**
  * Regenerate docs stub philes from docs-catalog.ts (phase_4.2).
- * Catalog wins for frontmatter + outline until articles are authored later.
+ * Catalog wins for frontmatter + outline on remaining outline stubs.
+ * Authored articles (FULL_ARTICLE marker and/or no stub marker) are skipped.
  *
  * Usage (from web/): bun run docs:generate-stubs
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { docsCatalog, type DocsCatalogEntry } from "../src/content/docs-catalog.ts";
+import {
+  DOCS_STUB_MARKER,
+  isAuthoredDocsBody
+} from "../src/content/docs-stub-contract.ts";
 import { stubRelPathForSlug } from "../src/content/docs-section-volume-map.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,7 +36,7 @@ function renderSourcesYaml(sources: DocsCatalogEntry["sources"]): string {
 function renderBody(entry: DocsCatalogEntry): string {
   const lines: string[] = [
     "",
-    "<!-- docs-stub: outline only; full prose out of scope -->",
+    DOCS_STUB_MARKER,
     "",
     "## Outline",
     "",
@@ -63,14 +68,24 @@ ${renderBody(entry)}`;
 
 function main(): void {
   let written = 0;
+  let skipped = 0;
   for (const entry of docsCatalog.articles) {
     const rel = stubRelPathForSlug(entry.slug, entry.section);
     const abs = join(webRoot, rel);
+    if (existsSync(abs)) {
+      const existing = readFileSync(abs, "utf8");
+      if (isAuthoredDocsBody(existing)) {
+        skipped += 1;
+        continue;
+      }
+    }
     mkdirSync(dirname(abs), { recursive: true });
     writeFileSync(abs, renderStub(entry), "utf8");
     written += 1;
   }
-  console.log(`Wrote ${written} docs stubs from catalog (${docsCatalog.articles.length} articles).`);
+  console.log(
+    `Wrote ${written} docs stubs from catalog (${docsCatalog.articles.length} articles; skipped ${skipped} authored).`
+  );
 }
 
 main();

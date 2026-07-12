@@ -11,7 +11,22 @@ sources:
     href: "https://beej.us/moria/mmspoilers/items.html#armor"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Body armor, shields, boots, helms, cloaks, and gloves. Each +AC typically adds 100 to value. Soft and hard body armor often carry a −To-Hit penalty that grows with plate.
+
+## Soft and hard body armor
+
+Soft leather line: robe (AC 2) through leather scale mail (AC 11, 700′). Hard metal starts around metal scale (AC 13, 1200′) and climbs to ribbed plate (AC 28, 2500′). Rusty chain mail is the trap: same weight/AC as chain but [−8] AC adjustment and cost `--`. Body armor is always **large**.
+
+## Shields, boots, headgear
+
+Shields: small leather (AC 2) up to large metal (AC 5); they also deal bash damage (1d1–1d3). Boots: soft shoes → soft boots → hard leather boots (AC 1–3). Caps and helms: soft/hard/metal caps, iron/steel helms, then crowns (silver/gold/jewel) with 0 base AC but high depth and cost—crowns are ego magnets.
+
+## Misc armor
+
+Filthy rags (~), cloak `(`, leather gloves and gauntlets `]`. Cloaks and gloves are small; they host many of the best (and worst) ego suffixes.
+
+For resist flags, helm/glove/boot/cloak egos, and named spoilers entries, see specials and armor artifacts. Combat math for total AC is under combat/armor-class.
 
 ## Outline
 

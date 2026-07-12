@@ -11,10 +11,44 @@ sources:
     href: "https://beej.us/moria/mmspoilers/spells.html#failure"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
 
-## Outline
+Every cast rolls against a fail chance. Base rates live on each spell (see [`/docs/spells/mage/`](/docs/spells/mage/), [`/docs/spells/priest/`](/docs/spells/priest/)); this page is the adjustment formula. Key stat is INT for mage books, WIS for priest books ([spell system](/docs/spells/system/)).
 
-- Failure rate formula, insufficient-mana penalty, 5–95% bounds.
+--[ Formula ]----------------------------------------------------------------
+
+```
+Fail% =
+    BaseFail
+  + 3 × spell_level
+  − 3 × player_level
+  − INT/WIS fail adjust
+  + 5 × missing_mana_points
+```
+
+Then clamp to **5–95%**. You never have a free cast or a guaranteed fizzle from the formula alone.
+
+--[ Fail adjust ]------------------------------------------------------------
+
+From the INT/WIS table on [`/docs/character/attributes/`](/docs/character/attributes/):
+
+```
+INT/WIS       Fail adjust
+3–7           (cannot cast; mana 0)
+8–14               −3%
+15–17              −6%
+18–18/49           −9%
+18/50–18/69       −12%
+18/70–18/89       −15%
+18/90–18/99       −18%
+18/100            −21%
+```
+
+--[ Insufficient mana ]------------------------------------------------------
+
+Each mana point you are short adds **+5%** fail. spells.txt also notes: after a short-mana attempt you may faint for a few turns and risk HP damage. Mana pool: [`/docs/spells/mana/`](/docs/spells/mana/).
+
+Worked sketch: Mage 10 casting a level-5 spell with BaseFail 30, INT 18 (−9), full mana → `30 + 15 − 30 − 9 = 6`, clamped to 5%. Same cast two mana short → `6 + 10 = 16%`.
+
 - Depends on: spells/mana, spells/system
 - Related: spells/mana, character/attributes

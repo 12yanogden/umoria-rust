@@ -9,7 +9,29 @@ sources:
     href: "https://beej.us/moria/weapnarm.txt"
 ---
 
-<!-- docs-stub: outline only; full prose out of scope -->
+<!-- FULL_ARTICLE -->
+Ego prefixes and suffixes from weapnarm.txt (Umoria 5.5.1+). Identified names already fold the listed hit/dam bonuses into the shown (+x,+y).
+
+## Melee egos
+
+| Flag | Effect |
+| ---- | ------ |
+| (HA) | Holy Avenger: +(1–4) STR & AC, (SE), (SU), See Invisible; STR bonus picks sustained stat (1 STR / 2 INT / 3 WIS / 4 CON) |
+| (DF) | Defender: Stealth, Regen, Free Action, See Invisible, Feather Fall, full resists (RF/RC/RL/RA), +(6–10) AC |
+| (SA)/(SD)/(SE)/(SU) | Slay Animal ×2 / Dragon ×4 / Evil ×2 / Undead ×3 (+ See Invisible on SU) |
+| (FT)/(FB) | Flame Tongue / Frost Brand ×1.5 vs vulnerable |
+
+## Ammo egos
+
+Dragon Slaying (+3/+3, ×4 dragons), Fire (+2/+4, ×1.5 fire-vuln), Slay Animal/Evil, or plain Slaying (+5/+5). Costs are per piece; packs are often ~20.
+
+## Armour egos
+
+Body/shields: (R) all four resists; (RA)/(RF)/(RC)/(RL) single-element. Cloaks: Protection, Stealth, or curses (Enveloping, Irritation, Vulnerability). Helms: INT/WIS/Infra-Vision vs Blindness, Dullness, Stupidity, Teleportation, Timidness, Ugliness, Weakness. Crowns: Beauty, Lordliness, Might (Free Action + physical stats), Regeneration, Seeing, Magi (INT + (R)). Gloves: Free Action, Slaying, or Clumsiness/Weakness. Boots: Slow Descent, Speed (+1), Stealth, or Slowness / Noise / Great Mass.
+
+**Free Action** blocks paralysis, sleep, charm, and stun.
+
+Overlapping mmspoilers ego write-ups live on the weapon-artifacts and armor-artifacts pages.
 
 ## Outline
 
