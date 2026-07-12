@@ -1,8 +1,5 @@
 //! Shared type aliases and fixed-size string buffers.
-#![allow(
-    unused_imports,
-    reason = "re-exports kept for call-site convenience"
-)]
+#![allow(unused_imports, reason = "re-exports kept for call-site convenience")]
 //!
 //! ## Fixed char-buffer semantics
 //!

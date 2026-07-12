@@ -81,7 +81,7 @@ fn push_any_key() {
 }
 
 fn setup_ui_harness() {
- // Full TLS reset: cargo reuses worker threads across tests.
+    // Full TLS reset: cargo reuses worker threads across tests.
     test_set_ncurses_stub(true);
     test_set_eof_flag(0);
     test_set_select_ready(None);
@@ -347,7 +347,7 @@ fn output_random_level_objects_prompt_flow_and_bounds() {
 
 #[test]
 fn output_random_level_objects_writes_header_and_completed() {
- // Relative filename + splash tests' chdir must not race.
+    // Relative filename + splash tests' chdir must not race.
     let _cwd = CWD_LOCK.lock().unwrap();
     let out = PathBuf::from("w5.txt");
     let _ = fs::remove_file(&out);
@@ -356,7 +356,7 @@ fn output_random_level_objects_writes_header_and_completed() {
     reset_for_new_game(Some(12345));
     init_treasure_levels();
     test_clear_getch_keys();
- // LIFO: last push consumed first → level, count, small?, filename.
+    // LIFO: last push consumed first → level, count, small?, filename.
     push_string_input(out.to_str().unwrap());
     push_confirm_no();
     push_string_input("2");

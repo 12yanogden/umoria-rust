@@ -144,7 +144,7 @@ fn expected_to_hit_adj(dexterity: i32, strength: i32) -> i16 {
     } else if strength < 7 {
         total -= 1;
     } else if strength < 18 {
- // no change
+        // no change
     } else if strength < 94 {
         total += 1;
     } else if strength < 109 {

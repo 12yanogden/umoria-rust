@@ -174,8 +174,8 @@ fn magic_initialize_item_names_restore_matches_expected_seed_set() {
     let before = get_seed();
     with_state_mut(|s| s.game.magic_seed = 42);
     magic_initialize_item_names();
- // seedResetToOldSeed() calls setRandomSeed(old_seed), which re-normalizes:
- // restored = (old_seed % (RNG_M-1)) + 1 — one past the saved stream position.
+    // seedResetToOldSeed() calls setRandomSeed(old_seed), which re-normalizes:
+    // restored = (old_seed % (RNG_M-1)) + 1 — one past the saved stream position.
     assert_eq!(get_seed(), before.wrapping_add(1));
 }
 

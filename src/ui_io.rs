@@ -1274,16 +1274,10 @@ fn set_errno(err: i32) {
     }
 }
 
-#[allow(
-    unused_imports,
-    reason = "re-exports kept for call-site convenience"
-)]
+#[allow(unused_imports, reason = "re-exports kept for call-site convenience")]
 pub use terminal::Coord;
 
-#[allow(
-    unused_imports,
-    reason = "re-exports kept for call-site convenience"
-)]
+#[allow(unused_imports, reason = "re-exports kept for call-site convenience")]
 pub use crate::game::get_direction_with_memory;
 
 /// Test hook for direction-taking player actions (open/close door).

@@ -259,7 +259,7 @@ fn dungeon_generate_rng_after_full_generation_seed42_level5() {
 
     dungeon_generate();
 
- // reference (seed 42, level 5): post-dungeonGenerate randomNumber(8) == 7
+    // reference (seed 42, level 5): post-dungeonGenerate randomNumber(8) == 7
     assert_eq!(next_random_pair(8), (8, 7));
 }
 
@@ -328,7 +328,7 @@ fn generate_cave_dungeon_dimensions_and_panel_max_seed42() {
         assert_eq!(s.dg.panel.row, 4);
         assert_eq!(s.dg.panel.col, 4);
     });
- // reference (seed 42, level 5): post-generateCave randomNumber(8) == 7
+    // reference (seed 42, level 5): post-generateCave randomNumber(8) == 7
     assert_eq!(next_random_pair(8), (8, 7));
 }
 

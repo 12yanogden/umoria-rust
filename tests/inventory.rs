@@ -156,7 +156,7 @@ fn inventory_item_stackable_boundaries() {
         1,
         10
     )));
- // sub_category_id 192 is both ITEM_SINGLE_STACK_MAX and ITEM_GROUP_MIN (torch case).
+    // sub_category_id 192 is both ITEM_SINGLE_STACK_MAX and ITEM_GROUP_MIN (torch case).
     assert!(inventory_item_single_stackable(make_item(
         TV_FOOD,
         ITEM_GROUP_MIN,

@@ -390,6 +390,10 @@ pub fn replay_transcript(
     let run_dir = repo_root();
     // Match tools/capture/play.sh: golden transcripts assume a fresh save slot.
     let _ = fs::remove_file(run_dir.join("game.sav"));
+    let scores_initial = golden_root().join("scores/scores_initial.dat");
+    if scores_initial.is_file() {
+        fs::copy(&scores_initial, run_dir.join("scores.dat"))?;
+    }
 
     let pty_system = native_pty_system();
     let pair = pty_system

@@ -261,7 +261,7 @@ fn player_throw_wall_hit_rng_order_seed42() {
         },
     );
     pack_item(0, throwable_item(10, Dice { dice: 1, sides: 6 }, 2));
- // weaponMissileFacts: diceRoll(1d6); landing: randomNumber(10) break gate only (tile valid).
+    // weaponMissileFacts: diceRoll(1d6); landing: randomNumber(10) break gate only (tile valid).
     random_number(6);
     random_number(10);
     let expected_post = random_number(100);
@@ -284,7 +284,7 @@ fn inventory_drop_or_throw_item_break_gate_only_on_landing_branch() {
     let expected_post_fail_probe = random_number(100);
     assert_eq!(post_fail_probe, expected_post_fail_probe);
 
- // Block the landing tile so scatter rolls fire after break gate passes.
+    // Block the landing tile so scatter rolls fire after break gate passes.
     reset_for_new_game(Some(43));
     setup_dungeon(40, 40);
     setup_player_panel(POS);

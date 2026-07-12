@@ -765,7 +765,7 @@ fn store_enter_then_inventory_does_not_panic() {
         s.py.pack.unique_items = 1;
         s.py.inventory[0] = food_item();
     });
- // Open inventory from store, then ESC out of inventory, then ESC out of store.
+    // Open inventory from store, then ESC out of inventory, then ESC out of store.
     push_keys_in_consume_order(&[i32::from(ESCAPE), i32::from(ESCAPE), i32::from(b'i')]);
     store_enter(0);
 }

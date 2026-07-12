@@ -190,7 +190,7 @@ fn enter_wizard_mode_succeeds_on_confirm() {
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
- // print_message may require a -more- ack when a prior line is pending.
+    // print_message may require a -more- ack when a prior line is pending.
     with_state_mut(|s| s.message_ready_to_print = true);
     push_keys_in_consume_order(&[i32::from(b' '), i32::from(b'y')]);
 
@@ -288,11 +288,11 @@ fn wizard_drop_random_items_defaults_to_one_when_no_command_count() {
 
     wizard_drop_random_items();
 
- // `tries` defaults to 1 when command_count is 0, but
- // `dungeonPlaceRandomObjectNear` sets `i = 9` on each successful placement
- // inside `for (i = 0; i <= 10; i++)`, so the post-increment re-enters at
- // `i == 10` and can chain further placements until an attempt fails.
- // Seed 1 on this open floor places 8 objects for that single try.
+    // `tries` defaults to 1 when command_count is 0, but
+    // `dungeonPlaceRandomObjectNear` sets `i = 9` on each successful placement
+    // inside `for (i = 0; i <= 10; i++)`, so the post-increment re-enters at
+    // `i == 10` and can chain further placements until an attempt fails.
+    // Seed 1 on this open floor places 8 objects for that single try.
     let count = with_state(|s| {
         s.dg.floor
             .iter()
@@ -515,7 +515,7 @@ fn wizard_light_up_dungeon_skips_non_floor_tiles() {
 
 #[test]
 fn wizard_light_up_dungeon_edge_floor_lights_in_bounds_neighbors() {
- // writes yy/xx without bounds checks; Rust lights all in-array neighbors.
+    // writes yy/xx without bounds checks; Rust lights all in-array neighbors.
     reset_for_new_game(None);
     setup_dungeon(10, 10);
     setup_panel(Coord_t { y: 0, x: 0 });

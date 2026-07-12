@@ -163,7 +163,7 @@ fn monster_attack_player_miss_prints_message_seed777() {
         s.py.misc.ac = 200;
         s.py.misc.magical_ac = 200;
     });
- // Kobold attack desc is in 1..=3, so the miss path prints "misses you."
+    // Kobold attack desc is in 1..=3, so the miss path prints "misses you."
     place_monster(2, KOBOLD_ID, 10, Coord_t { y: 10, x: 10 }, true);
 
     monster_attack_player(2);
@@ -291,7 +291,7 @@ fn execute_attack_acid_seed42() {
     let death = death_description_for(GREY_MUSHROOM_ID);
     execute_attack_on_player(10, &mut hp, 2, 6, 20, &death, true);
     with_state(|s| {
- // No AC acid resist → full damage (flag+1 == 1).
+        // No AC acid resist → full damage (flag+1 == 1).
         assert_eq!(s.py.misc.current_hp, 480);
         assert_eq!(message_text(s.last_message_id), "You are covered in acid!");
     });
@@ -452,14 +452,14 @@ fn execute_attack_drain_xp_seed42() {
         s.py.misc.max_exp = 1000;
         s.py.misc.level = 5;
         s.py.misc.experience_factor = 100;
- // Thresholds so level stays 5 after draining 30 exp (970 still above level-5 floor).
+        // Thresholds so level stays 5 after draining 30 exp (970 still above level-5 floor).
         for i in 0..s.py.base_exp_levels.len() {
             s.py.base_exp_levels[i] = if i < 4 { 0 } else { 10_000 };
         }
     });
     let mut hp = 0i16;
     let death = death_description_for(GREY_MUSHROOM_ID);
- // damage 10 → drain = 10 + (1000/100)*2 = 30
+    // damage 10 → drain = 10 + (1000/100)*2 = 30
     execute_attack_on_player(10, &mut hp, 2, 19, 10, &death, true);
     with_state(|s| {
         assert_eq!(s.py.misc.exp, 970);
@@ -590,7 +590,7 @@ fn execute_attack_eat_light_seed42() {
     let noticed = execute_attack_on_player(10, &mut hp, 2, 23, 0, &death, true);
     assert!(noticed);
     with_state(|s| {
- // misc_use -= 250 + randomNumber(250); seed42 → 548 (same as inventory tests).
+        // misc_use -= 250 + randomNumber(250); seed42 → 548 (same as inventory tests).
         assert_eq!(
             s.py.inventory[PlayerEquipment::Light as usize].misc_use,
             548
@@ -619,7 +619,7 @@ fn execute_attack_drain_charges_seed42() {
     });
     let mut hp = 10i16;
     let death = death_description_for(GREY_MUSHROOM_ID);
- // creature_level 3 → monster_hp += 3 * 5 = 15 → 25
+    // creature_level 3 → monster_hp += 3 * 5 = 15 → 25
     let noticed = execute_attack_on_player(3, &mut hp, 2, 24, 0, &death, true);
     assert!(noticed);
     assert_eq!(hp, 25);

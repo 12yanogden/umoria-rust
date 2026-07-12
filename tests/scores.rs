@@ -582,7 +582,10 @@ fn test_show_scores_line_format_exact() {
     score.died_from = stripped;
 
     let line = format_show_scores_line(1, &score);
-    assert_eq!(line, "1      12345 Gandalf             M Human      Mage     7 fiery dragon          ");
+    assert_eq!(
+        line,
+        "1      12345 Gandalf             M Human      Mage     7 fiery dragon          "
+    );
 }
 
 #[test]

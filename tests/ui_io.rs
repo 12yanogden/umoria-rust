@@ -25,7 +25,7 @@ use umoria::ui_io::{
 // --------------------------------------------------------------------------
 #[test]
 fn t1_put_string_truncation_boundaries() {
- // clamp x>79, strncpy to 79-x, force NUL.
+    // clamp x>79, strncpy to 79-x, force NUL.
     assert_eq!(ui_io::truncate_for_put_string("ABCDEFGH", 75), "ABCD");
     assert_eq!(ui_io::truncate_for_put_string("AB", 79), "");
     assert_eq!(ui_io::truncate_for_put_string("AB", 85), "");
@@ -44,7 +44,7 @@ fn t1_put_string_truncation_boundaries() {
 // --------------------------------------------------------------------------
 #[test]
 fn t3_panel_screen_coord_subtracts_offsets() {
- // , 194–202.
+    // , 194–202.
     let coord = Coord { y: 10, x: 30 };
     let screen = panel_screen_coord(coord, 2, 13);
     assert_eq!(screen, Coord { y: 8, x: 17 });
@@ -65,7 +65,7 @@ fn t4_cap_message_line_resize_79() {
 
 #[test]
 fn t4_message_ring_wrap_and_truncation() {
- // .
+    // .
     assert_eq!(advance_message_ring_index(21), 0);
     assert_eq!(advance_message_ring_index(0), 1);
 
@@ -84,7 +84,7 @@ fn t4_message_ring_wrap_and_truncation() {
 // --------------------------------------------------------------------------
 #[test]
 fn t5_combine_and_more_thresholds() {
- // old_len = strlen + 1; >= 73 → -more-.
+    // old_len = strlen + 1; >= 73 → -more-.
     let old = message_old_len(b"hello"); // 5 + 1 = 6
     assert_eq!(old, 6);
     assert!(should_combine_messages(6, 64)); // 64+6+2=72 < 73
@@ -119,7 +119,7 @@ fn t6_get_key_input_normal_char() {
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
- // Queue is LIFO (pop); push in reverse consume order.
+    // Queue is LIFO (pop); push in reverse consume order.
     test_push_getch_keys(&[i32::from(b'a')]);
     assert_eq!(terminal::get_key_input(), b'a');
     test_set_ncurses_stub(false);
@@ -130,7 +130,7 @@ fn t6_get_key_input_ctrl_r_redraw() {
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
- // ^R is consumed; next key is returned. getKeyInput never returns ^R.
+    // ^R is consumed; next key is returned. getKeyInput never returns ^R.
     test_push_getch_keys(&[i32::from(b'z'), i32::from(ctrl_key(b'R'))]);
     assert_eq!(terminal::get_key_input(), b'z');
     test_set_ncurses_stub(false);
@@ -138,8 +138,8 @@ fn t6_get_key_input_ctrl_r_redraw() {
 
 #[test]
 fn t6_get_key_input_eof_hangup_path() {
- // EOF bumps eof_flag and returns ESCAPE when character is in-progress
- // (generated but not yet saved) — otherwise endGame() is called.
+    // EOF bumps eof_flag and returns ESCAPE when character is in-progress
+    // (generated but not yet saved) — otherwise endGame() is called.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     test_set_eof_flag(0);
@@ -178,14 +178,14 @@ fn t7_command_wrappers_input() {
 // --------------------------------------------------------------------------
 #[test]
 fn t8_string_input_end_col_clamped_to_79() {
- // .
+    // .
     assert_eq!(clamp_string_input_end_col(70, 20), 79);
     assert_eq!(clamp_string_input_end_col(10, 5), 14);
 }
 
 #[test]
 fn t8_isprint_matches_c_ascii() {
- // isprint(key) — documented as 0x20..=0x7e.
+    // isprint(key) — documented as 0x20..=0x7e.
     assert!(!is_printable_key(0x1f));
     assert!(is_printable_key(b'a' as i32));
     assert!(!is_printable_key(0x7f));
@@ -205,7 +205,7 @@ fn t8_trim_trailing_blanks_on_submit() {
 // --------------------------------------------------------------------------
 #[test]
 fn t9_confirmation_key_codes() {
- // .
+    // .
     assert_eq!(confirmation_key_result(b'y'), 1);
     assert_eq!(confirmation_key_result(b'Y'), 1);
     assert_eq!(confirmation_key_result(b'n'), 0);
@@ -252,7 +252,7 @@ fn t10_flush_input_buffer_drains_queue() {
     test_push_getch_keys(&[i32::from(b'a'), i32::from(b'b')]);
     terminal::flush_input_buffer();
     assert!(test_flush_input_buffer_count() >= 1);
- // After drain, no keys remain for a subsequent getch pop.
+    // After drain, no keys remain for a subsequent getch pop.
     test_set_select_ready(None);
     test_set_ui_detail_capture(false);
     test_set_ncurses_stub(false);
@@ -269,7 +269,7 @@ fn t11_non_blocking_key_press_unix() {
     test_set_select_ready(Some(false));
     assert!(!terminal::check_for_non_blocking_key_press(0));
     test_set_select_ready(Some(true));
- // Timed select path with empty queue returns true when microseconds > 0.
+    // Timed select path with empty queue returns true when microseconds > 0.
     assert!(terminal::check_for_non_blocking_key_press(1));
     test_set_select_ready(None);
     test_set_ncurses_stub(false);
@@ -332,7 +332,7 @@ fn t12_check_file_permissions_success_on_normal_process() {
 // --------------------------------------------------------------------------
 #[test]
 fn t13_terminal_initialize_and_restore() {
- // Stub path: initialize/restore must not panic and must register UI hooks.
+    // Stub path: initialize/restore must not panic and must register UI hooks.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     assert!(terminal::terminal_initialize());

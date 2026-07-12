@@ -31,7 +31,7 @@ fn scores_byte_exact_roundtrip_matches_expected_golden() {
         "golden scores artifact must contain a version header and at least one record"
     );
 
- // Preserve the golden version header; decode each HighScore record and re-encode.
+    // Preserve the golden version header; decode each HighScore record and re-encode.
     let mut rebuilt = golden[..3].to_vec();
     let mut offset = 3usize;
     while offset + HIGH_SCORE_RECORD_SIZE <= golden.len() {

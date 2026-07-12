@@ -14,13 +14,13 @@ use umoria::ui_io::{self, terminal, Coord};
 // --------------------------------------------------------------------------
 #[test]
 fn ncurses_crate_links_without_initscr() {
- // ^R = CTRL_KEY('R') = 0x12; keyname does not require initscr.
+    // ^R = CTRL_KEY('R') = 0x12; keyname does not require initscr.
     let name = ncurses::keyname(0x12);
     assert!(
         name.as_ref().is_some_and(|s| !s.is_empty()),
         "ncurses::keyname(0x12) should return a non-empty string"
     );
- // Prove ERR/OK constants are linkable.
+    // Prove ERR/OK constants are linkable.
     let _ = ncurses::ERR;
     let _ = ncurses::OK;
 }
@@ -73,7 +73,7 @@ fn encode_tile_plain_byte() {
 
 #[test]
 fn encode_tile_standout_high_bit_sign_extends() {
- // C passes `char` to mvaddch; signed char 0xC0 (-64) sign-extends into chtype.
+    // C passes `char` to mvaddch; signed char 0xC0 (-64) sign-extends into chtype.
     assert_eq!(
         ui_io::encode_tile(0xC0),
         0xC0_u8 as i8 as ncurses::ll::chtype

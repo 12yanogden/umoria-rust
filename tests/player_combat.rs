@@ -460,7 +460,7 @@ fn recalculate_bonuses_cursed_unidentified_hides_base_ac() {
     with_state(|s| {
         assert_eq!(s.py.misc.display_to_hit, base_th);
         assert_eq!(s.py.misc.plusses_to_hit, base_th.wrapping_add(5));
- // cursed + unidentified → neither display branch runs; only display_to_ac added.
+        // cursed + unidentified → neither display branch runs; only display_to_ac added.
         assert_eq!(s.py.misc.display_ac, base_mac);
         assert_eq!(s.py.misc.magical_ac, base_mac.wrapping_add(3));
         assert_eq!(s.py.misc.ac, 2);

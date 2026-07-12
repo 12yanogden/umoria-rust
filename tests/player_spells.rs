@@ -485,7 +485,7 @@ fn gain_spells_mage_picks_from_menu_seed42() {
     reset_for_new_game(Some(42));
     test_set_ncurses_stub(true);
     test_clear_getch_keys();
- // pop order: first key consumed first
+    // pop order: first key consumed first
     test_push_getch_keys(&[b'b' as i32]); // learn spell_bank[1]
 
     setup_base_player(MAGE_CLASS_ID, 10);

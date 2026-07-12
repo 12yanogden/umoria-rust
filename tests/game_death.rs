@@ -77,7 +77,7 @@ fn setup_nonwinner_tomb() {
         state.py.misc.au = 567;
         state.dg.current_level = 12;
         state.py.misc.gender = true;
- // Generated characters always have non-zero ability bases.
+        // Generated characters always have non-zero ability bases.
         state.py.misc.bth = 10;
         state.py.misc.bth_with_bows = 10;
         state.py.misc.saving_throw = 10;

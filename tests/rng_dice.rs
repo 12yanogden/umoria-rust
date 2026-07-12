@@ -213,7 +213,7 @@ fn seeds_initialize_fixed_seed_sets_magic_town_and_rng_state() {
     assert_eq!(magic, input);
     assert_eq!(town, input.wrapping_add(8762));
 
- // Post-init generator seed after setRandomSeed(seed+8762+113452) and warmup loop.
+    // Post-init generator seed after setRandomSeed(seed+8762+113452) and warmup loop.
     let expected_init_seed = input.wrapping_add(8762).wrapping_add(113_452);
     reset_for_new_game(None);
     set_seed(expected_init_seed);
@@ -236,7 +236,7 @@ fn seed_set_and_reset_match_expected_mapping() {
     assert_eq!(get_seed(), (12345 % (RNG_M as u32 - 1)) + 1);
     umoria::game::with_state(|s| assert_eq!(s.rng.old_seed, before));
     seed_reset_to_old_seed();
- // `seedResetToOldSeed` calls `setRandomSeed(old_seed)`, re-applying the modulus map.
+    // `seedResetToOldSeed` calls `setRandomSeed(old_seed)`, re-applying the modulus map.
     assert_eq!(get_seed(), (before % (RNG_M as u32 - 1)) + 1);
 }
 

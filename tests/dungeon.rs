@@ -141,7 +141,7 @@ fn coord_corridor_walls_next_to_counts_corr_without_doors() {
             },
         );
     }
- // Door treasure blocks counting (category_id >= TV_MIN_DOORS).
+    // Door treasure blocks counting (category_id >= TV_MIN_DOORS).
     with_state_mut(|s| {
         s.game.treasure.current_id = 1;
         s.dg.floor[4][5].treasure_id = 1;
@@ -204,7 +204,7 @@ fn cave_get_tile_symbol_rng_order_with_image() {
         s.dg.floor[5][5].feature_id = TILE_LIGHT_FLOOR;
     });
     let sym = cave_get_tile_symbol(Coord_t { y: 5, x: 5 });
- // seed 42: randomNumber(12) -> 9 (not 1), so floor tile '.'; next draws 9, 91.
+    // seed 42: randomNumber(12) -> 9 (not 1), so floor tile '.'; next draws 9, 91.
     assert_eq!(sym, b'.');
     assert_eq!(next_random_pair(12), (12, 9));
     assert_eq!(next_random_pair(95), (95, 91));
@@ -220,7 +220,7 @@ fn cave_get_tile_symbol_hallucination_symbol_from_golden_stream() {
         s.dg.floor[2][2].feature_id = TILE_LIGHT_FLOOR;
     });
     let sym = cave_get_tile_symbol(Coord_t { y: 2, x: 2 });
- // seed 1: randomNumber(12)==1, randomNumber(95)+31 == 46
+    // seed 1: randomNumber(12)==1, randomNumber(95)+31 == 46
     assert_eq!(sym, 46);
 }
 
@@ -242,9 +242,9 @@ fn dungeon_place_gold_rng_order_and_result_seed42() {
     assert_eq!(treasure_id, 1);
     let item = with_state(|s| s.game.treasure.list[treasure_id as usize]);
     assert_eq!(item.category_id, umoria::treasure::TV_GOLD);
- // gold_type_id = ((randomNumber(7)+2)/2)-1 with first roll 5 -> ((5+2)/2)-1 = 2
+    // gold_type_id = ((randomNumber(7)+2)/2)-1 with first roll 5 -> ((5+2)/2)-1 = 2
     assert_eq!(item.id, OBJ_GOLD_LIST);
- // base cost 3; cost += 8*randomNumber(3)+randomNumber(8) -> 3+8*1+2=13 for seed 42
+    // base cost 3; cost += 8*randomNumber(3)+randomNumber(8) -> 3+8*1+2=13 for seed 42
     assert_eq!(item.cost, 13);
 
     assert_eq!(next_random_pair(7), (7, 6));
@@ -337,8 +337,8 @@ fn dungeon_place_random_object_near_gold_path_seed1() {
     });
     let origin = Coord_t { y: 10, x: 10 };
     dungeon_place_random_object_near(origin, 1);
- // sets i=9 on success inside i<=10, so one post-success attempt may place a
- // second object. Seed 1 places gold at (12,7) then a second item.
+    // sets i=9 on success inside i<=10, so one post-success attempt may place a
+    // second object. Seed 1 places gold at (12,7) then a second item.
     let at = Coord_t { y: 12, x: 7 };
     assert_eq!(tile_at(at).treasure_id, 1);
     assert_eq!(
@@ -376,8 +376,8 @@ fn dungeon_delete_object_restores_floor_and_frees_treasure() {
 
 #[test]
 fn dungeon_delete_object_field_mark_only_returns_false() {
- // clears field_mark then returns caveTileVisible — so field_mark-only
- // visibility must yield false after delete.
+    // clears field_mark then returns caveTileVisible — so field_mark-only
+    // visibility must yield false after delete.
     reset_for_new_game(None);
     setup_dungeon(10, 10);
     let coord = Coord_t { y: 5, x: 5 };

@@ -533,7 +533,10 @@ fn c26_blank_string_tail_slice_lengths() {
 fn c27_header_and_number_snprintf_widths() {
     assert_eq!(format_header_number("LEV ", 3), "LEV :      3");
     assert_eq!(format_header_long_number("EXP ", 12345), "EXP :  12345");
-    assert_eq!(format_header_long_number7_spaces("Level      ", 7), "Level      :       7");
+    assert_eq!(
+        format_header_long_number7_spaces("Level      ", 7),
+        "Level      :       7"
+    );
     assert_eq!(format_long_number(-42), "   -42");
     assert_eq!(format_number(999999), "999999");
 }

@@ -353,10 +353,7 @@ pub fn player_get_gender_label() -> &'static str {
     }
 }
 
-#[allow(
-    unused_imports,
-    reason = "re-exports kept for call-site convenience"
-)]
+#[allow(unused_imports, reason = "re-exports kept for call-site convenience")]
 pub use crate::player_stats::{
     player_armor_class_adjustment, player_attack_blows, player_calculate_hit_points,
     player_damage_adjustment, player_disarm_adjustment, player_initialize_base_experience_levels,

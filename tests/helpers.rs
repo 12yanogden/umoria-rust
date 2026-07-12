@@ -112,7 +112,7 @@ fn insert_number_into_string_skips_false_percent_match() {
 
 #[test]
 fn insert_number_into_string_truncates_at_moria_message_size() {
- // Prefix + 5-digit number exceeds 79 chars; snprintf(to, 80, …) clips tail.
+    // Prefix + 5-digit number exceeds 79 chars; snprintf(to, 80, …) clips tail.
     let prefix = "x".repeat(75);
     let mut to = vtype_from(&format!("{prefix}%d"));
     insert_number_into_string(&mut to, b"%d", 12345, false);
@@ -252,7 +252,7 @@ fn string_to_number_trailing_garbage() {
 
 #[test]
 fn string_to_number_empty() {
- // macOS strtol("") sets errno=EINVAL; `stringToNumber` returns false.
+    // macOS strtol("") sets errno=EINVAL; `stringToNumber` returns false.
     let mut n = 99;
     assert!(!string_to_number("", &mut n));
     assert_eq!(n, 99);
@@ -279,7 +279,7 @@ fn string_to_number_erange_underflow() {
 
 #[test]
 fn string_to_number_int_truncation_on_64bit_long() {
- // macOS/Linux reference build: long is 64-bit; value fits in long but not i32.
+    // macOS/Linux reference build: long is 64-bit; value fits in long but not i32.
     if std::mem::size_of::<libc::c_long>() == 8 {
         let mut n = 0;
         assert!(string_to_number("3000000000", &mut n));
@@ -304,7 +304,7 @@ fn human_date_string_shape() {
     let s = CStr::from_bytes_until_nul(&day).unwrap().to_str().unwrap();
     assert!(s.len() <= 10);
 
- // Shape: "Mon Jul  5" — `%a %b %e` (space-padded day 1–9 on Unix).
+    // Shape: "Mon Jul  5" — `%a %b %e` (space-padded day 1–9 on Unix).
     let bytes = s.as_bytes();
     assert!((8..=10).contains(&bytes.len()));
     assert!(bytes[0..3].iter().all(u8::is_ascii_alphabetic));

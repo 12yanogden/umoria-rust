@@ -486,7 +486,7 @@ fn game_objects_spot_checks() {
 
 #[test]
 fn special_item_names_spot_checks() {
- // CNIL → "" in Rust &str table
+    // CNIL → "" in Rust &str table
     assert_eq!(SPECIAL_ITEM_NAMES[SpecialNameIds::SN_NULL as usize], "");
     assert_eq!(
         SPECIAL_ITEM_NAMES[SpecialNameIds::SN_FREE_ACTION as usize],

@@ -265,7 +265,7 @@ fn inscription_match_digit_not_found() {
 fn inscription_match_digit_skipped_for_r_command() {
     reset_for_new_game(None);
     set_inscription(2, b'5');
- // command 'r' falls through to which-'a' branch: '5'-'a' = negative / wrong
+    // command 'r' falls through to which-'a' branch: '5'-'a' = negative / wrong
     assert_eq!(
         inventory_get_item_matching_inscription(b'5', b'r', 0, 5),
         -44
@@ -362,7 +362,7 @@ fn wear_slot_unknown_category() {
 
 #[test]
 fn wear_slot_ring_path() {
- // empty right hand → Right; empty left (right occupied) → Left.
+    // empty right hand → Right; empty left (right occupied) → Left.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     with_state_mut(|s| {
@@ -399,13 +399,13 @@ fn switch_screen_line_pos_branches() {
 
 #[test]
 fn apply_switch_screen_bottom_extend() {
- // currentLinePos >= screen_bottom_pos → bottom = currentLinePos+1
+    // currentLinePos >= screen_bottom_pos → bottom = currentLinePos+1
     assert_eq!(apply_switch_screen_bottom_pos(5, 3), (6, true));
 }
 
 #[test]
 fn apply_switch_screen_bottom_shrink() {
- // currentLinePos < screen_bottom_pos → erase from currentLinePos+1 .. bottom
+    // currentLinePos < screen_bottom_pos → erase from currentLinePos+1 .. bottom
     assert_eq!(apply_switch_screen_bottom_pos(2, 5), (5, false));
 }
 
@@ -511,7 +511,7 @@ fn take_off_pack_full_blocks() {
 
 #[test]
 fn take_off_switches_to_equipment() {
- // only switch when current != Blank.
+    // only switch when current != Blank.
     reset_for_new_game(None);
     test_set_ncurses_stub(true);
     with_state_mut(|s| s.py.equipment_count = 1);
@@ -679,7 +679,7 @@ fn inventory_drop_uppercase_verify_does_not_panic() {
         s.py.pos.x = 5;
         s.dg.floor[5][5].treasure_id = 0;
     });
- // d → select A (uppercase verify) → n (decline) → ESC
+    // d → select A (uppercase verify) → n (decline) → ESC
     push_keys_in_consume_order(&[
         i32::from(umoria::ui_io::ESCAPE),
         i32::from(b'n'),
@@ -701,7 +701,7 @@ fn inventory_drop_stack_confirm_does_not_panic() {
         s.py.pos.x = 5;
         s.dg.floor[5][5].treasure_id = 0;
     });
- // d → a → n (don't drop all / abort path) → ESC
+    // d → a → n (don't drop all / abort path) → ESC
     push_keys_in_consume_order(&[
         i32::from(umoria::ui_io::ESCAPE),
         i32::from(b'n'),
@@ -741,7 +741,7 @@ fn inventory_wear_cursed_slot_message_does_not_panic() {
         s.py.inventory[slot].flags |= TR_CURSED;
         s.py.equipment_count = 1;
     });
- // w → a (try wear over cursed) → ESC
+    // w → a (try wear over cursed) → ESC
     push_keys_in_consume_order(&[i32::from(umoria::ui_io::ESCAPE), i32::from(b'a')]);
     umoria::ui_inventory::inventory_execute_command(b'w');
     test_set_ncurses_stub(false);

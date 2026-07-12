@@ -159,7 +159,7 @@ fn test_wrbyte_xor_chain() {
 fn test_wrshort_little_endian_chained() {
     with_buffer(0xA5, || {
         wr_short(0x1234).unwrap();
- // low: 0xA5 ^ 0x34 = 0x91; high xor uses running 0x91 ^ 0x12 = 0x83
+        // low: 0xA5 ^ 0x34 = 0x91; high xor uses running 0x91 ^ 0x12 = 0x83
         assert_eq!(game_save::xor_byte(), 0x83);
         assert_bytes(&[0x91, 0x83]);
     });

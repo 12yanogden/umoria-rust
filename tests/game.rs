@@ -305,12 +305,12 @@ fn step3_set_game_options_interactive_loop() {
 
     let before = with_state(|state| state.options.clone());
 
- // ESC immediately — no changes.
+    // ESC immediately — no changes.
     test_push_getch_keys(&[i32::from(ESCAPE)]);
     umoria::game::set_game_options();
     assert_eq!(with_state(|state| state.options.clone()), before);
 
- // Navigate to idx 6, then y (use_roguelike_keys).
+    // Navigate to idx 6, then y (use_roguelike_keys).
     setup_harness();
     test_set_ui_capture(true);
     test_set_ui_detail_capture(true);
@@ -331,7 +331,7 @@ fn step3_set_game_options_interactive_loop() {
         .iter()
         .any(|(y, x, text)| text == "yes" && *y == 7 && *x == 40));
 
- // '-' at idx 0 wraps to 10; space at idx 10 wraps to 0.
+    // '-' at idx 0 wraps to 10; space at idx 10 wraps to 0.
     setup_harness();
     test_set_ui_detail_capture(true);
     test_clear_getch_keys();
@@ -341,7 +341,7 @@ fn step3_set_game_options_interactive_loop() {
     assert!(moves.contains(&Coord { y: 11, x: 40 }));
     assert!(moves.contains(&Coord { y: 1, x: 40 }));
 
- // '-' wraps to idx 10 (display_counts); n sets false.
+    // '-' wraps to idx 10 (display_counts); n sets false.
     setup_harness();
     with_state_mut(|state| state.options.display_counts = true);
     test_set_ui_capture(true);
@@ -354,7 +354,7 @@ fn step3_set_game_options_interactive_loop() {
         .iter()
         .any(|(y, x, text)| text == "no " && *y == 11 && *x == 40));
 
- // Unknown key → bell, no state change.
+    // Unknown key → bell, no state change.
     setup_harness();
     let snapshot = with_state(|state| state.options.clone());
     test_set_ui_detail_capture(true);
@@ -364,7 +364,7 @@ fn step3_set_game_options_interactive_loop() {
     assert_eq!(with_state(|state| state.options.clone()), snapshot);
     assert_eq!(test_bell_count(), 1);
 
- // Initial row rendering uses %-38s layout.
+    // Initial row rendering uses %-38s layout.
     setup_harness();
     test_set_ui_capture(true);
     test_clear_getch_keys();

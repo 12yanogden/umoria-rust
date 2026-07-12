@@ -340,7 +340,7 @@ fn player_teleport_rng_and_destination_seed42() {
         assert!(tile.creature_id < 2);
         assert!(!s.game.teleport_player);
     });
- // Post-teleport RNG stream (rolls consumed during placement loop + update_monsters).
+    // Post-teleport RNG stream (rolls consumed during placement loop + update_monsters).
     assert_eq!(next_random_pair(20), (20, 16));
     assert_eq!(next_random_pair(20), (20, 2));
 }
@@ -352,7 +352,7 @@ fn player_search_rng_roll_count_seed99() {
     setup_open_dungeon(10, 10);
     let coord = Coord_t { y: 5, x: 5 };
     player_search(coord, 50);
- // Nine adjacent tiles × one randomNumber(100) each.
+    // Nine adjacent tiles × one randomNumber(100) each.
     assert_eq!(next_random_pair(100), (100, 30));
 }
 

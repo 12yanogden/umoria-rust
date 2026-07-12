@@ -261,7 +261,7 @@ fn los_diagonal_corner_slope_equality() {
     reset_for_new_game(None);
     setup_dungeon(30, 30);
     fill_feature(TILE_LIGHT_FLOOR);
- // dy == scale_half: delta (2,2) → first stepped cell is (11,11)
+    // dy == scale_half: delta (2,2) → first stepped cell is (11,11)
     set_tile(
         Coord_t { y: 11, x: 11 },
         Tile {
@@ -486,7 +486,7 @@ fn look_see_floor_object_does_not_panic() {
     los_look_set_rocks_and_objects(0);
 
     let mut transparent = false;
- // Looking at the player's own tile (0,0) describes the floor object.
+    // Looking at the player's own tile (0,0) describes the floor object.
     let _abort = look_see(Coord_t { y: 0, x: 0 }, &mut transparent);
     assert!(transparent);
 
@@ -513,7 +513,7 @@ fn look_directional_scan_order() {
     los_look_set_rocks_and_objects(0);
     umoria::ui_io::test_set_ncurses_stub(true);
     umoria::ui_io::test_clear_getch_keys();
- // Direction 5 = look in all directions (get_all_directions).
+    // Direction 5 = look in all directions (get_all_directions).
     umoria::ui_io::test_push_getch_keys(&[i32::from(b'5')]);
     look();
     umoria::ui_io::test_set_ncurses_stub(false);

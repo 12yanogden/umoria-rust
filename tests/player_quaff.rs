@@ -337,7 +337,7 @@ fn lose_experience_small_exp_branch_seed42() {
         s.py.misc.exp = 500;
     });
     assert!(drink(potion2_flag(34), POTION2));
- // exp/5 + randomNumber(500)/5 = 100 + 202/5 = 140 lost at seed 42
+    // exp/5 + randomNumber(500)/5 = 100 + 202/5 = 140 lost at seed 42
     with_state(|s| assert_eq!(s.py.misc.exp, 360));
 }
 

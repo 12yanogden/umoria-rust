@@ -75,7 +75,7 @@ fn player_protect_evil_rng_order_seed42_level10() {
 
     assert!(player_protect_evil());
 
- // seed 42: randomNumber(25) == 2; protect_evil += 2 + 3*10
+    // seed 42: randomNumber(25) == 2; protect_evil += 2 + 3*10
     with_state(|s| assert_eq!(s.py.flags.protect_evil, 32));
     assert_eq!(next_random_pair(25), (25, 23));
 }
@@ -90,7 +90,7 @@ fn player_protect_evil_returns_false_when_already_protected() {
 
     assert!(!player_protect_evil());
 
- // 7 + randomNumber(25)=2 + 3*5
+    // 7 + randomNumber(25)=2 + 3*5
     with_state(|s| assert_eq!(s.py.flags.protect_evil, 24));
 }
 

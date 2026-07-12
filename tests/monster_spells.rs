@@ -64,7 +64,7 @@ fn setup_player(pos: Coord_t) {
     let bounds = panel_bounds_fields(0, 0);
     with_state_mut(|s| {
         s.py.pos = pos;
- // Breath / area effects hit the player only when the floor tile is marked.
+        // Breath / area effects hit the player only when the floor tile is marked.
         s.dg.floor[pos.y as usize][pos.x as usize].creature_id = 1;
         s.dg.panel.row = 0;
         s.dg.panel.col = 0;
@@ -218,8 +218,8 @@ fn monster_cast_spell_lost_soul_freq_and_selection_seed14() {
     reset_monster_slots();
     place_monster(2, LOST_SOUL_ID, 20, Coord_t { y: 10, x: 11 }, true, 1);
     assert!(monster_cast_spell(2));
- // seed14: freq=1, selection=1 → Teleport Long; teleport consumes placement rolls,
- // then the next draws are rn(15)=1 and rn(2)=1 (expected stream).
+    // seed14: freq=1, selection=1 → Teleport Long; teleport consumes placement rolls,
+    // then the next draws are rn(15)=1 and rn(2)=1 (expected stream).
     assert_eq!(next_random_pair(15), (15, 1));
     assert_eq!(next_random_pair(2), (2, 1));
 }
@@ -383,7 +383,7 @@ fn execute_spell_breath_light_scaling_seed600() {
             message_text(s.last_message_id),
             "The Blue Jelly breathes lightning."
         );
- // Breath damage is monster.hp / 4 = 30 at distance 0 → full 30 HP.
+        // Breath damage is monster.hp / 4 = 30 at distance 0 → full 30 HP.
         assert_eq!(s.py.misc.current_hp, 470);
     });
 }
@@ -401,7 +401,7 @@ fn execute_spell_teleport_to_player_seed700() {
     let before = with_state(|s| s.py.pos);
     monster_execute_casting_of_spell(2, 7, creature.level, &mut name, &death);
     with_state(|s| {
- // Teleport-to places the player near the monster at (12,14).
+        // Teleport-to places the player near the monster at (12,14).
         let dy = (s.py.pos.y - 12).abs();
         let dx = (s.py.pos.x - 14).abs();
         assert!(
@@ -498,7 +498,7 @@ fn monster_cast_spell_it_prefix_when_unlit_seed4() {
 
 #[test]
 fn monster_cast_spell_teleport_short_no_disturb_seed14() {
- // seed14: freq gate rn(15)==1 so Poltergeist casts; only spell is Teleport Short.
+    // seed14: freq gate rn(15)==1 so Poltergeist casts; only spell is Teleport Short.
     reset_for_new_game(Some(14));
     setup_dungeon(20, 20);
     setup_player(Coord_t { y: 10, x: 10 });
@@ -507,9 +507,9 @@ fn monster_cast_spell_teleport_short_no_disturb_seed14() {
     with_state_mut(|s| s.game.command_count = 5);
     assert!(monster_cast_spell(2));
     with_state(|s| {
- // Teleport Short (spell id 5) must not disturb (command_count stays 5).
+        // Teleport Short (spell id 5) must not disturb (command_count stays 5).
         assert_eq!(s.game.command_count, 5);
- // Monster should have moved away from (10,11).
+        // Monster should have moved away from (10,11).
         assert_ne!(s.monsters[2].pos, Coord_t { y: 10, x: 11 });
     });
 }

@@ -421,9 +421,9 @@ fn store_carry_item_merges_stack_and_caps_at_twenty_four() {
 
 #[test]
 fn store_carry_item_insert_before_higher_category_and_negative_cost() {
- // Store sorted by descending category: inserting FOOD (80) into a store
- // that already has SWORD (23) hits `item_category > store_item.category_id`
- // and inserts at slot 0.
+    // Store sorted by descending category: inserting FOOD (80) into a store
+    // that already has SWORD (23) hits `item_category > store_item.category_id`
+    // and inserts at slot 0.
     reset_for_new_game(Some(42));
     with_state_mut(|s| {
         s.py.misc.race_id = 0;
@@ -449,8 +449,8 @@ fn store_carry_item_insert_before_higher_category_and_negative_cost() {
 
 #[test]
 fn store_carry_item_append_returns_post_insert_index() {
- // after append insert,
- // index_id = unique_items_counter - 1 (the new last slot), not pos - 1.
+    // after append insert,
+    // index_id = unique_items_counter - 1 (the new last slot), not pos - 1.
     reset_for_new_game(Some(42));
     with_state_mut(|s| {
         s.py.misc.race_id = 0;

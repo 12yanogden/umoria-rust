@@ -214,7 +214,7 @@ fn spell_starlite_touches_one_monster_one_dice_roll_seed42() {
 
     spell_starlite(Coord_t { y: 20, x: 20 });
 
- // South line (dir 2) reaches the eye; other directions do not.
+    // South line (dir 2) reaches the eye; other directions do not.
     assert_eq!(next_random_pair(8), (8, 4));
     assert_eq!(next_random_pair(8), (8, 2));
 }

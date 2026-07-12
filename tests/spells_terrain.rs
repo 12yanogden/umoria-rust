@@ -145,9 +145,9 @@ fn reference_earthquake_rng_after(player_pos: Coord_t) -> (i32, i32) {
                 y: coord_y,
                 x: coord_x,
             };
- // Keep nested `if`s (not `&&`-collapsed): floor RNG must run whenever the
- // 1-in-8 roll hits, even when `creature_id <= 1`. Collapsing would only be
- // safe if the floor check stayed outside the creature branch.
+            // Keep nested `if`s (not `&&`-collapsed): floor RNG must run whenever the
+            // 1-in-8 roll hits, even when `creature_id <= 1`. Collapsing would only be
+            // safe if the floor check stayed outside the creature branch.
             #[allow(
                 clippy::collapsible_if,
                 reason = "nested structure mirrors earthquake RNG; floor roll is sibling of creature branch"

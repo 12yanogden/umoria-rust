@@ -65,7 +65,7 @@ fn dungeon_default_matches_expected() {
 
     assert_eq!(dg.height, 0);
     assert_eq!(dg.width, 0);
- // Dungeon_t{0,0,{},-1,0,true,{}} positional init: game_turn(4th)=-1, current_level(5th)=0.
+    // Dungeon_t{0,0,{},-1,0,true,{}} positional init: game_turn(4th)=-1, current_level(5th)=0.
     assert_eq!(dg.current_level, 0);
     assert_eq!(dg.game_turn, -1);
     assert!(dg.generate_new_level);
@@ -194,7 +194,7 @@ fn readonly_tables_are_immutable_homes() {
 // --------------------------------------------------------------------------
 #[test]
 fn every_mapped_global_has_a_home() {
- // -- mutable singletons (State fields) ---
+    // -- mutable singletons (State fields) ---
     game::with_state(|s| {
         let _ = &s.game;
         let _ = &s.py;
@@ -220,7 +220,7 @@ fn every_mapped_global_has_a_home() {
         let _ = &s.rng;
     });
 
- // -- read-only tables ---
+    // -- read-only tables ---
     let _ = &*data_treasure::GAME_OBJECTS;
     let _ = &*data_creatures::CREATURES_LIST;
     let _ = &*data_creatures::MONSTER_ATTACKS;
@@ -264,7 +264,7 @@ fn every_mapped_global_has_a_home() {
     let _ = &data_treasure::AMULETS;
     let _ = &data_treasure::SYLLABLES;
 
- // -- config namespace ---
+    // -- config namespace ---
     let _ = config::files::SPLASH_SCREEN;
     let _ = config::files::WELCOME_SCREEN;
     let _ = config::files::LICENSE;
@@ -284,7 +284,7 @@ fn every_mapped_global_has_a_home() {
     let _ = config::spells::SPELL_TYPE_NONE;
     let _ = config::stores::STORE_MAX_AUTO_BUY_ITEMS;
 
- // -- module-private transient statics (not in State) ---
+    // -- module-private transient statics (not in State) ---
     let _ = ui_io::curses_on();
     let _ = ui_io::eof_flag();
     let _ = ui_io::panic_save();
@@ -294,7 +294,7 @@ fn every_mapped_global_has_a_home() {
     let _ = scores::highscore_fp_is_none();
     let _ = dungeon_generate::door_index();
 
- // -- rng free-fn surface ---
+    // -- rng free-fn surface ---
     let _ = rng::get_seed();
 }
 
@@ -303,7 +303,7 @@ fn every_mapped_global_has_a_home() {
 // --------------------------------------------------------------------------
 #[test]
 fn module_statics_excluded_from_state() {
- // Access transient homes directly — they must not live on State.
+    // Access transient homes directly — they must not live on State.
     assert!(!ui_io::curses_on());
     assert_eq!(ui_io::eof_flag(), 0);
     assert!(!ui_io::panic_save());
@@ -313,7 +313,7 @@ fn module_statics_excluded_from_state() {
     assert!(scores::highscore_fp_is_none());
     assert_eq!(dungeon_generate::door_index(), 0);
 
- // State field inventory: no transient scratch fields.
+    // State field inventory: no transient scratch fields.
     let field_count = std::mem::size_of::<game::State>();
     assert!(field_count > 0);
     let _ = MORIA_MESSAGE_SIZE; // keep test module linked to types

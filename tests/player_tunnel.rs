@@ -275,7 +275,7 @@ fn player_tunnel_non_confused_skips_confusion_rolls() {
         ..Default::default()
     });
     player_tunnel(6);
- // Granite path: randomNumber(1200)+80 consumed; next probe is randomNumber(1200).
+    // Granite path: randomNumber(1200)+80 consumed; next probe is randomNumber(1200).
     assert_eq!(next_random_pair(1200), (1200, 273));
 }
 
@@ -295,7 +295,7 @@ fn player_tunnel_confused_consumes_two_rolls_before_material() {
         ..Default::default()
     });
     player_tunnel(6);
- // seed 42: randomNumber(4)=3 (>1), randomNumber(9)=8, then granite roll.
+    // seed 42: randomNumber(4)=3 (>1), randomNumber(9)=8, then granite roll.
     assert_eq!(next_random_pair(1200), (1200, 436));
 }
 
@@ -417,7 +417,7 @@ fn player_tunnel_rubble_success_removes_object() {
     player_tunnel(6);
     assert_eq!(last_message_text(), "You have removed the rubble.");
     with_state(|s| assert_eq!(s.dg.floor[5][6].treasure_id, 0));
- // randomNumber(10) consumed; seed 1 next roll for max=10 is 7.
+    // randomNumber(10) consumed; seed 1 next roll for max=10 is 7.
     assert_eq!(next_random_pair(10), (10, 10));
 }
 
@@ -441,7 +441,7 @@ fn player_tunnel_rubble_treasure_reveal_rng_site() {
     });
     player_tunnel(6);
     with_state(|s| assert_eq!(s.dg.floor[5][6].treasure_id, 0));
- // seed 99: randomNumber(180) then randomNumber(10)==1 triggers placement RNG.
+    // seed 99: randomNumber(180) then randomNumber(10)==1 triggers placement RNG.
     assert_eq!(next_random_pair(10), (10, 6));
 }
 
@@ -469,6 +469,6 @@ fn player_tunnel_secret_door_triggers_search() {
     });
     player_tunnel(6);
     assert_eq!(last_message_text(), "You tunnel into the granite wall.");
- // player_search at py.pos consumes nine randomNumber(100) rolls.
+    // player_search at py.pos consumes nine randomNumber(100) rolls.
     assert_eq!(next_random_pair(100), (100, 8));
 }

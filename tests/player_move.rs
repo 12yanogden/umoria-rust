@@ -228,12 +228,12 @@ fn sit_direction_never_randomizes_even_when_confused() {
 
 #[test]
 fn sober_move_still_consumes_random_four_seed42() {
- // playerRandomMovement always draws randomNumber(4) when dir != 5.
+    // playerRandomMovement always draws randomNumber(4) when dir != 5.
     reset_for_new_game(Some(42));
     setup_dungeon();
     setup_player();
     with_state_mut(|s| {
- // fos > 1 so the fos gate consumes one roll; PY_SEARCH off.
+        // fos > 1 so the fos gate consumes one roll; PY_SEARCH off.
         s.py.misc.fos = 50;
         s.py.misc.chance_in_search = 0;
         s.py.flags.status = 0;
@@ -243,8 +243,8 @@ fn sober_move_still_consumes_random_four_seed42() {
     player_move(NORTH, false);
 
     with_state(|s| assert_eq!(s.py.pos, Coord_t { y: 9, x: 10 }));
- // Draws: randomNumber(4) then randomNumber(50). Next randomNumber(4)
- // must not be the first seed42 draw (1) — that was already consumed.
+    // Draws: randomNumber(4) then randomNumber(50). Next randomNumber(4)
+    // must not be the first seed42 draw (1) — that was already consumed.
     assert_ne!(next_random_pair(4), (4, 1));
 }
 
@@ -271,7 +271,7 @@ fn search_fos_le_one_skips_random_fos_roll() {
 
     player_move(NORTH, false);
 
- // After sober move, always consumes randomNumber(4) before search.
+    // After sober move, always consumes randomNumber(4) before search.
     assert_eq!(next_random_pair(100), (100, 15));
 }
 
@@ -305,8 +305,8 @@ fn search_py_search_flag_triggers_search_without_fos_roll() {
 
     player_move(NORTH, false);
 
- // Search ran (PY_SEARCH) without consuming randomNumber(50); next roll after
- // the always-drawn randomNumber(4) from playerRandomMovement.
+    // Search ran (PY_SEARCH) without consuming randomNumber(50); next roll after
+    // the always-drawn randomNumber(4) from playerRandomMovement.
     assert_eq!(next_random_pair(100), (100, 91));
 }
 
